@@ -124,9 +124,10 @@ Contoh environment minimal untuk `auth`:
 
 ```env
 DATABASE_URL=local.db
-JWT_ACCESS_SECRET=replace-this-secret
-JWT_ACCESS_TTL_SECONDS=900
-REFRESH_TOKEN_TTL_SECONDS=2592000
-AUTH_MAX_FAILED_LOGINS=5
-AUTH_LOCK_MINUTES=15
+BETTER_AUTH_SECRET=replace-with-a-long-random-secret
+BETTER_AUTH_URL=http://localhost:5173
+JWT_ACCESS_SECRET=replace-with-another-long-random-secret
+JWT_ACCESS_ISSUER=auth-service
+JWT_ACCESS_AUDIENCE=internal-services
+JWT_ACCESS_EXPIRES_IN=15m
 ```

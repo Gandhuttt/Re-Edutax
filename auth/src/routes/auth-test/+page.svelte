@@ -1,7 +1,9 @@
 <script lang="ts">
 	import { invalidateAll } from '$app/navigation';
+	import { onMount } from 'svelte';
+	import { writable } from 'svelte/store';
 
-	import { authClient } from '$lib/auth-client';
+	import { getAuthClient } from '$lib/auth-client';
 
 	type PageData = {
 		session: {
@@ -12,7 +14,7 @@
 
 	let { data }: { data: PageData } = $props();
 
-	const sessionStore = authClient.useSession();
+	const sessionStore = writable<unknown>(null);
 
 	let name = $state('');
 	let email = $state('');
@@ -30,11 +32,20 @@
 		await invalidateAll();
 	}
 
+	onMount(() => {
+		const clientSessionStore = getAuthClient().useSession();
+		const unsubscribe = clientSessionStore.subscribe((value) => {
+			sessionStore.set(value);
+		});
+
+		return unsubscribe;
+	});
+
 	async function handleSignUp() {
 		pendingAction = 'signup';
 
 		try {
-			const result = await authClient.signUp.email({
+			const result = await getAuthClient().signUp.email({
 				name,
 				email,
 				password,
@@ -53,7 +64,7 @@
 		pendingAction = 'signin';
 
 		try {
-			const result = await authClient.signIn.email({
+			const result = await getAuthClient().signIn.email({
 				email: signInEmail,
 				password: signInPassword,
 			});
@@ -71,7 +82,7 @@
 		pendingAction = 'signout';
 
 		try {
-			const result = await authClient.signOut();
+			const result = await getAuthClient().signOut();
 
 			formatResult('Sign out response', result);
 			await refreshPageData();
@@ -86,7 +97,7 @@
 		pendingAction = 'session';
 
 		try {
-			const result = await authClient.getSession();
+			const result = await getAuthClient().getSession();
 
 			formatResult('Get session response', result);
 			await refreshPageData();
