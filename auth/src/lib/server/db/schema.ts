@@ -9,6 +9,8 @@ export const user = sqliteTable("user", {
     .default(false)
     .notNull(),
   image: text("image"),
+  role: text("role").default("taxpayer").notNull(),
+  jenis_wp: text("jenis_wp"), // e.g., "ORANG_PRIBADI", "BADAN", "BENDAHARA"
   createdAt: integer("created_at", { mode: "timestamp_ms" })
     .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
     .notNull(),

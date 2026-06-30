@@ -20,6 +20,19 @@ export const auth = betterAuth({
 	emailAndPassword: {
 		enabled: true,
 	},
+	user: {
+		additionalFields: {
+			role: {
+				type: "string",
+				required: true,
+				defaultValue: "taxpayer",
+			},
+			jenis_wp: {
+				type: "string",
+				required: false,
+			}
+		}
+	}
 });
 
 export type Session = typeof auth.$Infer.Session;

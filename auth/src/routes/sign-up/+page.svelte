@@ -6,6 +6,7 @@
 	let name = $state('');
 	let email = $state('');
 	let password = $state('');
+	let jenis_wp = $state('ORANG_PRIBADI');
 	let pending = $state(false);
 	let errorMessage = $state('');
 
@@ -18,6 +19,7 @@
 				name,
 				email,
 				password,
+				jenis_wp,
 			});
 
 			if (result.error) {
@@ -56,6 +58,14 @@
 			<label>
 				<span>Password</span>
 				<input bind:value={password} type="password" placeholder="••••••••" />
+			</label>
+			<label>
+				<span>Jenis Wajib Pajak</span>
+				<select bind:value={jenis_wp}>
+					<option value="ORANG_PRIBADI">Orang Pribadi (OP)</option>
+					<option value="BADAN">Badan Usaha</option>
+					<option value="BENDAHARA">Bendahara</option>
+				</select>
 			</label>
 
 			{#if errorMessage}
@@ -128,7 +138,7 @@
 		font-size: 0.92rem;
 	}
 
-	input {
+	input, select {
 		padding: 11px 12px;
 		border: 1px solid #d4d4d8;
 		border-radius: 10px;
