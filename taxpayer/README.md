@@ -5,6 +5,10 @@ Service `taxpayer` menyimpan profile wajib pajak dan master referensi yang dipak
 ## Yang Sudah Ada
 
 - tabel `taxpayer_profile` untuk profile utama wajib pajak
+- tabel `taxpayer_individual_detail` untuk detail orang pribadi
+- tabel `taxpayer_entity_detail` untuk detail badan/entitas
+- tabel `taxpayer_contact` untuk kontak utama
+- tabel `taxpayer_address` untuk alamat utama
 - tabel referensi `ref_jenis_wp`
 - tabel referensi `ref_kategori_wp`
 - tabel `taxpayer_nitku` untuk NITKU cabang/pusat
@@ -27,10 +31,28 @@ INTERNAL_API_SECRET=replace-with-a-shared-internal-secret
 - `npwp`
 - `nama`
 - `kategoriWpCode`
+- `kluKode`
+- `kppTerdaftar`
 - `statusWp`
 
 `jenis_wp` tidak disimpan langsung di `taxpayer_profile`.
 Nilainya diturunkan dari relasi `kategori_wp -> jenis_wp`.
+
+Detail subtype dan data pendukung dipisah ke tabel lain:
+
+- `taxpayer_individual_detail`
+  - `tempatLahir`
+  - `tanggalLahir`
+  - `statusPernikahan`
+- `taxpayer_entity_detail`
+  - `tanggalPendirian`
+- `taxpayer_contact`
+  - `email`
+  - `noHp`
+- `taxpayer_address`
+  - `alamatLengkap`
+  - `kota`
+  - `kodePos`
 
 ## Master Referensi
 
@@ -67,6 +89,10 @@ Respons lookup sudah menyertakan:
 - profile utama
 - `kategoriWp`
 - `jenisWp`
+- `individualDetail`
+- `entityDetail`
+- `contact`
+- `address`
 
 ## Endpoint Internal
 

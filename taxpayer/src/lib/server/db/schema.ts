@@ -69,19 +69,6 @@ export const taxpayerProfile = sqliteTable(
       .notNull()
       .references(() => refKategoriWp.code),
     
-    // Demografi Khusus
-    tempatLahir: text("tempat_lahir"),
-    tanggalLahir: text("tanggal_lahir"),
-    tanggalPendirian: text("tanggal_pendirian"),
-    statusPernikahan: text("status_pernikahan"),
-    
-    // Kontak & Alamat Utama (Alamat Domisili/Pusat)
-    email: text("email"),
-    noHp: text("no_hp"),
-    alamatLengkap: text("alamat_lengkap"),
-    kota: text("kota"),
-    kodePos: text("kode_pos"),
-    
     // Klasifikasi Perpajakan
     kluKode: text("klu_kode"), // Klasifikasi Lapangan Usaha Pusat
     kppTerdaftar: text("kpp_terdaftar"), // Kode KPP (misal "045")
@@ -100,6 +87,79 @@ export const taxpayerProfile = sqliteTable(
     index("taxpayer_npwp_idx").on(table.npwp),
     index("taxpayer_kategoriWpCode_idx").on(table.kategoriWpCode),
   ]
+);
+
+export const taxpayerIndividualDetail = sqliteTable(
+  "taxpayer_individual_detail",
+  {
+    taxpayerId: text("taxpayer_id")
+      .primaryKey()
+      .references(() => taxpayerProfile.id, { onDelete: "cascade" }),
+    tempatLahir: text("tempat_lahir"),
+    tanggalLahir: text("tanggal_lahir"),
+    statusPernikahan: text("status_pernikahan"),
+    createdAt: integer("created_at", { mode: "timestamp_ms" })
+      .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
+      .notNull(),
+    updatedAt: integer("updated_at", { mode: "timestamp_ms" })
+      .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
+      .$onUpdate(() => /* @__PURE__ */ new Date())
+      .notNull(),
+  }
+);
+
+export const taxpayerEntityDetail = sqliteTable(
+  "taxpayer_entity_detail",
+  {
+    taxpayerId: text("taxpayer_id")
+      .primaryKey()
+      .references(() => taxpayerProfile.id, { onDelete: "cascade" }),
+    tanggalPendirian: text("tanggal_pendirian"),
+    createdAt: integer("created_at", { mode: "timestamp_ms" })
+      .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
+      .notNull(),
+    updatedAt: integer("updated_at", { mode: "timestamp_ms" })
+      .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
+      .$onUpdate(() => /* @__PURE__ */ new Date())
+      .notNull(),
+  }
+);
+
+export const taxpayerContact = sqliteTable(
+  "taxpayer_contact",
+  {
+    taxpayerId: text("taxpayer_id")
+      .primaryKey()
+      .references(() => taxpayerProfile.id, { onDelete: "cascade" }),
+    email: text("email"),
+    noHp: text("no_hp"),
+    createdAt: integer("created_at", { mode: "timestamp_ms" })
+      .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
+      .notNull(),
+    updatedAt: integer("updated_at", { mode: "timestamp_ms" })
+      .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
+      .$onUpdate(() => /* @__PURE__ */ new Date())
+      .notNull(),
+  }
+);
+
+export const taxpayerAddress = sqliteTable(
+  "taxpayer_address",
+  {
+    taxpayerId: text("taxpayer_id")
+      .primaryKey()
+      .references(() => taxpayerProfile.id, { onDelete: "cascade" }),
+    alamatLengkap: text("alamat_lengkap"),
+    kota: text("kota"),
+    kodePos: text("kode_pos"),
+    createdAt: integer("created_at", { mode: "timestamp_ms" })
+      .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
+      .notNull(),
+    updatedAt: integer("updated_at", { mode: "timestamp_ms" })
+      .default(sql`(cast(unixepoch('subsecond') * 1000 as integer))`)
+      .$onUpdate(() => /* @__PURE__ */ new Date())
+      .notNull(),
+  }
 );
 
 // Tabel NITKU (Nomor Identitas Tempat Kegiatan Usaha)
@@ -138,6 +198,22 @@ export const taxpayerProfileRelations = relations(taxpayerProfile, ({ one, many 
     fields: [taxpayerProfile.kategoriWpCode],
     references: [refKategoriWp.code],
   }),
+  individualDetail: one(taxpayerIndividualDetail, {
+    fields: [taxpayerProfile.id],
+    references: [taxpayerIndividualDetail.taxpayerId],
+  }),
+  entityDetail: one(taxpayerEntityDetail, {
+    fields: [taxpayerProfile.id],
+    references: [taxpayerEntityDetail.taxpayerId],
+  }),
+  contact: one(taxpayerContact, {
+    fields: [taxpayerProfile.id],
+    references: [taxpayerContact.taxpayerId],
+  }),
+  address: one(taxpayerAddress, {
+    fields: [taxpayerProfile.id],
+    references: [taxpayerAddress.taxpayerId],
+  }),
   nitkus: many(taxpayerNitku),
 }));
 
@@ -151,6 +227,40 @@ export const refKategoriWpRelations = relations(refKategoriWp, ({ one, many }) =
     references: [refJenisWp.code],
   }),
   taxpayerProfiles: many(taxpayerProfile),
+}));
+
+export const taxpayerIndividualDetailRelations = relations(
+  taxpayerIndividualDetail,
+  ({ one }) => ({
+    taxpayerProfile: one(taxpayerProfile, {
+      fields: [taxpayerIndividualDetail.taxpayerId],
+      references: [taxpayerProfile.id],
+    }),
+  })
+);
+
+export const taxpayerEntityDetailRelations = relations(
+  taxpayerEntityDetail,
+  ({ one }) => ({
+    taxpayerProfile: one(taxpayerProfile, {
+      fields: [taxpayerEntityDetail.taxpayerId],
+      references: [taxpayerProfile.id],
+    }),
+  })
+);
+
+export const taxpayerContactRelations = relations(taxpayerContact, ({ one }) => ({
+  taxpayerProfile: one(taxpayerProfile, {
+    fields: [taxpayerContact.taxpayerId],
+    references: [taxpayerProfile.id],
+  }),
+}));
+
+export const taxpayerAddressRelations = relations(taxpayerAddress, ({ one }) => ({
+  taxpayerProfile: one(taxpayerProfile, {
+    fields: [taxpayerAddress.taxpayerId],
+    references: [taxpayerProfile.id],
+  }),
 }));
 
 export const taxpayerNitkuRelations = relations(taxpayerNitku, ({ one }) => ({
