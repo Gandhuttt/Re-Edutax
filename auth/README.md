@@ -19,6 +19,8 @@ JWT_ACCESS_SECRET=replace-with-another-long-random-secret
 JWT_ACCESS_ISSUER=auth-service
 JWT_ACCESS_AUDIENCE=internal-services
 JWT_ACCESS_EXPIRES_IN=15m
+TAXPAYER_SERVICE_URL=http://localhost:5174
+INTERNAL_API_SECRET=replace-with-a-shared-internal-secret
 ```
 
 Catatan:
@@ -40,6 +42,8 @@ Catatan:
 4. Client mengirim `Authorization: Bearer <token>` ke microservice lain.
 5. Microservice lain memverifikasi JWT dan mengisi `locals.user`.
 
+Saat menerbitkan token, service `auth` melakukan lookup ke service `taxpayer` untuk mengambil `jenis_wp` dan `kategori_wp` terbaru berdasarkan `userId`.
+
 Contoh respons `POST /api/token`:
 
 ```json
@@ -50,7 +54,17 @@ Contoh respons `POST /api/token`:
   "user": {
     "id": "user-id",
     "email": "user@example.com",
-    "name": "Jane Doe"
+    "name": "Jane Doe",
+    "role": "taxpayer",
+    "npwp": "012345678901234",
+    "jenisWp": {
+      "code": "ORANG_PRIBADI",
+      "name": "Orang Pribadi"
+    },
+    "kategoriWp": {
+      "code": "OP_KARYAWAN",
+      "name": "Orang Pribadi Karyawan"
+    }
   }
 }
 ```
@@ -71,6 +85,9 @@ Claim minimum yang diterbitkan:
 - `sub`
 - `email`
 - `name`
+- `role`
+- `jenisWp`
+- `kategoriWp`
 - `iss`
 - `aud`
 - `iat`

@@ -1,42 +1,95 @@
-# sv
+# Taxpayer Service
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+Service `taxpayer` menyimpan profile wajib pajak dan master referensi yang dipakai service lain, terutama `auth`, untuk lookup `jenis_wp` dan `kategori_wp`.
 
-## Creating a project
+## Yang Sudah Ada
 
-If you're seeing this, you've probably already done this step. Congrats!
+- tabel `taxpayer_profile` untuk profile utama wajib pajak
+- tabel referensi `ref_jenis_wp`
+- tabel referensi `ref_kategori_wp`
+- tabel `taxpayer_nitku` untuk NITKU cabang/pusat
+- helper lookup profile by `userId`
+- endpoint internal untuk lookup antar-service
+- endpoint test untuk verifikasi lookup saat development
 
-```sh
-# create a new project
-npx sv create my-app
+## Environment Minimal
+
+```env
+DATABASE_URL=local.db
+INTERNAL_API_SECRET=replace-with-a-shared-internal-secret
 ```
 
-To recreate this project with the same configuration:
+## Struktur Data
+
+`taxpayer_profile` menyimpan:
+
+- `userId`
+- `npwp`
+- `nama`
+- `kategoriWpCode`
+- `statusWp`
+
+`jenis_wp` tidak disimpan langsung di `taxpayer_profile`.
+Nilainya diturunkan dari relasi `kategori_wp -> jenis_wp`.
+
+## Master Referensi
+
+Master data hidup di [src/lib/server/db/schema.ts](src/lib/server/db/schema.ts):
+
+- `JENIS_WP_MASTER`
+- `KATEGORI_WP_MASTER`
+
+Seed membaca data dari sana agar schema tetap menjadi single source of truth.
+
+## Seed
+
+Jalankan:
 
 ```sh
-# recreate this project
-npx sv@0.16.1 create --template minimal --types ts --install npm ./
+npm run db:seed
 ```
 
-## Developing
+Ini akan melakukan upsert ke:
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+- `ref_jenis_wp`
+- `ref_kategori_wp`
 
-```sh
-npm run dev
+## Lookup Helper
 
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
+File: `src/lib/server/taxpayer-profile.ts`
+
+Helper utama:
+
+- `getTaxpayerProfileByUserId(userId)`
+
+Respons lookup sudah menyertakan:
+
+- profile utama
+- `kategoriWp`
+- `jenisWp`
+
+## Endpoint Internal
+
+Route:
+
+```txt
+GET /api/internal/taxpayer-profile?userId=<user-id>
 ```
 
-## Building
+Kebutuhan header:
 
-To create a production version of your app:
-
-```sh
-npm run build
+```txt
+x-internal-api-secret: <INTERNAL_API_SECRET>
 ```
 
-You can preview the production build with `npm run preview`.
+Dipakai oleh service `auth` saat menerbitkan `POST /api/token`.
 
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+## Endpoint Test
+
+Route:
+
+```txt
+GET /api/test/taxpayer-profile?userId=<user-id>
+```
+
+Dipakai untuk testing lokal tanpa secret internal.

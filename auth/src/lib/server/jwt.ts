@@ -16,6 +16,8 @@ export type AccessTokenClaims = JwtPayload & {
 	email: string;
 	name?: string | null;
 	role?: string;
+	jenisWp?: string;
+	kategoriWp?: string;
 };
 
 type SignAccessTokenInput = {
@@ -23,6 +25,8 @@ type SignAccessTokenInput = {
 	email: string;
 	name?: string | null;
 	role?: string;
+	jenisWp?: string;
+	kategoriWp?: string;
 };
 
 export const accessTokenConfig = {
