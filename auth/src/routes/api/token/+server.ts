@@ -2,7 +2,7 @@ import { json } from '@sveltejs/kit';
 
 import { auth } from '$lib/server/better-auth';
 import { accessTokenConfig, signAccessToken } from '$lib/server/jwt';
-import { getTaxpayerProfileByUserId } from '$lib/server/taxpayer';
+import { getTaxpayerProfileByUserId, TaxpayerLookupError } from '$lib/server/taxpayer';
 
 export const POST = async ({ locals, request }) => {
 	const session =
@@ -16,10 +16,39 @@ export const POST = async ({ locals, request }) => {
 	}
 
 	const { user } = session;
-	const taxpayerProfile = await getTaxpayerProfileByUserId(user.id);
+
+	let taxpayerProfile;
+
+	try {
+		taxpayerProfile = await getTaxpayerProfileByUserId(user.id);
+	} catch (error) {
+		if (error instanceof TaxpayerLookupError) {
+			return json(
+				{
+					message: error.message,
+					code: error.code,
+				},
+				{ status: error.status }
+			);
+		}
+
+		return json(
+			{
+				message: 'Failed to resolve taxpayer profile',
+				code: 'TAXPAYER_LOOKUP_UNKNOWN_ERROR',
+			},
+			{ status: 500 }
+		);
+	}
 
 	if (!taxpayerProfile) {
-		return json({ message: 'Taxpayer profile not found' }, { status: 409 });
+		return json(
+			{
+				message: 'Taxpayer profile not found',
+				code: 'TAXPAYER_PROFILE_NOT_FOUND',
+			},
+			{ status: 409 }
+		);
 	}
 
 	const accessToken = signAccessToken({

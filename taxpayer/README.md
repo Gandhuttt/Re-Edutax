@@ -100,6 +100,7 @@ Route:
 
 ```txt
 GET /api/internal/taxpayer-profile?userId=<user-id>
+POST /api/internal/taxpayer-profile
 ```
 
 Kebutuhan header:
@@ -110,12 +111,26 @@ x-internal-api-secret: <INTERNAL_API_SECRET>
 
 Dipakai oleh service `auth` saat menerbitkan `POST /api/token`.
 
+`POST` dapat dipakai untuk provisioning profile dari service lain selama masa development awal.
+
 ## Endpoint Test
 
 Route:
 
 ```txt
 GET /api/test/taxpayer-profile?userId=<user-id>
+POST /api/test/taxpayer-profile
 ```
 
 Dipakai untuk testing lokal tanpa secret internal.
+
+Payload minimum untuk `POST`:
+
+```json
+{
+  "userId": "auth-user-id",
+  "npwp": "012345678901234",
+  "nama": "Jane Doe",
+  "kategoriWpCode": "OP_KARYAWAN"
+}
+```

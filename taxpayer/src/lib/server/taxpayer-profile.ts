@@ -11,6 +11,33 @@ import {
   taxpayerProfile,
 } from "./db/schema";
 
+export type CreateTaxpayerProfileInput = {
+  userId: string;
+  npwp: string;
+  nama: string;
+  kategoriWpCode: string;
+  kluKode?: string | null;
+  kppTerdaftar?: string | null;
+  statusWp?: string | null;
+  individualDetail?: {
+    tempatLahir?: string | null;
+    tanggalLahir?: string | null;
+    statusPernikahan?: string | null;
+  } | null;
+  entityDetail?: {
+    tanggalPendirian?: string | null;
+  } | null;
+  contact?: {
+    email?: string | null;
+    noHp?: string | null;
+  } | null;
+  address?: {
+    alamatLengkap?: string | null;
+    kota?: string | null;
+    kodePos?: string | null;
+  } | null;
+};
+
 export type TaxpayerProfileLookup = {
   id: string;
   userId: string;
@@ -45,6 +72,78 @@ export type TaxpayerProfileLookup = {
     kodePos: string | null;
   } | null;
 };
+
+export async function createTaxpayerProfile(input: CreateTaxpayerProfileInput) {
+  const existingCategory = await db
+    .select({
+      code: refKategoriWp.code,
+    })
+    .from(refKategoriWp)
+    .where(eq(refKategoriWp.code, input.kategoriWpCode))
+    .get();
+
+  if (!existingCategory) {
+    throw new Error(`Invalid kategoriWpCode: ${input.kategoriWpCode}`);
+  }
+
+  await db.transaction(async (tx) => {
+    const inserted = await tx
+      .insert(taxpayerProfile)
+      .values({
+        userId: input.userId,
+        npwp: input.npwp,
+        nama: input.nama,
+        kategoriWpCode: input.kategoriWpCode,
+        kluKode: input.kluKode ?? null,
+        kppTerdaftar: input.kppTerdaftar ?? null,
+        statusWp: input.statusWp ?? "AKTIF",
+      })
+      .returning({
+        id: taxpayerProfile.id,
+      });
+
+    const taxpayerId = inserted[0]?.id;
+
+    if (!taxpayerId) {
+      throw new Error("Failed to create taxpayer profile");
+    }
+
+    if (input.individualDetail) {
+      await tx.insert(taxpayerIndividualDetail).values({
+        taxpayerId,
+        tempatLahir: input.individualDetail.tempatLahir ?? null,
+        tanggalLahir: input.individualDetail.tanggalLahir ?? null,
+        statusPernikahan: input.individualDetail.statusPernikahan ?? null,
+      });
+    }
+
+    if (input.entityDetail) {
+      await tx.insert(taxpayerEntityDetail).values({
+        taxpayerId,
+        tanggalPendirian: input.entityDetail.tanggalPendirian ?? null,
+      });
+    }
+
+    if (input.contact) {
+      await tx.insert(taxpayerContact).values({
+        taxpayerId,
+        email: input.contact.email ?? null,
+        noHp: input.contact.noHp ?? null,
+      });
+    }
+
+    if (input.address) {
+      await tx.insert(taxpayerAddress).values({
+        taxpayerId,
+        alamatLengkap: input.address.alamatLengkap ?? null,
+        kota: input.address.kota ?? null,
+        kodePos: input.address.kodePos ?? null,
+      });
+    }
+  });
+
+  return getTaxpayerProfileByUserId(input.userId);
+}
 
 export async function getTaxpayerProfileByUserId(
   userId: string

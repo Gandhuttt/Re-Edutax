@@ -44,6 +44,13 @@ Catatan:
 
 Saat menerbitkan token, service `auth` melakukan lookup ke service `taxpayer` untuk mengambil `jenis_wp` dan `kategori_wp` terbaru berdasarkan `userId`.
 
+Untuk development awal, `POST /api/token` sekarang mengembalikan error yang lebih eksplisit:
+
+- `409 TAXPAYER_PROFILE_NOT_FOUND` jika user belum punya profile di service `taxpayer`
+- `503 TAXPAYER_SERVICE_UNREACHABLE` jika service `taxpayer` tidak bisa dihubungi
+- `502 TAXPAYER_SERVICE_UNAUTHORIZED` jika secret internal antar-service tidak cocok
+- `500 TAXPAYER_SERVICE_URL_MISSING` atau `500 INTERNAL_API_SECRET_MISSING` jika env belum lengkap
+
 Contoh respons `POST /api/token`:
 
 ```json
