@@ -1,0 +1,126 @@
+<script lang="ts">
+    import Table from "$lib/components/Table.svelte";
+    import Label from "$lib/components/Label.svelte";
+    import Input from "$lib/components/Input.svelte";
+    import Select from "$lib/components/Select.svelte";
+	import Card from "$lib/components/Card.svelte";
+    import Button from "$lib/components/Button.svelte";
+    import { getContext } from "svelte";
+
+    let F17B = $state(false);
+    let F19A = $state(false);
+</script>
+
+<div class="tw:p-5">
+    <Table class={"tw:min-w-full"}>
+        {#snippet head()}
+            <tr class="tw:hidden">
+                <td>
+                    <Input hidden/>
+                </td>
+            </tr>
+        {/snippet}
+        {#snippet body()}
+            <tr>
+                <td class="tw:w-10"><span>17.a.</span></td>
+                <td class="tw:w-[40rem]"><span>PPh yang Kurang/Lebih Bayar</span></td>
+                <td class="tw:w-[10rem]"></td>
+                <td><Input class={"tw:text-end"} type={"text"} value={0} disabled/></td>
+            </tr>
+            <tr>
+                <td><span>17.b.</span></td>
+                <td><span>Apakah terdapat Surat Keputusan Persetujuan Pengangsuran atau Penundaan Pembayaran Pajak?</span></td>
+                <td>
+                    <div class="tw:flex tw:gap-5">
+                        <Label for={getContext("id")} class="tw:flex tw:items-center tw:gap-1">
+                            <input type="radio" name="F17B" value={false} bind:group={F17B} required>
+                            <span>Tidak</span>
+                        </Label>
+                        <Label for={getContext("id")} class="tw:flex tw:items-center tw:gap-1">
+                            <input type="radio" name="F17B" value={true} bind:group={F17B} required>
+                            <span>Ya</span>
+                        </Label>
+                    </div>
+                </td>
+                <td><Input class={"tw:text-end"} type={"text"} value={0} disabled={!F17B}/></td>
+            </tr>
+            <tr>
+                <td><span>17.c.</span></td>
+                <td><span>PPh yang masih harus dibayar atau lebih dibayar</span></td>
+                <td></td>
+                <td><Input class={"tw:text-end"} type={"text"} value={0} disabled/></td>
+            </tr>
+            <tr>
+                <td><span>18.a.</span></td>
+                <td><span>PPh yang kurang atau lebih bayar pada SPT yang dibetulkan</span></td>
+                <td></td>
+                <td><Input class={"tw:text-end"} type={"text"} value={0} disabled/></td>
+            </tr>
+            <tr>
+                <td><span>18.b.</span></td>
+                <td><span>PPh yang kurang atau lebih bayar karena pembetulan</span></td>
+                <td></td>
+                <td><Input class={"tw:text-end"} type={"text"} value={0} disabled/></td>
+            </tr>
+            <tr>
+                <td><span>19.a.</span></td>
+                <td><span>Lebih bayar pada Angka 17.a. atau 18.b. mohon untuk: (pilih salah satu):*</span></td>
+                <td colspan="2">
+                    <div class="tw:flex tw:gap-5">
+                        <Label for={getContext("id")} class="tw:flex tw:items-center tw:gap-1">
+                            <input type="radio" name="F19A" value={false} bind:group={F19A} required>
+                            <span>dikembalikan melalui pemeriksaan</span>
+                        </Label>
+                        <Label for={getContext("id")} class="tw:flex tw:items-center tw:gap-1">
+                            <input type="radio" name="F19A" value={true} bind:group={F19A} required>
+                            <span>dikembalikan melalui Pengembalian Pendahuluan</span>
+                        </Label>
+                    </div>
+                </td>
+            </tr>
+        {/snippet}
+    </Table>
+    <div class="tw:p-2">
+        <Card>
+            {#snippet head()}
+                <span>19.b. Informasi Rekening</span>
+            {/snippet}
+            {#snippet body()}
+            <div class="tw:flex tw:flex-col tw:gap-2">
+                <Label>
+                    <span class="tw:inline-block tw:w-[10rem] tw:text-right">Pilih Rekening Bank</span>
+                    <Button class={"tw:min-w-[3rem]!"} --color={'#FFD230'}>File</Button>
+                    <Button class={"tw:min-w-[3rem]!"} --color={'#FFD230'}>Clear</Button>
+                </Label>
+                <Label>
+                    <span class="tw:inline-block tw:w-[10rem] tw:text-right">Nomor Rekening</span>
+                    <Input class={"tw:w-[25%]!"} type={"text"} disabled/>
+                </Label>
+                <Label>
+                    <span class="tw:inline-block tw:w-[10rem] tw:text-right">Nama Bank</span>
+                    <Input class={"tw:w-[25%]!"} type={"text"} disabled/>
+                </Label>
+                <Label>
+                    <span class="tw:inline-block tw:w-[10rem] tw:text-right">Nama Pemilik Rekening</span>
+                    <Input class={"tw:w-[25%]!"} type={"text"} disabled/>
+                </Label>
+            </div>
+            {/snippet}
+        </Card>
+    </div>
+</div>
+
+<style>
+    tr {
+        border: none;
+        &:nth-child(even) {
+            background-color: #F9F6EE;
+        }
+    }
+    td {
+        padding: .25rem .5rem;
+    }
+    span {
+        font-size: .8rem;
+    }
+</style>
