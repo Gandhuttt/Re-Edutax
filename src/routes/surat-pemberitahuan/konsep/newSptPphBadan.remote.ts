@@ -59,7 +59,7 @@ export const newSptPphBadan = form(async () => {
 		});
 	}
 
-	redirect(303, `/surat-pemberitahuan/spt-pph-badan?id=${existing.id}`);
+	redirect(303, `/surat-pemberitahuan/pph-badan?id=${existing.id}`);
 });
 
 async function getOrCreateMataUangRupiah() {

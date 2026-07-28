@@ -45,7 +45,7 @@
 						{#each await listSptPpn({ status: 'konsep' }) as row}
 							<tr>
 								<td>
-									<a href="/surat-pemberitahuan/spt-ppn?id={row.id}" class="tw:text-black!">
+									<a href="/surat-pemberitahuan/ppn?id={row.id}" class="tw:text-black!">
 										<Button color="#FFD230">Buka</Button>
 									</a>
 								</td>
@@ -61,7 +61,7 @@
 						{#each await listSptPphBadan({ status: 'konsep' }) as row}
 							<tr>
 								<td>
-									<a href="/surat-pemberitahuan/spt-pph-badan?id={row.id}" class="tw:text-black!">
+									<a href="/surat-pemberitahuan/pph-badan?id={row.id}" class="tw:text-black!">
 										<Button color="#FFD230">Buka</Button>
 									</a>
 								</td>
