@@ -1,7 +1,7 @@
 import { db } from '$lib/server/db';
 import { spt_ppn } from '$lib/server/db/schema';
 import { and, eq } from 'drizzle-orm';
-import { createEmptySptPpnBlob } from './createEmptySptPpnBlob';
+import { createEmptySptPpnBlob } from '../createEmptySptPpnBlob';
 import { summarizeSptPpnBlob } from './summarizeSptPpnBlob.server';
 
 export async function getOrCreateCurrentSptPpn(activeNpwp: string, nama = '') {

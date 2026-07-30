@@ -2,9 +2,9 @@ import { getRequestEvent, query } from '$app/server';
 import { SptPpnBlobSchema } from '$lib/schemas/surat-pemberitahuan/spt-ppn';
 import { error } from '@sveltejs/kit';
 import * as v from 'valibot';
-import { getOrCreateCurrentSptPpn } from './getOrCreateCurrentSptPpn.server';
-import { getOwnedSptPpn } from './getOwnedSptPpn.server';
-import { getTaxpayerForSptPpn } from './getTaxpayerForSptPpn.server';
+import { getOrCreateCurrentSptPpn } from './server/getOrCreateCurrentSptPpn.server';
+import { getOwnedSptPpn } from './server/getOwnedSptPpn.server';
+import { getTaxpayerForSptPpn } from './server/getTaxpayerForSptPpn.server';
 
 export const getSptPpn = query(async () => {
 	const event = getRequestEvent();

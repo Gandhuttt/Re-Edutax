@@ -1,7 +1,7 @@
 import { form, getRequestEvent } from '$app/server';
 import { error, redirect } from '@sveltejs/kit';
-import { getOrCreateCurrentSptPpn } from '../(form)/ppn/getOrCreateCurrentSptPpn.server';
-import { getTaxpayerForSptPpn } from '../(form)/ppn/getTaxpayerForSptPpn.server';
+import { getOrCreateCurrentSptPpn } from '../(form)/ppn/server/getOrCreateCurrentSptPpn.server';
+import { getTaxpayerForSptPpn } from '../(form)/ppn/server/getTaxpayerForSptPpn.server';
 
 export const newSptPpn = form(async () => {
 	const event = getRequestEvent();

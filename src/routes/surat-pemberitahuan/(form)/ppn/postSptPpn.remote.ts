@@ -2,8 +2,8 @@ import { form, getRequestEvent } from '$app/server';
 import { SptPpnBlobSchema } from '$lib/schemas/surat-pemberitahuan/spt-ppn';
 import { error } from '@sveltejs/kit';
 import * as v from 'valibot';
-import { createPostedSptPpnBlob } from './createPostedSptPpnBlob.server';
-import { getOwnedSptPpn } from './getOwnedSptPpn.server';
+import { createPostedSptPpnBlob } from './server/createPostedSptPpnBlob.server';
+import { getOwnedSptPpn } from './server/getOwnedSptPpn.server';
 
 const SptPpnIdSchema = v.object({
 	id: v.string()

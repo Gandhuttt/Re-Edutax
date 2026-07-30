@@ -7,8 +7,8 @@ import { spt_ppn } from '$lib/server/db/schema';
 import { error, redirect } from '@sveltejs/kit';
 import { eq } from 'drizzle-orm';
 import * as v from 'valibot';
-import { getOwnedSptPpn } from './getOwnedSptPpn.server';
-import { summarizeSptPpnBlob } from './summarizeSptPpnBlob.server';
+import { getOwnedSptPpn } from './server/getOwnedSptPpn.server';
+import { summarizeSptPpnBlob } from './server/summarizeSptPpnBlob.server';
 
 const lebihBayarTindakanSchema = v.nullish(
 	v.picklist(['dikompensasikan', 'dikembalikan_pendahuluan', 'dikembalikan_pemeriksaan'])
