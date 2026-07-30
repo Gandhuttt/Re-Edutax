@@ -12,9 +12,6 @@
 
 <header>
 	<nav>
-		<div class="corner">
-			<span class="tw:text-base tw:text-[.8em]">{displayName}</span>
-		</div>
 		<ul class="nav-ul">
 			<li aria-current={page.url.pathname === '/' ? 'page' : undefined}>
 				<a href="/">Home</a>
@@ -37,18 +34,19 @@
 					<li><a class="dropdown-item" href="/surat-pemberitahuan/laporan">SPT Dilaporkan</a></li>
 				</ul>
 			</li>
-			{#if authenticated}
-				<li>
-					<form {...logout}>
-						<button type="submit">Logout</button>
-					</form>
-				</li>
-			{:else}
-				<li aria-current={page.url.pathname === '/auth/login' ? 'page' : undefined}>
-					<a href="/auth/login">Login</a>
-				</li>
-			{/if}
 		</ul>
+		<div class="corner">
+			<span class="tw:w-auto tw:text-base tw:text-[.8em] tw:overflow-clip">{displayName}</span>
+			<div class="tw:w-20">
+				{#if authenticated}
+				<form {...logout}>
+					<button type="submit">Logout</button>
+				</form>
+				{:else}
+				<a href="/auth/login">Login</a>
+				{/if}
+			</div>
+		</div>
 	</nav>
 	<svg viewBox="0 0 2 3" aria-hidden="true">
 		<path d="M0,0 L0,3 C0.5,3 0.5,3 1,2 L2,0 Z" />
@@ -68,20 +66,22 @@
 	.corner {
 		display: flex;
 		align-items: center;
-		width: fit-content;
-		max-width: 12rem;
+		width: 15rem;
 		font-weight: 700;
 		color: var(--color-text);
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
+		justify-content: right;
+		gap: 1rem;
 	}
 
 	nav {
 		display: flex;
 		justify-content: space-between;
-		width: 44rem;
-		padding: 0 1rem;
+		width: 100%;
+		padding: 0 5rem;
+		padding-right: 1rem;
 		--background: rgb(255, 255, 255);
 		background: var(--background);
 	}
