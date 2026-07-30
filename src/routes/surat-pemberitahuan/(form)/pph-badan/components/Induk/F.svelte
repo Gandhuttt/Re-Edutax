@@ -13,13 +13,15 @@
 
 <div class="tw:p-5">
     <Table class={"tw:min-w-full"}>
+
+        <!-- Hidden input field -->
         {#snippet head()}
             <tr class="tw:hidden">
-                <td>
-                    <Input hidden/>
-                </td>
+                <td><Input hidden/></td>
             </tr>
         {/snippet}
+
+        <!-- Input field -->
         {#snippet body()}
             <tr>
                 <td class="tw:w-10"><span>17.a.</span></td>
@@ -87,11 +89,16 @@
             {/snippet}
             {#snippet body()}
             <div class="tw:flex tw:flex-col tw:gap-2">
-                <Label>
+                <div>
                     <span class="tw:inline-block tw:w-[10rem] tw:text-right">Pilih Rekening Bank</span>
-                    <Button class={"tw:min-w-[3rem]!"} --color={'#FFD230'}>File</Button>
-                    <Button class={"tw:min-w-[3rem]!"} --color={'#FFD230'}>Clear</Button>
-                </Label>
+                    <Button class={"tw:min-w-[3rem]!"} --color={'#FFD230'} type={"button"}>
+                        <Label class={"tw:w-full tw:h-full"} for={getContext("id")}>
+                            <Input type={"file"}></Input>
+                            <span>File</span>
+                        </Label>
+                    </Button>
+                    <Button class={"tw:min-w-[3rem]!"} --color={'#FFD230'} type={"button"}>Clear</Button>
+                </div>
                 <Label>
                     <span class="tw:inline-block tw:w-[10rem] tw:text-right">Nomor Rekening</span>
                     <Input class={"tw:w-[25%]!"} type={"text"} disabled/>

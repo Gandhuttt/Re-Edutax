@@ -7,57 +7,35 @@
 
 <div class="tw:p-5">
     <Table class="tw:min-w-full" >
+
+        <!-- Hidden input field -->
         {#snippet head()}
             <tr class="tw:hidden">
-                <td>
-                    <Input hidden/>
-                </td>
+                <td><Input hidden/></td>
             </tr>
         {/snippet}
+
+        <!-- Input field -->
         {#snippet body()}
             <tr>
                 <td class="tw:w-10"><span>1.</span></td>
-                <td class="tw:w-[35rem]">
-                    <Label class="tw:w-full">
-                        <span>NPWP</span>
-                    </Label>
-                </td>
-                <td>
-                    <Input type={"text"} value={"2025"} disabled />
-                </td>
+                <td class="tw:w-[35rem]"><span>NPWP</span></td>
+                <td><Input type={"text"} value={"2025"} disabled /></td>
             </tr>
             <tr>
                 <td><span>2.</span></td>
-                <td>
-                    <Label class="tw:w-full">
-                        <span class="tw:mr-10">Nama</span>
-                    </Label>
-                </td>
-                <td>
-                    <Input type={"text"} value={"NORMAL"} disabled />
-                </td>
+                <td><span class="tw:mr-10">Nama</span></td>
+                <td><Input type={"text"} value={"NORMAL"} disabled /></td>
             </tr>
             <tr>
                 <td><span>3.</span></td>
-                <td>
-                    <Label>
-                        <span>Alamat Email</span>
-                    </Label>
-                </td>
-                <td>
-                    <Input type={"text"} value={"1"} disabled />
-                </td>
+                <td><span>Alamat Email</span></td>
+                <td><Input type={"text"} value={"1"} disabled /></td>
             </tr>
             <tr>
                 <td><span>4.</span></td>
-                <td>
-                    <Label>
-                        <span>Nomor Telepon</span>
-                    </Label>
-                </td>
-                <td>
-                    <Input type={"text"} value={"1"} disabled />
-                </td>
+                <td><span>Nomor Telepon</span></td>
+                <td><Input type={"text"} value={"1"} disabled /></td>
             </tr>
         {/snippet}
     </Table>

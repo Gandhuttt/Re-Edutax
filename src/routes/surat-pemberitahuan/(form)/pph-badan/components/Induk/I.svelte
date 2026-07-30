@@ -21,10 +21,10 @@
                                 <span>Pilih</span>
                             </Label>
                         </Button>
-                        <Button --color={'#FFD230'}>
+                        <Button --color={'#FFD230'} type={"button"}>
                             <span>Unggah</span>
                         </Button>
-                        <Button --color={'#FFD230'}>
+                        <Button --color={'#FFD230'} type={"button"}>
                             <span>Batal</span>
                         </Button>
                     </div>
@@ -37,12 +37,10 @@
     </div>
     <div class="tw:flex tw:flex-row tw:w-full">
         <span class="tw:inline-block tw:basis-1/3 tw:shrink">Files Uploaded</span>
-        <Table class={"tw:basis-auto tw:grow tw:shrink-[2] tw:border-1 tw:border-[#A9A9A9]"}>
+        <Table class={"tw:min-w-0! tw:basis-auto tw:grow tw:shrink-[2] tw:border-1 tw:border-[#A9A9A9]"}>
             {#snippet head()}
                 <tr class="tw:hidden">
-                    <td>
-                        <Input hidden/>
-                    </td>
+                    <td><Input hidden/></td>
                 </tr>
             {/snippet}
             {#snippet body()}

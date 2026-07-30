@@ -30,21 +30,19 @@
 
 <div class="tw:p-5">
     <Table class="tw:min-w-full" >
+
+        <!-- Hidden input field -->
         {#snippet head()}
             <tr class="tw:hidden">
-                <td>
-                    <Input hidden/>
-                </td>
+                <td><Input hidden/></td>
             </tr>
         {/snippet}
+
+        <!-- Input field -->
         {#snippet body()}
             <tr>
                 <td class="tw:w-10"><span>1.</span></td>
-                <td class="tw:w-[35rem]">
-                    <Label class="tw:w-full">
-                        <span>Sektor Usaha Laporan Keuangan pada Lampiran 1 *</span>
-                    </Label>
-                </td>
+                <td class="tw:w-[35rem]"><span>Sektor Usaha Laporan Keuangan pada Lampiran 1 *</span></td>
                 <td>
                     <Select class={"tw:invalid:text-gray-500"} required>
                         {#if sectionData}
@@ -54,7 +52,7 @@
                             {:else}
                                 <option value="" selected hidden>Select a business classification</option>
                             {/if}
-                            {:else}
+                        {:else}
                             <option value="" selected disabled hidden>Select a business classification</option>
                         {/if}
                         {#each sektorUsaha as sektor}
@@ -65,11 +63,7 @@
             </tr>
             <tr>
                 <td><span>2.</span></td>
-                <td>
-                    <Label class="tw:w-full">
-                        <span>Apakah Laporan Keuangan diaudit oleh Akuntan Publik? *</span>
-                    </Label>
-                </td>
+                <td><span>Apakah Laporan Keuangan diaudit oleh Akuntan Publik? *</span></td>
                 <td>
                     <div class="tw:flex tw:gap-5">
                         <Label for={getContext("id")} class="tw:flex tw:items-center tw:gap-1">
@@ -86,11 +80,7 @@
             {#if isDiaudit}    
                 <tr>
                     <td><span>2.a.</span></td>
-                    <td>
-                        <Label>
-                            <span>Opini Auditor</span>
-                        </Label>
-                    </td>
+                    <td><span>Opini Auditor</span></td>
                     <td>
                         <Select class={"tw:invalid:text-gray-500"} required>
                             {#if auditData?._ === true}
@@ -111,25 +101,13 @@
                 </tr>
                 <tr>
                     <td><span>2.b.</span></td>
-                    <td>
-                        <Label>
-                            <span>NPWP Kantor Akuntan Publik</span>
-                        </Label>
-                    </td>
-                    <td>
-                        <Input type={"text"} value={"0123456789012000"} disabled />
-                    </td>
+                    <td><span>NPWP Kantor Akuntan Publik</span></td>
+                    <td><Input type={"text"} value={"0123456789012000"} disabled /></td>
                 </tr>
                 <tr>
                     <td><span>2.c.</span></td>
-                    <td>
-                        <Label>
-                            <span>Nama Kantor Akuntan Publik</span>
-                        </Label>
-                    </td>
-                    <td>
-                        <Input type={"text"} value={"Akuntan Dummy"} disabled/>
-                    </td>
+                    <td><span>Nama Kantor Akuntan Publik</span></td>
+                    <td><Input type={"text"} value={"Akuntan Dummy"} disabled/></td>
                 </tr>
             {/if}
         {/snippet}

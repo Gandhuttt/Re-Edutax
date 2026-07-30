@@ -13,13 +13,15 @@
 
 <div class="tw:p-5">
     <Table class="tw:min-w-full">
+
+        <!-- Hidden input field -->
         {#snippet head()}
             <tr class="tw:hidden">
-                <td>
-                    <Input hidden/>
-                </td>
+                <td><Input hidden/></td>
             </tr>
         {/snippet}
+
+        <!-- Input field -->
         {#snippet body()}
             <tr>
                 <td class="tw:w-10"><span>4.</span></td>
@@ -120,7 +122,7 @@
                             "Tarif fasilitas sebagaimana Pasal 31E ayat (1) UU PPh",
                             "Tarif Pajak Lainnya"
                         ] as tarif, index}
-                            <option value={index}>{tarif}</option>
+                            <option class="tw:text-black" value={index}>{tarif}</option>
                         {/each}
                     </Select>
                 </td>

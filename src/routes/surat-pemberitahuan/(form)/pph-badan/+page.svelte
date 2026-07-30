@@ -6,6 +6,7 @@
 	import Label from '$lib/components/Label.svelte';
 	import Select from '$lib/components/Select.svelte';
 	import Table from '$lib/components/Table.svelte';
+	import Induk from './components/Induk/_Induk.svelte';
 	import L1C from './components/L1-C/L1C.svelte';
 	import L2 from './components/L2/_L2.svelte';
 	import { getSptPphBadan } from './getSptPphBadan.remote';
@@ -108,7 +109,8 @@
 					</header>
 
 					{#if currentTab === 'Induk'}
-						<div class="accordion" id="accordionSptPphBadan">
+					<Induk></Induk>
+						<!-- <div class="accordion" id="accordionSptPphBadan">
 					<Accordion item="HEADER" target="#accordionSptPphBadan">
 						<div class="tw:p-5">
 							<Table class="tw:min-w-full tw:table-fixed tw:border-collapse">
@@ -385,7 +387,7 @@
 							</div>
 							</div>
 						</Accordion>
-						</div>
+						</div> -->
 
 					{:else if currentTab === 'L1-C'}
 						<div class="tw:flex tw:flex-col tw:gap-4">

@@ -1,6 +1,6 @@
 <script lang="ts">
     import Accordion from "$lib/components/AccordionItem.svelte";
-    import Header from "./Header.svelte";
+    import Header from "./_Header.svelte";
     import A from "./A.svelte";
     import B from "./B.svelte";
     import C from "./C.svelte";

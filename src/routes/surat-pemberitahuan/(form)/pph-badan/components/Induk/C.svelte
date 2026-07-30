@@ -14,13 +14,15 @@
 
 <div class="tw:p-5">
     <Table class="tw:min-w-full">
+
+        <!-- Hidden input field -->
         {#snippet head()}
             <tr class="tw:hidden">
-                <td>
-                    <Input hidden/>
-                </td>
+                <td><Input hidden/></td>
             </tr>
         {/snippet}
+
+        <!-- Input field -->
         {#snippet body()}
             <tr>
                 <td class="tw:w-10"><span>1.a.</span></td>

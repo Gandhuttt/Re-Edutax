@@ -5,19 +5,21 @@
     import Select from "$lib/components/Select.svelte";
     import { getContext } from "svelte";
 
-    let E13 = $state();
-    let E16 = $state();
+    let E13 = $state(false);
+    let E16 = $state(false);
 </script>
 
 <div class="tw:p-5">
     <Table class={"tw:min-w-full"}>
+
+        <!-- Hidden field -->
         {#snippet head()}
             <tr class="tw:hidden">
-                <td>
-                    <Input hidden/>
-                </td>
+                <td><Input hidden/></td>
             </tr>
         {/snippet}
+
+        <!-- Input field -->
         {#snippet body()}
             <tr>
                 <td class="tw:w-10"><span>13.</span></td>
