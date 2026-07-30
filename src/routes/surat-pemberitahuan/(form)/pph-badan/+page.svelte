@@ -12,10 +12,12 @@
 	import IndukRows from './IndukRows.svelte';
 	import RadioPair from './RadioPair.svelte';
 	import { getOpiniAuditor } from './components/Induk/getOpiniAuditor.remote';
+	import { getSektorUsaha } from './components/Induk/getSektorUsaha.remote';
 	import { saveSptPphBadan } from './saveSptPphBadan.remote';
 
 	const { readonly, spt, lampiran1 } = await getSptPphBadan();
 	const opiniAuditorOptions = await getOpiniAuditor();
+	const sektorUsahaOptions = await getSektorUsaha();
 	const saveForm = saveSptPphBadan.for(spt.id);
 	const rupiah = new Intl.NumberFormat('id-ID');
 
@@ -171,7 +173,14 @@
 									<tr>
 										<td class="tw:w-10">1.</td>
 										<td class="tw:w-[35rem]"><Label><span>Sektor Usaha Laporan Keuangan pada Lampiran 1 *</span></Label></td>
-										<td><Input type="text" value={spt.sektorUsahaKode ?? ''} disabled /></td>
+										<td>
+											<Select name="sektorUsaha" value={spt.sektorUsahaKode ?? ''} required disabled={readonly}>
+												<option value="" disabled>Pilih sektor usaha</option>
+												{#each sektorUsahaOptions as sektorUsaha}
+													<option value={sektorUsaha.value}>{sektorUsaha.label}</option>
+												{/each}
+											</Select>
+										</td>
 									</tr>
 									<tr>
 										<td>2.</td>

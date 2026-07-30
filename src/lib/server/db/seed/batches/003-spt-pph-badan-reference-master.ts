@@ -1,4 +1,4 @@
-import { opini_auditor_spt_pph_badan } from '../../schema';
+import { opini_auditor_spt_pph_badan, sektor_usaha_spt_pph_badan } from '../../schema';
 import type { SeedContext } from '../context';
 
 export const name = '003 spt pph badan reference master data';
@@ -14,9 +14,42 @@ const auditorOptions = [
 	{ value: 'tidak_menyatakan_pendapat', label: 'Tidak Menyatakan Pendapat' }
 ] as const;
 
+const sektorUsahaOptions = [
+	{ value: 'umum', label: 'Umum' },
+	{ value: 'manufaktur', label: 'Manufaktur' },
+	{ value: 'dagang', label: 'Dagang' },
+	{ value: 'jasa', label: 'Jasa' },
+	{ value: 'bank_konvensional', label: 'Bank Konvensional' },
+	{ value: 'dana_pensiun', label: 'Dana Pensiun' },
+	{ value: 'asuransi', label: 'Asuransi' },
+	{ value: 'properti', label: 'Properti' },
+	{ value: 'bank_syariah', label: 'Bank Syariah' },
+	{ value: 'infrastruktur', label: 'Infrastruktur' },
+	{ value: 'sekuritas', label: 'Sekuritas' },
+	{ value: 'pembiayaan', label: 'Pembiayaan' }
+] as const;
+
 const opiniAuditorId = (kode: string) => `opini-auditor-${kode}`;
+const sektorUsahaId = (kode: string) => `sektor-usaha-${kode}`;
 
 export const run = async ({ db }: SeedContext) => {
+	for (const row of sektorUsahaOptions) {
+		await db
+			.insert(sektor_usaha_spt_pph_badan)
+			.values({
+				id: sektorUsahaId(row.value),
+				kode: row.value,
+				nama: row.label
+			})
+			.onConflictDoUpdate({
+				target: sektor_usaha_spt_pph_badan.kode,
+				set: {
+					nama: row.label,
+					aktif: true
+				}
+			});
+	}
+
 	for (const row of auditorOptions) {
 		await db
 			.insert(opini_auditor_spt_pph_badan)
@@ -35,6 +68,7 @@ export const run = async ({ db }: SeedContext) => {
 	}
 
 	console.log(`Seeded SPT PPh Badan references: ${auditorOptions.length} auditor opinions`);
+	console.log(`Seeded SPT PPh Badan references: ${sektorUsahaOptions.length} business sectors`);
 
 	return [];
 };

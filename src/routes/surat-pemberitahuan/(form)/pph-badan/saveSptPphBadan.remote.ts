@@ -3,6 +3,7 @@ import { decimalString } from '$lib/helpers/valibot-schema';
 import { db } from '$lib/server/db';
 import {
 	opini_auditor_spt_pph_badan,
+	sektor_usaha_spt_pph_badan,
 	spt_pph_badan,
 	spt_pph_badan_lampiran_1_laba_rugi,
 	spt_pph_badan_lampiran_1_neraca
@@ -17,6 +18,7 @@ const SaveSptPphBadanSchema = v.object({
 	id: v.string(),
 	action: v.optional(v.picklist(['Simpan Konsep', 'Simpan Lapor'])),
 	metodePembukuan: v.picklist(['akrual', 'kas']),
+	sektorUsaha: v.string(),
 	diaudit: v.optional(v.boolean()),
 	opiniAuditor: v.optional(v.string()),
 	menerimaPenghasilanPp23: v.optional(v.boolean()),
@@ -47,6 +49,7 @@ export const saveSptPphBadan = form('unchecked', async (rawInput) => {
 		id: stringValue(rawInput.id),
 		action: stringValue(rawInput.action) || 'Simpan Konsep',
 		metodePembukuan: stringValue(rawInput.metodePembukuan) || 'akrual',
+		sektorUsaha: stringValue(rawInput.sektorUsaha),
 		diaudit: booleanValue(rawInput.diaudit),
 		opiniAuditor: stringValue(rawInput.opiniAuditor),
 		menerimaPenghasilanPp23: booleanValue(rawInput.menerimaPenghasilanPp23),
@@ -83,6 +86,7 @@ export const saveSptPphBadan = form('unchecked', async (rawInput) => {
 
 	const pphKurangLebihBayar = input.labaRugi.reduce((total, row) => total + Number(row.fiskal), 0);
 	const statusDraft = input.action === 'Simpan Lapor' ? 'dilaporkan' : 'konsep';
+	const sektorUsahaId = await getSektorUsahaId(input.sektorUsaha);
 	const opiniAuditorId = await getOpiniAuditorId(input.diaudit ?? false, input.opiniAuditor ?? '');
 
 	await db.transaction(async (tx) => {
@@ -90,6 +94,7 @@ export const saveSptPphBadan = form('unchecked', async (rawInput) => {
 			.update(spt_pph_badan)
 			.set({
 				metodePembukuan: input.metodePembukuan,
+				sektorUsahaId,
 				opiniAuditorId,
 				menerimaPenghasilanPp23: input.menerimaPenghasilanPp23 ?? false,
 				hanyaPenghasilanPp23: input.hanyaPenghasilanPp23 ?? false,
@@ -187,4 +192,27 @@ async function getOpiniAuditorId(diaudit: boolean, kode: string) {
 	}
 
 	return opiniAuditor.id;
+}
+
+async function getSektorUsahaId(kode: string) {
+	if (!kode) {
+		error(400, 'Sektor usaha harus dipilih');
+	}
+
+	const [sektorUsaha] = await db
+		.select({ id: sektor_usaha_spt_pph_badan.id })
+		.from(sektor_usaha_spt_pph_badan)
+		.where(
+			and(
+				eq(sektor_usaha_spt_pph_badan.kode, kode),
+				eq(sektor_usaha_spt_pph_badan.aktif, true)
+			)
+		)
+		.limit(1);
+
+	if (!sektorUsaha) {
+		error(400, 'Sektor usaha tidak valid');
+	}
+
+	return sektorUsaha.id;
 }
