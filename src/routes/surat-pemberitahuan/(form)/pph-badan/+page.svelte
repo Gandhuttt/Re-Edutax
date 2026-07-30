@@ -200,8 +200,30 @@
 												</Select>
 											</td>
 										</tr>
-										<tr><td>2.b.</td><td><Label><span>NPWP Kantor Akuntan Publik</span></Label></td><td><Input type="text" value="-" disabled /></td></tr>
-										<tr><td>2.c.</td><td><Label><span>Nama Kantor Akuntan Publik</span></Label></td><td><Input type="text" value="-" disabled /></td></tr>
+										<tr>
+											<td>2.b.</td>
+											<td><Label><span>NPWP Kantor Akuntan Publik</span></Label></td>
+											<td>
+												<Input
+													type="text"
+													name="npwpKantorAkuntanPublik"
+													value={spt.npwpKantorAkuntanPublik ?? ''}
+													disabled={readonly}
+												/>
+											</td>
+										</tr>
+										<tr>
+											<td>2.c.</td>
+											<td><Label><span>Nama Kantor Akuntan Publik</span></Label></td>
+											<td>
+												<Input
+													type="text"
+													name="namaKantorAkuntanPublik"
+													value={spt.namaKantorAkuntanPublik ?? ''}
+													disabled={readonly}
+												/>
+											</td>
+										</tr>
 									{/if}
 								{/snippet}
 							</Table>

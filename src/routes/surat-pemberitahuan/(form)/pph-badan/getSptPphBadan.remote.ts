@@ -38,6 +38,8 @@ export const getSptPphBadan = query(async () => {
 			mataUangKode: mata_uang_spt_pph_badan.kode,
 			sektorUsahaKode: sektor_usaha_spt_pph_badan.kode,
 			opiniAuditorKode: opini_auditor_spt_pph_badan.kode,
+			npwpKantorAkuntanPublik: spt_pph_badan.npwpKantorAkuntanPublik,
+			namaKantorAkuntanPublik: spt_pph_badan.namaKantorAkuntanPublik,
 			menerimaPenghasilanPp23: spt_pph_badan.menerimaPenghasilanPp23,
 			hanyaPenghasilanPp23: spt_pph_badan.hanyaPenghasilanPp23,
 			menerimaPenghasilanFinal: spt_pph_badan.menerimaPenghasilanFinal,
