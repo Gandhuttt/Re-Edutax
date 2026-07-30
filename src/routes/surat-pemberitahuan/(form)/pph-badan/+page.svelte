@@ -11,9 +11,11 @@
 	import { getSptPphBadan } from './getSptPphBadan.remote';
 	import IndukRows from './IndukRows.svelte';
 	import RadioPair from './RadioPair.svelte';
+	import { getOpiniAuditor } from './components/Induk/getOpiniAuditor.remote';
 	import { saveSptPphBadan } from './saveSptPphBadan.remote';
 
 	const { readonly, spt, lampiran1 } = await getSptPphBadan();
+	const opiniAuditorOptions = await getOpiniAuditor();
 	const saveForm = saveSptPphBadan.for(spt.id);
 	const rupiah = new Intl.NumberFormat('id-ID');
 
@@ -42,7 +44,7 @@
 	let hanyaPenghasilanPp23 = $state(Boolean(spt.hanyaPenghasilanPp23));
 	let menerimaPenghasilanFinal = $state(Boolean(spt.menerimaPenghasilanFinal));
 	let menerimaPenghasilanBukanObjekPajak = $state(Boolean(spt.menerimaPenghasilanBukanObjekPajak));
-	let diaudit = $state(false);
+	let diaudit = $state(Boolean(spt.opiniAuditorKode));
 	let fasilitasPenanamanModal = $state(false);
 	let fasilitasVokasi = $state(false);
 	let kompensasiKerugian = $state(false);
@@ -91,15 +93,6 @@
 			<form {...saveForm}>
 				<input type="hidden" name="labaRugiJson" value={JSON.stringify(labaRugi)} />
 				<input type="hidden" name="neracaJson" value={JSON.stringify(neraca)} />
-				<input type="hidden" name="menerimaPenghasilanPp23" value={String(menerimaPenghasilanPp23)} />
-				<input type="hidden" name="hanyaPenghasilanPp23" value={String(menerimaPenghasilanPp23 && hanyaPenghasilanPp23)} />
-				<input type="hidden" name="menerimaPenghasilanFinal" value={String(menerimaPenghasilanFinal)} />
-					<input
-						type="hidden"
-						name="menerimaPenghasilanBukanObjekPajak"
-						value={String(menerimaPenghasilanBukanObjekPajak)}
-					/>
-
 					<header class="tw:mb-5">
 						<nav class="tw:overflow-x-auto tw:border-b tw:border-[#A9A9A9]">
 							<ul class="tw:m-0! tw:flex tw:min-w-max tw:flex-row tw:p-0!">
@@ -186,7 +179,18 @@
 										<td><RadioPair name="diaudit" bind:value={diaudit} disabled={readonly} /></td>
 									</tr>
 									{#if diaudit}
-										<tr><td>2.a.</td><td><Label><span>Opini Auditor</span></Label></td><td><Input type="text" value="-" disabled /></td></tr>
+										<tr>
+											<td>2.a.</td>
+											<td><Label><span>Opini Auditor</span></Label></td>
+											<td>
+												<Select name="opiniAuditor" value={spt.opiniAuditorKode ?? ''} required disabled={readonly}>
+													<option value="" disabled>Pilih opini auditor</option>
+													{#each opiniAuditorOptions as opiniAuditor}
+														<option value={opiniAuditor.value}>{opiniAuditor.label}</option>
+													{/each}
+												</Select>
+											</td>
+										</tr>
 										<tr><td>2.b.</td><td><Label><span>NPWP Kantor Akuntan Publik</span></Label></td><td><Input type="text" value="-" disabled /></td></tr>
 										<tr><td>2.c.</td><td><Label><span>Nama Kantor Akuntan Publik</span></Label></td><td><Input type="text" value="-" disabled /></td></tr>
 									{/if}

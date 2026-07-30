@@ -2,6 +2,7 @@ import { getRequestEvent, query } from '$app/server';
 import { db } from '$lib/server/db';
 import {
 	mata_uang_spt_pph_badan,
+	opini_auditor_spt_pph_badan,
 	sektor_usaha_spt_pph_badan,
 	spt_pph_badan,
 	spt_pph_badan_lampiran_1_laba_rugi,
@@ -36,6 +37,7 @@ export const getSptPphBadan = query(async () => {
 			metodePembukuan: spt_pph_badan.metodePembukuan,
 			mataUangKode: mata_uang_spt_pph_badan.kode,
 			sektorUsahaKode: sektor_usaha_spt_pph_badan.kode,
+			opiniAuditorKode: opini_auditor_spt_pph_badan.kode,
 			menerimaPenghasilanPp23: spt_pph_badan.menerimaPenghasilanPp23,
 			hanyaPenghasilanPp23: spt_pph_badan.hanyaPenghasilanPp23,
 			menerimaPenghasilanFinal: spt_pph_badan.menerimaPenghasilanFinal,
@@ -46,6 +48,10 @@ export const getSptPphBadan = query(async () => {
 		.from(spt_pph_badan)
 		.innerJoin(mata_uang_spt_pph_badan, eq(spt_pph_badan.mataUangPembukuanId, mata_uang_spt_pph_badan.id))
 		.leftJoin(sektor_usaha_spt_pph_badan, eq(spt_pph_badan.sektorUsahaId, sektor_usaha_spt_pph_badan.id))
+		.leftJoin(
+			opini_auditor_spt_pph_badan,
+			eq(spt_pph_badan.opiniAuditorId, opini_auditor_spt_pph_badan.id)
+		)
 		.where(and(eq(spt_pph_badan.id, id), eq(spt_pph_badan.npwp, activeNpwp)))
 		.limit(1);
 

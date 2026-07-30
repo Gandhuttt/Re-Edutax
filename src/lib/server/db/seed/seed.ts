@@ -3,8 +3,9 @@ import { createSeedContext } from './context';
 import * as initialUsers from './batches/001-initial-users';
 import * as fakturReferenceMaster from './batches/002-faktur-reference-master';
 import * as fakturDemo from './batches/002-faktur-demo';
+import * as sptPphBadanReferenceMaster from './batches/003-spt-pph-badan-reference-master';
 
-const batches = [initialUsers, fakturReferenceMaster, fakturDemo];
+const batches = [initialUsers, fakturReferenceMaster, sptPphBadanReferenceMaster, fakturDemo];
 
 const seed = async () => {
 	console.log('Seeding Better Auth users and wajib_pajak profiles...\n');

@@ -2,6 +2,7 @@ import { form, getRequestEvent } from '$app/server';
 import { decimalString } from '$lib/helpers/valibot-schema';
 import { db } from '$lib/server/db';
 import {
+	opini_auditor_spt_pph_badan,
 	spt_pph_badan,
 	spt_pph_badan_lampiran_1_laba_rugi,
 	spt_pph_badan_lampiran_1_neraca
@@ -16,6 +17,8 @@ const SaveSptPphBadanSchema = v.object({
 	id: v.string(),
 	action: v.optional(v.picklist(['Simpan Konsep', 'Simpan Lapor'])),
 	metodePembukuan: v.picklist(['akrual', 'kas']),
+	diaudit: v.optional(v.boolean()),
+	opiniAuditor: v.optional(v.string()),
 	menerimaPenghasilanPp23: v.optional(v.boolean()),
 	hanyaPenghasilanPp23: v.optional(v.boolean()),
 	menerimaPenghasilanFinal: v.optional(v.boolean()),
@@ -44,6 +47,8 @@ export const saveSptPphBadan = form('unchecked', async (rawInput) => {
 		id: stringValue(rawInput.id),
 		action: stringValue(rawInput.action) || 'Simpan Konsep',
 		metodePembukuan: stringValue(rawInput.metodePembukuan) || 'akrual',
+		diaudit: booleanValue(rawInput.diaudit),
+		opiniAuditor: stringValue(rawInput.opiniAuditor),
 		menerimaPenghasilanPp23: booleanValue(rawInput.menerimaPenghasilanPp23),
 		hanyaPenghasilanPp23: booleanValue(rawInput.hanyaPenghasilanPp23),
 		menerimaPenghasilanFinal: booleanValue(rawInput.menerimaPenghasilanFinal),
@@ -78,12 +83,14 @@ export const saveSptPphBadan = form('unchecked', async (rawInput) => {
 
 	const pphKurangLebihBayar = input.labaRugi.reduce((total, row) => total + Number(row.fiskal), 0);
 	const statusDraft = input.action === 'Simpan Lapor' ? 'dilaporkan' : 'konsep';
+	const opiniAuditorId = await getOpiniAuditorId(input.diaudit ?? false, input.opiniAuditor ?? '');
 
 	await db.transaction(async (tx) => {
 		await tx
 			.update(spt_pph_badan)
 			.set({
 				metodePembukuan: input.metodePembukuan,
+				opiniAuditorId,
 				menerimaPenghasilanPp23: input.menerimaPenghasilanPp23 ?? false,
 				hanyaPenghasilanPp23: input.hanyaPenghasilanPp23 ?? false,
 				menerimaPenghasilanFinal: input.menerimaPenghasilanFinal ?? false,
@@ -155,4 +162,29 @@ function parseJsonRows(value: string) {
 	} catch {
 		error(400, 'Data Lampiran 1 tidak valid');
 	}
+}
+
+async function getOpiniAuditorId(diaudit: boolean, kode: string) {
+	if (!diaudit) return null;
+
+	if (!kode) {
+		error(400, 'Opini auditor harus dipilih');
+	}
+
+	const [opiniAuditor] = await db
+		.select({ id: opini_auditor_spt_pph_badan.id })
+		.from(opini_auditor_spt_pph_badan)
+		.where(
+			and(
+				eq(opini_auditor_spt_pph_badan.kode, kode),
+				eq(opini_auditor_spt_pph_badan.aktif, true)
+			)
+		)
+		.limit(1);
+
+	if (!opiniAuditor) {
+		error(400, 'Opini auditor tidak valid');
+	}
+
+	return opiniAuditor.id;
 }
