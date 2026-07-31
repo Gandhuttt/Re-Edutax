@@ -3,6 +3,16 @@
     import Input from "$lib/components/Input.svelte";
     import Label from "$lib/components/Label.svelte";
     import Select from "$lib/components/Select.svelte";
+
+    interface Props {
+        data: {
+            npwp: string;
+        }
+        readonly: boolean
+    }
+
+    let { data, readonly }: Props = $props()
+
 </script>
 
 <div class="tw:p-5">
@@ -20,22 +30,22 @@
             <tr>
                 <td class="tw:w-10"><span>1.</span></td>
                 <td class="tw:w-[35rem]"><span>NPWP</span></td>
-                <td><Input type={"text"} value={"2025"} disabled /></td>
+                <td><Input type={"text"} value={data.npwp} readonly /></td>
             </tr>
             <tr>
                 <td><span>2.</span></td>
                 <td><span class="tw:mr-10">Nama</span></td>
-                <td><Input type={"text"} value={"NORMAL"} disabled /></td>
+                <td><Input type={"text"} value={"-"} readonly /></td>
             </tr>
             <tr>
                 <td><span>3.</span></td>
                 <td><span>Alamat Email</span></td>
-                <td><Input type={"text"} value={"1"} disabled /></td>
+                <td><Input type={"text"} value={"-"} readonly /></td>
             </tr>
             <tr>
                 <td><span>4.</span></td>
                 <td><span>Nomor Telepon</span></td>
-                <td><Input type={"text"} value={"1"} disabled /></td>
+                <td><Input type={"text"} value={"-"} readonly /></td>
             </tr>
         {/snippet}
     </Table>

@@ -72,8 +72,6 @@
 
 	const totalFiskal = $derived(labaRugi.reduce((total, row) => total + Number(row.fiskal || 0), 0));
 	const totalNeraca = $derived(neraca.reduce((total, row) => total + Number(row.nilai || 0), 0));
-	const periodeMulai = $derived(new Date(`${spt.periodePembukuanMulai}T00:00:00`).getMonth() + 1);
-	const periodeSelesai = $derived(new Date(`${spt.periodePembukuanSelesai}T00:00:00`).getMonth() + 1);
 
 	const tarifPajakOptions = [
 		'Tarif Ketentuan Umum sebagaimana Pasal 17 ayat (1) huruf b UU PPh',
@@ -110,63 +108,8 @@
 
 					{#if ['Induk', 'L1-C', 'L2', 'L3'].includes(currentTab)}
 					<Induk {currentTab} {spt} {readonly}></Induk>
-						<!-- <div class="accordion" id="accordionSptPphBadan">
-					<Accordion item="HEADER" target="#accordionSptPphBadan">
-						<div class="tw:p-5">
-							<Table class="tw:min-w-full tw:table-fixed tw:border-collapse">
-								{#snippet head()}<tr class="tw:hidden"><td></td></tr>{/snippet}
-								{#snippet body()}
-									<tr>
-										<td><Label class="tw:w-full"><span>Tahun Pajak/Bagian Tahun Pajak</span></Label></td>
-										<td><Input type="text" value={spt.tahunPajak} disabled /></td>
-									</tr>
-									<tr>
-										<td><Label class="tw:w-full"><span>Status</span></Label></td>
-										<td><Input type="text" value={spt.statusSpt.toUpperCase()} disabled /></td>
-									</tr>
-									<tr>
-										<td><Label><span>Periode Pembukuan</span></Label></td>
-										<td>
-											<div class="tw:flex tw:flex-row tw:gap-2">
-												<Input type="text" value={periodeMulai} disabled />
-												<Input type="text" value={periodeSelesai} disabled />
-											</div>
-										</td>
-									</tr>
-									<tr>
-										<td><Label><span>Metode Pembukuan/Pencatatan</span></Label></td>
-										<td>
-											<Select name="metodePembukuan" value={spt.metodePembukuan} disabled={readonly}>
-												<option value="kas">Akuntansi Berbasis Kas</option>
-												<option value="akrual">Akuntansi Berbasis Akrual</option>
-											</Select>
-										</td>
-									</tr>
-								{/snippet}
-							</Table>
-							<div class="tw:my-2 tw:flex tw:flex-row">
-								<div class="tw:mr-5">
-									<Button type="button" color="#198754" disabled={readonly}>Prefill SPT</Button>
-								</div>
-								<p class="tw:hidden">Posting belum pernah dilakukan</p>
-							</div>
-						</div>
-					</Accordion>
 
-					<Accordion item="A. IDENTITAS WAJIB PAJAK" target="#accordionSptPphBadan">
-						<div class="tw:p-5">
-							<Table class="tw:min-w-full old-spt-table">
-								{#snippet head()}<tr class="tw:hidden"><td></td></tr>{/snippet}
-								{#snippet body()}
-									<tr><td class="tw:w-10">1.</td><td class="tw:w-[35rem]"><Label><span>NPWP</span></Label></td><td><Input type="text" value={spt.npwp} disabled /></td></tr>
-									<tr><td>2.</td><td><Label><span>Nama</span></Label></td><td><Input type="text" value="-" disabled /></td></tr>
-									<tr><td>3.</td><td><Label><span>Alamat Email</span></Label></td><td><Input type="text" value="-" disabled /></td></tr>
-									<tr><td>4.</td><td><Label><span>Nomor Telepon</span></Label></td><td><Input type="text" value="-" disabled /></td></tr>
-								{/snippet}
-							</Table>
-						</div>
-					</Accordion>
-
+					<!--
 					<Accordion item="B. INFORMASI LAPORAN KEUANGAN" target="#accordionSptPphBadan">
 						<div class="tw:p-5">
 							<Table class="tw:min-w-full old-spt-table">

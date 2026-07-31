@@ -38,8 +38,8 @@
 <div class="{currentTab === "Induk" ? "" : "tw:hidden"}">
     <div class="accordion">
         <Accordion item={"HEADER"}><Header data={spt} {readonly} /></Accordion>
-        <Accordion item={"A. IDENTITAS WAJIB PAJAK"}><A/></Accordion>
-        <Accordion item={"B. INFORMASI LAPORAN KEUANGAN"} ><B data={pphBadanData.informasiLaporanKeuangan}/></Accordion>
+        <Accordion item={"A. IDENTITAS WAJIB PAJAK"}><A data={spt} {readonly}/></Accordion>
+        <Accordion item={"B. INFORMASI LAPORAN KEUANGAN"} ><B data={spt} {readonly}/></Accordion>
         <Accordion item={"C. PENGHASILAN YANG DIKENAKAN PPh YANG BERSIFAT FINAL DAN TIDAK TERMASUK OBJEK PAJAK"}><C data={pphBadanData.penghasilanDikenakanPPhFinal}/></Accordion>
         <Accordion item={"D. PENGHITUNGAN PPh"}><D/></Accordion>
         <Accordion item={"E. PENGURANGAN PPh TERUTANG"}><E/></Accordion>

@@ -6,10 +6,7 @@
 
     interface Props {
         data: {
-            id: string;
-            npwp: string;
             tahunPajak: number;
-            pembetulanKe: number;
             statusSpt: "normal" | "pembetulan";
             periodePembukuanMulai: string;
             periodePembukuanSelesai: string;
@@ -20,6 +17,8 @@
 
     let { data, readonly }: Props = $props();
 
+    const periodeMulai = $derived(new Date(`${data.periodePembukuanMulai}T00:00:00`).getMonth() + 1);
+	const periodeSelesai = $derived(new Date(`${data.periodePembukuanSelesai}T00:00:00`).getMonth() + 1);
     // const {headerData}: {headerData: NonNullable<(NonNullable<Awaited<ReturnType<typeof getKonsep>>>)['data']>['informasiLaporanKeuangan']} = $props();
 </script>
 
@@ -41,14 +40,14 @@
             </tr>
             <tr>
                 <td><span>Status</span></td>
-                <td><Input type={"text"} value={data.statusSpt} readonly /></td>
+                <td><Input type={"text"} value={data.statusSpt.toUpperCase()} readonly /></td>
             </tr>
             <tr>
                 <td><span>Periode Pembukuan</span></td>
                 <td>
                     <div class="tw:flex tw:flex-row tw:gap-2">
-                        <Input type={"text"} value={data.periodePembukuanMulai} readonly />
-                        <Input type={"text"} value={data.periodePembukuanSelesai} readonly />
+                        <Input type={"text"} value={periodeMulai} readonly />
+                        <Input type={"text"} value={periodeSelesai} readonly />
                     </div>
                 </td>
             </tr>

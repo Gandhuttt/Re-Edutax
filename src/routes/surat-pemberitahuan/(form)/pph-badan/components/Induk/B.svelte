@@ -4,11 +4,24 @@
     import Label from "$lib/components/Label.svelte";
     import Select from "$lib/components/Select.svelte";
     import { getContext } from "svelte";
+    import { getSektorUsaha } from "./getSektorUsaha.remote";
 
     export type SectionData = {
         '1'?: string;
         '2'?: { _?: boolean; opini?: string };
     };
+
+    interface Props {
+        data: {
+            sektorUsahaKode: string | null
+            opiniAuditorKode: string | null
+            npwpKantorAkuntanPublik: string | null
+            namaKantorAkuntanPublik: string | null
+        }
+        readonly: boolean
+    }
+
+    const sektorUsahaOptions = await getSektorUsaha();
 
     const sektorUsaha = [
         { value: 'umum', label: 'Umum' },
@@ -22,8 +35,8 @@
         { value: 'tidak-wajar', label: 'Tidak Wajar' }
     ];
 
-    const {data: sectionData}: {data?: SectionData} = $props();
-    const auditData = $derived(sectionData?.['2']);
+    const { data, readonly }: Props = $props();
+    // const auditData = $derived(sectionData?.['2']);
 
     let isDiaudit = $state(false);
 </script>
@@ -44,8 +57,8 @@
                 <td class="tw:w-10"><span>1.</span></td>
                 <td class="tw:w-[35rem]"><span>Sektor Usaha Laporan Keuangan pada Lampiran 1 *</span></td>
                 <td>
-                    <Select class={"tw:invalid:text-gray-500"} required>
-                        {#if sectionData}
+                    <Select class={"tw:invalid:text-gray-500"} name={"sektorUsaha"} value={data.sektorUsahaKode ?? ''}  required>
+                        <!-- {#if sectionData}
                             {@const selectedSektor = sektorUsaha.find((v) => v.value === sectionData['1'])}
                             {#if selectedSektor}
                                 <option value="{selectedSektor.value}" selected disabled hidden>{selectedSektor.label}</option>
@@ -57,6 +70,10 @@
                         {/if}
                         {#each sektorUsaha as sektor}
                             <option value={sektor.value}>{sektor.label}</option>
+                        {/each} -->
+                        <option selected disabled hidden>Select a business classification</option>
+                        {#each sektorUsahaOptions as sektorUsaha}
+                            <option value={sektorUsaha.value}>{sektorUsaha.label}</option>
                         {/each}
                     </Select>
                 </td>
@@ -82,8 +99,8 @@
                     <td><span>2.a.</span></td>
                     <td><span>Opini Auditor</span></td>
                     <td>
-                        <Select class={"tw:invalid:text-gray-500"} required>
-                            {#if auditData?._ === true}
+                        <Select class={"tw:invalid:text-gray-500"} name={"opiniAuditor"} required>
+                            <!-- {#if auditData?._ === true}
                                 {@const selectedOpinion = opiniAuditorIndukA.find((v) => auditData.opini === v.value)}
                                 {#if selectedOpinion}
                                     <option value="{selectedOpinion.value}" selected hidden>{selectedOpinion.label}</option>
@@ -95,19 +112,20 @@
                             {/if}
                             {#each opiniAuditorIndukA as opiniAuditor}
                                 <option value="{opiniAuditor.value}">{opiniAuditor.label}</option>
-                            {/each}
+                            {/each} -->
+                            <option value="">tset</option>
                         </Select>
                     </td>
                 </tr>
                 <tr>
                     <td><span>2.b.</span></td>
                     <td><span>NPWP Kantor Akuntan Publik</span></td>
-                    <td><Input type={"text"} value={"0123456789012000"} disabled /></td>
+                    <td><Input type={"text"} name={"npwpKantorAkuntanPublik"} value={"0123456789012000"} disabled /></td>
                 </tr>
                 <tr>
                     <td><span>2.c.</span></td>
                     <td><span>Nama Kantor Akuntan Publik</span></td>
-                    <td><Input type={"text"} value={"Akuntan Dummy"} disabled/></td>
+                    <td><Input type={"text"} name={"namaKantorAkuntanPublik"} value={"Akuntan Dummy"} disabled/></td>
                 </tr>
             {/if}
         {/snippet}
