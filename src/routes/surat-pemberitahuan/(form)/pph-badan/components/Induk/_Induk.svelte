@@ -12,18 +12,25 @@
     import I from "./I.svelte";
     import J from "./J.svelte";
     import type { SectionData as IndukBSectionData } from "./B.svelte";
+    import type { getSptPphBadan } from "../../getSptPphBadan.remote";
 
-    // const {data}: {data: Awaited<ReturnType<typeof getKonsep>>['data']} = $props();
-    const {
-        currentTab = "Induk",
-        pphBadanData = {}
-    }: {
-        currentTab?: string;
+    type pphInterface = Awaited<ReturnType<typeof getSptPphBadan>>;
+    type sptType = pphInterface['spt'];
+    interface Props {
+        currentTab: string;
+        spt: sptType;
         pphBadanData?: {
             informasiLaporanKeuangan?: IndukBSectionData;
             penghasilanDikenakanPPhFinal?: unknown;
         };
-    } = $props();
+    }
+
+    // const {data}: {data: Awaited<ReturnType<typeof getKonsep>>['data']} = $props();
+    let {
+        currentTab,
+        spt,
+        pphBadanData = {}
+    }: Props = $props();
 </script>
 
 <div class="{currentTab === "Induk" ? "" : "tw:hidden"}">

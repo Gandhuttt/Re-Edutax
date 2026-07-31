@@ -9,53 +9,35 @@
 
 <div class="tw:p-5">
     <Table class="tw:table-fixed tw:min-w-full tw:border-collapse" >
+
+        <!-- Hidden input field -->
         {#snippet head()}
             <tr class="tw:hidden">
-                <td>
-                    <Input hidden/>
-                </td>
+                <td><Input hidden/></td>
             </tr>
         {/snippet}
+
+        <!-- Input field -->
         {#snippet body()}
             <tr>
-                <td>
-                    <Label class="tw:w-full">
-                        <span>Tahun Pajak/Bagian Tahun Pajak</span>
-                    </Label>
-                </td>
-                <td>
-                    <Input type={"text"} value={"2025"} disabled />
-                </td>
+                <td><span>Tahun Pajak/Bagian Tahun Pajak</span></td>
+                <td><Input type={"text"} value={"2025"} readonly /></td>
             </tr>
             <tr>
-                <td>
-                    <Label class="tw:w-full">
-                        <span class="tw:mr-10">Status</span>
-                    </Label>
-                </td>
-                <td>
-                    <Input type={"text"} value={"NORMAL"} disabled />
-                </td>
+                <td><span>Status</span></td>
+                <td><Input type={"text"} value={"NORMAL"} readonly /></td>
             </tr>
             <tr>
-                <td>
-                    <Label>
-                        <span>Periode Pembukuan</span>
-                    </Label>
-                </td>
+                <td><span>Periode Pembukuan</span></td>
                 <td>
                     <div class="tw:flex tw:flex-row tw:gap-2">
-                        <Input type={"text"} value={"1"} disabled />
-                        <Input type={"text"} value={"12"} disabled />
+                        <Input type={"text"} value={"1"} readonly />
+                        <Input type={"text"} value={"12"} readonly />
                     </div>
                 </td>
             </tr>
             <tr>
-                <td>
-                    <Label>
-                        <span>Metode Pembukuan/Pencatatan</span>
-                    </Label>
-                </td>
+                <td><span>Metode Pembukuan/Pencatatan</span></td>
                 <td>
                     <Select>
                         <option value=0>Akuntansi Berbasis Kas</option>

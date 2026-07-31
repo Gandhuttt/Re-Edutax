@@ -108,8 +108,8 @@
 						</nav>
 					</header>
 
-					{#if currentTab === 'Induk'}
-					<Induk></Induk>
+					{#if ['Induk', 'L1-C', 'L2', 'L3'].includes(currentTab)}
+					<Induk {currentTab} {spt}></Induk>
 						<!-- <div class="accordion" id="accordionSptPphBadan">
 					<Accordion item="HEADER" target="#accordionSptPphBadan">
 						<div class="tw:p-5">
@@ -389,8 +389,7 @@
 						</Accordion>
 						</div> -->
 
-					{:else if currentTab === 'L1-C'}
-						<div class="tw:flex tw:flex-col tw:gap-4">
+						<div class="tw:flex tw:flex-col tw:gap-4 {currentTab === "L1-C" ? "" : "tw:hidden"}">
 					<Accordion item="Lampiran 1A - Laba Rugi" target="#accordionSptPphBadan">
 						<div class="tw:overflow-x-auto tw:p-5">
 							<Table class="tw:w-full attachment-table">
@@ -435,8 +434,7 @@
 					</Accordion>
 						</div>
 
-					{:else if currentTab === 'L2'}
-						<L2 currentTab="L2" />
+						<L2 {currentTab} />
 					{:else}
 						<div class="tw:border tw:border-[#A9A9A9] tw:p-5">
 							<span class="tw:text-sm">{currentTab} belum memiliki UI lama yang bisa dipakai.</span>
