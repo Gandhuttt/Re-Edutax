@@ -109,7 +109,7 @@
 					</header>
 
 					{#if ['Induk', 'L1-C', 'L2', 'L3'].includes(currentTab)}
-					<Induk {currentTab} {spt}></Induk>
+					<Induk {currentTab} {spt} {readonly}></Induk>
 						<!-- <div class="accordion" id="accordionSptPphBadan">
 					<Accordion item="HEADER" target="#accordionSptPphBadan">
 						<div class="tw:p-5">

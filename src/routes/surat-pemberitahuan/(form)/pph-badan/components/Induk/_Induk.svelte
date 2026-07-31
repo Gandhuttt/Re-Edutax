@@ -19,6 +19,7 @@
     interface Props {
         currentTab: string;
         spt: sptType;
+        readonly: boolean;
         pphBadanData?: {
             informasiLaporanKeuangan?: IndukBSectionData;
             penghasilanDikenakanPPhFinal?: unknown;
@@ -29,13 +30,14 @@
     let {
         currentTab,
         spt,
+        readonly,
         pphBadanData = {}
     }: Props = $props();
 </script>
 
 <div class="{currentTab === "Induk" ? "" : "tw:hidden"}">
     <div class="accordion">
-        <Accordion item={"HEADER"}><Header/></Accordion>
+        <Accordion item={"HEADER"}><Header data={spt} {readonly} /></Accordion>
         <Accordion item={"A. IDENTITAS WAJIB PAJAK"}><A/></Accordion>
         <Accordion item={"B. INFORMASI LAPORAN KEUANGAN"} ><B data={pphBadanData.informasiLaporanKeuangan}/></Accordion>
         <Accordion item={"C. PENGHASILAN YANG DIKENAKAN PPh YANG BERSIFAT FINAL DAN TIDAK TERMASUK OBJEK PAJAK"}><C data={pphBadanData.penghasilanDikenakanPPhFinal}/></Accordion>

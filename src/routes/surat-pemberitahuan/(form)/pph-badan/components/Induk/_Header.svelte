@@ -4,6 +4,22 @@
     import Label from "$lib/components/Label.svelte";
     import Select from "$lib/components/Select.svelte";
 
+    interface Props {
+        data: {
+            id: string;
+            npwp: string;
+            tahunPajak: number;
+            pembetulanKe: number;
+            statusSpt: "normal" | "pembetulan";
+            periodePembukuanMulai: string;
+            periodePembukuanSelesai: string;
+            metodePembukuan: "akrual" | "kas";
+        }
+        readonly: boolean
+    }
+
+    let { data, readonly }: Props = $props();
+
     // const {headerData}: {headerData: NonNullable<(NonNullable<Awaited<ReturnType<typeof getKonsep>>>)['data']>['informasiLaporanKeuangan']} = $props();
 </script>
 
@@ -21,27 +37,27 @@
         {#snippet body()}
             <tr>
                 <td><span>Tahun Pajak/Bagian Tahun Pajak</span></td>
-                <td><Input type={"text"} value={"2025"} readonly /></td>
+                <td><Input type={"text"} value={data.tahunPajak} readonly /></td>
             </tr>
             <tr>
                 <td><span>Status</span></td>
-                <td><Input type={"text"} value={"NORMAL"} readonly /></td>
+                <td><Input type={"text"} value={data.statusSpt} readonly /></td>
             </tr>
             <tr>
                 <td><span>Periode Pembukuan</span></td>
                 <td>
                     <div class="tw:flex tw:flex-row tw:gap-2">
-                        <Input type={"text"} value={"1"} readonly />
-                        <Input type={"text"} value={"12"} readonly />
+                        <Input type={"text"} value={data.periodePembukuanMulai} readonly />
+                        <Input type={"text"} value={data.periodePembukuanSelesai} readonly />
                     </div>
                 </td>
             </tr>
             <tr>
                 <td><span>Metode Pembukuan/Pencatatan</span></td>
                 <td>
-                    <Select>
-                        <option value=0>Akuntansi Berbasis Kas</option>
-                        <option value=1>Akuntansi Berbasi Akrual</option>
+                    <Select name={"metodePembukuan"} value={data.metodePembukuan}>
+                        <option value="kas">Akuntansi Berbasis Kas</option>
+                        <option value="akrual">Akuntansi Berbasi Akrual</option>
                     </Select>
                 </td>
             </tr>
@@ -49,7 +65,7 @@
     </Table>
     <div class="tw:flex tw:flex-row tw:my-2">
         <div class="tw:mr-5">
-            <button class="btn btn-success" name="action" value="Post">Prefill SPT</button>
+            <button class="btn btn-success" name="action" value="Post" disabled={readonly}>Prefill SPT</button>
         </div>
         <p class="tw:hidden">Posting belum pernah dilakukan</p>
     </div>
