@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Table from "$lib/components/Table.svelte";
-    import ModalEdit from "./_ModalEdit.svelte";
+    // import ModalEdit from "./_ModalEdit.svelte";
 </script>
 
 <div class="tw:p-5 tw:overflow-scroll">

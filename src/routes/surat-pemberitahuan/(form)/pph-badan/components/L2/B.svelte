@@ -1,5 +1,6 @@
 <script lang="ts">
     import Table from "$lib/components/Table.svelte";
+    import Button from "$lib/components/Button.svelte";
 </script>
 
 <div class="tw:p-5 tw:overflow-scroll">
@@ -33,7 +34,9 @@
             <td class="tw:w-30">BUNGA UTANG/TAHUN</td>
         </tr>
         <tr class="data tw:text-left">
-            <td>test</td>
+            <td class="tw:text-center">
+                <Button class={"tw:min-w-15!"}>Edit</Button>
+            </td>
             <td>130</td>
             <td>PLACEHOLDER</td>
             <td>PLACEHOLDER</td>

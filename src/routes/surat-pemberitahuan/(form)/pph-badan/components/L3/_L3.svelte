@@ -7,7 +7,7 @@
     const { currentTab }: { currentTab: string } = $props();
 </script>
 
-<div class="{currentTab === "L2" ? "" : "tw:hidden"}">
+<div class="{currentTab === "L3" ? "" : "tw:hidden"}">
     <h1>DAFTAR KEPEMILIKAN</h1>
     <Header/>
 

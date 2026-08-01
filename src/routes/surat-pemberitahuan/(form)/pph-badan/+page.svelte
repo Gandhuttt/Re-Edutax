@@ -9,6 +9,7 @@
 	import Induk from './components/Induk/_Induk.svelte';
 	import L1C from './components/L1-C/L1C.svelte';
 	import L2 from './components/L2/_L2.svelte';
+	import L3 from './components/L3/_L3.svelte';
 	import { getSptPphBadan } from './getSptPphBadan.remote';
 	import IndukRows from './IndukRows.svelte';
 	import RadioPair from './RadioPair.svelte';
@@ -378,6 +379,7 @@
 						</div>
 
 						<L2 {currentTab} />
+						<L3 {currentTab} />
 					{:else}
 						<div class="tw:border tw:border-[#A9A9A9] tw:p-5">
 							<span class="tw:text-sm">{currentTab} belum memiliki UI lama yang bisa dipakai.</span>
