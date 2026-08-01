@@ -3,8 +3,10 @@
     import Input from "$lib/components/Input.svelte";
     import Label from "$lib/components/Label.svelte";
     import Select from "$lib/components/Select.svelte";
+    import Alert from "$lib/components/Alert.svelte";
     import { getContext } from "svelte";
     import { getSektorUsaha } from "./getSektorUsaha.remote";
+    import { getOpiniAuditor } from "./getOpiniAuditor.remote";
 
     export type SectionData = {
         '1'?: string;
@@ -22,23 +24,24 @@
     }
 
     const sektorUsahaOptions = await getSektorUsaha();
+    const opiniAuditorOptions = await getOpiniAuditor();
 
-    const sektorUsaha = [
-        { value: 'umum', label: 'Umum' },
-        { value: 'perdagangan', label: 'Perdagangan' },
-        { value: 'pabrikan', label: 'Pabrikan' },
-        { value: 'jasa', label: 'Jasa' }
-    ];
-    const opiniAuditorIndukA = [
-        { value: 'wajar-tanpa-pengecualian', label: 'Wajar Tanpa Pengecualian' },
-        { value: 'wajar-dengan-pengecualian', label: 'Wajar Dengan Pengecualian' },
-        { value: 'tidak-wajar', label: 'Tidak Wajar' }
-    ];
+    // const sektorUsaha = [
+    //     { value: 'umum', label: 'Umum' },
+    //     { value: 'perdagangan', label: 'Perdagangan' },
+    //     { value: 'pabrikan', label: 'Pabrikan' },
+    //     { value: 'jasa', label: 'Jasa' }
+    // ];
+    // const opiniAuditorIndukA = [
+    //     { value: 'wajar-tanpa-pengecualian', label: 'Wajar Tanpa Pengecualian' },
+    //     { value: 'wajar-dengan-pengecualian', label: 'Wajar Dengan Pengecualian' },
+    //     { value: 'tidak-wajar', label: 'Tidak Wajar' }
+    // ];
 
     const { data, readonly }: Props = $props();
     // const auditData = $derived(sectionData?.['2']);
 
-    let isDiaudit = $state(false);
+    let isDiaudit = $state();
 </script>
 
 <div class="tw:p-5">
@@ -55,8 +58,8 @@
         {#snippet body()}
             <tr>
                 <td class="tw:w-10"><span>1.</span></td>
-                <td class="tw:w-[35rem]"><span>Sektor Usaha Laporan Keuangan pada Lampiran 1 *</span></td>
-                <td>
+                <td class="tw:w-[40rem]"><span>Sektor Usaha Laporan Keuangan pada Lampiran 1 *</span></td>
+                <td class="tw:w-[35rem]">
                     <Select class={"tw:invalid:text-gray-500"} name={"sektorUsaha"} value={data.sektorUsahaKode ?? ''}  required>
                         <!-- {#if sectionData}
                             {@const selectedSektor = sektorUsaha.find((v) => v.value === sectionData['1'])}
@@ -71,12 +74,14 @@
                         {#each sektorUsaha as sektor}
                             <option value={sektor.value}>{sektor.label}</option>
                         {/each} -->
-                        <option selected disabled hidden>Select a business classification</option>
+                        <option value="" selected disabled hidden>Select a business classification</option>
                         {#each sektorUsahaOptions as sektorUsaha}
                             <option value={sektorUsaha.value}>{sektorUsaha.label}</option>
                         {/each}
                     </Select>
                 </td>
+                <td class="tw:w-[10rem]"></td>
+                <td></td>
             </tr>
             <tr>
                 <td><span>2.</span></td>
@@ -84,22 +89,37 @@
                 <td>
                     <div class="tw:flex tw:gap-5">
                         <Label for={getContext("id")} class="tw:flex tw:items-center tw:gap-1">
-                            <input type="radio" name="diaudit" value={false} bind:group={isDiaudit} checked={true}>
+                            <input type="radio" name="diaudit" value={false} bind:group={isDiaudit}>
                             <span>Tidak</span>
                         </Label>
                         <Label for={getContext("id")} class="tw:flex tw:items-center tw:gap-1">
-                            <input type="radio" name="diaudit" value={true} bind:group={isDiaudit} checked={true}>
+                            <input type="radio" name="diaudit" value={true} bind:group={isDiaudit}>
                             <span>Ya</span>
                         </Label>
                     </div>
                 </td>
+                <td></td>
+                <td>
+                {#if isDiaudit != undefined}    
+                    <Alert bg={"var(--color-primary)"}>
+                        {#snippet head()}
+                            <span>i</span>
+                        {/snippet}
+                        {#snippet body()}
+                            <span>
+                            {isDiaudit ? "Ya, silahkan mengisi isian berikutnya" : "Tidak, silahkan lanjut pertanyaan berikutnya"}
+                            </span>
+                        {/snippet}
+                    </Alert>
+                {/if}
+                </td>
             </tr>
-            {#if isDiaudit}    
+            {#if isDiaudit}
                 <tr>
                     <td><span>2.a.</span></td>
                     <td><span>Opini Auditor</span></td>
                     <td>
-                        <Select class={"tw:invalid:text-gray-500"} name={"opiniAuditor"} required>
+                        <Select class={"tw:invalid:text-gray-500"} name={"opiniAuditor"} value={data.opiniAuditorKode ?? ''} required>
                             <!-- {#if auditData?._ === true}
                                 {@const selectedOpinion = opiniAuditorIndukA.find((v) => auditData.opini === v.value)}
                                 {#if selectedOpinion}
@@ -113,19 +133,28 @@
                             {#each opiniAuditorIndukA as opiniAuditor}
                                 <option value="{opiniAuditor.value}">{opiniAuditor.label}</option>
                             {/each} -->
-                            <option value="">tset</option>
+                            <option value="" selected disabled hidden>Select an auditor opinion</option>
+                            {#each opiniAuditorOptions as opiniAuditor}
+                                <option value={opiniAuditor.value}>{opiniAuditor.label}</option>
+                            {/each}
                         </Select>
                     </td>
+                    <td></td>
+                    <td></td>
                 </tr>
                 <tr>
                     <td><span>2.b.</span></td>
                     <td><span>NPWP Kantor Akuntan Publik</span></td>
                     <td><Input type={"text"} name={"npwpKantorAkuntanPublik"} value={"0123456789012000"} disabled /></td>
+                    <td></td>
+                    <td></td>
                 </tr>
                 <tr>
                     <td><span>2.c.</span></td>
                     <td><span>Nama Kantor Akuntan Publik</span></td>
                     <td><Input type={"text"} name={"namaKantorAkuntanPublik"} value={"Akuntan Dummy"} disabled/></td>
+                    <td></td>
+                    <td></td>
                 </tr>
             {/if}
         {/snippet}

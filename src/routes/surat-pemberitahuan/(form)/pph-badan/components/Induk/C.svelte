@@ -2,14 +2,15 @@
     import Table from "$lib/components/Table.svelte";
     import Label from "$lib/components/Label.svelte";
     import Input from "$lib/components/Input.svelte";
+    import Alert from "$lib/components/Alert.svelte";
     import { getContext } from "svelte";
 
     const {data}: {data?: unknown} = $props();
 
-    let C1a = $state(false);
-    let C1b = $state(false);
-    let C2 = $state(false);
-    let C3 = $state(false);
+    let C1a = $state();
+    let C1b = $state();
+    let C2 = $state();
+    let C3 = $state();
 </script>
 
 <div class="tw:p-5">
@@ -39,6 +40,21 @@
                         </Label>
                     </div>
                 </td>
+                <td class="tw:w-[35rem]"></td>
+                <td>
+                {#if C1a != undefined}    
+                    <Alert bg={"var(--color-primary)"}>
+                        {#snippet head()}
+                            <span>i</span>
+                        {/snippet}
+                        {#snippet body()}
+                            <span>
+                            {C1a ? "Ya, silahkan mengisi lampiran 5" : "Tidak, silahkan lanjut pertanyaan berikutnya"}
+                            </span>
+                        {/snippet}
+                    </Alert>
+                {/if}
+                </td>
             </tr>
             <tr>
                 <td><span>1.b.</span></td>
@@ -46,7 +62,7 @@
                 <td colspan="2">
                     <div class="tw:flex tw:gap-5">
                         <Label for={getContext("id")} class="tw:flex tw:items-center tw:gap-1">
-                            <input type="radio" name="C1b" value={false} bind:group={C1b} defaultChecked disabled={!C1a}>
+                            <input type="radio" name="C1b" value={false} bind:group={C1b} disabled={!C1a}>
                             <span>Tidak</span>
                         </Label>
                         <Label for={getContext("id")} class="tw:flex tw:items-center tw:gap-1">
@@ -62,7 +78,7 @@
                 <td>
                     <div class="tw:flex tw:gap-5">
                         <Label for={getContext("id")} class="tw:flex tw:items-center tw:gap-1">
-                            <input type="radio" name="C2" value={false} bind:group={C2} defaultChecked>
+                            <input type="radio" name="C2" value={false} bind:group={C2}>
                             <span>Tidak</span>
                         </Label>
                         <Label for={getContext("id")} class="tw:flex tw:items-center tw:gap-1">
