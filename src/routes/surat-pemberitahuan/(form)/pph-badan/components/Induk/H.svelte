@@ -8,16 +8,16 @@
     import Alert from "$lib/components/Alert.svelte";
     import { getContext } from "svelte";
 
-    let H21A = $state(false);
-    let H21B = $state(false);
-    let H21C = $state(false);
-    let H21D = $state(false);
-    let H21E = $state(false);
-    let H21F = $state(false);
-    let H21G = $state(false);
-    let H21H = $state(false);
-    let H21I = $state(false);
-    let H21J = $state(false);
+    let H21A = $state();
+    let H21B = $state();
+    let H21C = $state();
+    let H21D = $state();
+    let H21E = $state();
+    let H21F = $state();
+    let H21G = $state();
+    let H21H = $state();
+    let H21I = $state();
+    let H21J = $state();
 </script>
 
 <div class="tw:p-5">
@@ -316,6 +316,7 @@
                 <td><span>Kelebihan PPh yang bersifat final atas penghasilan dari usaha dengan peredaran bruto tertentu yang dapat diajukan pengembalian pajak *</span></td>
                 <td></td>
                 <td><Input class={"tw:text-end"} type={"text"} value={0} disabled/></td>
+                <td></td>
             </tr>
         {/snippet}
     </Table>

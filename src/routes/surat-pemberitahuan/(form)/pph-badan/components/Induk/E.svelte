@@ -6,8 +6,8 @@
     import Alert from "$lib/components/Alert.svelte";
     import { getContext } from "svelte";
 
-    let E13 = $state(false);
-    let E16 = $state(false);
+    let E13 = $state();
+    let E16 = $state();
 </script>
 
 <div class="tw:p-5">

@@ -17,7 +17,10 @@
     type pphInterface = Awaited<ReturnType<typeof getSptPphBadan>>;
     type sptType = pphInterface['spt'];
     interface Props {
-        currentTab: string;
+        currentTab: {
+            tab: string;
+            title: string;
+        };
         spt: sptType;
         readonly: boolean;
         pphBadanData?: {
@@ -28,14 +31,16 @@
 
     // const {data}: {data: Awaited<ReturnType<typeof getKonsep>>['data']} = $props();
     let {
-        currentTab,
+        currentTab = $bindable(),
         spt,
         readonly,
         pphBadanData = {}
     }: Props = $props();
+    
+    $effect(() => {currentTab.title = currentTab.tab === 'Induk' ? 'sigma' : currentTab.title});
 </script>
 
-<div class="{currentTab === "Induk" ? "" : "tw:hidden"}">
+<div class="{currentTab.tab === "Induk" ? "" : "tw:hidden"}">
     <div class="accordion">
         <Accordion item={"HEADER"}><Header data={spt} {readonly} /></Accordion>
         <Accordion item={"A. IDENTITAS WAJIB PAJAK"}><A data={spt} {readonly}/></Accordion>

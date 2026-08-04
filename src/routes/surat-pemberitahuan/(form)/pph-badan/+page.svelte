@@ -7,9 +7,17 @@
 	import Select from '$lib/components/Select.svelte';
 	import Table from '$lib/components/Table.svelte';
 	import Induk from './components/Induk/_Induk.svelte';
-	import L1C from './components/L1-C/L1C.svelte';
+	import L1A from './components/L1-A/_L1A.svelte';
+	import L1C from './components/L1-C/_L1C.svelte';
 	import L2 from './components/L2/_L2.svelte';
 	import L3 from './components/L3/_L3.svelte';
+	import L4 from './components/L4/_L4.svelte';
+	import L6 from './components/L6/_L6.svelte';
+	import L10A from './components/L10-A/_L10A.svelte';
+	import L10B from './components/L10-B/_L10B.svelte';
+	import L10C from './components/L10-C/_L10C.svelte';
+	import L13A from './components/L13-A/_L13A.svelte';
+	import L13B from './components/L13-B/_L13B.svelte';
 	import { getSptPphBadan } from './getSptPphBadan.remote';
 	import IndukRows from './IndukRows.svelte';
 	import RadioPair from './RadioPair.svelte';
@@ -21,7 +29,6 @@
 	const opiniAuditorOptions = await getOpiniAuditor();
 	const sektorUsahaOptions = await getSektorUsaha();
 	const saveForm = saveSptPphBadan.for(spt.id);
-	const rupiah = new Intl.NumberFormat('id-ID');
 
 	let labaRugi = $state(
 		lampiran1.labaRugi.map((row) => ({
@@ -69,10 +76,10 @@
 	let dividenLuarNegeri = $state(false);
 	let pernyataanBenar = $state(false);
 	let penandatangan = $state('wajib-pajak');
-	let currentTab = $state('Induk');
-
-	const totalFiskal = $derived(labaRugi.reduce((total, row) => total + Number(row.fiskal || 0), 0));
-	const totalNeraca = $derived(neraca.reduce((total, row) => total + Number(row.nilai || 0), 0));
+	let currentTab = $state({
+		tab: 'Induk',
+		title: ''
+	});
 
 	const tarifPajakOptions = [
 		'Tarif Ketentuan Umum sebagaimana Pasal 17 ayat (1) huruf b UU PPh',
@@ -80,7 +87,7 @@
 		'Tarif fasilitas sebagaimana Pasal 31E ayat (1) UU PPh',
 		'Tarif Pajak Lainnya'
 	];
-	const tabs = ['Induk', 'L1-C', 'L2', 'L3', 'L4', 'L5', 'L6', 'L7', 'L8', 'L9', 'L11-B'];
+	const tabs = ['Induk', 'L1-A', 'L1-C', 'L2', 'L3', 'L4', 'L5', 'L6', 'L7', 'L8', 'L9', 'L10-A', 'L10-B', 'L10-C', 'L11-B', 'L13-A', 'L13-B'];
 </script>
 
 <div class="tw:w-full tw:p-10">
@@ -95,20 +102,64 @@
 			<form {...saveForm}>
 				<input type="hidden" name="labaRugiJson" value={JSON.stringify(labaRugi)} />
 				<input type="hidden" name="neracaJson" value={JSON.stringify(neraca)} />
-					<header class="tw:mb-5">
-						<nav class="tw:overflow-x-auto tw:border-b tw:border-[#A9A9A9]">
-							<ul class="tw:m-0! tw:flex tw:min-w-max tw:flex-row tw:p-0!">
-								{#each tabs as tab}
-									<li class:active-tab={currentTab === tab}>
-										<button type="button" onclick={() => (currentTab = tab)}>{tab}</button>
-									</li>
-								{/each}
-							</ul>
-						</nav>
-					</header>
+				<header class="tw:mb-5">
+					<nav class="tw:overflow-x-auto tw:border-b tw:border-[#A9A9A9]">
+						<ul class="tw:m-0! tw:flex tw:min-w-max tw:flex-row tw:p-0!">
+							{#each tabs as tab}
+								<li class:active-tab={currentTab.tab === tab}>
+									<button type="button" onclick={() => (currentTab.tab = tab)}>{tab}</button>
+								</li>
+							{/each}
+						</ul>
+					</nav>
+				</header>
 
-					{#if ['Induk', 'L1-C', 'L2', 'L3'].includes(currentTab)}
-					<Induk {currentTab} {spt} {readonly}></Induk>
+				<Induk bind:currentTab {spt} {readonly}></Induk>
+
+				<!-- Lampiran -->
+				<div class="{currentTab.tab === "Induk" ? "tw:hidden" : ""}">
+					<h2>{currentTab.title}</h2>
+
+					<!-- Header -->
+					<Card>
+					{#snippet head()}
+						<span class="tw:text-xl!">HEADER</span>
+					{/snippet}
+					{#snippet body()}
+						<div>
+							<Table class="tw:table-fixed tw:min-w-full tw:border-collapse" >
+							{#snippet head()}
+								<tr class="tw:hidden">
+									<td><Input hidden/></td>
+								</tr>
+							{/snippet}
+							{#snippet body()}
+								<tr>
+									<td class="tw:w-[20rem]"><span>Tahun Pajak/Bagian Tahun Pajak</span></td>
+									<td><Input type={"text"} value={spt.tahunPajak} disabled /></td>
+								</tr>
+								<tr>
+									<td><span class="tw:mr-10">Nomor Identitas WP</span></td>
+									<td><Input type={"text"} value={"00000000000000000"} disabled /></td>
+								</tr>
+							{/snippet}
+							</Table>
+						</div>
+					{/snippet}
+					</Card>
+				</div>
+
+				<L1A bind:currentTab {labaRugi} {neraca} {readonly}></L1A>
+				<L1C bind:currentTab {labaRugi} {neraca} {readonly}></L1C>
+				<L2 bind:currentTab/>
+				<L3 bind:currentTab/>
+				<L4 bind:currentTab/>
+				<L6 bind:currentTab/>
+				<L10A bind:currentTab/>
+				<L10B bind:currentTab/>
+				<L10C bind:currentTab/>
+				<L13A bind:currentTab/>
+				<L13B bind:currentTab/>
 
 					<!--
 					<Accordion item="B. INFORMASI LAPORAN KEUANGAN" target="#accordionSptPphBadan">
@@ -333,58 +384,9 @@
 						</Accordion>
 						</div> -->
 
-						<div class="tw:flex tw:flex-col tw:gap-4 {currentTab === "L1-C" ? "" : "tw:hidden"}">
-					<Accordion item="Lampiran 1A - Laba Rugi" target="#accordionSptPphBadan">
-						<div class="tw:overflow-x-auto tw:p-5">
-							<Table class="tw:w-full attachment-table">
-								{#snippet head()}<tr><th>Kode</th><th>Nama Akun</th><th>Komersial</th><th>Tidak Objek Pajak</th><th>PPh Final</th><th>Fiskal</th></tr>{/snippet}
-								{#snippet body()}
-									{#each labaRugi as row}
-										<tr>
-											<td>{row.kodeAkun}</td>
-											<td>{row.namaAkun}</td>
-											<td><Input type="text" bind:value={row.komersial} disabled={readonly} /></td>
-											<td><Input type="text" bind:value={row.tidakTermasukObjekPajak} disabled={readonly} /></td>
-											<td><Input type="text" bind:value={row.dikenakanPphFinal} disabled={readonly} /></td>
-											<td><Input type="text" bind:value={row.fiskal} disabled={readonly} /></td>
-										</tr>
-									{/each}
-								{/snippet}
-							</Table>
-						</div>
-					</Accordion>
-
-					<Accordion item="Lampiran 1B - Neraca" target="#accordionSptPphBadan">
-						<div class="tw:overflow-x-auto tw:p-5">
-							<Table class="tw:w-full attachment-table">
-								{#snippet head()}<tr><th>Sisi</th><th>Kode</th><th>Nama Akun</th><th>Nilai</th></tr>{/snippet}
-								{#snippet body()}
-									{#each neraca as row}
-										<tr>
-											<td>{row.sisi}</td>
-											<td>{row.kodeAkun}</td>
-											<td>{row.namaAkun}</td>
-											<td><Input type="text" bind:value={row.nilai} disabled={readonly} /></td>
-										</tr>
-									{/each}
-									<tr><td colspan="3">Total</td><td><Input class="tw:text-end" type="text" value={rupiah.format(totalNeraca)} disabled /></td></tr>
-								{/snippet}
-							</Table>
-						</div>
-					</Accordion>
-
-					<Accordion item="Lampiran 1C - Old UI Draft" target="#accordionSptPphBadan">
-						<L1C />
-					</Accordion>
-						</div>
-
-						<L2 {currentTab} />
-						<L3 {currentTab} />
-					{:else}
-						<div class="tw:border tw:border-[#A9A9A9] tw:p-5">
+						<!-- <div class="tw:border tw:border-[#A9A9A9] tw:p-5">
 							<span class="tw:text-sm">{currentTab} belum memiliki UI lama yang bisa dipakai.</span>
-						</div>
-					{/if}
+						</div> -->
 
 				{#if !readonly}
 					<div class="tw:mt-4 tw:flex tw:gap-2">
