@@ -5,9 +5,10 @@
     import Select from "$lib/components/Select.svelte";
 	import Card from "$lib/components/Card.svelte";
     import Button from "$lib/components/Button.svelte";
+    import Alert from "$lib/components/Alert.svelte";
     import { getContext } from "svelte";
 
-    let G20 = $state(false);
+    let G20 = $state();
 </script>
 
 <div class="tw:p-5">
@@ -37,7 +38,21 @@
                         </Label>
                     </div>
                 </td>
-                <td><Input class={"tw:text-end"} type={"text"} value={0} disabled/></td>
+                <td class="tw:w-[35rem]"><Input class={"tw:text-end"} type={"text"} value={0} disabled/></td>
+                <td>
+                {#if G20 != undefined}    
+                    <Alert bg={"var(--color-primary)"}>
+                        {#snippet head()}
+                            <span>i</span>
+                        {/snippet}
+                        {#snippet body()}
+                            <span class="tw:whitespace-pre-line">
+                            {G20 ? "Ya, silahkan lanjut pertanyaan berikutnya.\nPastikan anda menyampaikan Laporan Penghitungan PPh Pasal 25." : "Ya, silahkan mengisi lampiran 6"}
+                            </span>
+                        {/snippet}
+                    </Alert>
+                {/if}
+                </td>
             </tr>
         {/snippet}
     </Table>

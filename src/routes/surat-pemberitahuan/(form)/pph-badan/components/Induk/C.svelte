@@ -71,6 +71,8 @@
                         </Label>
                     </div>
                 </td>
+                <td></td>
+                <td></td>
             </tr>
             <tr>
                 <td><span>2.</span></td>
@@ -88,6 +90,20 @@
                     </div>
                 </td>
                 <td><Input class={"tw:text-end"} type={"text"} value={0} disabled /></td>
+                <td>
+                {#if C2 != undefined}    
+                    <Alert bg={"var(--color-primary)"}>
+                        {#snippet head()}
+                            <span>i</span>
+                        {/snippet}
+                        {#snippet body()}
+                            <span>
+                            {C2 ? "Ya, silahkan mengisi Lampiran 4 Bagian A" : "Tidak, silahkan lanjut pertanyaan berikutnya"}
+                            </span>
+                        {/snippet}
+                    </Alert>
+                {/if}
+                </td>
             </tr>
             <tr>
                 <td><span>3.</span></td>
@@ -105,6 +121,20 @@
                     </div>
                 </td>
                 <td><Input class={"tw:text-end"} type={"text"} value={0} disabled /></td>
+                <td>
+                {#if C3 != undefined}    
+                    <Alert bg={"var(--color-primary)"}>
+                        {#snippet head()}
+                            <span>i</span>
+                        {/snippet}
+                        {#snippet body()}
+                            <span>
+                            {C3 ? "Ya, silahkan mengisi Lampiran 4 Bagian B" : "Tidak, silahkan lanjut pertanyaan berikutnya"}
+                            </span>
+                        {/snippet}
+                    </Alert>
+                {/if}
+                </td>
             </tr>
             {/snippet}
     </Table>

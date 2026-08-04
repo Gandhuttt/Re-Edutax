@@ -3,6 +3,7 @@
     import Label from "$lib/components/Label.svelte";
     import Input from "$lib/components/Input.svelte";
     import Select from "$lib/components/Select.svelte";
+    import Alert from "$lib/components/Alert.svelte";
     import { getContext } from "svelte";
 
     let E13 = $state(false);
@@ -36,19 +37,35 @@
                         </Label>
                     </div>
                 </td>
-                <td><Input class={"tw:text-end"} type={"text"} value={0} disabled /></td>
+                <td class="tw:w-[35rem]"><Input class={"tw:text-end"} type={"text"} value={0} disabled /></td>
+                <td>
+                {#if E13 != undefined}    
+                    <Alert bg={"var(--color-primary)"}>
+                        {#snippet head()}
+                            <span>i</span>
+                        {/snippet}
+                        {#snippet body()}
+                            <span>
+                            {E13 ? "Ya, silahkan mengisi lampiran 3" : "Tidak, silahkan lanjut pertanyaan berikutnya"}
+                            </span>
+                        {/snippet}
+                    </Alert>
+                {/if}
+                </td>
             </tr>
             <tr>
                 <td><span>14.</span></td>
                 <td><span>Angsuran PPh Pasal 25</span></td>
                 <td></td>
                 <td><Input class={"tw:text-end"} type={"text"} value={0} disabled/></td>
+                <td></td>
             </tr>
             <tr>
                 <td><span>15.</span></td>
                 <td><span>Surat Tagihan Pajak PPh Pasal 25 (hanya pokok pajak)</span></td>
                 <td></td>
                 <td><Input class={"tw:text-end"} type={"text"} value={0}/></td>
+                <td></td>
             </tr>
             <tr>
                 <td><span>16.</span></td>
@@ -66,6 +83,7 @@
                     </div>
                 </td>
                 <td><Input class={"tw:text-end"} type={"text"} value={0} disabled/></td>
+                <td></td>
             </tr>
         {/snippet}
     </Table>

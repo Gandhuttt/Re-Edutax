@@ -5,10 +5,11 @@
     import Select from "$lib/components/Select.svelte";
 	import Card from "$lib/components/Card.svelte";
     import Button from "$lib/components/Button.svelte";
+    import Alert from "$lib/components/Alert.svelte";
     import { getContext } from "svelte";
 
-    let F17B = $state(false);
-    let F19A = $state(false);
+    let F17B = $state();
+    let F19A = $state();
 </script>
 
 <div class="tw:p-5">
@@ -27,7 +28,8 @@
                 <td class="tw:w-10"><span>17.a.</span></td>
                 <td class="tw:w-[40rem]"><span>PPh yang Kurang/Lebih Bayar</span></td>
                 <td class="tw:w-[10rem]"></td>
-                <td><Input class={"tw:text-end"} type={"text"} value={0} disabled/></td>
+                <td class="tw:w-[35rem]"><Input class={"tw:text-end"} type={"text"} value={0} disabled/></td>
+                <td></td>
             </tr>
             <tr>
                 <td><span>17.b.</span></td>
@@ -45,24 +47,41 @@
                     </div>
                 </td>
                 <td><Input class={"tw:text-end"} type={"text"} value={0} disabled={!F17B}/></td>
+                <td>
+                {#if F17B != undefined}    
+                    <Alert bg={"var(--color-primary)"}>
+                        {#snippet head()}
+                            <span>i</span>
+                        {/snippet}
+                        {#snippet body()}
+                            <span>
+                            {F17B ? "Ya, silahkan mengisi jumlah pajak yang dapat diangsur/ditunda pembayarannya" : "Tidak, silahkan lanjut pertanyaan berikutnya"}
+                            </span>
+                        {/snippet}
+                    </Alert>
+                {/if}
+                </td>
             </tr>
             <tr>
                 <td><span>17.c.</span></td>
                 <td><span>PPh yang masih harus dibayar atau lebih dibayar</span></td>
                 <td></td>
                 <td><Input class={"tw:text-end"} type={"text"} value={0} disabled/></td>
+                <td></td>
             </tr>
             <tr>
                 <td><span>18.a.</span></td>
                 <td><span>PPh yang kurang atau lebih bayar pada SPT yang dibetulkan</span></td>
                 <td></td>
                 <td><Input class={"tw:text-end"} type={"text"} value={0} disabled/></td>
+                <td></td>
             </tr>
             <tr>
                 <td><span>18.b.</span></td>
                 <td><span>PPh yang kurang atau lebih bayar karena pembetulan</span></td>
                 <td></td>
                 <td><Input class={"tw:text-end"} type={"text"} value={0} disabled/></td>
+                <td></td>
             </tr>
             <tr>
                 <td><span>19.a.</span></td>
@@ -79,6 +98,7 @@
                         </Label>
                     </div>
                 </td>
+                <td></td>
             </tr>
         {/snippet}
     </Table>

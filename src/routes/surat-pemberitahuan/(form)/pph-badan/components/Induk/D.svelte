@@ -3,12 +3,13 @@
     import Label from "$lib/components/Label.svelte";
     import Input from "$lib/components/Input.svelte";
     import Select from "$lib/components/Select.svelte";
+    import Alert from "$lib/components/Alert.svelte";
     import { getContext } from "svelte";
 
-    let D5 = $state(false);
-    let D6 = $state(false);
-    let D8 = $state(false);
-    let D10 = $state(false);
+    let D5 = $state();
+    let D6 = $state();
+    let D8 = $state();
+    let D10 = $state();
 </script>
 
 <div class="tw:p-5">
@@ -26,13 +27,14 @@
             <tr>
                 <td class="tw:w-10"><span>4.</span></td>
                 <td class="tw:w-[40rem]"><span>Penghasilan Neto Fiskal sebelum Fasilitas Pajak</span></td>
+                <td class="tw:w-[10rem]"></td>
+                <td class="tw:w-[35rem]"><Input class={"tw:text-end"} type={"text"} value={0} disabled /></td>
                 <td></td>
-                <td><Input class={"tw:text-end"} type={"text"} value={0} disabled /></td>
             </tr>
             <tr>
                 <td><span>5.</span></td>
                 <td><span>Apakah Wajib Pajak memperoleh Fasilitas Perpajakan Dalam Rangka Penanaman Modal berupa pengurangan penghasilan neto? *</span></td>
-                <td class="tw:w-[10rem]">
+                <td>
                     <div class="tw:flex tw:gap-5">
                         <Label for={getContext("id")} class="tw:flex tw:items-center tw:gap-1">
                             <input type="radio" name="D5" value={false} bind:group={D5} defaultChecked>
@@ -45,6 +47,20 @@
                     </div>
                 </td>
                 <td><Input class={"tw:text-end"} type={"text"} value={0} disabled /></td>
+                <td>
+                {#if D5 != undefined}    
+                    <Alert bg={"var(--color-primary)"}>
+                        {#snippet head()}
+                            <span>i</span>
+                        {/snippet}
+                        {#snippet body()}
+                            <span>
+                            {D5 ? "Ya, silahkan mengisi lampiran 13A" : "Tidak, silahkan lanjut pertanyaan berikutnya"}
+                            </span>
+                        {/snippet}
+                    </Alert>
+                {/if}
+                </td>
             </tr>
             <tr>
                 <td><span>6.</span></td>
@@ -62,12 +78,27 @@
                     </div>
                 </td>
                 <td><Input class={"tw:text-end"} type={"text"} value={0} disabled /></td>
+                <td>
+                {#if D6 != undefined}    
+                    <Alert bg={"var(--color-primary)"}>
+                        {#snippet head()}
+                            <span>i</span>
+                        {/snippet}
+                        {#snippet body()}
+                            <span>
+                            {D6 ? "Ya, silahkan mengisi lampiran 13B tabel A dan B" : "Tidak, silahkan lanjut pertanyaan berikutnya"}
+                            </span>
+                        {/snippet}
+                    </Alert>
+                {/if}
+                </td>
             </tr>
             <tr>
                 <td><span>7.</span></td>
                 <td><span>Penghasilan Neto Fiskal Setelah Fasilitas Pajak</span></td>
                 <td></td>
                 <td><Input class={"tw:text-end"} type={"text"} value={0} disabled /></td>
+                <td></td>
             </tr>
             <tr>
                 <td><span>8.</span></td>
@@ -85,12 +116,27 @@
                     </div>
                 </td>
                 <td><Input class={"tw:text-end"} type={"text"} value={0} disabled /></td>
+                <td>
+                {#if D8 != undefined}    
+                    <Alert bg={"var(--color-primary)"}>
+                        {#snippet head()}
+                            <span>i</span>
+                        {/snippet}
+                        {#snippet body()}
+                            <span>
+                            {D8 ? "Ya, silahkan mengisi lampiran 7" : "Tidak, silahkan lanjut pertanyaan berikutnya"}
+                            </span>
+                        {/snippet}
+                    </Alert>
+                {/if}
+                </td>
             </tr>
             <tr>
                 <td><span>9.</span></td>
                 <td><span>Penghasilan Kena Pajak</span></td>
                 <td></td>
                 <td><Input class={"tw:text-end"} type={"text"} value={0} disabled /></td>
+                <td></td>
             </tr>
             <tr>
                 <td><span>10.</span></td>
@@ -108,6 +154,20 @@
                     </div>
                 </td>
                 <td><Input class={"tw:text-end"} type={"text"} value={0} disabled /></td>
+                <td>
+                {#if D10 != undefined}    
+                    <Alert bg={"var(--color-primary)"}>
+                        {#snippet head()}
+                            <span>i</span>
+                        {/snippet}
+                        {#snippet body()}
+                            <span>
+                            {D10 ? "Ya, silahkan mengisi lampiran 13A tabel C dan D" : "Tidak, silahkan lanjut pertanyaan berikutnya"}
+                            </span>
+                        {/snippet}
+                    </Alert>
+                {/if}
+                </td>
             </tr>
             <tr>
                 <td><span>11.</span></td>
@@ -126,12 +186,14 @@
                         {/each}
                     </Select>
                 </td>
+                <td></td>
             </tr>
             <tr>
                 <td><span>12.</span></td>
                 <td><span>PPh Terutang *</span></td>
                 <td></td>
                 <td><Input class={"tw:text-end"} type={"text"} value={0} disabled /></td>
+                <td></td>
             </tr>
             {/snippet}
     </Table>

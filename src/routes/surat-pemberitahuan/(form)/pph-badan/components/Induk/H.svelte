@@ -5,18 +5,19 @@
     import Select from "$lib/components/Select.svelte";
 	import Card from "$lib/components/Card.svelte";
     import Button from "$lib/components/Button.svelte";
+    import Alert from "$lib/components/Alert.svelte";
     import { getContext } from "svelte";
 
-    let G21A = $state(false);
-    let G21B = $state(false);
-    let G21C = $state(false);
-    let G21D = $state(false);
-    let G21E = $state(false);
-    let G21F = $state(false);
-    let G21G = $state(false);
-    let G21H = $state(false);
-    let G21I = $state(false);
-    let G21J = $state(false);
+    let H21A = $state(false);
+    let H21B = $state(false);
+    let H21C = $state(false);
+    let H21D = $state(false);
+    let H21E = $state(false);
+    let H21F = $state(false);
+    let H21G = $state(false);
+    let H21H = $state(false);
+    let H21I = $state(false);
+    let H21J = $state(false);
 </script>
 
 <div class="tw:p-5">
@@ -37,16 +38,30 @@
                 <td class="tw:w-[10rem]">
                     <div class="tw:flex tw:gap-5">
                         <Label for={getContext("id")} class="tw:flex tw:items-center tw:gap-1">
-                            <input type="radio" name="G21A" value={false} bind:group={G21A} required>
+                            <input type="radio" name="H21A" value={false} bind:group={H21A} required>
                             <span>Tidak</span>
                         </Label>
                         <Label for={getContext("id")} class="tw:flex tw:items-center tw:gap-1">
-                            <input type="radio" name="G21A" value={true} bind:group={G21A} required>
+                            <input type="radio" name="H21A" value={true} bind:group={H21A} required>
                             <span>Ya</span>
                         </Label>
                     </div>
                 </td>
-                <td></td>
+                <td class="tw:w-[35rem]"></td>
+                <td>
+                {#if H21A != undefined}    
+                    <Alert bg={"var(--color-primary)"}>
+                        {#snippet head()}
+                            <span>i</span>
+                        {/snippet}
+                        {#snippet body()}
+                            <span>
+                            {H21A ? "Ya, silahkan mengisi lampiran 10A, 10B, 10C" : "Tidak, silahkan lanjut pertanyaan berikutnya"}
+                            </span>
+                        {/snippet}
+                    </Alert>
+                {/if}
+                </td>
             </tr>
             <tr>
                 <td><span>21.b.</span></td>
@@ -54,16 +69,30 @@
                 <td>
                     <div class="tw:flex tw:gap-5">
                         <Label for={getContext("id")} class="tw:flex tw:items-center tw:gap-1">
-                            <input type="radio" name="G21B" value={false} bind:group={G21B} required>
+                            <input type="radio" name="H21B" value={false} bind:group={H21B} required>
                             <span>Tidak</span>
                         </Label>
                         <Label for={getContext("id")} class="tw:flex tw:items-center tw:gap-1">
-                            <input type="radio" name="G21B" value={true} bind:group={G21B} required>
+                            <input type="radio" name="H21B" value={true} bind:group={H21B} required>
                             <span>Ya</span>
                         </Label>
                     </div>
                 </td>
                 <td></td>
+                <td>
+                {#if H21B != undefined}    
+                    <Alert bg={"var(--color-primary)"}>
+                        {#snippet head()}
+                            <span>i</span>
+                        {/snippet}
+                        {#snippet body()}
+                            <span>
+                            {H21B ? "Ya, silahkan mengisi lampiran 10D" : "Tidak, silahkan lanjut pertanyaan berikutnya"}
+                            </span>
+                        {/snippet}
+                    </Alert>
+                {/if}
+                </td>
             </tr>
             <tr>
                 <td><span>21.c.</span></td>
@@ -71,16 +100,30 @@
                 <td>
                     <div class="tw:flex tw:gap-5">
                         <Label for={getContext("id")} class="tw:flex tw:items-center tw:gap-1">
-                            <input type="radio" name="G21C" value={false} bind:group={G21C} required>
+                            <input type="radio" name="H21C" value={false} bind:group={H21C} required>
                             <span>Tidak</span>
                         </Label>
                         <Label for={getContext("id")} class="tw:flex tw:items-center tw:gap-1">
-                            <input type="radio" name="G21C" value={true} bind:group={G21C} required>
+                            <input type="radio" name="H21C" value={true} bind:group={H21C} required>
                             <span>Ya</span>
                         </Label>
                     </div>
                 </td>
                 <td></td>
+                <td>
+                {#if H21C != undefined}    
+                    <Alert bg={"var(--color-primary)"}>
+                        {#snippet head()}
+                            <span>i</span>
+                        {/snippet}
+                        {#snippet body()}
+                            <span>
+                            {H21C ? "Ya, silahkan mengisi lampiran 2 Bagian B" : "Tidak, silahkan lanjut pertanyaan berikutnya"}
+                            </span>
+                        {/snippet}
+                    </Alert>
+                {/if}
+                </td>
             </tr>
             <tr>
                 <td><span>21.d.</span></td>
@@ -88,16 +131,30 @@
                 <td>
                     <div class="tw:flex tw:gap-5">
                         <Label for={getContext("id")} class="tw:flex tw:items-center tw:gap-1">
-                            <input type="radio" name="G21D" value={false} bind:group={G21D} required>
+                            <input type="radio" name="H21D" value={false} bind:group={H21D} required>
                             <span>Tidak</span>
                         </Label>
                         <Label for={getContext("id")} class="tw:flex tw:items-center tw:gap-1">
-                            <input type="radio" name="G21D" value={true} bind:group={G21D} required>
+                            <input type="radio" name="H21D" value={true} bind:group={H21D} required>
                             <span>Ya</span>
                         </Label>
                     </div>
                 </td>
                 <td></td>
+                <td>
+                {#if H21D != undefined}    
+                    <Alert bg={"var(--color-primary)"}>
+                        {#snippet head()}
+                            <span>i</span>
+                        {/snippet}
+                        {#snippet body()}
+                            <span>
+                            {H21D ? "Ya, silahkan mengisi lampiran 2 Bagian B" : "Tidak, silahkan lanjut pertanyaan berikutnya"}
+                            </span>
+                        {/snippet}
+                    </Alert>
+                {/if}
+                </td>
             </tr>
             <tr>
                 <td><span>21.e.</span></td>
@@ -105,16 +162,30 @@
                 <td>
                     <div class="tw:flex tw:gap-5">
                         <Label for={getContext("id")} class="tw:flex tw:items-center tw:gap-1">
-                            <input type="radio" name="G21E" value={false} bind:group={G21E} required>
+                            <input type="radio" name="H21E" value={false} bind:group={H21E} required>
                             <span>Tidak</span>
                         </Label>
                         <Label for={getContext("id")} class="tw:flex tw:items-center tw:gap-1">
-                            <input type="radio" name="G21E" value={true} bind:group={G21E} required>
+                            <input type="radio" name="H21E" value={true} bind:group={H21E} required>
                             <span>Ya</span>
                         </Label>
                     </div>
                 </td>
                 <td></td>
+                <td>
+                {#if H21E != undefined}    
+                    <Alert bg={"var(--color-primary)"}>
+                        {#snippet head()}
+                            <span>i</span>
+                        {/snippet}
+                        {#snippet body()}
+                            <span>
+                            {H21E ? "Ya, silahkan mengisi lampiran 9" : "Tidak, silahkan lanjut pertanyaan berikutnya"}
+                            </span>
+                        {/snippet}
+                    </Alert>
+                {/if}
+                </td>
             </tr>
             <tr>
                 <td><span>21.f.</span></td>
@@ -122,16 +193,30 @@
                 <td>
                     <div class="tw:flex tw:gap-5">
                         <Label for={getContext("id")} class="tw:flex tw:items-center tw:gap-1">
-                            <input type="radio" name="G21F" value={false} bind:group={G21F} required>
+                            <input type="radio" name="H21F" value={false} bind:group={H21F} required>
                             <span>Tidak</span>
                         </Label>
                         <Label for={getContext("id")} class="tw:flex tw:items-center tw:gap-1">
-                            <input type="radio" name="G21F" value={true} bind:group={G21F} required>
+                            <input type="radio" name="H21F" value={true} bind:group={H21F} required>
                             <span>Ya</span>
                         </Label>
                     </div>
                 </td>
                 <td></td>
+                <td>
+                {#if H21F != undefined}    
+                    <Alert bg={"var(--color-primary)"}>
+                        {#snippet head()}
+                            <span>i</span>
+                        {/snippet}
+                        {#snippet body()}
+                            <span>
+                            {H21F ? "Ya, silahkan mengisi lampiran 11A" : "Tidak, silahkan lanjut pertanyaan berikutnya"}
+                            </span>
+                        {/snippet}
+                    </Alert>
+                {/if}
+                </td>
             </tr>
             <tr>
                 <td><span>21.g.</span></td>
@@ -139,16 +224,30 @@
                 <td>
                     <div class="tw:flex tw:gap-5">
                         <Label for={getContext("id")} class="tw:flex tw:items-center tw:gap-1">
-                            <input type="radio" name="G21G" value={false} bind:group={G21G} required>
+                            <input type="radio" name="H21G" value={false} bind:group={H21G} required>
                             <span>Tidak</span>
                         </Label>
                         <Label for={getContext("id")} class="tw:flex tw:items-center tw:gap-1">
-                            <input type="radio" name="G21G" value={true} bind:group={G21G} required>
+                            <input type="radio" name="H21G" value={true} bind:group={H21G} required>
                             <span>Ya</span>
                         </Label>
                     </div>
                 </td>
                 <td></td>
+                <td>
+                {#if H21G != undefined}    
+                    <Alert bg={"var(--color-primary)"}>
+                        {#snippet head()}
+                            <span>i</span>
+                        {/snippet}
+                        {#snippet body()}
+                            <span>
+                            {H21G ? "Ya, silahkan mengisi lampiran 13A" : "Tidak, silahkan lanjut pertanyaan berikutnya"}
+                            </span>
+                        {/snippet}
+                    </Alert>
+                {/if}
+                </td>
             </tr>
             <tr>
                 <td><span>21.h.</span></td>
@@ -156,16 +255,30 @@
                 <td>
                     <div class="tw:flex tw:gap-5">
                         <Label for={getContext("id")} class="tw:flex tw:items-center tw:gap-1">
-                            <input type="radio" name="G21H" value={false} bind:group={G21H} required>
+                            <input type="radio" name="H21H" value={false} bind:group={H21H} required>
                             <span>Tidak</span>
                         </Label>
                         <Label for={getContext("id")} class="tw:flex tw:items-center tw:gap-1">
-                            <input type="radio" name="G21H" value={true} bind:group={G21H} required>
+                            <input type="radio" name="H21H" value={true} bind:group={H21H} required>
                             <span>Ya</span>
                         </Label>
                     </div>
                 </td>
                 <td></td>
+                <td>
+                {#if H21H != undefined}    
+                    <Alert bg={"var(--color-primary)"}>
+                        {#snippet head()}
+                            <span>i</span>
+                        {/snippet}
+                        {#snippet body()}
+                            <span>
+                            {H21H ? "Ya, silahkan mengisi lampiran 14" : "Tidak, silahkan lanjut pertanyaan berikutnya"}
+                            </span>
+                        {/snippet}
+                    </Alert>
+                {/if}
+                </td>
             </tr>
             <tr>
                 <td><span>21.i.</span></td>
@@ -173,16 +286,30 @@
                 <td>
                     <div class="tw:flex tw:gap-5">
                         <Label for={getContext("id")} class="tw:flex tw:items-center tw:gap-1">
-                            <input type="radio" name="G21I" value={false} bind:group={G21I} required>
+                            <input type="radio" name="H21I" value={false} bind:group={H21I} required>
                             <span>Tidak</span>
                         </Label>
                         <Label for={getContext("id")} class="tw:flex tw:items-center tw:gap-1">
-                            <input type="radio" name="G21I" value={true} bind:group={G21I} required>
+                            <input type="radio" name="H21I" value={true} bind:group={H21I} required>
                             <span>Ya</span>
                         </Label>
                     </div>
                 </td>
                 <td></td>
+                <td>
+                {#if H21I != undefined}    
+                    <Alert bg={"var(--color-primary)"}>
+                        {#snippet head()}
+                            <span>i</span>
+                        {/snippet}
+                        {#snippet body()}
+                            <span class="tw:whitespace-pre-line">
+                            {H21I ? "Ya, silahkan sampaikan laporan realisasi investasi secara terpisah pada menu\nlayanan wajib pajak" : "Tidak, silahkan lanjut pertanyaan berikutnya"}
+                            </span>
+                        {/snippet}
+                    </Alert>
+                {/if}
+                </td>
             </tr>
             <tr>
                 <td><span>21.j.</span></td>
