@@ -8,16 +8,29 @@
         currentTab: {
             tab: string;
             title: string;
-        }
+        };
+        l2a: Array<{
+            id: string | number;
+            nama: string;
+            alamat: string;
+            negara: string;
+            npwp: string;
+            jabatan: string;
+            nilaiModal: number;
+            persentase: number;
+            dividen: number;
+        }>;
+        readonly?: boolean;
+        negaraOptions: { value: string; label: string }[];
     }
 
-    const { currentTab = $bindable() }: Props = $props();
+    const {
+        currentTab = $bindable(),
+        l2a: pemegangSaham = $bindable(),
+        readonly = false,
+        negaraOptions
+    }: Props = $props();
     $effect(() => {currentTab.title = currentTab.tab === "L2" ? "DAFTAR KEPEMILIKAN" : ''});
-
-    // State for A
-    let pemegangSaham = $state([
-        { id: 1, nama: 'PEMEGANG SAHAM SATU', alamat: 'JL. JALAN SATU', negara: 'INDONESIA', npwp: '330000000000010100000000000000', jabatan: 'DIREKTUR', nilaiModal: 0, persentase: 0, dividen: 0 }
-    ]);
 
     // State for B
     let penyertaanModal = $state([
@@ -58,4 +71,4 @@
     </div>
 </div>
 
-<ModalEdit bind:data={editingItem.data} {saveItem} />
+<ModalEdit bind:data={editingItem.data} {saveItem} {negaraOptions} />

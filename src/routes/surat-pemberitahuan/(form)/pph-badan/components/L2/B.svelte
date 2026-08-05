@@ -38,7 +38,7 @@
         {#each data as item, i}
         <tr class="data tw:text-left">
             <td class="tw:text-center">
-                <Button class={"tw:min-w-15!"} onclick={() => openModal('B', item)} data-bs-toggle="modal" data-bs-target="#modalL2">Edit</Button>
+                <Button type="button" class={"tw:min-w-15!"} onclick={() => openModal('B', item)} data-bs-toggle="modal" data-bs-target="#modalL2">Edit</Button>
             </td>
             <td>{i + 1}</td>
             <td>{item.nama}</td>

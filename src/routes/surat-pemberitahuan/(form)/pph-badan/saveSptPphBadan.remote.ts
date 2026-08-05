@@ -1,12 +1,14 @@
 import { form, getRequestEvent } from '$app/server';
-import { decimalString } from '$lib/helpers/valibot-schema';
+import { decimalString, requiredString } from '$lib/helpers/valibot-schema';
 import { db } from '$lib/server/db';
 import {
+	negara_spt_pph_badan,
 	opini_auditor_spt_pph_badan,
 	sektor_usaha_spt_pph_badan,
 	spt_pph_badan,
 	spt_pph_badan_lampiran_1_laba_rugi,
-	spt_pph_badan_lampiran_1_neraca
+	spt_pph_badan_lampiran_1_neraca,
+	spt_pph_badan_lampiran_2_pihak
 } from '$lib/server/db/schema';
 import { error, redirect } from '@sveltejs/kit';
 import { and, eq } from 'drizzle-orm';
@@ -14,31 +16,50 @@ import * as v from 'valibot';
 
 const decimalInput = (field: string) => v.union([decimalString(field), v.number(`${field} harus berupa angka`)]);
 
+const booleanRadio = (fallback: boolean) =>
+	v.optional(
+		v.union([v.boolean(), v.pipe(v.picklist(['true', 'false']), v.transform((value) => value === 'true'))]),
+		fallback
+	);
+
+const jsonRows = <TItem extends v.GenericSchema>(itemSchema: TItem) =>
+	v.optional(v.pipe(v.string(), v.parseJson(undefined, 'Data tidak valid'), v.array(itemSchema)), '[]');
+
 const SaveSptPphBadanSchema = v.object({
-	id: v.string(),
-	action: v.optional(v.picklist(['Simpan Konsep', 'Simpan Lapor'])),
-	metodePembukuan: v.picklist(['akrual', 'kas']),
-	sektorUsaha: v.string(),
-	diaudit: v.optional(v.boolean()),
-	opiniAuditor: v.optional(v.string()),
-	npwpKantorAkuntanPublik: v.optional(v.string()),
-	namaKantorAkuntanPublik: v.optional(v.string()),
-	menerimaPenghasilanPp23: v.optional(v.boolean()),
-	hanyaPenghasilanPp23: v.optional(v.boolean()),
-	menerimaPenghasilanFinal: v.optional(v.boolean()),
-	menerimaPenghasilanBukanObjekPajak: v.optional(v.boolean()),
-	labaRugiJson: v.string(),
-	neracaJson: v.string(),
-	labaRugi: v.array(
-			v.object({
-				id: v.string(),
-				komersial: decimalInput('Nilai komersial'),
-				tidakTermasukObjekPajak: decimalInput('Tidak termasuk objek pajak'),
-				dikenakanPphFinal: decimalInput('Dikenakan PPh final'),
-				fiskal: decimalInput('Nilai fiskal')
-			})
-		),
-	neraca: v.array(
+	id: requiredString('SPT PPh Badan'),
+	action: v.optional(v.picklist(['Simpan Konsep', 'Simpan Lapor']), 'Simpan Konsep'),
+	metodePembukuan: v.optional(v.picklist(['akrual', 'kas']), 'akrual'),
+	sektorUsaha: requiredString('Sektor usaha'),
+	diaudit: booleanRadio(false),
+	opiniAuditor: v.optional(v.string(), ''),
+	npwpKantorAkuntanPublik: v.optional(v.string(), ''),
+	namaKantorAkuntanPublik: v.optional(v.string(), ''),
+	menerimaPenghasilanPp23: booleanRadio(false),
+	hanyaPenghasilanPp23: booleanRadio(false),
+	menerimaPenghasilanFinal: booleanRadio(false),
+	menerimaPenghasilanBukanObjekPajak: booleanRadio(false),
+	l2a: jsonRows(
+		v.object({
+			nama: requiredString('Nama'),
+			alamat: v.optional(v.string(), ''),
+			negara: v.optional(v.string(), ''),
+			npwp: v.optional(v.string(), ''),
+			jabatan: v.optional(v.string(), ''),
+			nilaiModal: decimalInput('Nilai modal disetor'),
+			persentase: decimalInput('Persentase modal disetor'),
+			dividen: decimalInput('Dividen/pembagian laba')
+		})
+	),
+	labaRugi: jsonRows(
+		v.object({
+			id: v.string(),
+			komersial: decimalInput('Nilai komersial'),
+			tidakTermasukObjekPajak: decimalInput('Tidak termasuk objek pajak'),
+			dikenakanPphFinal: decimalInput('Dikenakan PPh final'),
+			fiskal: decimalInput('Nilai fiskal')
+		})
+	),
+	neraca: jsonRows(
 		v.object({
 			id: v.string(),
 			nilai: decimalInput('Nilai neraca')
@@ -46,25 +67,7 @@ const SaveSptPphBadanSchema = v.object({
 	)
 });
 
-export const saveSptPphBadan = form('unchecked', async (rawInput) => {
-	const input = v.parse(SaveSptPphBadanSchema, {
-		id: stringValue(rawInput.id),
-		action: stringValue(rawInput.action) || 'Simpan Konsep',
-		metodePembukuan: stringValue(rawInput.metodePembukuan) || 'akrual',
-		sektorUsaha: stringValue(rawInput.sektorUsaha),
-		diaudit: booleanValue(rawInput.diaudit),
-		opiniAuditor: stringValue(rawInput.opiniAuditor),
-		npwpKantorAkuntanPublik: stringValue(rawInput.npwpKantorAkuntanPublik),
-		namaKantorAkuntanPublik: stringValue(rawInput.namaKantorAkuntanPublik),
-		menerimaPenghasilanPp23: booleanValue(rawInput.menerimaPenghasilanPp23),
-		hanyaPenghasilanPp23: booleanValue(rawInput.hanyaPenghasilanPp23),
-		menerimaPenghasilanFinal: booleanValue(rawInput.menerimaPenghasilanFinal),
-		menerimaPenghasilanBukanObjekPajak: booleanValue(rawInput.menerimaPenghasilanBukanObjekPajak),
-		labaRugiJson: stringValue(rawInput.labaRugiJson),
-		neracaJson: stringValue(rawInput.neracaJson),
-		labaRugi: parseJsonRows(stringValue(rawInput.labaRugiJson)),
-		neraca: parseJsonRows(stringValue(rawInput.neracaJson))
-	});
+export const saveSptPphBadan = form(SaveSptPphBadanSchema, async (input) => {
 	const event = getRequestEvent();
 	const activeNpwp = event.locals.user?.username;
 
@@ -91,7 +94,7 @@ export const saveSptPphBadan = form('unchecked', async (rawInput) => {
 	const pphKurangLebihBayar = input.labaRugi.reduce((total, row) => total + Number(row.fiskal), 0);
 	const statusDraft = input.action === 'Simpan Lapor' ? 'dilaporkan' : 'konsep';
 	const sektorUsahaId = await getSektorUsahaId(input.sektorUsaha);
-	const opiniAuditorId = await getOpiniAuditorId(input.diaudit ?? false, input.opiniAuditor ?? '');
+	const opiniAuditorId = await getOpiniAuditorId(input.diaudit, input.opiniAuditor);
 
 	await db.transaction(async (tx) => {
 		await tx
@@ -102,10 +105,10 @@ export const saveSptPphBadan = form('unchecked', async (rawInput) => {
 				opiniAuditorId,
 				npwpKantorAkuntanPublik: input.diaudit ? input.npwpKantorAkuntanPublik : null,
 				namaKantorAkuntanPublik: input.diaudit ? input.namaKantorAkuntanPublik : null,
-				menerimaPenghasilanPp23: input.menerimaPenghasilanPp23 ?? false,
-				hanyaPenghasilanPp23: input.hanyaPenghasilanPp23 ?? false,
-				menerimaPenghasilanFinal: input.menerimaPenghasilanFinal ?? false,
-				menerimaPenghasilanBukanObjekPajak: input.menerimaPenghasilanBukanObjekPajak ?? false,
+				menerimaPenghasilanPp23: input.menerimaPenghasilanPp23,
+				hanyaPenghasilanPp23: input.hanyaPenghasilanPp23,
+				menerimaPenghasilanFinal: input.menerimaPenghasilanFinal,
+				menerimaPenghasilanBukanObjekPajak: input.menerimaPenghasilanBukanObjekPajak,
 				pphKurangLebihBayar,
 				statusDraft,
 				tanggalDilaporkan: statusDraft === 'dilaporkan' ? new Date() : null
@@ -142,38 +145,37 @@ export const saveSptPphBadan = form('unchecked', async (rawInput) => {
 					)
 				);
 		}
+
+		await tx
+			.delete(spt_pph_badan_lampiran_2_pihak)
+			.where(
+				and(
+					eq(spt_pph_badan_lampiran_2_pihak.sptPphBadanId, input.id),
+					eq(spt_pph_badan_lampiran_2_pihak.jenis, 'pemegang_saham')
+				)
+			);
+
+		for (const [index, row] of input.l2a.entries()) {
+			const negaraId = row.negara ? await getNegaraId(row.negara) : null;
+
+			await tx.insert(spt_pph_badan_lampiran_2_pihak).values({
+				sptPphBadanId: input.id,
+				jenis: 'pemegang_saham',
+				nomorUrut: index + 1,
+				nama: row.nama,
+				alamat: row.alamat,
+				negaraId,
+				npwpNikTin: row.npwp,
+				jabatan: row.jabatan,
+				modalSahamNominal: Number(row.nilaiModal),
+				modalSahamPersentase: Number(row.persentase),
+				dividenDiterima: Number(row.dividen)
+			});
+		}
 	});
 
 	redirect(303, statusDraft === 'dilaporkan' ? '/surat-pemberitahuan/laporan' : '/surat-pemberitahuan/konsep');
 });
-
-function formValue(value: unknown) {
-	return Array.isArray(value) ? value.at(-1) : value;
-}
-
-function stringValue(value: unknown) {
-	const first = formValue(value);
-
-	return typeof first === 'string' ? first : '';
-}
-
-function booleanValue(value: unknown) {
-	const first = formValue(value);
-
-	return first === true || first === 'on' || first === 'true';
-}
-
-function parseJsonRows(value: string) {
-	if (!value) return [];
-
-	try {
-		const parsed = JSON.parse(value);
-
-		return Array.isArray(parsed) ? parsed : [];
-	} catch {
-		error(400, 'Data Lampiran 1 tidak valid');
-	}
-}
 
 async function getOpiniAuditorId(diaudit: boolean, kode: string) {
 	if (!diaudit) return null;
@@ -198,6 +200,20 @@ async function getOpiniAuditorId(diaudit: boolean, kode: string) {
 	}
 
 	return opiniAuditor.id;
+}
+
+async function getNegaraId(kode: string) {
+	const [negara] = await db
+		.select({ id: negara_spt_pph_badan.id })
+		.from(negara_spt_pph_badan)
+		.where(and(eq(negara_spt_pph_badan.kode, kode), eq(negara_spt_pph_badan.aktif, true)))
+		.limit(1);
+
+	if (!negara) {
+		error(400, 'Negara tidak valid');
+	}
+
+	return negara.id;
 }
 
 async function getSektorUsahaId(kode: string) {

@@ -1,7 +1,7 @@
 <script lang="ts">
     let {
         data = $bindable() as {
-            id: number;
+            id: string | number;
             nama: string;
             alamat?: string;
             negara: string;
@@ -19,10 +19,11 @@
             piutangTahun?: number;
             piutangBunga?: number;
         },
-        saveItem
+        saveItem,
+        negaraOptions
     }: {
         data: {
-            id: number;
+            id: string | number;
             nama: string;
             alamat?: string;
             negara: string;
@@ -41,6 +42,7 @@
             piutangBunga?: number;
         };
         saveItem: () => void;
+        negaraOptions: { value: string; label: string }[];
     } = $props();
 
     function handleSave(): void {
@@ -60,7 +62,7 @@
       </div>
       
       <div class="modal-body">
-        <form style="display: flex; flex-direction: column; gap: 10px;">
+        <div style="display: flex; flex-direction: column; gap: 10px;">
           <div style="display: flex; align-items: center;">
             <label for="nama" style="width: 200px;">Nama *</label>
             <input type="text" id="nama" bind:value={data.nama} style="flex: 1;" />
@@ -72,7 +74,10 @@
           <div style="display: flex; align-items: center;">
             <label for="negara" style="width: 200px;">Negara</label>
             <select id="negara" bind:value={data.negara} style="flex: 1;">
-              <option value="Indonesia">Indonesia</option>
+              <option value="" disabled>Pilih negara</option>
+              {#each negaraOptions as negara}
+                <option value={negara.value}>{negara.label}</option>
+              {/each}
             </select>
           </div>
           <div style="display: flex; align-items: center;">
@@ -106,9 +111,9 @@
               <input type="number" id="dividen" bind:value={data.dividen} style="flex: 1; text-align: right;" />
             </div>
           </div>
-        </form>
+        </div>
       </div>
-      
+
       <div class="modal-footer" style="justify-content: flex-end;">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
           Tutup

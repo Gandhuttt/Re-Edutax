@@ -1,5 +1,11 @@
-import { opini_auditor_spt_pph_badan, sektor_usaha_spt_pph_badan } from '../../schema';
+import { fileURLToPath } from 'node:url';
+import { negara_spt_pph_badan, opini_auditor_spt_pph_badan, sektor_usaha_spt_pph_badan } from '../../schema';
 import type { SeedContext } from '../context';
+import { readCsv } from '../helpers';
+
+const negaraCsvPath = fileURLToPath(
+	new URL('../data/spt_pph_badan/negara.csv', import.meta.url)
+);
 
 export const name = '003 spt pph badan reference master data';
 
@@ -31,6 +37,9 @@ const sektorUsahaOptions = [
 
 const opiniAuditorId = (kode: string) => `opini-auditor-${kode}`;
 const sektorUsahaId = (kode: string) => `sektor-usaha-${kode}`;
+const negaraId = (kode: string) => `negara-${kode}`;
+
+const negaraOptions = readCsv(negaraCsvPath) as { kode: string; nama: string }[];
 
 export const run = async ({ db }: SeedContext) => {
 	for (const row of sektorUsahaOptions) {
@@ -67,8 +76,26 @@ export const run = async ({ db }: SeedContext) => {
 			});
 	}
 
+	for (const row of negaraOptions) {
+		await db
+			.insert(negara_spt_pph_badan)
+			.values({
+				id: negaraId(row.kode),
+				kode: row.kode,
+				nama: row.nama
+			})
+			.onConflictDoUpdate({
+				target: negara_spt_pph_badan.kode,
+				set: {
+					nama: row.nama,
+					aktif: true
+				}
+			});
+	}
+
 	console.log(`Seeded SPT PPh Badan references: ${auditorOptions.length} auditor opinions`);
 	console.log(`Seeded SPT PPh Badan references: ${sektorUsahaOptions.length} business sectors`);
+	console.log(`Seeded SPT PPh Badan references: ${negaraOptions.length} countries`);
 
 	return [];
 };

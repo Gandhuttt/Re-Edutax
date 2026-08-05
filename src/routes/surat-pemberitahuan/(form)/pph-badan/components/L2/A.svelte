@@ -6,7 +6,7 @@
 </script>
 
 <div class="tw:p-5 tw:flex tw:flex-col tw:gap-1">
-    <Button class={"tw:text-white tw:w-30"} color={"#1c398e"} onclick={() => openModal('A', null)} data-bs-toggle="modal" data-bs-target="#modalL2">Tambah</Button>
+    <Button type="button" class={"tw:text-white tw:w-30"} color={"#1c398e"} onclick={() => openModal('A', null)} data-bs-toggle="modal" data-bs-target="#modalL2">Tambah</Button>
     <div class="tw:overflow-scroll">
         <Table class={"tw:w-full"}>
             {#snippet head()}
@@ -33,8 +33,8 @@
                 {#each data as item, i}
                 <tr class="data">
                     <td class="tw:flex tw:flex-row tw:gap-1 tw:justify-center">
-                        <Button class={"tw:min-w-15!"} onclick={() => openModal('A', item)} data-bs-toggle="modal" data-bs-target="#modalL2">Edit</Button>
-                        <Button class={"tw:min-w-15!"}>Hapus</Button>
+                        <Button type="button" class={"tw:min-w-15!"} onclick={() => openModal('A', item)} data-bs-toggle="modal" data-bs-target="#modalL2">Edit</Button>
+                        <Button type="button" class={"tw:min-w-15!"}>Hapus</Button>
                     </td>
                     <td>{i + 1}</td>
                     <td>{item.nama}</td>

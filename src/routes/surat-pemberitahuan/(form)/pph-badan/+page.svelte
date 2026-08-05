@@ -1,5 +1,8 @@
 <script lang="ts">
+	import { isHttpError } from '@sveltejs/kit';
+	import { tick } from 'svelte';
 	import Accordion from '$lib/components/AccordionItem.svelte';
+	import Alert from '$lib/components/Alert.svelte';
 	import Button from '$lib/components/Button.svelte';
 	import Card from '$lib/components/Card.svelte';
 	import Input from '$lib/components/Input.svelte';
@@ -23,11 +26,13 @@
 	import RadioPair from './RadioPair.svelte';
 	import { getOpiniAuditor } from './components/Induk/getOpiniAuditor.remote';
 	import { getSektorUsaha } from './components/Induk/getSektorUsaha.remote';
+	import { getNegara } from './components/L2/getNegara.remote';
 	import { saveSptPphBadan } from './saveSptPphBadan.remote';
 
-	const { readonly, spt, lampiran1 } = await getSptPphBadan();
+	const { readonly, spt, lampiran1, lampiran2 } = await getSptPphBadan();
 	const opiniAuditorOptions = await getOpiniAuditor();
 	const sektorUsahaOptions = await getSektorUsaha();
+	const negaraOptions = await getNegara();
 	const saveForm = saveSptPphBadan.for(spt.id);
 
 	let labaRugi = $state(
@@ -48,6 +53,19 @@
 			kodeAkun: row.kodeAkun,
 			namaAkun: row.namaAkun,
 			nilai: row.nilai
+		}))
+	);
+	let l2a = $state(
+		lampiran2.pemegangSaham.map((row) => ({
+			id: row.id,
+			nama: row.nama,
+			alamat: row.alamat,
+			negara: row.negaraKode ?? '',
+			npwp: row.npwp,
+			jabatan: row.jabatan,
+			nilaiModal: row.nilaiModal,
+			persentase: row.persentase,
+			dividen: row.dividen
 		}))
 	);
 
@@ -80,6 +98,7 @@
 		tab: 'Induk',
 		title: ''
 	});
+	let saveError = $state('');
 
 	const tarifPajakOptions = [
 		'Tarif Ketentuan Umum sebagaimana Pasal 17 ayat (1) huruf b UU PPh',
@@ -99,9 +118,26 @@
 			</div>
 		{/snippet}
 		{#snippet body()}
-			<form {...saveForm}>
-				<input type="hidden" name="labaRugiJson" value={JSON.stringify(labaRugi)} />
-				<input type="hidden" name="neracaJson" value={JSON.stringify(neraca)} />
+			<form
+				novalidate
+				{...saveForm.enhance(async (form) => {
+					saveError = '';
+
+					try {
+						if (await form.submit()) {
+							await tick();
+							form.element.reset();
+						} else {
+							saveError = 'Periksa kembali data yang diisi.';
+						}
+					} catch (e) {
+						saveError = isHttpError(e) ? e.body.message : 'Gagal menyimpan SPT PPh Badan.';
+					}
+				})}
+			>
+				<input type="hidden" name="labaRugi" value={JSON.stringify(labaRugi)} />
+				<input type="hidden" name="neraca" value={JSON.stringify(neraca)} />
+				<input type="hidden" name="l2a" value={JSON.stringify(l2a)} />
 				<header class="tw:mb-5">
 					<nav class="tw:overflow-x-auto tw:border-b tw:border-[#A9A9A9]">
 						<ul class="tw:m-0! tw:flex tw:min-w-max tw:flex-row tw:p-0!">
@@ -151,7 +187,7 @@
 
 				<L1A bind:currentTab {labaRugi} {neraca} {readonly}></L1A>
 				<L1C bind:currentTab {labaRugi} {neraca} {readonly}></L1C>
-				<L2 bind:currentTab/>
+				<L2 bind:currentTab bind:l2a {readonly} {negaraOptions}/>
 				<L3 bind:currentTab/>
 				<L4 bind:currentTab/>
 				<L6 bind:currentTab/>
@@ -387,6 +423,19 @@
 						<!-- <div class="tw:border tw:border-[#A9A9A9] tw:p-5">
 							<span class="tw:text-sm">{currentTab} belum memiliki UI lama yang bisa dipakai.</span>
 						</div> -->
+
+				{#if saveError}
+					<div class="tw:mt-4">
+						<Alert bg={'#dc2626'}>
+							{#snippet head()}
+								<span>!</span>
+							{/snippet}
+							{#snippet body()}
+								<span>{saveError}</span>
+							{/snippet}
+						</Alert>
+					</div>
+				{/if}
 
 				{#if !readonly}
 					<div class="tw:mt-4 tw:flex tw:gap-2">
