@@ -9,6 +9,7 @@
 		key: index + 1,
 		label: formatMonth(index + 1)
 	}));
+	const yearOptions = Array.from({ length: 6 }, (_, index) => currentDate.getFullYear() - 3 + index);
 
 	const {
 		namaPKP = '',
@@ -19,8 +20,8 @@
 		klasifikasiLapanganUsaha = '',
 		periode = { bulan: currentDate.getMonth() + 1, tahun: currentDate.getFullYear() },
 		readonly = true,
-		postFormId
-		// periode
+		postFormId,
+		onPeriodeChange
 	}: {
 		namaPKP?: string;
 		alamat?: string;
@@ -31,6 +32,7 @@
 		periode?: { bulan: number; tahun: number };
 		readonly?: boolean;
 		postFormId?: string;
+		onPeriodeChange?: (bulan: number, tahun: number) => void;
 	} = $props();
 </script>
 
@@ -115,6 +117,8 @@
 											name="periodeBulan"
 											class={'tw:h-[2rem]! tw:basis-auto tw:text-sm! tw:leading-[100%]'}
 											value={periode.bulan}
+											onchange={(event) =>
+												onPeriodeChange?.(Number(event.currentTarget.value), periode.tahun)}
 										>
 											{#each monthOptions as month}
 												<option value={month.key} class="tw:w-full">{month.label}</option>
@@ -123,11 +127,12 @@
 										<Select
 											class={'tw:h-[2rem]! tw:basis-3/5 tw:text-sm! tw:leading-[100%]'}
 											value={periode.tahun}
-											disabled
+											onchange={(event) =>
+												onPeriodeChange?.(periode.bulan, Number(event.currentTarget.value))}
 										>
-											<option value={2025}>2025</option>
-											<option value={2024}>2024</option>
-											<option value={2026}>2026</option>
+											{#each yearOptions as year}
+												<option value={year}>{year}</option>
+											{/each}
 										</Select>
 									</div>
 									<Label class={'tw:w-full tw:basis-1/2'}>

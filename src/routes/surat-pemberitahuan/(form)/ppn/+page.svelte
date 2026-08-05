@@ -12,6 +12,8 @@
 	import VII from '$lib/components/surat-pemberitahuan/rekap/VII.svelte';
 	import VIII from '$lib/components/surat-pemberitahuan/rekap/VIII.svelte';
 	import X from '$lib/components/surat-pemberitahuan/rekap/X.svelte';
+	import { tick } from 'svelte';
+	import { newSptPpn } from '../../konsep/newSptPpn.remote';
 	import { getSptPpn } from './getSptPpn.remote';
 	import { postSptPpn } from './postSptPpn.remote';
 	import { saveSptPpn } from './saveSptPpn.remote';
@@ -20,10 +22,24 @@
 	const postForm = postSptPpn.for(id);
 	const saveForm = saveSptPpn.for(id);
 	const displayedBlob = $derived(postForm.result?.blob ?? blob);
+
+	let switchMasaPajak = $state(blob.periodeBulan);
+	let switchTahun = $state(blob.periodeTahun);
+
+	async function handlePeriodeChange(bulan: number, tahun: number) {
+		switchMasaPajak = bulan;
+		switchTahun = tahun;
+		await tick();
+		await newSptPpn.submit();
+	}
 </script>
 
 <div class="tw:w-full tw:p-10">
 	<form {...postForm} id="spt-post-form"></form>
+	<form {...newSptPpn} class="tw:hidden">
+		<input type="hidden" name="masaPajak" value={switchMasaPajak} />
+		<input type="hidden" name="tahun" value={switchTahun} />
+	</form>
 
 	<div class="accordion" id="accordionSPT">
 		<form {...saveForm} id="spt-save-form">
@@ -40,6 +56,7 @@
 					teleponSeluler={taxpayer.teleponSeluler}
 					klasifikasiLapanganUsaha={taxpayer.klasifikasiLapanganUsaha}
 					periode={{ bulan: displayedBlob.periodeBulan, tahun: displayedBlob.periodeTahun }}
+					onPeriodeChange={handlePeriodeChange}
 				/>
 			</Accordion>
 			<Accordion item="I. PENYERAHAN BARANG DAN JASA" target="#accordionSPT"><I sptItem={displayedBlob.I} /></Accordion>

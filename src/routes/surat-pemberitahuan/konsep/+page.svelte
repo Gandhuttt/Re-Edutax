@@ -1,6 +1,7 @@
 <script lang="ts">
 	import Button from '$lib/components/Button.svelte';
 	import Card from '$lib/components/Card.svelte';
+	import Select from '$lib/components/Select.svelte';
 	import Table from '$lib/components/Table.svelte';
 	import { formatMonth } from '$lib/helpers/date';
 	import { listSptPphBadan } from '../listSptPphBadan.remote';
@@ -9,6 +10,10 @@
 	import { newSptPpn } from './newSptPpn.remote';
 
 	const rupiah = new Intl.NumberFormat('id-ID');
+
+	const today = new Date();
+	const months = Array.from({ length: 12 }, (_, i) => i + 1);
+	const years = Array.from({ length: 6 }, (_, i) => today.getFullYear() - 3 + i);
 </script>
 
 <div class="tw:w-full tw:p-25">
@@ -16,8 +21,18 @@
 		{#snippet head()}
 			<div class="tw:w-full tw:flex tw:flex-row tw:justify-between tw:items-center">
 				<span class="tw:text-2xl tw:h-10 tw:flex tw:items-center">Konsep SPT</span>
-				<div class="tw:flex tw:gap-2">
-					<form {...newSptPpn}>
+				<div class="tw:flex tw:gap-2 tw:items-center">
+					<form {...newSptPpn} class="tw:flex tw:gap-2 tw:items-center">
+						<Select name="masaPajak" value={String(today.getMonth() + 1)} class="tw:w-[10rem]">
+							{#each months as month}
+								<option value={month}>{formatMonth(month)}</option>
+							{/each}
+						</Select>
+						<Select name="tahun" value={String(today.getFullYear())} class="tw:w-[7rem]">
+							{#each years as year}
+								<option value={year}>{year}</option>
+							{/each}
+						</Select>
 						<Button color="#FFD230">Buat SPT PPN</Button>
 					</form>
 					<form {...newSptPphBadan}>

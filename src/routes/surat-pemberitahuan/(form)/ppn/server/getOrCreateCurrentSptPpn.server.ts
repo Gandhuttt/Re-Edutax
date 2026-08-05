@@ -4,11 +4,12 @@ import { and, eq } from 'drizzle-orm';
 import { createEmptySptPpnBlob } from '../createEmptySptPpnBlob';
 import { summarizeSptPpnBlob } from './summarizeSptPpnBlob.server';
 
-export async function getOrCreateCurrentSptPpn(activeNpwp: string, nama = '') {
-	const today = new Date();
-	const periodeBulan = today.getMonth() + 1;
-	const periodeTahun = today.getFullYear();
-
+export async function getOrCreateSptPpnForPeriod(
+	activeNpwp: string,
+	nama = '',
+	periodeBulan: number,
+	periodeTahun: number
+) {
 	let [sptPpn] = await db
 		.select()
 		.from(spt_ppn)
@@ -43,4 +44,10 @@ export async function getOrCreateCurrentSptPpn(activeNpwp: string, nama = '') {
 	}
 
 	return sptPpn;
+}
+
+export async function getOrCreateCurrentSptPpn(activeNpwp: string, nama = '') {
+	const today = new Date();
+
+	return getOrCreateSptPpnForPeriod(activeNpwp, nama, today.getMonth() + 1, today.getFullYear());
 }
