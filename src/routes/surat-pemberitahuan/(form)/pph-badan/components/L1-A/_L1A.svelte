@@ -76,3 +76,45 @@
         </div>
     </Accordion>
 </div>
+
+<style>
+    /* .old-spt-table tr {
+		border: none;
+	}
+
+	.old-spt-table tr:nth-child(even) {
+		background-color: #f9f6ee;
+	}
+
+	.old-spt-table td {
+		padding: 0.25rem 0.5rem;
+	}
+
+	.old-spt-table span,
+	.old-spt-table td,
+	.attachment-table span,
+	.attachment-table td,
+	.attachment-table th {
+		font-size: 0.8rem;
+	}
+
+	.attachment-table td,
+	.attachment-table th {
+		border: 1px solid #a9a9a9;
+		padding: 0.25rem 0.5rem;
+	}
+
+	.attachment-table th {
+		background-color: #ffd230;
+		font-weight: 600;
+		text-align: center;
+	}
+
+	.attachment-table td {
+		text-align: right;
+	}
+
+	.attachment-table td:last-child {
+		text-align: center;
+	} */
+</style>
