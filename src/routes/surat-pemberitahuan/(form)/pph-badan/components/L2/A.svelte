@@ -1,11 +1,12 @@
 <script lang="ts">
 	import Table from "$lib/components/Table.svelte";
     import Button from "$lib/components/Button.svelte";
-    import ModalEdit from "./_ModalEdit.svelte";
+
+    let { data, openModal } = $props();
 </script>
 
 <div class="tw:p-5 tw:flex tw:flex-col tw:gap-1">
-    <Button class={"tw:text-white tw:w-30"} color={"#1c398e"}>Tambah</Button>
+    <Button class={"tw:text-white tw:w-30"} color={"#1c398e"} onclick={() => openModal('A', null)} data-bs-toggle="modal" data-bs-target="#modalL2">Tambah</Button>
     <div class="tw:overflow-scroll">
         <Table class={"tw:w-full"}>
             {#snippet head()}
@@ -29,21 +30,23 @@
                     <td class="tw:w-[10rem]"><span>NILAI (Rp)</span></td>
                     <td class="tw:w-[10rem]"><span>%</span></td>
                 </tr>
+                {#each data as item, i}
                 <tr class="data">
                     <td class="tw:flex tw:flex-row tw:gap-1 tw:justify-center">
-                        <Button class={"tw:min-w-15!"}>Edit</Button>
+                        <Button class={"tw:min-w-15!"} onclick={() => openModal('A', item)} data-bs-toggle="modal" data-bs-target="#modalL2">Edit</Button>
                         <Button class={"tw:min-w-15!"}>Hapus</Button>
                     </td>
-                    <td>1</td>
-                    <td>PEMEGANG SAHAM SATU</td>
-                    <td>JL. JALAN SATU RT 001 RW 001 KOTA ADM. JAKARTA PUSAT 10350</td>
-                    <td>INDONESIA</td>
-                    <td>330000000000010100000000000000</td>
-                    <td>DIREKTUR</td>
-                    <td>12345678901234567890</td>
-                    <td>0</td>
-                    <td>0</td>
+                    <td>{i + 1}</td>
+                    <td>{item.nama}</td>
+                    <td>{item.alamat}</td>
+                    <td>{item.negara}</td>
+                    <td>{item.npwp}</td>
+                    <td>{item.jabatan}</td>
+                    <td>{item.nilaiModal}</td>
+                    <td>{item.persentase}</td>
+                    <td>{item.dividen}</td>
                 </tr>
+                {/each}
                 <tr class="footer tw:bg-[#FFD230] tw:text-right tw:font-bold">
                     <td colspan="7">JUMLAH</td>
                     <td>0</td>
