@@ -2,10 +2,36 @@
     import Table from "$lib/components/Table.svelte";
     import Button from "$lib/components/Button.svelte";
 
-    let { data, openModal } = $props();
+    let {
+        data,
+        openModal,
+        deleteItem
+    }: {
+        data: Array<{
+            id: string | number;
+            nama: string;
+            negara: string;
+            npwp: string;
+            modalNilai: number;
+            modalPersen: number;
+            utangNilai: number;
+            utangTahun: number;
+            utangBunga: number;
+            piutangNilai: number;
+            piutangTahun: number;
+            piutangBunga: number;
+        }>;
+        openModal: (item: unknown) => void;
+        deleteItem: (id: string | number) => void;
+    } = $props();
+
+    let totalUtangNilai = $derived(data.reduce((sum, item) => sum + Number(item.utangNilai || 0), 0));
+    let totalPiutangNilai = $derived(data.reduce((sum, item) => sum + Number(item.piutangNilai || 0), 0));
 </script>
 
-<div class="tw:p-5 tw:overflow-scroll">
+<div class="tw:p-5 tw:flex tw:flex-col tw:gap-1">
+    <Button type="button" class={"tw:text-white tw:w-30"} color={"#1c398e"} onclick={() => openModal(null)} data-bs-toggle="modal" data-bs-target="#modalL2B">Tambah</Button>
+    <div class="tw:overflow-scroll">
     <Table class={"tw:w-full"}>
     {#snippet head()}
         <tr class="tw:hidden">
@@ -37,8 +63,9 @@
         </tr>
         {#each data as item, i}
         <tr class="data tw:text-left">
-            <td class="tw:text-center">
-                <Button type="button" class={"tw:min-w-15!"} onclick={() => openModal('B', item)} data-bs-toggle="modal" data-bs-target="#modalL2">Edit</Button>
+            <td class="tw:text-center tw:flex tw:flex-row tw:gap-1 tw:justify-center">
+                <Button type="button" class={"tw:min-w-15!"} onclick={() => openModal(item)} data-bs-toggle="modal" data-bs-target="#modalL2B">Edit</Button>
+                <Button type="button" class={"tw:min-w-15!"} onclick={() => deleteItem(item.id)}>Hapus</Button>
             </td>
             <td>{i + 1}</td>
             <td>{item.nama}</td>
@@ -56,13 +83,14 @@
         {/each}
         <tr class="footer tw:bg-[#ffd230] tw:text-right tw:font-bold">
             <td colspan="7">JUMLAH</td>
-            <td>0</td>
+            <td>{totalUtangNilai.toLocaleString('id-ID')}</td>
             <td colspan="2"></td>
-            <td>0</td>
+            <td>{totalPiutangNilai.toLocaleString('id-ID')}</td>
             <td colspan="2"></td>
         </tr>
     {/snippet}
     </Table>
+    </div>
 </div>
 
 <style>

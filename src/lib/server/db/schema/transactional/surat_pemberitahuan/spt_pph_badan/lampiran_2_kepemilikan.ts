@@ -33,8 +33,13 @@ export const spt_pph_badan_lampiran_2_afiliasi = sqliteTable('spt_pph_badan_lamp
 	namaPihakAfiliasi: text('nama_pihak_afiliasi').notNull(),
 	negaraId: text('negara_id').references(() => negara_spt_pph_badan.id),
 	npwpTin: text('npwp_tin').notNull().default(''),
-	jenis: text('jenis', { enum: ['penyertaan_modal', 'utang', 'piutang'] }).notNull(),
-	nilai: integer('nilai').notNull().default(0),
-	persentaseKepemilikan: integer('persentase_kepemilikan').notNull().default(0),
+	penyertaanModalNilai: integer('penyertaan_modal_nilai').notNull().default(0),
+	penyertaanModalPersentase: integer('penyertaan_modal_persentase').notNull().default(0),
+	utangNilai: integer('utang_nilai').notNull().default(0),
+	utangTahun: integer('utang_tahun'),
+	utangBungaPersentase: integer('utang_bunga_persentase').notNull().default(0),
+	piutangNilai: integer('piutang_nilai').notNull().default(0),
+	piutangTahun: integer('piutang_tahun'),
+	piutangBungaPersentase: integer('piutang_bunga_persentase').notNull().default(0),
 	keterangan: text('keterangan').notNull().default('')
 });

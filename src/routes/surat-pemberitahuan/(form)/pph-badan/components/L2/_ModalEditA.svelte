@@ -10,14 +10,6 @@
             nilaiModal?: number;
             persentase?: number;
             dividen?: number;
-            modalNilai?: number;
-            modalPersen?: number;
-            utangNilai?: number;
-            utangTahun?: number;
-            utangBunga?: number;
-            piutangNilai?: number;
-            piutangTahun?: number;
-            piutangBunga?: number;
         },
         saveItem,
         negaraOptions
@@ -32,14 +24,6 @@
             nilaiModal?: number;
             persentase?: number;
             dividen?: number;
-            modalNilai?: number;
-            modalPersen?: number;
-            utangNilai?: number;
-            utangTahun?: number;
-            utangBunga?: number;
-            piutangNilai?: number;
-            piutangTahun?: number;
-            piutangBunga?: number;
         };
         saveItem: () => void;
         negaraOptions: { value: string; label: string }[];
@@ -60,7 +44,7 @@
         </h1>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
-      
+
       <div class="modal-body">
         <div style="display: flex; flex-direction: column; gap: 10px;">
           <div style="display: flex; align-items: center;">

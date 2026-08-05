@@ -4,7 +4,8 @@
 
     let {
         data,
-        openModal
+        openModal,
+        deleteItem
     }: {
         data: Array<{
             id: string | number;
@@ -17,7 +18,8 @@
             persentase: number;
             dividen: number;
         }>;
-        openModal: (type: 'A' | 'B', item: unknown) => void;
+        openModal: (item: unknown) => void;
+        deleteItem: (id: string | number) => void;
     } = $props();
 
     let totalNilaiModal = $derived(data.reduce((sum, item) => sum + Number(item.nilaiModal || 0), 0));
@@ -26,7 +28,7 @@
 </script>
 
 <div class="tw:p-5 tw:flex tw:flex-col tw:gap-1">
-    <Button type="button" class={"tw:text-white tw:w-30"} color={"#1c398e"} onclick={() => openModal('A', null)} data-bs-toggle="modal" data-bs-target="#modalL2">Tambah</Button>
+    <Button type="button" class={"tw:text-white tw:w-30"} color={"#1c398e"} onclick={() => openModal(null)} data-bs-toggle="modal" data-bs-target="#modalL2">Tambah</Button>
     <div class="tw:overflow-scroll">
         <Table class={"tw:w-full"}>
             {#snippet head()}
@@ -53,8 +55,8 @@
                 {#each data as item, i}
                 <tr class="data">
                     <td class="tw:flex tw:flex-row tw:gap-1 tw:justify-center">
-                        <Button type="button" class={"tw:min-w-15!"} onclick={() => openModal('A', item)} data-bs-toggle="modal" data-bs-target="#modalL2">Edit</Button>
-                        <Button type="button" class={"tw:min-w-15!"}>Hapus</Button>
+                        <Button type="button" class={"tw:min-w-15!"} onclick={() => openModal(item)} data-bs-toggle="modal" data-bs-target="#modalL2">Edit</Button>
+                        <Button type="button" class={"tw:min-w-15!"} onclick={() => deleteItem(item.id)}>Hapus</Button>
                     </td>
                     <td>{i + 1}</td>
                     <td>{item.nama}</td>

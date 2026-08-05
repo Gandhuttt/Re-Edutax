@@ -68,6 +68,22 @@
 			dividen: row.dividen
 		}))
 	);
+	let l2b = $state(
+		lampiran2.penyertaanModal.map((row) => ({
+			id: row.id,
+			nama: row.nama,
+			negara: row.negaraKode ?? '',
+			npwp: row.npwp,
+			modalNilai: row.modalNilai,
+			modalPersen: row.modalPersen,
+			utangNilai: row.utangNilai,
+			utangTahun: row.utangTahun ?? 0,
+			utangBunga: row.utangBunga,
+			piutangNilai: row.piutangNilai,
+			piutangTahun: row.piutangTahun ?? 0,
+			piutangBunga: row.piutangBunga
+		}))
+	);
 
 	let menerimaPenghasilanPp23 = $state(Boolean(spt.menerimaPenghasilanPp23));
 	let hanyaPenghasilanPp23 = $state(Boolean(spt.hanyaPenghasilanPp23));
@@ -128,16 +144,25 @@
 							await tick();
 							form.element.reset();
 						} else {
-							saveError = 'Periksa kembali data yang diisi.';
+							const issues = form.fields.allIssues();
+							saveError = issues?.length
+								? issues.map((issue) => issue.message).join('; ')
+								: 'Periksa kembali data yang diisi.';
 						}
 					} catch (e) {
-						saveError = isHttpError(e) ? e.body.message : 'Gagal menyimpan SPT PPh Badan.';
+						console.error(e);
+						saveError = isHttpError(e)
+							? e.body.message
+							: e instanceof Error
+								? e.message
+								: 'Gagal menyimpan SPT PPh Badan.';
 					}
 				})}
 			>
 				<input type="hidden" name="labaRugi" value={JSON.stringify(labaRugi)} />
 				<input type="hidden" name="neraca" value={JSON.stringify(neraca)} />
 				<input type="hidden" name="l2a" value={JSON.stringify(l2a)} />
+				<input type="hidden" name="l2b" value={JSON.stringify(l2b)} />
 				<header class="tw:mb-5">
 					<nav class="tw:overflow-x-auto tw:border-b tw:border-[#A9A9A9]">
 						<ul class="tw:m-0! tw:flex tw:min-w-max tw:flex-row tw:p-0!">
@@ -187,7 +212,7 @@
 
 				<L1A bind:currentTab {labaRugi} {neraca} {readonly}></L1A>
 				<L1C bind:currentTab {labaRugi} {neraca} {readonly}></L1C>
-				<L2 bind:currentTab bind:l2a {readonly} {negaraOptions}/>
+				<L2 bind:currentTab bind:l2a bind:l2b {readonly} {negaraOptions}/>
 				<L3 bind:currentTab/>
 				<L4 bind:currentTab/>
 				<L6 bind:currentTab/>

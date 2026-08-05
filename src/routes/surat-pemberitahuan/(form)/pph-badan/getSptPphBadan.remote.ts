@@ -8,6 +8,7 @@ import {
 	spt_pph_badan,
 	spt_pph_badan_lampiran_1_laba_rugi,
 	spt_pph_badan_lampiran_1_neraca,
+	spt_pph_badan_lampiran_2_afiliasi,
 	spt_pph_badan_lampiran_2_pihak
 } from '$lib/server/db/schema';
 import { error } from '@sveltejs/kit';
@@ -64,7 +65,7 @@ export const getSptPphBadan = query(async () => {
 		error(404, 'SPT PPh Badan tidak ditemukan');
 	}
 
-	const [labaRugi, neraca, pemegangSaham] = await Promise.all([
+	const [labaRugi, neraca, pemegangSaham, penyertaanModal] = await Promise.all([
 		db
 			.select()
 			.from(spt_pph_badan_lampiran_1_laba_rugi)
@@ -98,7 +99,29 @@ export const getSptPphBadan = query(async () => {
 					eq(spt_pph_badan_lampiran_2_pihak.jenis, 'pemegang_saham')
 				)
 			)
-			.orderBy(asc(spt_pph_badan_lampiran_2_pihak.nomorUrut))
+			.orderBy(asc(spt_pph_badan_lampiran_2_pihak.nomorUrut)),
+		db
+			.select({
+				id: spt_pph_badan_lampiran_2_afiliasi.id,
+				nama: spt_pph_badan_lampiran_2_afiliasi.namaPihakAfiliasi,
+				negaraKode: negara_spt_pph_badan.kode,
+				npwp: spt_pph_badan_lampiran_2_afiliasi.npwpTin,
+				modalNilai: spt_pph_badan_lampiran_2_afiliasi.penyertaanModalNilai,
+				modalPersen: spt_pph_badan_lampiran_2_afiliasi.penyertaanModalPersentase,
+				utangNilai: spt_pph_badan_lampiran_2_afiliasi.utangNilai,
+				utangTahun: spt_pph_badan_lampiran_2_afiliasi.utangTahun,
+				utangBunga: spt_pph_badan_lampiran_2_afiliasi.utangBungaPersentase,
+				piutangNilai: spt_pph_badan_lampiran_2_afiliasi.piutangNilai,
+				piutangTahun: spt_pph_badan_lampiran_2_afiliasi.piutangTahun,
+				piutangBunga: spt_pph_badan_lampiran_2_afiliasi.piutangBungaPersentase
+			})
+			.from(spt_pph_badan_lampiran_2_afiliasi)
+			.leftJoin(
+				negara_spt_pph_badan,
+				eq(spt_pph_badan_lampiran_2_afiliasi.negaraId, negara_spt_pph_badan.id)
+			)
+			.where(eq(spt_pph_badan_lampiran_2_afiliasi.sptPphBadanId, id))
+			.orderBy(asc(spt_pph_badan_lampiran_2_afiliasi.nomorUrut))
 	]);
 
 	return {
@@ -109,7 +132,8 @@ export const getSptPphBadan = query(async () => {
 			neraca
 		},
 		lampiran2: {
-			pemegangSaham
+			pemegangSaham,
+			penyertaanModal
 		}
 	};
 });

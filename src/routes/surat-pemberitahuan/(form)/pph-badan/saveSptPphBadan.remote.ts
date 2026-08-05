@@ -8,6 +8,7 @@ import {
 	spt_pph_badan,
 	spt_pph_badan_lampiran_1_laba_rugi,
 	spt_pph_badan_lampiran_1_neraca,
+	spt_pph_badan_lampiran_2_afiliasi,
 	spt_pph_badan_lampiran_2_pihak
 } from '$lib/server/db/schema';
 import { error, redirect } from '@sveltejs/kit';
@@ -48,6 +49,21 @@ const SaveSptPphBadanSchema = v.object({
 			nilaiModal: decimalInput('Nilai modal disetor'),
 			persentase: decimalInput('Persentase modal disetor'),
 			dividen: decimalInput('Dividen/pembagian laba')
+		})
+	),
+	l2b: jsonRows(
+		v.object({
+			nama: requiredString('Nama'),
+			negara: v.optional(v.string(), ''),
+			npwp: v.optional(v.string(), ''),
+			modalNilai: decimalInput('Penyertaan modal'),
+			modalPersen: decimalInput('Penyertaan modal (%)'),
+			utangNilai: decimalInput('Utang'),
+			utangTahun: decimalInput('Tahun utang'),
+			utangBunga: decimalInput('Bunga utang/tahun'),
+			piutangNilai: decimalInput('Piutang'),
+			piutangTahun: decimalInput('Tahun piutang'),
+			piutangBunga: decimalInput('Bunga piutang/tahun')
 		})
 	),
 	labaRugi: jsonRows(
@@ -171,6 +187,30 @@ export const saveSptPphBadan = form(SaveSptPphBadanSchema, async (input) => {
 				modalSahamNominal: Number(row.nilaiModal),
 				modalSahamPersentase: Number(row.persentase),
 				dividenDiterima: Number(row.dividen)
+			});
+		}
+
+		await tx
+			.delete(spt_pph_badan_lampiran_2_afiliasi)
+			.where(eq(spt_pph_badan_lampiran_2_afiliasi.sptPphBadanId, input.id));
+
+		for (const [index, row] of input.l2b.entries()) {
+			const negaraId = row.negara ? await getNegaraId(row.negara) : null;
+
+			await tx.insert(spt_pph_badan_lampiran_2_afiliasi).values({
+				sptPphBadanId: input.id,
+				nomorUrut: index + 1,
+				namaPihakAfiliasi: row.nama,
+				negaraId,
+				npwpTin: row.npwp,
+				penyertaanModalNilai: Number(row.modalNilai),
+				penyertaanModalPersentase: Number(row.modalPersen),
+				utangNilai: Number(row.utangNilai),
+				utangTahun: Number(row.utangTahun),
+				utangBungaPersentase: Number(row.utangBunga),
+				piutangNilai: Number(row.piutangNilai),
+				piutangTahun: Number(row.piutangTahun),
+				piutangBungaPersentase: Number(row.piutangBunga)
 			});
 		}
 	});
