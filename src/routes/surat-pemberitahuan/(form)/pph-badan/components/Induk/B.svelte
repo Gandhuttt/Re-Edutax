@@ -4,7 +4,6 @@
     import Label from "$lib/components/Label.svelte";
     import Select from "$lib/components/Select.svelte";
     import Alert from "$lib/components/Alert.svelte";
-    import { getContext } from "svelte";
     import { getSektorUsaha } from "./getSektorUsaha.remote";
     import { getOpiniAuditor } from "./getOpiniAuditor.remote";
 
@@ -16,6 +15,7 @@
     interface Props {
         data: {
             sektorUsahaKode: string | null
+            diaudit: boolean | null
             opiniAuditorKode: string | null
             npwpKantorAkuntanPublik: string | null
             namaKantorAkuntanPublik: string | null
@@ -41,7 +41,7 @@
     const { data, readonly }: Props = $props();
     // const auditData = $derived(sectionData?.['2']);
 
-    let isDiaudit = $state();
+    let isDiaudit = $state(data.diaudit ?? undefined);
 </script>
 
 <div class="tw:p-5">
@@ -88,11 +88,11 @@
                 <td><span>Apakah Laporan Keuangan diaudit oleh Akuntan Publik? *</span></td>
                 <td>
                     <div class="tw:flex tw:gap-5">
-                        <Label for={getContext("id")} class="tw:flex tw:items-center tw:gap-1">
+                        <Label class="tw:flex tw:items-center tw:gap-1">
                             <input type="radio" name="diaudit" value={false} bind:group={isDiaudit}>
                             <span>Tidak</span>
                         </Label>
-                        <Label for={getContext("id")} class="tw:flex tw:items-center tw:gap-1">
+                        <Label class="tw:flex tw:items-center tw:gap-1">
                             <input type="radio" name="diaudit" value={true} bind:group={isDiaudit}>
                             <span>Ya</span>
                         </Label>

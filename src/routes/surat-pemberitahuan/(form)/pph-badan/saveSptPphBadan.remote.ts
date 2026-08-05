@@ -102,6 +102,7 @@ export const saveSptPphBadan = form(SaveSptPphBadanSchema, async (input) => {
 			.set({
 				metodePembukuan: input.metodePembukuan,
 				sektorUsahaId,
+				diaudit: input.diaudit,
 				opiniAuditorId,
 				npwpKantorAkuntanPublik: input.diaudit ? input.npwpKantorAkuntanPublik : null,
 				namaKantorAkuntanPublik: input.diaudit ? input.namaKantorAkuntanPublik : null,

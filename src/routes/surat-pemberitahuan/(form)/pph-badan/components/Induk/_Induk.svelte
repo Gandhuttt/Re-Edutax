@@ -11,7 +11,6 @@
     import H from "./H.svelte";
     import I from "./I.svelte";
     import J from "./J.svelte";
-    import type { SectionData as IndukBSectionData } from "./B.svelte";
     import type { getSptPphBadan } from "../../getSptPphBadan.remote";
 
     type pphInterface = Awaited<ReturnType<typeof getSptPphBadan>>;
@@ -23,18 +22,12 @@
         };
         spt: sptType;
         readonly: boolean;
-        pphBadanData?: {
-            informasiLaporanKeuangan?: IndukBSectionData;
-            penghasilanDikenakanPPhFinal?: unknown;
-        };
     }
 
-    // const {data}: {data: Awaited<ReturnType<typeof getKonsep>>['data']} = $props();
     let {
         currentTab = $bindable(),
         spt,
-        readonly,
-        pphBadanData = {}
+        readonly
     }: Props = $props();
     
     $effect(() => {currentTab.title = currentTab.tab === 'Induk' ? 'sigma' : currentTab.title});
@@ -45,7 +38,7 @@
         <Accordion item={"HEADER"}><Header data={spt} {readonly} /></Accordion>
         <Accordion item={"A. IDENTITAS WAJIB PAJAK"}><A data={spt} {readonly}/></Accordion>
         <Accordion item={"B. INFORMASI LAPORAN KEUANGAN"} ><B data={spt} {readonly}/></Accordion>
-        <Accordion item={"C. PENGHASILAN YANG DIKENAKAN PPh YANG BERSIFAT FINAL DAN TIDAK TERMASUK OBJEK PAJAK"}><C data={pphBadanData.penghasilanDikenakanPPhFinal}/></Accordion>
+        <Accordion item={"C. PENGHASILAN YANG DIKENAKAN PPh YANG BERSIFAT FINAL DAN TIDAK TERMASUK OBJEK PAJAK"}><C data={spt}/></Accordion>
         <Accordion item={"D. PENGHITUNGAN PPh"}><D/></Accordion>
         <Accordion item={"E. PENGURANGAN PPh TERUTANG"}><E/></Accordion>
         <Accordion item={"F. PPh KURANG/LEBIH BAYAR"}><F/></Accordion>

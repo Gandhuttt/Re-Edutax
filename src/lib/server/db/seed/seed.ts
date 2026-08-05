@@ -4,8 +4,9 @@ import * as initialUsers from './batches/001-initial-users';
 import * as fakturReferenceMaster from './batches/002-faktur-reference-master';
 import * as fakturDemo from './batches/002-faktur-demo';
 import * as sptPphBadanReferenceMaster from './batches/003-spt-pph-badan-reference-master';
+import * as batch16Peserta from './batches/004-batch-16-peserta';
 
-const batches = [initialUsers, fakturReferenceMaster, sptPphBadanReferenceMaster, fakturDemo];
+const batches = [initialUsers, fakturReferenceMaster, sptPphBadanReferenceMaster, batch16Peserta, fakturDemo];
 
 const seed = async () => {
 	console.log('Seeding Better Auth users and wajib_pajak profiles...\n');

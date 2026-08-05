@@ -34,6 +34,7 @@ export const spt_pph_badan = sqliteTable(
 			.references(() => mata_uang_spt_pph_badan.id),
 
 		sektorUsahaId: text('sektor_usaha_id').references(() => sektor_usaha_spt_pph_badan.id),
+		diaudit: integer('diaudit', { mode: 'boolean' }),
 		opiniAuditorId: text('opini_auditor_id').references(() => opini_auditor_spt_pph_badan.id),
 		npwpKantorAkuntanPublik: text('npwp_kantor_akuntan_publik'),
 		namaKantorAkuntanPublik: text('nama_kantor_akuntan_publik'),

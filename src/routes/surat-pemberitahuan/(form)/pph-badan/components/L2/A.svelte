@@ -2,7 +2,27 @@
 	import Table from "$lib/components/Table.svelte";
     import Button from "$lib/components/Button.svelte";
 
-    let { data, openModal } = $props();
+    let {
+        data,
+        openModal
+    }: {
+        data: Array<{
+            id: string | number;
+            nama: string;
+            alamat: string;
+            negara: string;
+            npwp: string;
+            jabatan: string;
+            nilaiModal: number;
+            persentase: number;
+            dividen: number;
+        }>;
+        openModal: (type: 'A' | 'B', item: unknown) => void;
+    } = $props();
+
+    let totalNilaiModal = $derived(data.reduce((sum, item) => sum + Number(item.nilaiModal || 0), 0));
+    let totalPersentase = $derived(data.reduce((sum, item) => sum + Number(item.persentase || 0), 0));
+    let totalDividen = $derived(data.reduce((sum, item) => sum + Number(item.dividen || 0), 0));
 </script>
 
 <div class="tw:p-5 tw:flex tw:flex-col tw:gap-1">
@@ -49,9 +69,9 @@
                 {/each}
                 <tr class="footer tw:bg-[#FFD230] tw:text-right tw:font-bold">
                     <td colspan="7">JUMLAH</td>
-                    <td>0</td>
-                    <td>0,0000</td>
-                    <td>0</td>
+                    <td>{totalNilaiModal.toLocaleString('id-ID')}</td>
+                    <td>{totalPersentase.toLocaleString('id-ID', { minimumFractionDigits: 4, maximumFractionDigits: 4 })}</td>
+                    <td>{totalDividen.toLocaleString('id-ID')}</td>
                 </tr>
             {/snippet}
         </Table>
