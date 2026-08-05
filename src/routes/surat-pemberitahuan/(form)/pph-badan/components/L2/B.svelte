@@ -109,7 +109,7 @@ tr {
     border: none;
 }
 td {
-    padding: .5rem .1rem;
+    padding: .5rem 1rem;
     word-wrap: break-word;
     font-size: .8rem;
 }

@@ -16,6 +16,8 @@
 	--color-input-primary: #fff;
 	--color-input-secondary: #aaa;
 	--color-primary: #ffd230;
+	--color-secondary: #1c398e;
+	--color-disabled: hsl(from var(--color-input-primary) h s calc(l - 10));
 	--color-text: rgba(0, 0, 0, 0.7);
 	--column-width: 42rem;
 	--column-margin-top: 4rem;
