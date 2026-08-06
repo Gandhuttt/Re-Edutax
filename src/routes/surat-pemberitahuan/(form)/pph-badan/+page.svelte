@@ -466,8 +466,8 @@
 
 				{#if !readonly}
 					<div class="tw:mt-4 tw:flex tw:gap-2">
-						<Button type="submit" name="action" value="Simpan Konsep" color="#FFD230">Simpan Konsep</Button>
-						<Button type="submit" name="action" value="Simpan Lapor" color="#FFD230">Simpan Lapor</Button>
+						<Button type="submit" name="action" value="Simpan Konsep" color="var(--color-secondary)"><span class="tw:text-white">Simpan Konsep</span></Button>
+						<Button type="submit" name="action" value="Simpan Lapor" color="var(--color-secondary)"><span class="tw:text-white">Simpan Lapor</span></Button>
 					</div>
 				{/if}
 			</form>
