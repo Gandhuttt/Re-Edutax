@@ -1,51 +1,111 @@
 <script lang="ts">
 	import Table from "$lib/components/Table.svelte";
-    // import ModalEdit from "./_ModalEdit.svelte";
+    import Button from "$lib/components/Button.svelte";
+
+    let {
+        data,
+        openModal,
+        deleteItem,
+        pengembalianPengurangan = $bindable(0)
+    }: {
+        data: Array<{
+            id: string | number;
+            namaPemberiPenghasilan: string;
+            negara: string;
+            tanggal: string;
+            jenisPenghasilan: string;
+            penghasilanNeto: number;
+            pphLuarNegeri: number;
+            mataUang: string;
+            pphLuarNegeriMataUangAsing: number;
+            kreditPajakYangDapatDikreditkan: number;
+            keterangan: string;
+        }>;
+        openModal: (item: unknown) => void;
+        deleteItem: (id: string | number) => void;
+        pengembalianPengurangan?: number;
+    } = $props();
+
+    let totalPenghasilanNeto = $derived(data.reduce((sum, item) => sum + Number(item.penghasilanNeto || 0), 0));
+    let totalPphLuarNegeri = $derived(data.reduce((sum, item) => sum + Number(item.pphLuarNegeri || 0), 0));
+    let totalKreditPajak = $derived(data.reduce((sum, item) => sum + Number(item.kreditPajakYangDapatDikreditkan || 0), 0));
+    let jumlahDapatDiperhitungkan = $derived(totalKreditPajak - Number(pengembalianPengurangan || 0));
 </script>
 
-<div class="tw:p-5 tw:overflow-scroll">
-    <Table class={"tw:w-full"}>
-        {#snippet head()}
-            <tr class="tw:hidden">
-                <td><input type="text" name="" id=""></td>
-            </tr>
-        {/snippet}
-        {#snippet body()}
-            <tr class="header tw:bg-[var(--color-primary)] tw:font-bold tw:text-center">
-                <td class="tw:w-[10rem]" rowspan="2"><span>TINDAKAN</span></td>
-                <td class="tw:w-[5rem]" rowspan="2"><span>NO</span></td>
-                <td class="tw:w-[15rem]" rowspan="2"><span>NAMA</span></td>
-                <td class="tw:w-[15rem]" rowspan="2"><span>ALAMAT</span></td>
-                <td class="tw:w-[10rem]" rowspan="2"><span>KODE NEGARA</span></td>
-                <td class="tw:w-[10rem]" rowspan="2"><span>NPWP/NIK</span></td>
-                <td class="tw:w-[10rem]" rowspan="2"><span>JABATAN</span></td>
-                <td class="tw:w-[20rem]" colspan="2"><span>MODAL DISETOR</span></td>
-                <td class="tw:w-[15rem]" rowspan="2"><span>DIVIDEN/PEMBAGIAN LABA (Rp)</span></td>
-            </tr>
-            <tr class="header tw:bg-[var(--color-primary)] tw:font-bold tw:text-center">
-                <td class="tw:w-[10rem]"><span>NILAI (Rp)</span></td>
-                <td class="tw:w-[10rem]"><span>%</span></td>
-            </tr>
-            <tr class="data">
-                <td>test</td>
-                <td>1</td>
-                <td>PEMEGANG SAHAM SATU</td>
-                <td>JL. JALAN SATU RT 001 RW 001 KOTA ADM. JAKARTA PUSAT 10350</td>
-                <td>INDONESIA</td>
-                <td>330000000000010100000000000000</td>
-                <td>DIREKTUR</td>
-                <td>12345678901234567890</td>
-                <td>0</td>
-                <td>0</td>
-            </tr>
-            <tr class="footer tw:bg-[#FFD230] tw:text-right tw:font-bold">
-                <td colspan="7">JUMLAH</td>
-                <td>0</td>
-                <td>0,0000</td>
-                <td>0</td>
-            </tr>
-        {/snippet}
-    </Table>
+<div class="tw:p-5 tw:flex tw:flex-col tw:gap-1">
+    <Button type="button" class={"tw:text-white tw:w-30"} color={"#1c398e"} onclick={() => openModal(null)} data-bs-toggle="modal" data-bs-target="#modalL3A">Tambah</Button>
+    <div class="tw:overflow-scroll">
+        <Table class={"tw:w-full"}>
+            {#snippet head()}
+                <tr class="tw:hidden">
+                    <td><input type="text" name="" id=""></td>
+                </tr>
+            {/snippet}
+            {#snippet body()}
+                <tr class="header tw:bg-[var(--color-primary)] tw:font-bold tw:text-center">
+                    <td class="tw:w-[10rem]" rowspan="2"><span>TINDAKAN</span></td>
+                    <td class="tw:w-[5rem]" rowspan="2"><span>NO</span></td>
+                    <td class="tw:w-[25rem]" colspan="2"><span>PEMOTONG PAJAK</span></td>
+                    <td class="tw:w-[8rem]" rowspan="2"><span>TANGGAL</span></td>
+                    <td class="tw:w-[15rem]" rowspan="2"><span>JENIS PENGHASILAN</span></td>
+                    <td class="tw:w-[12rem]" rowspan="2"><span>PENGHASILAN NETO (Rp)</span></td>
+                    <td class="tw:w-[35rem]" colspan="3"><span>PPh YANG DIBAYAR/DIPOTONG/TERUTANG DI LUAR NEGERI</span></td>
+                    <td class="tw:w-[15rem]" rowspan="2"><span>KREDIT PAJAK YANG DAPAT DIKREDITKAN (Rp)</span></td>
+                    <td class="tw:w-[15rem]" rowspan="2"><span>KETERANGAN</span></td>
+                </tr>
+                <tr class="header tw:bg-[var(--color-primary)] tw:font-bold tw:text-center">
+                    <td class="tw:w-[15rem]"><span>NAMA</span></td>
+                    <td class="tw:w-[10rem]"><span>NEGARA</span></td>
+                    <td class="tw:w-[12rem]"><span>NILAI (Rp)</span></td>
+                    <td class="tw:w-[8rem]"><span>MATA UANG</span></td>
+                    <td class="tw:w-[15rem]"><span>NILAI DALAM MATA UANG ASING</span></td>
+                </tr>
+                {#each data as item, i}
+                <tr class="data">
+                    <td class="tw:flex tw:flex-row tw:gap-1 tw:justify-center">
+                        <Button type="button" class={"tw:min-w-15!"} onclick={() => openModal(item)} data-bs-toggle="modal" data-bs-target="#modalL3A">Edit</Button>
+                        <Button type="button" class={"tw:min-w-15!"} onclick={() => deleteItem(item.id)}>Hapus</Button>
+                    </td>
+                    <td>{i + 1}</td>
+                    <td>{item.namaPemberiPenghasilan}</td>
+                    <td>{item.negara}</td>
+                    <td>{item.tanggal}</td>
+                    <td>{item.jenisPenghasilan}</td>
+                    <td>{Number(item.penghasilanNeto || 0).toLocaleString('id-ID')}</td>
+                    <td>{Number(item.pphLuarNegeri || 0).toLocaleString('id-ID')}</td>
+                    <td>{item.mataUang}</td>
+                    <td>{Number(item.pphLuarNegeriMataUangAsing || 0).toLocaleString('id-ID')}</td>
+                    <td>{Number(item.kreditPajakYangDapatDikreditkan || 0).toLocaleString('id-ID')}</td>
+                    <td>{item.keterangan}</td>
+                </tr>
+                {/each}
+                <tr class="footer tw:bg-[#FFD230] tw:text-right tw:font-bold">
+                    <td colspan="6">JUMLAH</td>
+                    <td>{totalPenghasilanNeto.toLocaleString('id-ID')}</td>
+                    <td>{totalPphLuarNegeri.toLocaleString('id-ID')}</td>
+                    <td colspan="2"></td>
+                    <td>{totalKreditPajak.toLocaleString('id-ID')}</td>
+                    <td></td>
+                </tr>
+                <tr class="footer tw:bg-[#FFD230] tw:font-bold">
+                    <td colspan="10" class="tw:text-right">PENGEMBALIAN/PENGURANGAN PAJAK PENGHASILAN LUAR NEGERI (PASAL 24) YANG TELAH DIKREDITKAN UNTUK TAHUN SEBELUMNYA</td>
+                    <td class="tw:text-right">
+                        <input
+                            type="number"
+                            bind:value={pengembalianPengurangan}
+                            class="tw:w-full tw:text-right tw:bg-transparent"
+                        />
+                    </td>
+                    <td></td>
+                </tr>
+                <tr class="footer tw:bg-[#FFD230] tw:text-right tw:font-bold">
+                    <td colspan="10">JUMLAH PAJAK PENGHASILAN YANG DIBAYAR DI LUAR NEGERI YANG DAPAT DIPERHITUNGKAN DALAM TAHUN BERJALAN</td>
+                    <td>{jumlahDapatDiperhitungkan.toLocaleString('id-ID')}</td>
+                    <td></td>
+                </tr>
+            {/snippet}
+        </Table>
+    </div>
 </div>
 
 <style>

@@ -52,6 +52,11 @@ export const spt_pph_badan = sqliteTable(
 		persentaseTarifLainnya: integer('persentase_tarif_lainnya'),
 
 		pphKurangLebihBayar: integer('pph_kurang_lebih_bayar').notNull().default(0),
+		lampiran3PengembalianPenguranganPphLuarNegeriTahunSebelumnya: integer(
+			'lampiran3_pengembalian_pengurangan_pph_luar_negeri_tahun_sebelumnya'
+		)
+			.notNull()
+			.default(0),
 		tanggalPosting: integer('tanggal_posting', { mode: 'timestamp_ms' }),
 		tanggalDilaporkan: integer('tanggal_dilaporkan', { mode: 'timestamp_ms' }),
 		createdAt: createdAt(),

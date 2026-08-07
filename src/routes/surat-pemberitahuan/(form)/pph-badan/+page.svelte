@@ -30,15 +30,21 @@
 	import { getKodeKoreksiFiskal } from './components/L1/getKodeKoreksiFiskal.remote';
 	import { getLampiran1LabaRugiTemplates } from './components/L1/getLampiran1LabaRugiTemplates.remote';
 	import { getLampiran1NeracaTemplates } from './components/L1/getLampiran1NeracaTemplates.remote';
+	import { getJenisPenghasilanKreditPajakLuarNegeri } from './components/L3/getJenisPenghasilanKreditPajakLuarNegeri.remote';
+	import { getMataUang } from './components/L3/getMataUang.remote';
+	import { getJenisPajakDipotongDipungut } from './components/L3/getJenisPajakDipotongDipungut.remote';
 	import { saveSptPphBadan } from './saveSptPphBadan.remote';
 
-	const { readonly, spt, lampiran1, lampiran2 } = await getSptPphBadan();
+	const { readonly, spt, lampiran1, lampiran2, lampiran3 } = await getSptPphBadan();
 	const opiniAuditorOptions = await getOpiniAuditor();
 	const sektorUsahaOptions = await getSektorUsaha();
 	const negaraOptions = await getNegara();
 	const kodeKoreksiFiskalOptions = await getKodeKoreksiFiskal();
 	const lampiran1LabaRugiTemplates = await getLampiran1LabaRugiTemplates();
 	const lampiran1NeracaTemplates = await getLampiran1NeracaTemplates();
+	const jenisPenghasilanKreditPajakLuarNegeriOptions = await getJenisPenghasilanKreditPajakLuarNegeri();
+	const mataUangOptions = await getMataUang();
+	const jenisPajakDipotongDipungutOptions = await getJenisPajakDipotongDipungut();
 	const saveForm = saveSptPphBadan.for(spt.id);
 
 	const lampiran1LabaRugiTemplatesBySektor = new Map<
@@ -111,6 +117,37 @@
 			piutangNilai: row.piutangNilai,
 			piutangTahun: row.piutangTahun ?? 0,
 			piutangBunga: row.piutangBunga
+		}))
+	);
+
+	let l3a = $state(
+		lampiran3.penghasilanLuarNegeri.map((row) => ({
+			id: row.id,
+			namaPemberiPenghasilan: row.namaPemberiPenghasilan,
+			negara: row.negaraKode,
+			tanggal: row.tanggal,
+			jenisPenghasilan: row.jenisPenghasilanKode,
+			penghasilanNeto: row.penghasilanNeto,
+			pphLuarNegeri: row.pphLuarNegeri,
+			mataUang: row.mataUangKode,
+			pphLuarNegeriMataUangAsing: row.pphLuarNegeriMataUangAsing,
+			kreditPajakYangDapatDikreditkan: row.kreditPajakYangDapatDikreditkan,
+			keterangan: row.keterangan
+		}))
+	);
+
+	let l3aPengembalianPengurangan = $state(lampiran3.pengembalianPenguranganPphLuarNegeriTahunSebelumnya);
+
+	let l3b = $state(
+		lampiran3.pphDipotong.map((row) => ({
+			id: row.id,
+			namaPemotongPemungut: row.namaPemotongPemungut,
+			npwp: row.npwp,
+			jenisPajak: row.jenisPajakKode,
+			dpp: row.dpp,
+			pph: row.pph,
+			nomorBukti: row.nomorBukti,
+			tanggalBukti: row.tanggalBukti
 		}))
 	);
 
@@ -197,6 +234,9 @@
 				<input type="hidden" name="neraca" value={JSON.stringify(neraca)} />
 				<input type="hidden" name="l2a" value={JSON.stringify(l2a)} />
 				<input type="hidden" name="l2b" value={JSON.stringify(l2b)} />
+				<input type="hidden" name="l3a" value={JSON.stringify(l3a)} />
+				<input type="hidden" name="l3aPengembalianPengurangan" value={l3aPengembalianPengurangan} />
+				<input type="hidden" name="l3b" value={JSON.stringify(l3b)} />
 				<header class="tw:mb-5">
 					<nav class="tw:overflow-x-auto tw:border-b tw:border-[#A9A9A9]">
 						<ul class="tw:m-0! tw:flex tw:min-w-max tw:flex-row tw:p-0!">
@@ -255,7 +295,17 @@
 					{kodeKoreksiFiskalOptions}
 				/>
 				<L2 bind:currentTab bind:l2a bind:l2b {readonly} {negaraOptions}/>
-				<L3 bind:currentTab/>
+				<L3
+					bind:currentTab
+					bind:l3a
+					bind:l3aPengembalianPengurangan
+					bind:l3b
+					{readonly}
+					{negaraOptions}
+					jenisPenghasilanOptions={jenisPenghasilanKreditPajakLuarNegeriOptions}
+					{mataUangOptions}
+					jenisPajakOptions={jenisPajakDipotongDipungutOptions}
+				/>
 				<L4 bind:currentTab/>
 				<L6 bind:currentTab/>
 				<L10A bind:currentTab/>

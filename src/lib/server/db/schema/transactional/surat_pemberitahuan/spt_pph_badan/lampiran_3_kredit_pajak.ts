@@ -1,4 +1,5 @@
 import { integer, sqliteTable, text } from 'drizzle-orm/sqlite-core';
+import { jenis_pajak_dipotong_dipungut_spt_pph_badan } from '../../../references/spt_pph_badan/jenis_pajak_dipotong_dipungut';
 import { jenis_penghasilan_kredit_pajak_luar_negeri_spt_pph_badan } from '../../../references/spt_pph_badan/jenis_penghasilan_kredit_pajak_luar_negeri';
 import { mata_uang_spt_pph_badan } from '../../../references/spt_pph_badan/mata_uang';
 import { negara_spt_pph_badan } from '../../../references/spt_pph_badan/negara';
@@ -45,18 +46,9 @@ export const spt_pph_badan_lampiran_3_pph_dipotong = sqliteTable(
 		nomorUrut: integer('nomor_urut').notNull(),
 		namaPemotongPemungut: text('nama_pemotong_pemungut').notNull(),
 		npwpPemotongPemungut: text('npwp_pemotong_pemungut').notNull().default(''),
-		jenisPajak: text('jenis_pajak', {
-			enum: [
-				'pph_pasal_15',
-				'pph_pasal_21',
-				'pph_pasal_22',
-				'pph_pasal_23',
-				'pph_pasal_26',
-				'pph_ditanggung_pemerintah',
-				'pph_ditanggung_pemerintah_proyek_bantuan_luar_negeri',
-				'sisa_lb_tidak_dikembalikan'
-			]
-		}).notNull(),
+		jenisPajakId: text('jenis_pajak_id')
+			.notNull()
+			.references(() => jenis_pajak_dipotong_dipungut_spt_pph_badan.id),
 		dpp: integer('dpp').notNull().default(0),
 		pph: integer('pph').notNull().default(0),
 		nomorBukti: text('nomor_bukti').notNull().default(''),

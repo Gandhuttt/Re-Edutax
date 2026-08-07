@@ -1,7 +1,7 @@
 import { integer, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
 
-export const jenis_penghasilan_kredit_pajak_luar_negeri_spt_pph_badan = sqliteTable(
-	'jenis_penghasilan_kredit_pajak_luar_negeri_spt_pph_badan',
+export const jenis_pajak_dipotong_dipungut_spt_pph_badan = sqliteTable(
+	'jenis_pajak_dipotong_dipungut_spt_pph_badan',
 	{
 		id: text('id')
 			.primaryKey()
@@ -11,7 +11,5 @@ export const jenis_penghasilan_kredit_pajak_luar_negeri_spt_pph_badan = sqliteTa
 		nomorUrut: integer('nomor_urut').notNull().default(0),
 		aktif: integer('aktif', { mode: 'boolean' }).notNull().default(true)
 	},
-	(t) => [
-		uniqueIndex('jenis_penghasilan_kredit_pajak_luar_negeri_spt_pph_badan_kode_unique').on(t.kode)
-	]
+	(t) => [uniqueIndex('jenis_pajak_dipotong_dipungut_spt_pph_badan_kode_unique').on(t.kode)]
 );
