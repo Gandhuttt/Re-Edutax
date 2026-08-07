@@ -18,6 +18,7 @@
 	import L10A from './components/L10-A/_L10A.svelte';
 	import L10B from './components/L10-B/_L10B.svelte';
 	import L10C from './components/L10-C/_L10C.svelte';
+	import L10D from './components/L10-D/_L10D.svelte';
 	import L13A from './components/L13-A/_L13A.svelte';
 	import L13B from './components/L13-B/_L13B.svelte';
 	import { getSptPphBadan } from './getSptPphBadan.remote';
@@ -127,7 +128,7 @@
 		'Tarif fasilitas sebagaimana Pasal 31E ayat (1) UU PPh',
 		'Tarif Pajak Lainnya'
 	];
-	const tabs = ['Induk', 'L1', 'L2', 'L3', 'L4', 'L5', 'L6', 'L7', 'L8', 'L9', 'L10-A', 'L10-B', 'L10-C', 'L11-B', 'L13-A', 'L13-B'];
+	const tabs = ['Induk', 'L1', 'L2', 'L3', 'L4', 'L5', 'L6', 'L7', 'L8', 'L9', 'L10-A', 'L10-B', 'L10-C', 'L10-D', 'L11-B', 'L13-A', 'L13-B'];
 	const tabLabel = (tab: string) => {
 		if (tab !== 'L1') return tab;
 		const lampiranKode = lampiran1TemplatesBySektor.get(sektorUsaha)?.lampiranKode;
@@ -234,6 +235,7 @@
 				<L10A bind:currentTab/>
 				<L10B bind:currentTab/>
 				<L10C bind:currentTab/>
+				<L10D bind:currentTab/>
 				<L13A bind:currentTab/>
 				<L13B bind:currentTab/>
 
@@ -479,8 +481,8 @@
 
 				{#if !readonly}
 					<div class="tw:mt-4 tw:flex tw:gap-2">
-						<Button type="submit" name="action" value="Simpan Konsep" color="#FFD230">Simpan Konsep</Button>
-						<Button type="submit" name="action" value="Simpan Lapor" color="#FFD230">Simpan Lapor</Button>
+						<Button type="submit" name="action" value="Simpan Konsep" color="var(--color-secondary)"><span class="tw:text-white">Simpan Konsep</span></Button>
+						<Button type="submit" name="action" value="Simpan Lapor" color="var(--color-secondary)"><span class="tw:text-white">Simpan Lapor</span></Button>
 					</div>
 				{/if}
 			</form>
