@@ -28,7 +28,8 @@
 	import { getSektorUsaha } from './components/Induk/getSektorUsaha.remote';
 	import { getNegara } from './components/L2/getNegara.remote';
 	import { getKodeKoreksiFiskal } from './components/L1/getKodeKoreksiFiskal.remote';
-	import { getLampiran1Templates } from './components/L1/getLampiran1Templates.remote';
+	import { getLampiran1LabaRugiTemplates } from './components/L1/getLampiran1LabaRugiTemplates.remote';
+	import { getLampiran1NeracaTemplates } from './components/L1/getLampiran1NeracaTemplates.remote';
 	import { saveSptPphBadan } from './saveSptPphBadan.remote';
 
 	const { readonly, spt, lampiran1, lampiran2 } = await getSptPphBadan();
@@ -36,14 +37,28 @@
 	const sektorUsahaOptions = await getSektorUsaha();
 	const negaraOptions = await getNegara();
 	const kodeKoreksiFiskalOptions = await getKodeKoreksiFiskal();
-	const lampiran1Templates = await getLampiran1Templates();
+	const lampiran1LabaRugiTemplates = await getLampiran1LabaRugiTemplates();
+	const lampiran1NeracaTemplates = await getLampiran1NeracaTemplates();
 	const saveForm = saveSptPphBadan.for(spt.id);
 
-	const lampiran1TemplatesBySektor = new Map<string, { lampiranKode: string | null; rows: typeof lampiran1Templates }>();
-	for (const row of lampiran1Templates) {
-		const entry = lampiran1TemplatesBySektor.get(row.sektorUsahaKode) ?? { lampiranKode: row.lampiranKode, rows: [] };
+	const lampiran1LabaRugiTemplatesBySektor = new Map<
+		string,
+		{ lampiranKode: string | null; rows: typeof lampiran1LabaRugiTemplates }
+	>();
+	for (const row of lampiran1LabaRugiTemplates) {
+		const entry = lampiran1LabaRugiTemplatesBySektor.get(row.sektorUsahaKode) ?? {
+			lampiranKode: row.lampiranKode,
+			rows: []
+		};
 		entry.rows.push(row);
-		lampiran1TemplatesBySektor.set(row.sektorUsahaKode, entry);
+		lampiran1LabaRugiTemplatesBySektor.set(row.sektorUsahaKode, entry);
+	}
+
+	const lampiran1NeracaTemplatesBySektor = new Map<string, { rows: typeof lampiran1NeracaTemplates }>();
+	for (const row of lampiran1NeracaTemplates) {
+		const entry = lampiran1NeracaTemplatesBySektor.get(row.sektorUsahaKode) ?? { rows: [] };
+		entry.rows.push(row);
+		lampiran1NeracaTemplatesBySektor.set(row.sektorUsahaKode, entry);
 	}
 
 	let sektorUsaha = $state(spt.sektorUsahaKode ?? '');
@@ -58,6 +73,14 @@
 			penyesuaianFiskalPositif: row.penyesuaianFiskalPositif,
 			penyesuaianFiskalNegatif: row.penyesuaianFiskalNegatif,
 			kodePenyesuaianFiskal: row.kodePenyesuaianFiskal
+		}))
+	);
+
+	let neraca = $state(
+		lampiran1.neraca.map((row) => ({
+			id: row.id,
+			akunId: row.akunId,
+			nilai: row.nilai
 		}))
 	);
 
@@ -131,7 +154,7 @@
 	const tabs = ['Induk', 'L1', 'L2', 'L3', 'L4', 'L5', 'L6', 'L7', 'L8', 'L9', 'L10-A', 'L10-B', 'L10-C', 'L10-D', 'L11-B', 'L13-A', 'L13-B'];
 	const tabLabel = (tab: string) => {
 		if (tab !== 'L1') return tab;
-		const lampiranKode = lampiran1TemplatesBySektor.get(sektorUsaha)?.lampiranKode;
+		const lampiranKode = lampiran1LabaRugiTemplatesBySektor.get(sektorUsaha)?.lampiranKode;
 		return `L1${lampiranKode ? `-${lampiranKode}` : ''}`;
 	};
 </script>
@@ -171,6 +194,7 @@
 				})}
 			>
 				<input type="hidden" name="labaRugi" value={JSON.stringify(labaRugi)} />
+				<input type="hidden" name="neraca" value={JSON.stringify(neraca)} />
 				<input type="hidden" name="l2a" value={JSON.stringify(l2a)} />
 				<input type="hidden" name="l2b" value={JSON.stringify(l2b)} />
 				<header class="tw:mb-5">
@@ -223,8 +247,10 @@
 				<L1
 					bind:currentTab
 					{sektorUsaha}
-					templatesBySektor={lampiran1TemplatesBySektor}
+					templatesBySektor={lampiran1LabaRugiTemplatesBySektor}
 					bind:labaRugi
+					neracaTemplatesBySektor={lampiran1NeracaTemplatesBySektor}
+					bind:neraca
 					{readonly}
 					{kodeKoreksiFiskalOptions}
 				/>

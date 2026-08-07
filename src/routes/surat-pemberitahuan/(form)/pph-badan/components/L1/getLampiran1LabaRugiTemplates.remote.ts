@@ -3,7 +3,7 @@ import { db } from '$lib/server/db';
 import { sektor_usaha_spt_pph_badan, spt_pph_badan_lampiran_1_akun } from '$lib/server/db/schema';
 import { asc, eq } from 'drizzle-orm';
 
-export const getLampiran1Templates = prerender(async () => {
+export const getLampiran1LabaRugiTemplates = prerender(async () => {
 	const rows = await db
 		.select({
 			id: spt_pph_badan_lampiran_1_akun.id,

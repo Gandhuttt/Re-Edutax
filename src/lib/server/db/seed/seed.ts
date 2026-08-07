@@ -6,6 +6,7 @@ import * as fakturDemo from './batches/002-faktur-demo';
 import * as sptPphBadanReferenceMaster from './batches/003-spt-pph-badan-reference-master';
 import * as batch16Peserta from './batches/004-batch-16-peserta';
 import * as lampiran1Akun from './batches/005-lampiran-1-akun';
+import * as lampiran1NeracaAkun from './batches/006-lampiran-1-neraca-akun';
 
 const batches = [
 	initialUsers,
@@ -13,6 +14,7 @@ const batches = [
 	sptPphBadanReferenceMaster,
 	batch16Peserta,
 	lampiran1Akun,
+	lampiran1NeracaAkun,
 	fakturDemo
 ];
 

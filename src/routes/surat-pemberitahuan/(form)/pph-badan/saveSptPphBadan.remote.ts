@@ -10,6 +10,8 @@ import {
 	spt_pph_badan,
 	spt_pph_badan_lampiran_1_akun,
 	spt_pph_badan_lampiran_1_laba_rugi,
+	spt_pph_badan_lampiran_1_neraca,
+	spt_pph_badan_lampiran_1_neraca_akun,
 	spt_pph_badan_lampiran_2_afiliasi,
 	spt_pph_badan_lampiran_2_pihak
 } from '$lib/server/db/schema';
@@ -78,6 +80,12 @@ const SaveSptPphBadanSchema = v.object({
 			penyesuaianFiskalNegatif: decimalInput('Penyesuaian fiskal negatif'),
 			kodePenyesuaianFiskal: v.optional(v.string(), '')
 		})
+	),
+	neraca: jsonRows(
+		v.object({
+			akunId: requiredString('Akun neraca'),
+			nilai: decimalInput('Nilai')
+		})
 	)
 });
 
@@ -122,6 +130,11 @@ export const saveSptPphBadan = form(SaveSptPphBadanSchema, async (input) => {
 		})
 		.from(spt_pph_badan_lampiran_1_akun)
 		.where(eq(spt_pph_badan_lampiran_1_akun.sektorUsahaId, sektorUsahaId));
+
+	const neracaTemplate = await db
+		.select({ id: spt_pph_badan_lampiran_1_neraca_akun.id, rowType: spt_pph_badan_lampiran_1_neraca_akun.rowType })
+		.from(spt_pph_badan_lampiran_1_neraca_akun)
+		.where(eq(spt_pph_badan_lampiran_1_neraca_akun.sektorUsahaId, sektorUsahaId));
 
 	const pphKurangLebihBayar =
 		computeLabaRugiRows(
@@ -189,6 +202,28 @@ export const saveSptPphBadan = form(SaveSptPphBadanSchema, async (input) => {
 						spt_pph_badan_lampiran_1_laba_rugi.sptPphBadanId,
 						spt_pph_badan_lampiran_1_laba_rugi.akunId
 					],
+					set: values
+				});
+		}
+
+		const neracaDataAkunIds = new Set(
+			neracaTemplate.filter((row) => row.rowType === 'data').map((row) => row.id)
+		);
+
+		for (const row of input.neraca) {
+			if (!neracaDataAkunIds.has(row.akunId)) continue;
+
+			const values = { nilai: Number(row.nilai) };
+
+			await tx
+				.insert(spt_pph_badan_lampiran_1_neraca)
+				.values({
+					sptPphBadanId: input.id,
+					akunId: row.akunId,
+					...values
+				})
+				.onConflictDoUpdate({
+					target: [spt_pph_badan_lampiran_1_neraca.sptPphBadanId, spt_pph_badan_lampiran_1_neraca.akunId],
 					set: values
 				});
 		}

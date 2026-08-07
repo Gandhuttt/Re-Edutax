@@ -8,6 +8,7 @@ import {
 	sektor_usaha_spt_pph_badan,
 	spt_pph_badan,
 	spt_pph_badan_lampiran_1_laba_rugi,
+	spt_pph_badan_lampiran_1_neraca,
 	spt_pph_badan_lampiran_2_afiliasi,
 	spt_pph_badan_lampiran_2_pihak
 } from '$lib/server/db/schema';
@@ -65,7 +66,7 @@ export const getSptPphBadan = query(async () => {
 		error(404, 'SPT PPh Badan tidak ditemukan');
 	}
 
-	const [nilai, pemegangSaham, penyertaanModal] = await Promise.all([
+	const [nilai, neraca, pemegangSaham, penyertaanModal] = await Promise.all([
 		db
 			.select({
 				id: spt_pph_badan_lampiran_1_laba_rugi.id,
@@ -83,6 +84,14 @@ export const getSptPphBadan = query(async () => {
 				eq(spt_pph_badan_lampiran_1_laba_rugi.kodePenyesuaianFiskalId, kode_koreksi_fiskal_spt_pph_badan.id)
 			)
 			.where(eq(spt_pph_badan_lampiran_1_laba_rugi.sptPphBadanId, id)),
+		db
+			.select({
+				id: spt_pph_badan_lampiran_1_neraca.id,
+				akunId: spt_pph_badan_lampiran_1_neraca.akunId,
+				nilai: spt_pph_badan_lampiran_1_neraca.nilai
+			})
+			.from(spt_pph_badan_lampiran_1_neraca)
+			.where(eq(spt_pph_badan_lampiran_1_neraca.sptPphBadanId, id)),
 		db
 			.select({
 				id: spt_pph_badan_lampiran_2_pihak.id,
@@ -135,7 +144,8 @@ export const getSptPphBadan = query(async () => {
 		readonly: spt.statusDraft !== 'konsep',
 		spt,
 		lampiran1: {
-			nilai: nilai.map((row) => ({ ...row, kodePenyesuaianFiskal: row.kodePenyesuaianFiskal ?? '' }))
+			nilai: nilai.map((row) => ({ ...row, kodePenyesuaianFiskal: row.kodePenyesuaianFiskal ?? '' })),
+			neraca
 		},
 		lampiran2: {
 			pemegangSaham,
