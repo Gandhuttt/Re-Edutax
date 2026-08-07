@@ -112,20 +112,17 @@
 .header td, .footer td {
     border: 1px solid white;
 }
-
 .data {
     &:nth-child(even) {
         background-color: #F9F6EE;
     }
     td {
-        padding-inline: .5rem;
+        padding-inline: .2rem;
     }
 }
-
 tr {
     border: none;
 }
-
 td {
     padding: .5rem 1rem;
     word-wrap: break-word;

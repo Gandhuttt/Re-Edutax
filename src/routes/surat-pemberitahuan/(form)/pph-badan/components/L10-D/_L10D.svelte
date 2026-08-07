@@ -85,11 +85,11 @@
                     <span class="tw:font-bold">III. PERNYATAAN PENYELENGGARAN DAN PENYEDIAAN DOKUMEN INDUK DAN DOKUMEN LOKAL</span>
                     <span>Bahwasanya kami telah menyelenggarakan dokumen induk dan dokumen lokal berdasarkan data dan informasi yang tersedia saat dilakukannya Transaksi Afililasi, dan:</span>
                 </div>
-                <Label class={"tw:flex! tw:items-center tw:gap-2"}>
+                <Label class={"tw:flex! tw:items-center tw:gap-2 tw:p-2 tw:border-b-1 tw:border-(--color-disabled)"}>
                     <span class="tw:block tw:w-[50rem]">1. Dokumen Induk telah tersedia pada tanggal:</span>
                     <Input class={"tw:w-50!"} id={getContext("id")} type={"date"}/>
                 </Label>
-                <Label class={"tw:flex! tw:items-center tw:gap-2"}>
+                <Label class={"tw:flex! tw:items-center tw:gap-2 tw:p-2 tw:border-b-1 tw:border-(--color-disabled)"}>
                     <span class="tw:block tw:w-[50rem]">2. Dokumen Lokal telah tersedia pada tanggal:</span>
                     <Input class={"tw:w-50!"} id={getContext("id")} type={"date"}/>
                 </Label>

@@ -28,7 +28,7 @@
 </script>
 
 <div class="tw:p-5 tw:flex tw:flex-col tw:gap-1">
-    <Button type="button" class={"tw:text-white tw:w-30"} color={"#1c398e"} onclick={() => openModal(null)} data-bs-toggle="modal" data-bs-target="#modalL2">Tambah</Button>
+    <Button type="button" class={"tw:text-white tw:w-30"} color={"var(--color-secondary)"} onclick={() => openModal(null)} data-bs-toggle="modal" data-bs-target="#modalL2">Tambah</Button>
     <div class="tw:overflow-scroll">
         <Table class={"tw:w-full"}>
             {#snippet head()}
