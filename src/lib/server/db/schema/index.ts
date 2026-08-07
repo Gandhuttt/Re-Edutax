@@ -23,6 +23,7 @@ export * from './references/spt_pph_badan/objek_pajak';
 export * from './references/spt_pph_badan/jenis_penghasilan_bukan_objek_pajak';
 export * from './references/spt_pph_badan/jenis_penghasilan_kredit_pajak_luar_negeri';
 export * from './references/spt_pph_badan/kode_koreksi_fiskal';
+export * from './references/spt_pph_badan/lampiran_1_akun';
 export * from './transactional/surat_pemberitahuan/spt_pph_badan/spt_pph_badan';
 export * from './transactional/surat_pemberitahuan/spt_pph_badan/lampiran_1_laporan_keuangan';
 export * from './transactional/surat_pemberitahuan/spt_pph_badan/lampiran_2_kepemilikan';

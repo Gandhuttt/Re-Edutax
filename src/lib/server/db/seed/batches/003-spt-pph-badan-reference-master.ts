@@ -21,18 +21,18 @@ const auditorOptions = [
 ] as const;
 
 const sektorUsahaOptions = [
-	{ value: 'umum', label: 'Umum' },
-	{ value: 'manufaktur', label: 'Manufaktur' },
-	{ value: 'dagang', label: 'Dagang' },
-	{ value: 'jasa', label: 'Jasa' },
-	{ value: 'bank_konvensional', label: 'Bank Konvensional' },
-	{ value: 'dana_pensiun', label: 'Dana Pensiun' },
-	{ value: 'asuransi', label: 'Asuransi' },
-	{ value: 'properti', label: 'Properti' },
-	{ value: 'bank_syariah', label: 'Bank Syariah' },
-	{ value: 'infrastruktur', label: 'Infrastruktur' },
-	{ value: 'sekuritas', label: 'Sekuritas' },
-	{ value: 'pembiayaan', label: 'Pembiayaan' }
+	{ value: 'umum', label: 'Umum', lampiran1Kode: 'A' },
+	{ value: 'manufaktur', label: 'Manufaktur', lampiran1Kode: 'B' },
+	{ value: 'dagang', label: 'Dagang', lampiran1Kode: 'C' },
+	{ value: 'jasa', label: 'Jasa', lampiran1Kode: 'D' },
+	{ value: 'bank_konvensional', label: 'Bank Konvensional', lampiran1Kode: 'E' },
+	{ value: 'dana_pensiun', label: 'Dana Pensiun', lampiran1Kode: 'F' },
+	{ value: 'asuransi', label: 'Asuransi', lampiran1Kode: 'G' },
+	{ value: 'properti', label: 'Properti', lampiran1Kode: 'H' },
+	{ value: 'bank_syariah', label: 'Bank Syariah', lampiran1Kode: 'I' },
+	{ value: 'infrastruktur', label: 'Infrastruktur', lampiran1Kode: 'J' },
+	{ value: 'sekuritas', label: 'Sekuritas', lampiran1Kode: 'K' },
+	{ value: 'pembiayaan', label: 'Pembiayaan', lampiran1Kode: 'L' }
 ] as const;
 
 const opiniAuditorId = (kode: string) => `opini-auditor-${kode}`;
@@ -48,12 +48,14 @@ export const run = async ({ db }: SeedContext) => {
 			.values({
 				id: sektorUsahaId(row.value),
 				kode: row.value,
-				nama: row.label
+				nama: row.label,
+				lampiran1Kode: row.lampiran1Kode
 			})
 			.onConflictDoUpdate({
 				target: sektor_usaha_spt_pph_badan.kode,
 				set: {
 					nama: row.label,
+					lampiran1Kode: row.lampiran1Kode,
 					aktif: true
 				}
 			});

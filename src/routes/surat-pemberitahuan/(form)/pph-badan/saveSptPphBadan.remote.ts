@@ -1,13 +1,15 @@
 import { form, getRequestEvent } from '$app/server';
+import { computeLabaRugiRows } from '$lib/helpers/labaRugiRollup';
 import { decimalString, requiredString } from '$lib/helpers/valibot-schema';
 import { db } from '$lib/server/db';
 import {
+	kode_koreksi_fiskal_spt_pph_badan,
 	negara_spt_pph_badan,
 	opini_auditor_spt_pph_badan,
 	sektor_usaha_spt_pph_badan,
 	spt_pph_badan,
+	spt_pph_badan_lampiran_1_akun,
 	spt_pph_badan_lampiran_1_laba_rugi,
-	spt_pph_badan_lampiran_1_neraca,
 	spt_pph_badan_lampiran_2_afiliasi,
 	spt_pph_badan_lampiran_2_pihak
 } from '$lib/server/db/schema';
@@ -68,17 +70,13 @@ const SaveSptPphBadanSchema = v.object({
 	),
 	labaRugi: jsonRows(
 		v.object({
-			id: v.string(),
-			komersial: decimalInput('Nilai komersial'),
-			tidakTermasukObjekPajak: decimalInput('Tidak termasuk objek pajak'),
+			akunId: requiredString('Akun laba rugi'),
+			nilaiKomersial: decimalInput('Nilai komersial'),
+			nonObjekPajak: decimalInput('Non objek pajak'),
 			dikenakanPphFinal: decimalInput('Dikenakan PPh final'),
-			fiskal: decimalInput('Nilai fiskal')
-		})
-	),
-	neraca: jsonRows(
-		v.object({
-			id: v.string(),
-			nilai: decimalInput('Nilai neraca')
+			penyesuaianFiskalPositif: decimalInput('Penyesuaian fiskal positif'),
+			penyesuaianFiskalNegatif: decimalInput('Penyesuaian fiskal negatif'),
+			kodePenyesuaianFiskal: v.optional(v.string(), '')
 		})
 	)
 });
@@ -107,10 +105,37 @@ export const saveSptPphBadan = form(SaveSptPphBadanSchema, async (input) => {
 		error(404, 'Konsep SPT PPh Badan tidak ditemukan');
 	}
 
-	const pphKurangLebihBayar = input.labaRugi.reduce((total, row) => total + Number(row.fiskal), 0);
 	const statusDraft = input.action === 'Simpan Lapor' ? 'dilaporkan' : 'konsep';
 	const sektorUsahaId = await getSektorUsahaId(input.sektorUsaha);
 	const opiniAuditorId = await getOpiniAuditorId(input.diaudit, input.opiniAuditor);
+
+	const labaRugiTemplate = await db
+		.select({
+			id: spt_pph_badan_lampiran_1_akun.id,
+			nomorUrut: spt_pph_badan_lampiran_1_akun.nomorUrut,
+			kode: spt_pph_badan_lampiran_1_akun.kode,
+			namaAkun: spt_pph_badan_lampiran_1_akun.namaAkun,
+			rowType: spt_pph_badan_lampiran_1_akun.rowType,
+			classification: spt_pph_badan_lampiran_1_akun.classification,
+			parentKode: spt_pph_badan_lampiran_1_akun.parentKode,
+			sign: spt_pph_badan_lampiran_1_akun.sign
+		})
+		.from(spt_pph_badan_lampiran_1_akun)
+		.where(eq(spt_pph_badan_lampiran_1_akun.sektorUsahaId, sektorUsahaId));
+
+	const pphKurangLebihBayar =
+		computeLabaRugiRows(
+			labaRugiTemplate,
+			input.labaRugi.map((row) => ({
+				akunId: row.akunId,
+				nilaiKomersial: Number(row.nilaiKomersial),
+				nonObjekPajak: Number(row.nonObjekPajak),
+				dikenakanPphFinal: Number(row.dikenakanPphFinal),
+				penyesuaianFiskalPositif: Number(row.penyesuaianFiskalPositif),
+				penyesuaianFiskalNegatif: Number(row.penyesuaianFiskalNegatif),
+				kodePenyesuaianFiskal: row.kodePenyesuaianFiskal
+			}))
+		).find((row) => row.kode === '4800')?.nilaiFiskal ?? 0;
 
 	await db.transaction(async (tx) => {
 		await tx
@@ -132,35 +157,40 @@ export const saveSptPphBadan = form(SaveSptPphBadanSchema, async (input) => {
 			})
 			.where(eq(spt_pph_badan.id, input.id));
 
-		for (const row of input.labaRugi) {
-			await tx
-				.update(spt_pph_badan_lampiran_1_laba_rugi)
-				.set({
-					komersial: Number(row.komersial),
-					tidakTermasukObjekPajak: Number(row.tidakTermasukObjekPajak),
-					dikenakanPphFinal: Number(row.dikenakanPphFinal),
-					fiskal: Number(row.fiskal)
-				})
-				.where(
-					and(
-						eq(spt_pph_badan_lampiran_1_laba_rugi.id, row.id),
-						eq(spt_pph_badan_lampiran_1_laba_rugi.sptPphBadanId, input.id)
-					)
-				);
-		}
+		const dataAkunIds = new Set(
+			labaRugiTemplate.filter((row) => row.rowType === 'data').map((row) => row.id)
+		);
 
-		for (const row of input.neraca) {
+		for (const row of input.labaRugi) {
+			if (!dataAkunIds.has(row.akunId)) continue;
+
+			const kodePenyesuaianFiskalId = row.kodePenyesuaianFiskal
+				? await getKodePenyesuaianFiskalId(row.kodePenyesuaianFiskal)
+				: null;
+
+			const values = {
+				nilaiKomersial: Number(row.nilaiKomersial),
+				nonObjekPajak: Number(row.nonObjekPajak),
+				dikenakanPphFinal: Number(row.dikenakanPphFinal),
+				penyesuaianFiskalPositif: Number(row.penyesuaianFiskalPositif),
+				penyesuaianFiskalNegatif: Number(row.penyesuaianFiskalNegatif),
+				kodePenyesuaianFiskalId
+			};
+
 			await tx
-				.update(spt_pph_badan_lampiran_1_neraca)
-				.set({
-					nilai: Number(row.nilai)
+				.insert(spt_pph_badan_lampiran_1_laba_rugi)
+				.values({
+					sptPphBadanId: input.id,
+					akunId: row.akunId,
+					...values
 				})
-				.where(
-					and(
-						eq(spt_pph_badan_lampiran_1_neraca.id, row.id),
-						eq(spt_pph_badan_lampiran_1_neraca.sptPphBadanId, input.id)
-					)
-				);
+				.onConflictDoUpdate({
+					target: [
+						spt_pph_badan_lampiran_1_laba_rugi.sptPphBadanId,
+						spt_pph_badan_lampiran_1_laba_rugi.akunId
+					],
+					set: values
+				});
 		}
 
 		await tx
@@ -255,6 +285,22 @@ async function getNegaraId(kode: string) {
 	}
 
 	return negara.id;
+}
+
+async function getKodePenyesuaianFiskalId(kode: string) {
+	const [kodeKoreksiFiskal] = await db
+		.select({ id: kode_koreksi_fiskal_spt_pph_badan.id })
+		.from(kode_koreksi_fiskal_spt_pph_badan)
+		.where(
+			and(eq(kode_koreksi_fiskal_spt_pph_badan.kode, kode), eq(kode_koreksi_fiskal_spt_pph_badan.aktif, true))
+		)
+		.limit(1);
+
+	if (!kodeKoreksiFiskal) {
+		error(400, 'Kode penyesuaian fiskal tidak valid');
+	}
+
+	return kodeKoreksiFiskal.id;
 }
 
 async function getSektorUsahaId(kode: string) {

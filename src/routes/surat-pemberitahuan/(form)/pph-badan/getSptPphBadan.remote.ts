@@ -1,13 +1,13 @@
 import { getRequestEvent, query } from '$app/server';
 import { db } from '$lib/server/db';
 import {
+	kode_koreksi_fiskal_spt_pph_badan,
 	mata_uang_spt_pph_badan,
 	negara_spt_pph_badan,
 	opini_auditor_spt_pph_badan,
 	sektor_usaha_spt_pph_badan,
 	spt_pph_badan,
 	spt_pph_badan_lampiran_1_laba_rugi,
-	spt_pph_badan_lampiran_1_neraca,
 	spt_pph_badan_lampiran_2_afiliasi,
 	spt_pph_badan_lampiran_2_pihak
 } from '$lib/server/db/schema';
@@ -65,17 +65,24 @@ export const getSptPphBadan = query(async () => {
 		error(404, 'SPT PPh Badan tidak ditemukan');
 	}
 
-	const [labaRugi, neraca, pemegangSaham, penyertaanModal] = await Promise.all([
+	const [nilai, pemegangSaham, penyertaanModal] = await Promise.all([
 		db
-			.select()
+			.select({
+				id: spt_pph_badan_lampiran_1_laba_rugi.id,
+				akunId: spt_pph_badan_lampiran_1_laba_rugi.akunId,
+				nilaiKomersial: spt_pph_badan_lampiran_1_laba_rugi.nilaiKomersial,
+				nonObjekPajak: spt_pph_badan_lampiran_1_laba_rugi.nonObjekPajak,
+				dikenakanPphFinal: spt_pph_badan_lampiran_1_laba_rugi.dikenakanPphFinal,
+				penyesuaianFiskalPositif: spt_pph_badan_lampiran_1_laba_rugi.penyesuaianFiskalPositif,
+				penyesuaianFiskalNegatif: spt_pph_badan_lampiran_1_laba_rugi.penyesuaianFiskalNegatif,
+				kodePenyesuaianFiskal: kode_koreksi_fiskal_spt_pph_badan.kode
+			})
 			.from(spt_pph_badan_lampiran_1_laba_rugi)
-			.where(eq(spt_pph_badan_lampiran_1_laba_rugi.sptPphBadanId, id))
-			.orderBy(asc(spt_pph_badan_lampiran_1_laba_rugi.nomorUrut)),
-		db
-			.select()
-			.from(spt_pph_badan_lampiran_1_neraca)
-			.where(eq(spt_pph_badan_lampiran_1_neraca.sptPphBadanId, id))
-			.orderBy(asc(spt_pph_badan_lampiran_1_neraca.nomorUrut)),
+			.leftJoin(
+				kode_koreksi_fiskal_spt_pph_badan,
+				eq(spt_pph_badan_lampiran_1_laba_rugi.kodePenyesuaianFiskalId, kode_koreksi_fiskal_spt_pph_badan.id)
+			)
+			.where(eq(spt_pph_badan_lampiran_1_laba_rugi.sptPphBadanId, id)),
 		db
 			.select({
 				id: spt_pph_badan_lampiran_2_pihak.id,
@@ -128,8 +135,7 @@ export const getSptPphBadan = query(async () => {
 		readonly: spt.statusDraft !== 'konsep',
 		spt,
 		lampiran1: {
-			labaRugi,
-			neraca
+			nilai: nilai.map((row) => ({ ...row, kodePenyesuaianFiskal: row.kodePenyesuaianFiskal ?? '' }))
 		},
 		lampiran2: {
 			pemegangSaham,

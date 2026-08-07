@@ -5,8 +5,16 @@ import * as fakturReferenceMaster from './batches/002-faktur-reference-master';
 import * as fakturDemo from './batches/002-faktur-demo';
 import * as sptPphBadanReferenceMaster from './batches/003-spt-pph-badan-reference-master';
 import * as batch16Peserta from './batches/004-batch-16-peserta';
+import * as lampiran1Akun from './batches/005-lampiran-1-akun';
 
-const batches = [initialUsers, fakturReferenceMaster, sptPphBadanReferenceMaster, batch16Peserta, fakturDemo];
+const batches = [
+	initialUsers,
+	fakturReferenceMaster,
+	sptPphBadanReferenceMaster,
+	batch16Peserta,
+	lampiran1Akun,
+	fakturDemo
+];
 
 const seed = async () => {
 	console.log('Seeding Better Auth users and wajib_pajak profiles...\n');

@@ -22,12 +22,14 @@
         };
         spt: sptType;
         readonly: boolean;
+        sektorUsaha: string;
     }
 
     let {
         currentTab = $bindable(),
         spt,
-        readonly
+        readonly,
+        sektorUsaha = $bindable()
     }: Props = $props();
     
     $effect(() => {currentTab.title = currentTab.tab === 'Induk' ? 'sigma' : currentTab.title});
@@ -37,7 +39,7 @@
     <div class="accordion">
         <Accordion item={"HEADER"}><Header data={spt} {readonly} /></Accordion>
         <Accordion item={"A. IDENTITAS WAJIB PAJAK"}><A data={spt} {readonly}/></Accordion>
-        <Accordion item={"B. INFORMASI LAPORAN KEUANGAN"} ><B data={spt} {readonly}/></Accordion>
+        <Accordion item={"B. INFORMASI LAPORAN KEUANGAN"} ><B data={spt} {readonly} bind:sektorUsaha/></Accordion>
         <Accordion item={"C. PENGHASILAN YANG DIKENAKAN PPh YANG BERSIFAT FINAL DAN TIDAK TERMASUK OBJEK PAJAK"}><C data={spt}/></Accordion>
         <Accordion item={"D. PENGHITUNGAN PPh"}><D/></Accordion>
         <Accordion item={"E. PENGURANGAN PPh TERUTANG"}><E/></Accordion>

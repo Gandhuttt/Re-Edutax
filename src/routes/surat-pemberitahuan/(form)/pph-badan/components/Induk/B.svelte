@@ -21,6 +21,7 @@
             namaKantorAkuntanPublik: string | null
         }
         readonly: boolean
+        sektorUsaha: string
     }
 
     const sektorUsahaOptions = await getSektorUsaha();
@@ -38,7 +39,7 @@
     //     { value: 'tidak-wajar', label: 'Tidak Wajar' }
     // ];
 
-    const { data, readonly }: Props = $props();
+    let { data, readonly, sektorUsaha = $bindable() }: Props = $props();
     // const auditData = $derived(sectionData?.['2']);
 
     let isDiaudit = $state(data.diaudit ?? undefined);
@@ -60,7 +61,7 @@
                 <td class="tw:w-10"><span>1.</span></td>
                 <td class="tw:w-[40rem]"><span>Sektor Usaha Laporan Keuangan pada Lampiran 1 *</span></td>
                 <td class="tw:w-[35rem]">
-                    <Select class={"tw:invalid:text-gray-500"} name={"sektorUsaha"} value={data.sektorUsahaKode ?? ''}  required>
+                    <Select class={"tw:invalid:text-gray-500"} name={"sektorUsaha"} bind:value={sektorUsaha} required disabled={readonly}>
                         <!-- {#if sectionData}
                             {@const selectedSektor = sektorUsaha.find((v) => v.value === sectionData['1'])}
                             {#if selectedSektor}

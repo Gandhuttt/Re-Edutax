@@ -10,8 +10,7 @@
 	import Select from '$lib/components/Select.svelte';
 	import Table from '$lib/components/Table.svelte';
 	import Induk from './components/Induk/_Induk.svelte';
-	import L1A from './components/L1-A/_L1A.svelte';
-	import L1C from './components/L1-C/_L1C.svelte';
+	import L1 from './components/L1/_L1.svelte';
 	import L2 from './components/L2/_L2.svelte';
 	import L3 from './components/L3/_L3.svelte';
 	import L4 from './components/L4/_L4.svelte';
@@ -27,34 +26,40 @@
 	import { getOpiniAuditor } from './components/Induk/getOpiniAuditor.remote';
 	import { getSektorUsaha } from './components/Induk/getSektorUsaha.remote';
 	import { getNegara } from './components/L2/getNegara.remote';
+	import { getKodeKoreksiFiskal } from './components/L1/getKodeKoreksiFiskal.remote';
+	import { getLampiran1Templates } from './components/L1/getLampiran1Templates.remote';
 	import { saveSptPphBadan } from './saveSptPphBadan.remote';
 
 	const { readonly, spt, lampiran1, lampiran2 } = await getSptPphBadan();
 	const opiniAuditorOptions = await getOpiniAuditor();
 	const sektorUsahaOptions = await getSektorUsaha();
 	const negaraOptions = await getNegara();
+	const kodeKoreksiFiskalOptions = await getKodeKoreksiFiskal();
+	const lampiran1Templates = await getLampiran1Templates();
 	const saveForm = saveSptPphBadan.for(spt.id);
 
+	const lampiran1TemplatesBySektor = new Map<string, { lampiranKode: string | null; rows: typeof lampiran1Templates }>();
+	for (const row of lampiran1Templates) {
+		const entry = lampiran1TemplatesBySektor.get(row.sektorUsahaKode) ?? { lampiranKode: row.lampiranKode, rows: [] };
+		entry.rows.push(row);
+		lampiran1TemplatesBySektor.set(row.sektorUsahaKode, entry);
+	}
+
+	let sektorUsaha = $state(spt.sektorUsahaKode ?? '');
+
 	let labaRugi = $state(
-		lampiran1.labaRugi.map((row) => ({
+		lampiran1.nilai.map((row) => ({
 			id: row.id,
-			kodeAkun: row.kodeAkun,
-			namaAkun: row.namaAkun,
-			komersial: row.komersial,
-			tidakTermasukObjekPajak: row.tidakTermasukObjekPajak,
+			akunId: row.akunId,
+			nilaiKomersial: row.nilaiKomersial,
+			nonObjekPajak: row.nonObjekPajak,
 			dikenakanPphFinal: row.dikenakanPphFinal,
-			fiskal: row.fiskal
+			penyesuaianFiskalPositif: row.penyesuaianFiskalPositif,
+			penyesuaianFiskalNegatif: row.penyesuaianFiskalNegatif,
+			kodePenyesuaianFiskal: row.kodePenyesuaianFiskal
 		}))
 	);
-	let neraca = $state(
-		lampiran1.neraca.map((row) => ({
-			id: row.id,
-			sisi: row.sisi,
-			kodeAkun: row.kodeAkun,
-			namaAkun: row.namaAkun,
-			nilai: row.nilai
-		}))
-	);
+
 	let l2a = $state(
 		lampiran2.pemegangSaham.map((row) => ({
 			id: row.id,
@@ -122,7 +127,12 @@
 		'Tarif fasilitas sebagaimana Pasal 31E ayat (1) UU PPh',
 		'Tarif Pajak Lainnya'
 	];
-	const tabs = ['Induk', 'L1-A', 'L1-C', 'L2', 'L3', 'L4', 'L5', 'L6', 'L7', 'L8', 'L9', 'L10-A', 'L10-B', 'L10-C', 'L11-B', 'L13-A', 'L13-B'];
+	const tabs = ['Induk', 'L1', 'L2', 'L3', 'L4', 'L5', 'L6', 'L7', 'L8', 'L9', 'L10-A', 'L10-B', 'L10-C', 'L11-B', 'L13-A', 'L13-B'];
+	const tabLabel = (tab: string) => {
+		if (tab !== 'L1') return tab;
+		const lampiranKode = lampiran1TemplatesBySektor.get(sektorUsaha)?.lampiranKode;
+		return `L1${lampiranKode ? `-${lampiranKode}` : ''}`;
+	};
 </script>
 
 <div class="tw:w-full tw:p-10">
@@ -160,7 +170,6 @@
 				})}
 			>
 				<input type="hidden" name="labaRugi" value={JSON.stringify(labaRugi)} />
-				<input type="hidden" name="neraca" value={JSON.stringify(neraca)} />
 				<input type="hidden" name="l2a" value={JSON.stringify(l2a)} />
 				<input type="hidden" name="l2b" value={JSON.stringify(l2b)} />
 				<header class="tw:mb-5">
@@ -168,14 +177,14 @@
 						<ul class="tw:m-0! tw:flex tw:min-w-max tw:flex-row tw:p-0!">
 							{#each tabs as tab}
 								<li class:active-tab={currentTab.tab === tab}>
-									<button type="button" onclick={() => (currentTab.tab = tab)}>{tab}</button>
+									<button type="button" onclick={() => (currentTab.tab = tab)}>{tabLabel(tab)}</button>
 								</li>
 							{/each}
 						</ul>
 					</nav>
 				</header>
 
-				<Induk bind:currentTab {spt} {readonly}></Induk>
+				<Induk bind:currentTab {spt} {readonly} bind:sektorUsaha></Induk>
 
 				<!-- Lampiran -->
 				<div class="{currentTab.tab === "Induk" ? "tw:hidden" : ""}">
@@ -210,8 +219,14 @@
 					</Card>
 				</div>
 
-				<L1A bind:currentTab {labaRugi} {neraca} {readonly}></L1A>
-				<L1C bind:currentTab {labaRugi} {neraca} {readonly}></L1C>
+				<L1
+					bind:currentTab
+					{sektorUsaha}
+					templatesBySektor={lampiran1TemplatesBySektor}
+					bind:labaRugi
+					{readonly}
+					{kodeKoreksiFiskalOptions}
+				/>
 				<L2 bind:currentTab bind:l2a bind:l2b {readonly} {negaraOptions}/>
 				<L3 bind:currentTab/>
 				<L4 bind:currentTab/>
