@@ -6,6 +6,7 @@
     import Alert from "$lib/components/Alert.svelte";
     import { getSektorUsaha } from "./getSektorUsaha.remote";
     import { getOpiniAuditor } from "./getOpiniAuditor.remote";
+    import { getContext } from "svelte";
 
     export type SectionData = {
         '1'?: string;
@@ -42,7 +43,7 @@
     let { data, readonly, sektorUsaha = $bindable() }: Props = $props();
     // const auditData = $derived(sectionData?.['2']);
 
-    let isDiaudit = $state(data.diaudit ?? undefined);
+    let isDiaudit = $derived(data.diaudit ?? undefined);
 </script>
 
 <div class="tw:p-5">
@@ -90,11 +91,11 @@
                 <td>
                     <div class="tw:flex tw:gap-5">
                         <Label class="tw:flex tw:items-center tw:gap-1">
-                            <input type="radio" name="diaudit" value={false} bind:group={isDiaudit}>
+                            <input type="radio" name="diaudit" id="{getContext("id")}" value={false} bind:group={isDiaudit}>
                             <span>Tidak</span>
                         </Label>
                         <Label class="tw:flex tw:items-center tw:gap-1">
-                            <input type="radio" name="diaudit" value={true} bind:group={isDiaudit}>
+                            <input type="radio" name="diaudit" id="{getContext("id")}" value={true} bind:group={isDiaudit}>
                             <span>Ya</span>
                         </Label>
                     </div>

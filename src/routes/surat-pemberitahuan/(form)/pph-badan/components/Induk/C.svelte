@@ -3,6 +3,7 @@
     import Label from "$lib/components/Label.svelte";
     import Input from "$lib/components/Input.svelte";
     import Alert from "$lib/components/Alert.svelte";
+    import { getContext } from "svelte";
 
     const { data }: {
         data: {
@@ -13,10 +14,10 @@
         }
     } = $props();
 
-    let C1a = $state(data.menerimaPenghasilanPp23 ?? undefined);
-    let C1b = $state(data.hanyaPenghasilanPp23 ?? undefined);
-    let C2 = $state(data.menerimaPenghasilanFinal ?? undefined);
-    let C3 = $state(data.menerimaPenghasilanBukanObjekPajak ?? undefined);
+    let C1a = $derived(data.menerimaPenghasilanPp23 ?? undefined);
+    let C1b = $derived(data.hanyaPenghasilanPp23 ?? undefined);
+    let C2 = $derived(data.menerimaPenghasilanFinal ?? undefined);
+    let C3 = $derived(data.menerimaPenghasilanBukanObjekPajak ?? undefined);
 </script>
 
 <div class="tw:p-5">
@@ -37,11 +38,11 @@
                 <td class="tw:w-[10rem]">
                     <div class="tw:flex tw:gap-5">
                         <Label class="tw:flex tw:items-center tw:gap-1">
-                            <input type="radio" name="menerimaPenghasilanPp23" value={false} bind:group={C1a}>
+                            <input type="radio" name="menerimaPenghasilanPp23" id="{getContext("id")}" value={false} bind:group={C1a}>
                             <span>Tidak</span>
                         </Label>
                         <Label class="tw:flex tw:items-center tw:gap-1">
-                            <input type="radio" name="menerimaPenghasilanPp23" value={true} bind:group={C1a}>
+                            <input type="radio" name="menerimaPenghasilanPp23" id="{getContext("id")}" value={true} bind:group={C1a}>
                             <span>Ya</span>
                         </Label>
                     </div>
@@ -68,11 +69,11 @@
                 <td colspan="2">
                     <div class="tw:flex tw:gap-5">
                         <Label class="tw:flex tw:items-center tw:gap-1">
-                            <input type="radio" name="hanyaPenghasilanPp23" value={false} bind:group={C1b} disabled={!C1a}>
+                            <input type="radio" name="hanyaPenghasilanPp23" id="{getContext("id")}" value={false} bind:group={C1b} disabled={!C1a}>
                             <span>Tidak</span>
                         </Label>
                         <Label class="tw:flex tw:items-center tw:gap-1">
-                            <input type="radio" name="hanyaPenghasilanPp23" value={true} bind:group={C1b} disabled={!C1a}>
+                            <input type="radio" name="hanyaPenghasilanPp23" id="{getContext("id")}" value={true} bind:group={C1b} disabled={!C1a}>
                             <span>Ya</span>
                         </Label>
                     </div>
@@ -86,11 +87,11 @@
                 <td>
                     <div class="tw:flex tw:gap-5">
                         <Label class="tw:flex tw:items-center tw:gap-1">
-                            <input type="radio" name="menerimaPenghasilanFinal" value={false} bind:group={C2}>
+                            <input type="radio" name="menerimaPenghasilanFinal" id="{getContext("id")}" value={false} bind:group={C2}>
                             <span>Tidak</span>
                         </Label>
                         <Label class="tw:flex tw:items-center tw:gap-1">
-                            <input type="radio" name="menerimaPenghasilanFinal" value={true} bind:group={C2}>
+                            <input type="radio" name="menerimaPenghasilanFinal" id="{getContext("id")}" value={true} bind:group={C2}>
                             <span>Ya</span>
                         </Label>
                     </div>
@@ -117,11 +118,11 @@
                 <td>
                     <div class="tw:flex tw:gap-5">
                         <Label class="tw:flex tw:items-center tw:gap-1">
-                            <input type="radio" name="menerimaPenghasilanBukanObjekPajak" value={false} bind:group={C3}>
+                            <input type="radio" name="menerimaPenghasilanBukanObjekPajak" id="{getContext("id")}" value={false} bind:group={C3}>
                             <span>Tidak</span>
                         </Label>
                         <Label class="tw:flex tw:items-center tw:gap-1">
-                            <input type="radio" name="menerimaPenghasilanBukanObjekPajak" value={true} bind:group={C3}>
+                            <input type="radio" name="menerimaPenghasilanBukanObjekPajak" id="{getContext("id")}" value={true} bind:group={C3}>
                             <span>Ya</span>
                         </Label>
                     </div>
