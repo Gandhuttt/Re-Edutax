@@ -14,6 +14,7 @@
 	import L2 from './components/L2/_L2.svelte';
 	import L3 from './components/L3/_L3.svelte';
 	import L4 from './components/L4/_L4.svelte';
+	import L5 from './components/L5/_L5.svelte';
 	import L6 from './components/L6/_L6.svelte';
 	import L10A from './components/L10-A/_L10A.svelte';
 	import L10B from './components/L10-B/_L10B.svelte';
@@ -307,6 +308,7 @@
 					jenisPajakOptions={jenisPajakDipotongDipungutOptions}
 				/>
 				<L4 bind:currentTab/>
+				<L5 bind:currentTab/>
 				<L6 bind:currentTab/>
 				<L10A bind:currentTab/>
 				<L10B bind:currentTab/>
