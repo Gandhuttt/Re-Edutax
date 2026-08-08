@@ -13,8 +13,6 @@
     let { currentTab = $bindable() }: Props = $props();
 
     $effect(() => {currentTab.title = currentTab.tab === "L8" ? "PERHITUNGAN FASILITAS PENGURANGAN TARIF PPh  BAGI WAJIB PAJAK BADAN DALAM NEGERI BERDASARKAN PASAL 31E AYAT (1) UDANG-UNDANG PPh" : currentTab.title})
-
-    const currentYear = new Date().getFullYear();
 </script>
 
 <div class="tw:mt-5 {currentTab.tab === "L8" ? "" : "tw:hidden"}">

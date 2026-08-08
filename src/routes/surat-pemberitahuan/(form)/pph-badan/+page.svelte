@@ -18,6 +18,7 @@
 	import L6 from './components/L6/_L6.svelte';
 	import L7 from './components/L7/_L7.svelte';
 	import L8 from './components/L8/_L8.svelte';
+	import L9 from './components/L9/_L9.svelte';
 	import L10A from './components/L10-A/_L10A.svelte';
 	import L10B from './components/L10-B/_L10B.svelte';
 	import L10C from './components/L10-C/_L10C.svelte';
@@ -363,6 +364,7 @@
 				<L6 bind:currentTab/>
 				<L7 bind:currentTab/>
 				<L8 bind:currentTab/>
+				<L9 bind:currentTab/>
 				<L10A bind:currentTab/>
 				<L10B bind:currentTab/>
 				<L10C bind:currentTab/>
