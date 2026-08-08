@@ -1,10 +1,38 @@
 <script lang="ts">
-	import Table from "$lib/components/Table.svelte";
+    import Table from "$lib/components/Table.svelte";
     import Button from "$lib/components/Button.svelte";
+
+    let {
+        data,
+        openModal,
+        deleteItem,
+        objekPajakOptions
+    }: {
+        data: Array<{
+            id: string | number;
+            npwpPemotongPemungutPenyetor: string;
+            namaPemotongPemungutPenyetor: string;
+            objekPajak: string;
+            dasarPengenaanPajak: number;
+            tarif: number;
+            pphFinalTerutang: number;
+            nomorBuktiPotong: string;
+            tanggalBuktiPotong: string;
+            keterangan: string;
+        }>;
+        openModal: (item: unknown) => void;
+        deleteItem: (id: string | number) => void;
+        objekPajakOptions: { value: string; label: string }[];
+    } = $props();
+
+    const objekPajakLabel = (kode: string) => objekPajakOptions.find((o) => o.value === kode)?.label ?? kode;
+
+    let totalDasarPengenaanPajak = $derived(data.reduce((sum, item) => sum + Number(item.dasarPengenaanPajak || 0), 0));
+    let totalPphFinalTerutang = $derived(data.reduce((sum, item) => sum + Number(item.pphFinalTerutang || 0), 0));
 </script>
 
 <div class="tw:p-5 tw:flex tw:flex-col tw:gap-1">
-    <Button class={"tw:text-white tw:w-30"} color={"#1c398e"}>Tambah</Button>
+    <Button type="button" class={"tw:text-white tw:w-30"} color={"#1c398e"} onclick={() => openModal(null)} data-bs-toggle="modal" data-bs-target="#modalL4A">Tambah</Button>
     <div class="tw:overflow-scroll">
         <Table class={"tw:w-full"}>
             {#snippet head()}
@@ -15,32 +43,39 @@
             {#snippet body()}
                 <tr class="header tw:bg-[var(--color-primary)] tw:font-bold tw:text-center">
                     <td class="tw:w-[10rem]"><span>TINDAKAN</span></td>
-                    <td class="tw:w-[15rem]"><span>NPWP PEMOTONG/PEMUNGUT</span></td>
-                    <td class="tw:w-[15rem]"><span>NAMA PEMOTONG PEMUNGUT</span></td>
-                    <td class="tw:w-[15rem]"><span>KODE OBJEK PAJAK</span></td>
-                    <td class="tw:w-[10rem]"><span>OBJEK PAJAK</span></td>
-                    <td class="tw:w-[20rem]"><span>DASAR PENGENAAN PAJAK (Rupiah)</span></td>
-                    <td class="tw:w-[10rem]"><span>TINGKAT</span></td>
-                    <td class="tw:w-[20rem]"><span>PPH FINAL TERUTANG (Rupiah)</span></td>
+                    <td class="tw:w-[15rem]"><span>NPWP PEMOTONG/PEMUNGUT/PENYETOR</span></td>
+                    <td class="tw:w-[15rem]"><span>NAMA PEMOTONG/PEMUNGUT/PENYETOR</span></td>
+                    <td class="tw:w-[20rem]"><span>OBJEK PAJAK</span></td>
+                    <td class="tw:w-[15rem]"><span>DASAR PENGENAAN PAJAK (Rupiah)</span></td>
+                    <td class="tw:w-[8rem]"><span>TARIF (%)</span></td>
+                    <td class="tw:w-[15rem]"><span>PPh FINAL TERUTANG (Rupiah)</span></td>
+                    <td class="tw:w-[12rem]"><span>NOMOR BUKTI POTONG/SETOR</span></td>
+                    <td class="tw:w-[10rem]"><span>TANGGAL BUKTI POTONG/SETOR</span></td>
+                    <td class="tw:w-[15rem]"><span>KETERANGAN</span></td>
                 </tr>
+                {#each data as item, i}
                 <tr class="data">
                     <td class="tw:flex tw:flex-row tw:gap-1 tw:justify-center">
-                        <Button class={"tw:min-w-15!"}>Edit</Button>
-                        <Button class={"tw:min-w-15!"}>Hapus</Button>
+                        <Button type="button" class={"tw:min-w-15!"} onclick={() => openModal(item)} data-bs-toggle="modal" data-bs-target="#modalL4A">Edit</Button>
+                        <Button type="button" class={"tw:min-w-15!"} onclick={() => deleteItem(item.id)}>Hapus</Button>
                     </td>
-                    <td>1</td>
-                    <td>PEMEGANG SAHAM SATU</td>
-                    <td>JL. JALAN SATU RT 001 RW 001 KOTA ADM. JAKARTA PUSAT 10350</td>
-                    <td>INDONESIA</td>
-                    <td>330000000000010100000000000000</td>
-                    <td>DIREKTUR</td>
-                    <td>12345678901234567890</td>
+                    <td>{item.npwpPemotongPemungutPenyetor}</td>
+                    <td>{item.namaPemotongPemungutPenyetor}</td>
+                    <td>{objekPajakLabel(item.objekPajak)}</td>
+                    <td>{Number(item.dasarPengenaanPajak || 0).toLocaleString('id-ID')}</td>
+                    <td>{item.tarif}</td>
+                    <td>{Number(item.pphFinalTerutang || 0).toLocaleString('id-ID')}</td>
+                    <td>{item.nomorBuktiPotong}</td>
+                    <td>{item.tanggalBuktiPotong}</td>
+                    <td>{item.keterangan}</td>
                 </tr>
+                {/each}
                 <tr class="footer tw:bg-[#FFD230] tw:text-right tw:font-bold">
-                    <td colspan="5">TOTAL</td>
-                    <td>0</td>
+                    <td colspan="4">JUMLAH</td>
+                    <td>{totalDasarPengenaanPajak.toLocaleString('id-ID')}</td>
                     <td></td>
-                    <td>0</td>
+                    <td>{totalPphFinalTerutang.toLocaleString('id-ID')}</td>
+                    <td colspan="3"></td>
                 </tr>
             {/snippet}
         </Table>

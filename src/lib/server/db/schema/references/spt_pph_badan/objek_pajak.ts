@@ -8,6 +8,7 @@ export const objek_pajak_spt_pph_badan = sqliteTable(
 			.$defaultFn(() => crypto.randomUUID()),
 		kode: text('kode').notNull(),
 		nama: text('nama').notNull(),
+		nomorUrut: integer('nomor_urut').notNull().default(0),
 		aktif: integer('aktif', { mode: 'boolean' }).notNull().default(true)
 	},
 	(t) => [uniqueIndex('objek_pajak_spt_pph_badan_kode_unique').on(t.kode)]

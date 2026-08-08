@@ -34,9 +34,10 @@
 	import { getJenisPenghasilanKreditPajakLuarNegeri } from './components/L3/getJenisPenghasilanKreditPajakLuarNegeri.remote';
 	import { getMataUang } from './components/L3/getMataUang.remote';
 	import { getJenisPajakDipotongDipungut } from './components/L3/getJenisPajakDipotongDipungut.remote';
+	import { getObjekPajak } from './components/L4/getObjekPajak.remote';
 	import { saveSptPphBadan } from './saveSptPphBadan.remote';
 
-	const { readonly, spt, lampiran1, lampiran2, lampiran3 } = await getSptPphBadan();
+	const { readonly, spt, lampiran1, lampiran2, lampiran3, lampiran4 } = await getSptPphBadan();
 	const opiniAuditorOptions = await getOpiniAuditor();
 	const sektorUsahaOptions = await getSektorUsaha();
 	const negaraOptions = await getNegara();
@@ -46,6 +47,7 @@
 	const jenisPenghasilanKreditPajakLuarNegeriOptions = await getJenisPenghasilanKreditPajakLuarNegeri();
 	const mataUangOptions = await getMataUang();
 	const jenisPajakDipotongDipungutOptions = await getJenisPajakDipotongDipungut();
+	const objekPajakOptions = await getObjekPajak();
 	const saveForm = saveSptPphBadan.for(spt.id);
 
 	const lampiran1LabaRugiTemplatesBySektor = new Map<
@@ -152,6 +154,21 @@
 		}))
 	);
 
+	let l4a = $state(
+		lampiran4.penghasilanFinal.map((row) => ({
+			id: row.id,
+			npwpPemotongPemungutPenyetor: row.npwpPemotongPemungutPenyetor,
+			namaPemotongPemungutPenyetor: row.namaPemotongPemungutPenyetor,
+			objekPajak: row.objekPajakKode,
+			dasarPengenaanPajak: row.dasarPengenaanPajak,
+			tarif: row.tarif,
+			pphFinalTerutang: row.pphFinalTerutang,
+			nomorBuktiPotong: row.nomorBuktiPotong,
+			tanggalBuktiPotong: row.tanggalBuktiPotong ?? '',
+			keterangan: row.keterangan
+		}))
+	);
+
 	let menerimaPenghasilanPp23 = $state(Boolean(spt.menerimaPenghasilanPp23));
 	let hanyaPenghasilanPp23 = $state(Boolean(spt.hanyaPenghasilanPp23));
 	let menerimaPenghasilanFinal = $state(Boolean(spt.menerimaPenghasilanFinal));
@@ -238,6 +255,7 @@
 				<input type="hidden" name="l3a" value={JSON.stringify(l3a)} />
 				<input type="hidden" name="l3aPengembalianPengurangan" value={l3aPengembalianPengurangan} />
 				<input type="hidden" name="l3b" value={JSON.stringify(l3b)} />
+				<input type="hidden" name="l4a" value={JSON.stringify(l4a)} />
 				<header class="tw:mb-5">
 					<nav class="tw:overflow-x-auto tw:border-b tw:border-[#A9A9A9]">
 						<ul class="tw:m-0! tw:flex tw:min-w-max tw:flex-row tw:p-0!">
@@ -307,7 +325,7 @@
 					{mataUangOptions}
 					jenisPajakOptions={jenisPajakDipotongDipungutOptions}
 				/>
-				<L4 bind:currentTab/>
+				<L4 bind:currentTab bind:l4a {readonly} {objekPajakOptions}/>
 				<L5 bind:currentTab/>
 				<L6 bind:currentTab/>
 				<L10A bind:currentTab/>

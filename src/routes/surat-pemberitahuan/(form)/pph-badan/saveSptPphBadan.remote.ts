@@ -8,6 +8,7 @@ import {
 	kode_koreksi_fiskal_spt_pph_badan,
 	mata_uang_spt_pph_badan,
 	negara_spt_pph_badan,
+	objek_pajak_spt_pph_badan,
 	opini_auditor_spt_pph_badan,
 	sektor_usaha_spt_pph_badan,
 	spt_pph_badan,
@@ -18,7 +19,8 @@ import {
 	spt_pph_badan_lampiran_2_afiliasi,
 	spt_pph_badan_lampiran_2_pihak,
 	spt_pph_badan_lampiran_3_penghasilan_luar_negeri,
-	spt_pph_badan_lampiran_3_pph_dipotong
+	spt_pph_badan_lampiran_3_pph_dipotong,
+	spt_pph_badan_lampiran_4_pph_final
 } from '$lib/server/db/schema';
 import { error, redirect } from '@sveltejs/kit';
 import { and, eq } from 'drizzle-orm';
@@ -119,6 +121,19 @@ const SaveSptPphBadanSchema = v.object({
 			pph: decimalInput('Pajak penghasilan'),
 			nomorBukti: requiredString('Nomor bukti pemotongan/SSP/SSPCP'),
 			tanggalBukti: requiredString('Tanggal bukti pemotongan/SSP/SSPCP')
+		})
+	),
+	l4a: jsonRows(
+		v.object({
+			npwpPemotongPemungutPenyetor: v.optional(v.string(), ''),
+			namaPemotongPemungutPenyetor: v.optional(v.string(), ''),
+			objekPajak: requiredString('Objek pajak'),
+			dasarPengenaanPajak: decimalInput('Dasar pengenaan pajak'),
+			tarif: decimalInput('Tarif'),
+			pphFinalTerutang: decimalInput('PPh final terutang'),
+			nomorBuktiPotong: v.optional(v.string(), ''),
+			tanggalBuktiPotong: v.optional(v.string(), ''),
+			keterangan: v.optional(v.string(), '')
 		})
 	)
 });
@@ -360,6 +375,28 @@ export const saveSptPphBadan = form(SaveSptPphBadanSchema, async (input) => {
 				tanggalBukti: row.tanggalBukti
 			});
 		}
+
+		await tx
+			.delete(spt_pph_badan_lampiran_4_pph_final)
+			.where(eq(spt_pph_badan_lampiran_4_pph_final.sptPphBadanId, input.id));
+
+		for (const [index, row] of input.l4a.entries()) {
+			const objekPajakId = await getObjekPajakId(row.objekPajak);
+
+			await tx.insert(spt_pph_badan_lampiran_4_pph_final).values({
+				sptPphBadanId: input.id,
+				nomorUrut: index + 1,
+				npwpPemotongPemungutPenyetor: row.npwpPemotongPemungutPenyetor,
+				namaPemotongPemungutPenyetor: row.namaPemotongPemungutPenyetor,
+				objekPajakId,
+				dasarPengenaanPajak: Number(row.dasarPengenaanPajak),
+				tarif: Number(row.tarif),
+				pphFinalTerutang: Number(row.pphFinalTerutang),
+				nomorBuktiPotong: row.nomorBuktiPotong,
+				tanggalBuktiPotong: row.tanggalBuktiPotong,
+				keterangan: row.keterangan
+			});
+		}
 	});
 
 	redirect(303, statusDraft === 'dilaporkan' ? '/surat-pemberitahuan/laporan' : '/surat-pemberitahuan/konsep');
@@ -454,6 +491,20 @@ async function getJenisPajakDipotongDipungutId(kode: string) {
 	}
 
 	return jenisPajak.id;
+}
+
+async function getObjekPajakId(kode: string) {
+	const [objekPajak] = await db
+		.select({ id: objek_pajak_spt_pph_badan.id })
+		.from(objek_pajak_spt_pph_badan)
+		.where(and(eq(objek_pajak_spt_pph_badan.kode, kode), eq(objek_pajak_spt_pph_badan.aktif, true)))
+		.limit(1);
+
+	if (!objekPajak) {
+		error(400, 'Objek pajak tidak valid');
+	}
+
+	return objekPajak.id;
 }
 
 async function getKodePenyesuaianFiskalId(kode: string) {
