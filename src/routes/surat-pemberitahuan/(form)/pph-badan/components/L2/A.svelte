@@ -52,6 +52,9 @@
                     <td class="tw:w-[10rem]"><span>NILAI (Rp)</span></td>
                     <td class="tw:w-[10rem]"><span>%</span></td>
                 </tr>
+                {#if data.length === 0}
+                <tr class="data tw:text-center"><td colspan="10">Tidak ada data yang ditampilkan</td></tr>
+                {:else}
                 {#each data as item, i}
                 <tr class="data">
                     <td class="tw:flex tw:flex-row tw:gap-1 tw:justify-center">
@@ -69,6 +72,7 @@
                     <td>{item.dividen}</td>
                 </tr>
                 {/each}
+                {/if}
                 <tr class="footer tw:bg-[#FFD230] tw:text-right tw:font-bold">
                     <td colspan="7">JUMLAH</td>
                     <td>{totalNilaiModal.toLocaleString('id-ID')}</td>

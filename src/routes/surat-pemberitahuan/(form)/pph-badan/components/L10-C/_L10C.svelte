@@ -43,6 +43,9 @@
                             <td class="tw:w-[30rem]">NEGARA</td>
                             <td class="tw:w-[10rem]">NILAI TRANSAKSI (Rupiah)</td>
                         </tr>
+                        {#if true}
+                        <tr class="data tw:text-center"><td colspan="6">Tidak ada data yang ditampilkan</td></tr>
+                        {:else}
                         <tr class="data">
                             <td>tsetaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</td>
                             <td>tsetaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</td>
@@ -51,6 +54,7 @@
                             <td>tset</td>
                             <td>tset</td>
                         </tr>
+                        {/if}
                     {/snippet}
                 </Table>
             </div>

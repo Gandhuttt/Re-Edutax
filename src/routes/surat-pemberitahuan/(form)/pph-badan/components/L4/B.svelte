@@ -19,6 +19,9 @@
                 <td class="tw:w-[15rem]"><span>SUMBER PENGHASILAN</span></td>
                 <td class="tw:w-[15rem]"><span>PENGHASILAN BRUTO</span></td>
             </tr>
+            {#if true}
+            <tr class="data tw:text-center"><td colspan="6">Tidak ada data yang ditampilkan</td></tr>
+            {:else}
             <tr class="data">
                 <td class="tw:flex tw:flex-row tw:gap-1 tw:justify-center">
                     <Button class={"tw:min-w-15!"}>Edit</Button>
@@ -34,6 +37,7 @@
                 <td colspan="5">JUMLAH</td>
                 <td>0</td>
             </tr>
+            {/if}
         {/snippet}
     </Table>
 </div>

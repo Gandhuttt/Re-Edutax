@@ -24,6 +24,9 @@
                 <td>NOMOR</td>
                 <td>TANGGAL</td>
             </tr>
+            {#if true}
+            <tr class="data tw:text-center"><td colspan="6">Tidak ada data yang ditampilkan</td></tr>
+            {:else}
             <tr class="data">
                 <td>testtttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt</td>
                 <td>testtttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt</td>
@@ -32,6 +35,7 @@
                 <td>testtttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt</td>
                 <td>testttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt</td>
             </tr>
+            {/if}
             {/snippet}
         </Table>
     </div>

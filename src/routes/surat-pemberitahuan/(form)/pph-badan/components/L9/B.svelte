@@ -36,9 +36,13 @@
                             <td>KOMERSIAL</td>
                             <td>FISKAL</td>
                         </tr>
+                        {#if true}
+                        <tr class="data tw:text-center"><td colspan="10">Tidak ada data yang ditampilkan</td></tr>
+                        {:else}
                         <tr class="data">
-                            <td></td>
+                            <td>test</td>
                         </tr>
+                        {/if}
                         <tr class="footer tw:bg-[#FFD230] tw:text-right tw:font-bold">
                             <td colspan="8">TOTAL</td>
                             <td>0</td>
@@ -80,9 +84,13 @@
                             <td>KOMERSIAL</td>
                             <td>FISKAL</td>
                         </tr>
+                        {#if true}
+                        <tr class="data tw:text-center"><td colspan="10">Tidak ada data yang ditampilkan</td></tr>
+                        {:else}
                         <tr class="data">
-                            <td></td>
+                            <td>test</td>
                         </tr>
+                        {/if}
                         <tr class="footer tw:bg-[#FFD230] tw:text-right tw:font-bold">
                             <td colspan="8">TOTAL</td>
                             <td>0</td>

@@ -53,6 +53,9 @@
                     <td class="tw:w-[10rem]"><span>TANGGAL BUKTI POTONG/SETOR</span></td>
                     <td class="tw:w-[15rem]"><span>KETERANGAN</span></td>
                 </tr>
+                {#if data.length === 0}
+                <tr class="data tw:text-center"><td colspan="10">Tidak ada data yang ditampilkan</td></tr>
+                {:else}
                 {#each data as item, i}
                 <tr class="data">
                     <td class="tw:flex tw:flex-row tw:gap-1 tw:justify-center">
@@ -70,6 +73,7 @@
                     <td>{item.keterangan}</td>
                 </tr>
                 {/each}
+                {/if}
                 <tr class="footer tw:bg-[#FFD230] tw:text-right tw:font-bold">
                     <td colspan="4">JUMLAH</td>
                     <td>{totalDasarPengenaanPajak.toLocaleString('id-ID')}</td>

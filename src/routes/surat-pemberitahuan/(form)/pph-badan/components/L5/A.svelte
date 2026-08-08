@@ -42,6 +42,9 @@
                     <td class="tw:w-[20rem]"><span>KOTA/KABUPATEN</span></td>
                     <td class="tw:w-[10rem]"><span>PROVINSI</span></td>
                 </tr>
+                {#if data.length === 0}
+                <tr class="data tw:text-center"><td colspan="8">Tidak ada data yang ditampilkan</td></tr>
+                {:else}
                 {#each data as item}
                 <tr class="data">
                     <td class="tw:flex tw:flex-row tw:gap-1 tw:justify-center">
@@ -57,6 +60,7 @@
                     <td>{item.provinsi}</td>
                 </tr>
                 {/each}
+                {/if}
             {/snippet}
         </Table>
     </div>

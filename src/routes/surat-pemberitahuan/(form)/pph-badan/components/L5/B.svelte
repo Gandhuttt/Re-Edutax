@@ -64,6 +64,9 @@
                 {/each}
                 <td class="tw:w-[7rem]">JUMLAH</td>
             </tr>
+            {#if data.length === 0}
+            <tr class="data tw:text-center"><td colspan="15">Tidak ada data yang ditampilkan</td></tr>
+            {:else}
             {#each data as item}
             <tr class="data tw:text-right">
                 <td class="tw:text-center">
@@ -76,6 +79,7 @@
                 <td>{rowJumlahBruto(item.bulanan).toLocaleString('id-ID')}</td>
             </tr>
             {/each}
+            {/if}
             <tr class="footer tw:bg-[var(--color-primary)] tw:font-bold tw:text-right">
                 <td colspan="2">JUMLAH PEREDARAN BRUTO</td>
                 {#each totalBrutoPerBulan as bulan}
