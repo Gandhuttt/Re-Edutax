@@ -9,7 +9,7 @@ import type { SeedContext, TaxpayerSeedAccount } from './context';
  */
 export const readCsv = (path: string): Record<string, string>[] => {
 	const content = readFileSync(path, 'utf-8').trim();
-	const [headerLine, ...lines] = content.split('\n');
+	const [headerLine, ...lines] = content.split(/\r?\n/);
 	const headers = parseCsvLine(headerLine);
 
 	return lines.map((line) => {

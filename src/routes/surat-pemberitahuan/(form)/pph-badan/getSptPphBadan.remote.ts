@@ -6,6 +6,7 @@ import {
 	kode_koreksi_fiskal_spt_pph_badan,
 	mata_uang_spt_pph_badan,
 	negara_spt_pph_badan,
+	objek_pajak_spt_pph_badan,
 	opini_auditor_spt_pph_badan,
 	sektor_usaha_spt_pph_badan,
 	spt_pph_badan,
@@ -14,7 +15,8 @@ import {
 	spt_pph_badan_lampiran_2_afiliasi,
 	spt_pph_badan_lampiran_2_pihak,
 	spt_pph_badan_lampiran_3_penghasilan_luar_negeri,
-	spt_pph_badan_lampiran_3_pph_dipotong
+	spt_pph_badan_lampiran_3_pph_dipotong,
+	spt_pph_badan_lampiran_4_pph_final
 } from '$lib/server/db/schema';
 import { error } from '@sveltejs/kit';
 import { asc, and, eq } from 'drizzle-orm';
@@ -72,7 +74,15 @@ export const getSptPphBadan = query(async () => {
 		error(404, 'SPT PPh Badan tidak ditemukan');
 	}
 
-	const [nilai, neraca, pemegangSaham, penyertaanModal, penghasilanLuarNegeri, pphDipotong] = await Promise.all([
+	const [
+		nilai,
+		neraca,
+		pemegangSaham,
+		penyertaanModal,
+		penghasilanLuarNegeri,
+		pphDipotong,
+		penghasilanFinal
+	] = await Promise.all([
 		db
 			.select({
 				id: spt_pph_badan_lampiran_1_laba_rugi.id,
@@ -198,7 +208,27 @@ export const getSptPphBadan = query(async () => {
 				)
 			)
 			.where(eq(spt_pph_badan_lampiran_3_pph_dipotong.sptPphBadanId, id))
-			.orderBy(asc(spt_pph_badan_lampiran_3_pph_dipotong.nomorUrut))
+			.orderBy(asc(spt_pph_badan_lampiran_3_pph_dipotong.nomorUrut)),
+		db
+			.select({
+				id: spt_pph_badan_lampiran_4_pph_final.id,
+				npwpPemotongPemungutPenyetor: spt_pph_badan_lampiran_4_pph_final.npwpPemotongPemungutPenyetor,
+				namaPemotongPemungutPenyetor: spt_pph_badan_lampiran_4_pph_final.namaPemotongPemungutPenyetor,
+				objekPajakKode: objek_pajak_spt_pph_badan.kode,
+				dasarPengenaanPajak: spt_pph_badan_lampiran_4_pph_final.dasarPengenaanPajak,
+				tarif: spt_pph_badan_lampiran_4_pph_final.tarif,
+				pphFinalTerutang: spt_pph_badan_lampiran_4_pph_final.pphFinalTerutang,
+				nomorBuktiPotong: spt_pph_badan_lampiran_4_pph_final.nomorBuktiPotong,
+				tanggalBuktiPotong: spt_pph_badan_lampiran_4_pph_final.tanggalBuktiPotong,
+				keterangan: spt_pph_badan_lampiran_4_pph_final.keterangan
+			})
+			.from(spt_pph_badan_lampiran_4_pph_final)
+			.leftJoin(
+				objek_pajak_spt_pph_badan,
+				eq(spt_pph_badan_lampiran_4_pph_final.objekPajakId, objek_pajak_spt_pph_badan.id)
+			)
+			.where(eq(spt_pph_badan_lampiran_4_pph_final.sptPphBadanId, id))
+			.orderBy(asc(spt_pph_badan_lampiran_4_pph_final.nomorUrut))
 	]);
 
 	return {
@@ -222,6 +252,9 @@ export const getSptPphBadan = query(async () => {
 			pengembalianPenguranganPphLuarNegeriTahunSebelumnya:
 				spt.lampiran3PengembalianPenguranganPphLuarNegeriTahunSebelumnya,
 			pphDipotong: pphDipotong.map((row) => ({ ...row, jenisPajakKode: row.jenisPajakKode ?? '' }))
+		},
+		lampiran4: {
+			penghasilanFinal: penghasilanFinal.map((row) => ({ ...row, objekPajakKode: row.objekPajakKode ?? '' }))
 		}
 	};
 });
