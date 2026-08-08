@@ -16,7 +16,10 @@ import {
 	spt_pph_badan_lampiran_2_pihak,
 	spt_pph_badan_lampiran_3_penghasilan_luar_negeri,
 	spt_pph_badan_lampiran_3_pph_dipotong,
-	spt_pph_badan_lampiran_4_pph_final
+	spt_pph_badan_lampiran_4_pph_final,
+	spt_pph_badan_lampiran_5_pp23_bulanan,
+	spt_pph_badan_lampiran_5_pp23_dipotong_bulanan,
+	spt_pph_badan_lampiran_5_tku
 } from '$lib/server/db/schema';
 import { error } from '@sveltejs/kit';
 import { asc, and, eq } from 'drizzle-orm';
@@ -81,7 +84,10 @@ export const getSptPphBadan = query(async () => {
 		penyertaanModal,
 		penghasilanLuarNegeri,
 		pphDipotong,
-		penghasilanFinal
+		penghasilanFinal,
+		tku,
+		bulananPp23,
+		dipotongBulanan
 	] = await Promise.all([
 		db
 			.select({
@@ -228,7 +234,39 @@ export const getSptPphBadan = query(async () => {
 				eq(spt_pph_badan_lampiran_4_pph_final.objekPajakId, objek_pajak_spt_pph_badan.id)
 			)
 			.where(eq(spt_pph_badan_lampiran_4_pph_final.sptPphBadanId, id))
-			.orderBy(asc(spt_pph_badan_lampiran_4_pph_final.nomorUrut))
+			.orderBy(asc(spt_pph_badan_lampiran_4_pph_final.nomorUrut)),
+		db
+			.select({
+				id: spt_pph_badan_lampiran_5_tku.id,
+				nitku: spt_pph_badan_lampiran_5_tku.nitku,
+				nama: spt_pph_badan_lampiran_5_tku.nama,
+				alamat: spt_pph_badan_lampiran_5_tku.alamat,
+				kelurahan: spt_pph_badan_lampiran_5_tku.kelurahan,
+				kecamatan: spt_pph_badan_lampiran_5_tku.kecamatan,
+				kabupaten: spt_pph_badan_lampiran_5_tku.kabupaten,
+				provinsi: spt_pph_badan_lampiran_5_tku.provinsi
+			})
+			.from(spt_pph_badan_lampiran_5_tku)
+			.where(eq(spt_pph_badan_lampiran_5_tku.sptPphBadanId, id)),
+		db
+			.select({
+				tkuId: spt_pph_badan_lampiran_5_pp23_bulanan.tkuId,
+				bulan: spt_pph_badan_lampiran_5_pp23_bulanan.bulan,
+				jumlahPeredaranBruto: spt_pph_badan_lampiran_5_pp23_bulanan.jumlahPeredaranBruto
+			})
+			.from(spt_pph_badan_lampiran_5_pp23_bulanan)
+			.innerJoin(
+				spt_pph_badan_lampiran_5_tku,
+				eq(spt_pph_badan_lampiran_5_pp23_bulanan.tkuId, spt_pph_badan_lampiran_5_tku.id)
+			)
+			.where(eq(spt_pph_badan_lampiran_5_tku.sptPphBadanId, id)),
+		db
+			.select({
+				bulan: spt_pph_badan_lampiran_5_pp23_dipotong_bulanan.bulan,
+				nilai: spt_pph_badan_lampiran_5_pp23_dipotong_bulanan.nilai
+			})
+			.from(spt_pph_badan_lampiran_5_pp23_dipotong_bulanan)
+			.where(eq(spt_pph_badan_lampiran_5_pp23_dipotong_bulanan.sptPphBadanId, id))
 	]);
 
 	return {
@@ -255,6 +293,11 @@ export const getSptPphBadan = query(async () => {
 		},
 		lampiran4: {
 			penghasilanFinal: penghasilanFinal.map((row) => ({ ...row, objekPajakKode: row.objekPajakKode ?? '' }))
+		},
+		lampiran5: {
+			tku,
+			bulanan: bulananPp23,
+			dipotongBulanan
 		}
 	};
 });

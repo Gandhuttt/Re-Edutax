@@ -38,7 +38,7 @@
 	import { getObjekPajak } from './components/L4/getObjekPajak.remote';
 	import { saveSptPphBadan } from './saveSptPphBadan.remote';
 
-	const { readonly, spt, lampiran1, lampiran2, lampiran3, lampiran4 } = await getSptPphBadan();
+	const { readonly, spt, lampiran1, lampiran2, lampiran3, lampiran4, lampiran5 } = await getSptPphBadan();
 	const opiniAuditorOptions = await getOpiniAuditor();
 	const sektorUsahaOptions = await getSektorUsaha();
 	const negaraOptions = await getNegara();
@@ -170,6 +170,35 @@
 		}))
 	);
 
+	let l5a = $state(
+		lampiran5.tku.map((t) => ({
+			id: t.id,
+			nitku: t.nitku,
+			nama: t.nama,
+			alamat: t.alamat,
+			kelurahan: t.kelurahan,
+			kecamatan: t.kecamatan,
+			kabupaten: t.kabupaten,
+			provinsi: t.provinsi,
+			bulanan: Array.from({ length: 12 }, (_, i) => {
+				const bulan = i + 1;
+				const existing = lampiran5.bulanan.find((b) => b.tkuId === t.id && b.bulan === bulan);
+				return {
+					bulan,
+					jumlahPeredaranBruto: existing?.jumlahPeredaranBruto ?? 0
+				};
+			})
+		}))
+	);
+
+	let l5bDipotong = $state(
+		Array.from({ length: 12 }, (_, i) => {
+			const bulan = i + 1;
+			const existing = lampiran5.dipotongBulanan.find((b) => b.bulan === bulan);
+			return { bulan, nilai: existing?.nilai ?? 0 };
+		})
+	);
+
 	let menerimaPenghasilanPp23 = $state(Boolean(spt.menerimaPenghasilanPp23));
 	let hanyaPenghasilanPp23 = $state(Boolean(spt.hanyaPenghasilanPp23));
 	let menerimaPenghasilanFinal = $state(Boolean(spt.menerimaPenghasilanFinal));
@@ -257,6 +286,8 @@
 				<input type="hidden" name="l3aPengembalianPengurangan" value={l3aPengembalianPengurangan} />
 				<input type="hidden" name="l3b" value={JSON.stringify(l3b)} />
 				<input type="hidden" name="l4a" value={JSON.stringify(l4a)} />
+				<input type="hidden" name="l5a" value={JSON.stringify(l5a)} />
+				<input type="hidden" name="l5bDipotong" value={JSON.stringify(l5bDipotong)} />
 				<header class="tw:mb-5">
 					<nav class="tw:overflow-x-auto tw:border-b tw:border-[#A9A9A9]">
 						<ul class="tw:m-0! tw:flex tw:min-w-max tw:flex-row tw:p-0!">
@@ -327,7 +358,7 @@
 					jenisPajakOptions={jenisPajakDipotongDipungutOptions}
 				/>
 				<L4 bind:currentTab bind:l4a {readonly} {objekPajakOptions}/>
-				<L5 bind:currentTab/>
+				<L5 bind:currentTab bind:l5a bind:l5bDipotong {readonly}/>
 				<L6 bind:currentTab/>
 				<L7 bind:currentTab/>
 				<L10A bind:currentTab/>

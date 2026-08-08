@@ -28,12 +28,22 @@ export const spt_pph_badan_lampiran_5_pp23_bulanan = sqliteTable(
 			.references(() => spt_pph_badan_lampiran_5_tku.id, { onDelete: 'cascade' }),
 		bulan: integer('bulan').notNull(),
 		jumlahPeredaranBruto: integer('jumlah_peredaran_bruto').notNull().default(0),
-		jumlahPphFinalTerutang: integer('jumlah_pph_final_terutang').notNull().default(0),
-		pphFinalDisetorSendiri: integer('pph_final_disetor_sendiri').notNull().default(0),
-		pphFinalDipotongDipungutPihakLain: integer('pph_final_dipotong_dipungut_pihak_lain')
-			.notNull()
-			.default(0),
-		selisih: integer('selisih').notNull().default(0)
+		jumlahPphFinalTerutang: integer('jumlah_pph_final_terutang').notNull().default(0)
 	},
 	(t) => [uniqueIndex('spt_pph_badan_lampiran_5_pp23_bulanan_unique').on(t.tkuId, t.bulan)]
+);
+
+export const spt_pph_badan_lampiran_5_pp23_dipotong_bulanan = sqliteTable(
+	'spt_pph_badan_lampiran_5_pp23_dipotong_bulanan',
+	{
+		id: text('id')
+			.primaryKey()
+			.$defaultFn(() => crypto.randomUUID()),
+		sptPphBadanId: text('spt_pph_badan_id')
+			.notNull()
+			.references(() => spt_pph_badan.id, { onDelete: 'cascade' }),
+		bulan: integer('bulan').notNull(),
+		nilai: integer('nilai').notNull().default(0)
+	},
+	(t) => [uniqueIndex('spt_pph_badan_lampiran_5_pp23_dipotong_bulanan_unique').on(t.sptPphBadanId, t.bulan)]
 );

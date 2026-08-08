@@ -20,7 +20,10 @@ import {
 	spt_pph_badan_lampiran_2_pihak,
 	spt_pph_badan_lampiran_3_penghasilan_luar_negeri,
 	spt_pph_badan_lampiran_3_pph_dipotong,
-	spt_pph_badan_lampiran_4_pph_final
+	spt_pph_badan_lampiran_4_pph_final,
+	spt_pph_badan_lampiran_5_pp23_bulanan,
+	spt_pph_badan_lampiran_5_pp23_dipotong_bulanan,
+	spt_pph_badan_lampiran_5_tku
 } from '$lib/server/db/schema';
 import { error, redirect } from '@sveltejs/kit';
 import { and, eq } from 'drizzle-orm';
@@ -134,6 +137,29 @@ const SaveSptPphBadanSchema = v.object({
 			nomorBuktiPotong: v.optional(v.string(), ''),
 			tanggalBuktiPotong: v.optional(v.string(), ''),
 			keterangan: v.optional(v.string(), '')
+		})
+	),
+	l5a: jsonRows(
+		v.object({
+			nitku: requiredString('NI TKU'),
+			nama: requiredString('Nama TKU'),
+			alamat: v.optional(v.string(), ''),
+			kelurahan: v.optional(v.string(), ''),
+			kecamatan: v.optional(v.string(), ''),
+			kabupaten: v.optional(v.string(), ''),
+			provinsi: v.optional(v.string(), ''),
+			bulanan: v.array(
+				v.object({
+					bulan: v.pipe(v.number('Bulan harus berupa angka'), v.integer(), v.minValue(1), v.maxValue(12)),
+					jumlahPeredaranBruto: decimalInput('Peredaran bruto')
+				})
+			)
+		})
+	),
+	l5bDipotong: jsonRows(
+		v.object({
+			bulan: v.pipe(v.number('Bulan harus berupa angka'), v.integer(), v.minValue(1), v.maxValue(12)),
+			nilai: decimalInput('PPh dipotong/dipungut pihak lain')
 		})
 	)
 });
@@ -395,6 +421,59 @@ export const saveSptPphBadan = form(SaveSptPphBadanSchema, async (input) => {
 				nomorBuktiPotong: row.nomorBuktiPotong,
 				tanggalBuktiPotong: row.tanggalBuktiPotong,
 				keterangan: row.keterangan
+			});
+		}
+
+		const existingTku = await tx
+			.select({ id: spt_pph_badan_lampiran_5_tku.id })
+			.from(spt_pph_badan_lampiran_5_tku)
+			.where(eq(spt_pph_badan_lampiran_5_tku.sptPphBadanId, input.id));
+
+		for (const row of existingTku) {
+			await tx
+				.delete(spt_pph_badan_lampiran_5_pp23_bulanan)
+				.where(eq(spt_pph_badan_lampiran_5_pp23_bulanan.tkuId, row.id));
+		}
+
+		await tx.delete(spt_pph_badan_lampiran_5_tku).where(eq(spt_pph_badan_lampiran_5_tku.sptPphBadanId, input.id));
+
+		for (const row of input.l5a) {
+			const [tku] = await tx
+				.insert(spt_pph_badan_lampiran_5_tku)
+				.values({
+					sptPphBadanId: input.id,
+					nitku: row.nitku,
+					nama: row.nama,
+					alamat: row.alamat,
+					kelurahan: row.kelurahan,
+					kecamatan: row.kecamatan,
+					kabupaten: row.kabupaten,
+					provinsi: row.provinsi
+				})
+				.returning({ id: spt_pph_badan_lampiran_5_tku.id });
+
+			for (const bulanan of row.bulanan) {
+				const jumlahPeredaranBruto = Number(bulanan.jumlahPeredaranBruto);
+				const jumlahPphFinalTerutang = Math.round(jumlahPeredaranBruto * 0.005);
+
+				await tx.insert(spt_pph_badan_lampiran_5_pp23_bulanan).values({
+					tkuId: tku.id,
+					bulan: bulanan.bulan,
+					jumlahPeredaranBruto,
+					jumlahPphFinalTerutang
+				});
+			}
+		}
+
+		await tx
+			.delete(spt_pph_badan_lampiran_5_pp23_dipotong_bulanan)
+			.where(eq(spt_pph_badan_lampiran_5_pp23_dipotong_bulanan.sptPphBadanId, input.id));
+
+		for (const row of input.l5bDipotong) {
+			await tx.insert(spt_pph_badan_lampiran_5_pp23_dipotong_bulanan).values({
+				sptPphBadanId: input.id,
+				bulan: row.bulan,
+				nilai: Number(row.nilai)
 			});
 		}
 	});
