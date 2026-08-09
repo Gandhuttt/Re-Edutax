@@ -19,6 +19,7 @@ import { L10BSchema, saveLampiranL10B } from './components/L10-B/saveLampiranL10
 import { L10CSchema, saveLampiranL10C } from './components/L10-C/saveLampiranL10C.server';
 import { L10DSchema, saveLampiranL10D } from './components/L10-D/saveLampiranL10D.server';
 import { L13BSchema, saveLampiranL13B } from './components/L13-B/saveLampiranL13B.server';
+import { computeIndukDEF } from './components/Induk/computeIndukDEF';
 
 const SaveSptPphBadanSchema = v.object({
 	id: requiredString('SPT PPh Badan'),
@@ -34,6 +35,29 @@ const SaveSptPphBadanSchema = v.object({
 	menerimaPenghasilanFinal: booleanRadio(false),
 	menerimaPenghasilanBukanObjekPajak: booleanRadio(false),
 	l3aPengembalianPengurangan: v.optional(decimalInput('Pengembalian/pengurangan PPh luar negeri tahun sebelumnya'), 0),
+	d5FasilitasPenanamanModal: booleanRadio(false),
+	d6FasilitasBrutoVokasi: booleanRadio(false),
+	d8AdaKompensasiKerugian: booleanRadio(false),
+	d10FasilitasBrutoLitbang: booleanRadio(false),
+	tarifPajak: v.optional(v.picklist(['pasal_17_1_b', 'pasal_17_2b', 'pasal_31e', 'lainnya']), 'pasal_17_1_b'),
+	persentaseTarifLainnya: v.optional(decimalInput('Persentase tarif lainnya'), 0),
+	e13AdaKreditPajakLuarNegeri: booleanRadio(false),
+	e14AngsuranPph25TahunBerjalan: v.optional(decimalInput('Angsuran PPh Pasal 25'), 0),
+	e15StpPph25: v.optional(decimalInput('STP PPh Pasal 25'), 0),
+	e16FasilitasPenguranganPphTerutang: booleanRadio(false),
+	f17bAdaSkPengangsuranPenundaan: booleanRadio(false),
+	f17bJumlahDiangsurDitunda: v.optional(decimalInput('Jumlah yang dapat diangsur/ditunda'), 0),
+	f19aMetodePengembalian: v.optional(v.picklist(['pemeriksaan', 'pengembalian_pendahuluan'])),
+	g20WajibLaporAngsuranPph25: booleanRadio(false),
+	h21aTransaksiHubunganIstimewa: booleanRadio(false),
+	h21bDokumenPenentuanHargaTransfer: booleanRadio(false),
+	h21cPenanamanModalAfiliasi: booleanRadio(false),
+	h21dUtangPiutangAfiliasi: booleanRadio(false),
+	h21ePenyusutanAmortisasiFiskal: booleanRadio(false),
+	h21fBiayaEntertainment: booleanRadio(false),
+	h21gFasilitasPenanamanModalDaerahTertentu: booleanRadio(false),
+	h21hSisaLebihSaranaPrasarana: booleanRadio(false),
+	h21iDividenLuarNegeri: booleanRadio(false),
 	...L1Schema.entries,
 	...L2Schema.entries,
 	...L3Schema.entries,
@@ -79,9 +103,34 @@ export const saveSptPphBadan = form(SaveSptPphBadanSchema, async (input) => {
 	const opiniAuditorId = await getOpiniAuditorId(input.diaudit, input.opiniAuditor);
 
 	await db.transaction(async (tx) => {
-		const pphKurangLebihBayar = await saveLampiranL1(tx, input.id, sektorUsahaId, {
+		const netoFiskalSebelumFasilitas = await saveLampiranL1(tx, input.id, sektorUsahaId, {
 			labaRugi: input.labaRugi,
 			neraca: input.neraca
+		});
+
+		const computed = computeIndukDEF({
+			netoFiskalSebelumFasilitas,
+			d6FasilitasBrutoVokasi: input.d6FasilitasBrutoVokasi,
+			l13bBNilai: input.l13bB.map((row) => Number(row.nilai)),
+			d8AdaKompensasiKerugian: input.d8AdaKompensasiKerugian,
+			l7KompensasiTahunIni: input.l7.map((row) => Number(row.kompensasiTahunIni)),
+			d10FasilitasBrutoLitbang: input.d10FasilitasBrutoLitbang,
+			l13bC: input.l13bC.map((row) => ({
+				jumlahBiaya: Number(row.jumlahBiaya),
+				persentaseFasilitasPajak: Number(row.persentaseFasilitasPajak)
+			})),
+			l13bDTermanfaatkanTahunSebelumnya: Number(input.l13bDTermanfaatkanTahunSebelumnya),
+			tarifPajak: input.tarifPajak,
+			persentaseTarifLainnya: Number(input.persentaseTarifLainnya),
+			l8JumlahPeredaranBruto: Number(input.l8JumlahPeredaranBruto),
+			l8PenghasilanKenaPajak: Number(input.l8PenghasilanKenaPajak),
+			e13AdaKreditPajakLuarNegeri: input.e13AdaKreditPajakLuarNegeri,
+			l3aKreditPajak: input.l3a.map((row) => Number(row.kreditPajakYangDapatDikreditkan)),
+			l3bPph: input.l3b.map((row) => Number(row.pph)),
+			e14AngsuranPph25TahunBerjalan: Number(input.e14AngsuranPph25TahunBerjalan),
+			e15StpPph25: Number(input.e15StpPph25),
+			f17bAdaSkPengangsuranPenundaan: input.f17bAdaSkPengangsuranPenundaan,
+			f17bJumlahDiangsurDitunda: Number(input.f17bJumlahDiangsurDitunda)
 		});
 
 		await tx
@@ -97,7 +146,31 @@ export const saveSptPphBadan = form(SaveSptPphBadanSchema, async (input) => {
 				hanyaPenghasilanPp23: input.hanyaPenghasilanPp23,
 				menerimaPenghasilanFinal: input.menerimaPenghasilanFinal,
 				menerimaPenghasilanBukanObjekPajak: input.menerimaPenghasilanBukanObjekPajak,
-				pphKurangLebihBayar,
+				penghasilanNetoFiskalSebelumFasilitas: Math.round(netoFiskalSebelumFasilitas),
+				d5FasilitasPenanamanModal: input.d5FasilitasPenanamanModal,
+				d6FasilitasBrutoVokasi: input.d6FasilitasBrutoVokasi,
+				d8AdaKompensasiKerugian: input.d8AdaKompensasiKerugian,
+				d10FasilitasBrutoLitbang: input.d10FasilitasBrutoLitbang,
+				tarifPajak: input.tarifPajak,
+				persentaseTarifLainnya: Number(input.persentaseTarifLainnya),
+				e13AdaKreditPajakLuarNegeri: input.e13AdaKreditPajakLuarNegeri,
+				e14AngsuranPph25TahunBerjalan: Math.round(Number(input.e14AngsuranPph25TahunBerjalan)),
+				e15StpPph25: Math.round(Number(input.e15StpPph25)),
+				e16FasilitasPenguranganPphTerutang: input.e16FasilitasPenguranganPphTerutang,
+				f17bAdaSkPengangsuranPenundaan: input.f17bAdaSkPengangsuranPenundaan,
+				f17bJumlahDiangsurDitunda: Math.round(Number(input.f17bJumlahDiangsurDitunda)),
+				f19aMetodePengembalian: input.f19aMetodePengembalian ?? null,
+				g20WajibLaporAngsuranPph25: input.g20WajibLaporAngsuranPph25,
+				h21aTransaksiHubunganIstimewa: input.h21aTransaksiHubunganIstimewa,
+				h21bDokumenPenentuanHargaTransfer: input.h21bDokumenPenentuanHargaTransfer,
+				h21cPenanamanModalAfiliasi: input.h21cPenanamanModalAfiliasi,
+				h21dUtangPiutangAfiliasi: input.h21dUtangPiutangAfiliasi,
+				h21ePenyusutanAmortisasiFiskal: input.h21ePenyusutanAmortisasiFiskal,
+				h21fBiayaEntertainment: input.h21fBiayaEntertainment,
+				h21gFasilitasPenanamanModalDaerahTertentu: input.h21gFasilitasPenanamanModalDaerahTertentu,
+				h21hSisaLebihSaranaPrasarana: input.h21hSisaLebihSaranaPrasarana,
+				h21iDividenLuarNegeri: input.h21iDividenLuarNegeri,
+				pphKurangLebihBayar: Math.round(computed.f17c),
 				lampiran3PengembalianPenguranganPphLuarNegeriTahunSebelumnya: Number(input.l3aPengembalianPengurangan),
 				statusDraft,
 				tanggalDilaporkan: statusDraft === 'dilaporkan' ? new Date() : null

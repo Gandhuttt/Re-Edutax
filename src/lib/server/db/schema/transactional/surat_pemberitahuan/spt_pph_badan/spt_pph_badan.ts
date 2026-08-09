@@ -46,10 +46,43 @@ export const spt_pph_badan = sqliteTable(
 			mode: 'boolean'
 		}),
 
+		penghasilanNetoFiskalSebelumFasilitas: integer('penghasilan_neto_fiskal_sebelum_fasilitas').default(0),
+		d5FasilitasPenanamanModal: integer('d5_fasilitas_penanaman_modal', { mode: 'boolean' }),
+		d6FasilitasBrutoVokasi: integer('d6_fasilitas_bruto_vokasi', { mode: 'boolean' }),
+		d8AdaKompensasiKerugian: integer('d8_ada_kompensasi_kerugian', { mode: 'boolean' }),
+		d10FasilitasBrutoLitbang: integer('d10_fasilitas_bruto_litbang', { mode: 'boolean' }),
+
 		tarifPajak: text('tarif_pajak', {
 			enum: ['pasal_17_1_b', 'pasal_17_2b', 'pasal_31e', 'lainnya']
 		}),
 		persentaseTarifLainnya: integer('persentase_tarif_lainnya'),
+
+		e13AdaKreditPajakLuarNegeri: integer('e13_ada_kredit_pajak_luar_negeri', { mode: 'boolean' }),
+		e14AngsuranPph25TahunBerjalan: integer('e14_angsuran_pph_25_tahun_berjalan').default(0),
+		e15StpPph25: integer('e15_stp_pph_25').default(0),
+		e16FasilitasPenguranganPphTerutang: integer('e16_fasilitas_pengurangan_pph_terutang', {
+			mode: 'boolean'
+		}),
+
+		f17bAdaSkPengangsuranPenundaan: integer('f17b_ada_sk_pengangsuran_penundaan', { mode: 'boolean' }),
+		f17bJumlahDiangsurDitunda: integer('f17b_jumlah_diangsur_ditunda').default(0),
+		f19aMetodePengembalian: text('f19a_metode_pengembalian', {
+			enum: ['pemeriksaan', 'pengembalian_pendahuluan']
+		}),
+
+		g20WajibLaporAngsuranPph25: integer('g20_wajib_lapor_angsuran_pph_25', { mode: 'boolean' }),
+
+		h21aTransaksiHubunganIstimewa: integer('h21a_transaksi_hubungan_istimewa', { mode: 'boolean' }),
+		h21bDokumenPenentuanHargaTransfer: integer('h21b_dokumen_penentuan_harga_transfer', { mode: 'boolean' }),
+		h21cPenanamanModalAfiliasi: integer('h21c_penanaman_modal_afiliasi', { mode: 'boolean' }),
+		h21dUtangPiutangAfiliasi: integer('h21d_utang_piutang_afiliasi', { mode: 'boolean' }),
+		h21ePenyusutanAmortisasiFiskal: integer('h21e_penyusutan_amortisasi_fiskal', { mode: 'boolean' }),
+		h21fBiayaEntertainment: integer('h21f_biaya_entertainment', { mode: 'boolean' }),
+		h21gFasilitasPenanamanModalDaerahTertentu: integer('h21g_fasilitas_penanaman_modal_daerah_tertentu', {
+			mode: 'boolean'
+		}),
+		h21hSisaLebihSaranaPrasarana: integer('h21h_sisa_lebih_sarana_prasarana', { mode: 'boolean' }),
+		h21iDividenLuarNegeri: integer('h21i_dividen_luar_negeri', { mode: 'boolean' }),
 
 		pphKurangLebihBayar: integer('pph_kurang_lebih_bayar').notNull().default(0),
 		lampiran3PengembalianPenguranganPphLuarNegeriTahunSebelumnya: integer(

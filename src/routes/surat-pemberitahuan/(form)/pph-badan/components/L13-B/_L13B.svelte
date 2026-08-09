@@ -15,6 +15,7 @@
         l13bB: L13BBRow[];
         l13bC: L13BCRow[];
         l13bDTermanfaatkanTahunSebelumnya: number;
+        penghasilanKenaPajakSebelumFasilitas: number;
         readonly?: boolean;
     }
 
@@ -24,6 +25,7 @@
         l13bB = $bindable(),
         l13bC = $bindable(),
         l13bDTermanfaatkanTahunSebelumnya = $bindable(),
+        penghasilanKenaPajakSebelumFasilitas,
         readonly = false
     }: Props = $props();
 
@@ -52,6 +54,7 @@
             <D
                 {jumlahTambahanPengurangLitbang}
                 bind:termanfaatkanTahunSebelumnya={l13bDTermanfaatkanTahunSebelumnya}
+                {penghasilanKenaPajakSebelumFasilitas}
                 {readonly}
             ></D>
         </Accordion>

@@ -39,6 +39,8 @@
 	import { getObjekPajak } from './components/L4/getObjekPajak.remote';
 	import { getJenisPenghasilanBukanObjekPajak } from './components/L4/getJenisPenghasilanBukanObjekPajak.remote';
 	import { hitungFasilitas31E } from './components/L8/fasilitas31e';
+	import { computeLabaRugiRows } from './components/L1/labaRugiRollup';
+	import { computeIndukDEF } from './components/Induk/computeIndukDEF';
 	import { getJenisHarta } from './components/L9/getJenisHarta.remote';
 	import { getMetodePenyusutan } from './components/L9/getMetodePenyusutan.remote';
 	import { getBentukHubungan } from './components/L10-A/getBentukHubungan.remote';
@@ -382,24 +384,75 @@
 	let menerimaPenghasilanFinal = $state(Boolean(spt.menerimaPenghasilanFinal));
 	let menerimaPenghasilanBukanObjekPajak = $state(Boolean(spt.menerimaPenghasilanBukanObjekPajak));
 	let diaudit = $state(Boolean(spt.opiniAuditorKode));
-	let fasilitasPenanamanModal = $state(false);
-	let fasilitasVokasi = $state(false);
-	let kompensasiKerugian = $state(false);
-	let fasilitasLitbang = $state(false);
-	let kreditPajak = $state(false);
-	let fasilitasPenguranganPph = $state(false);
-	let persetujuanAngsuran = $state(false);
-	let pengembalianPendahuluan = $state(false);
-	let wajibLaporAngsuranPph25 = $state(false);
-	let transaksiHubunganIstimewa = $state(false);
-	let dokumenTransferPricing = $state(false);
-	let penanamanModalAfiliasi = $state(false);
-	let utangPiutangAfiliasi = $state(false);
-	let penyusutanFiskal = $state(false);
-	let biayaEntertainment = $state(false);
-	let fasilitasDaerahTertentu = $state(false);
-	let sisaLebihSarana = $state(false);
-	let dividenLuarNegeri = $state(false);
+
+	let d5FasilitasPenanamanModal = $state(Boolean(spt.d5FasilitasPenanamanModal));
+	let d6FasilitasBrutoVokasi = $state(Boolean(spt.d6FasilitasBrutoVokasi));
+	let d8AdaKompensasiKerugian = $state(Boolean(spt.d8AdaKompensasiKerugian));
+	let d10FasilitasBrutoLitbang = $state(Boolean(spt.d10FasilitasBrutoLitbang));
+	let tarifPajak = $state(spt.tarifPajak ?? 'pasal_17_1_b');
+	let persentaseTarifLainnya = $state(spt.persentaseTarifLainnya ?? 0);
+	let e13AdaKreditPajakLuarNegeri = $state(Boolean(spt.e13AdaKreditPajakLuarNegeri));
+	let e14AngsuranPph25TahunBerjalan = $state(spt.e14AngsuranPph25TahunBerjalan ?? 0);
+	let e15StpPph25 = $state(spt.e15StpPph25 ?? 0);
+	let e16FasilitasPenguranganPphTerutang = $state(Boolean(spt.e16FasilitasPenguranganPphTerutang));
+	let f17bAdaSkPengangsuranPenundaan = $state(Boolean(spt.f17bAdaSkPengangsuranPenundaan));
+	let f17bJumlahDiangsurDitunda = $state(spt.f17bJumlahDiangsurDitunda ?? 0);
+	let f19aMetodePengembalian = $state(spt.f19aMetodePengembalian === 'pengembalian_pendahuluan');
+	let g20WajibLaporAngsuranPph25 = $state(Boolean(spt.g20WajibLaporAngsuranPph25));
+
+	let d4Live = $derived.by(() => {
+		const template = lampiran1LabaRugiTemplatesBySektor.get(sektorUsaha)?.rows ?? [];
+		const rows = computeLabaRugiRows(
+			template,
+			labaRugi.map((row) => ({
+				akunId: row.akunId,
+				nilaiKomersial: Number(row.nilaiKomersial),
+				nonObjekPajak: Number(row.nonObjekPajak),
+				dikenakanPphFinal: Number(row.dikenakanPphFinal),
+				penyesuaianFiskalPositif: Number(row.penyesuaianFiskalPositif),
+				penyesuaianFiskalNegatif: Number(row.penyesuaianFiskalNegatif),
+				kodePenyesuaianFiskal: row.kodePenyesuaianFiskal
+			}))
+		);
+		return rows.find((row) => row.kode === '4800')?.nilaiFiskal ?? 0;
+	});
+
+	let indukDEF = $derived(
+		computeIndukDEF({
+			netoFiskalSebelumFasilitas: d4Live,
+			d6FasilitasBrutoVokasi,
+			l13bBNilai: l13bB.map((row) => Number(row.nilai)),
+			d8AdaKompensasiKerugian,
+			l7KompensasiTahunIni: l7.map((row) => Number(row.kompensasiTahunIni)),
+			d10FasilitasBrutoLitbang,
+			l13bC: l13bC.map((row) => ({
+				jumlahBiaya: Number(row.jumlahBiaya),
+				persentaseFasilitasPajak: Number(row.persentaseFasilitasPajak)
+			})),
+			l13bDTermanfaatkanTahunSebelumnya: Number(l13bDTermanfaatkanTahunSebelumnya),
+			tarifPajak: tarifPajak as 'pasal_17_1_b' | 'pasal_17_2b' | 'pasal_31e' | 'lainnya',
+			persentaseTarifLainnya: Number(persentaseTarifLainnya),
+			l8JumlahPeredaranBruto: Number(l8JumlahPeredaranBruto),
+			l8PenghasilanKenaPajak: Number(l8PenghasilanKenaPajak),
+			e13AdaKreditPajakLuarNegeri,
+			l3aKreditPajak: l3a.map((row) => Number(row.kreditPajakYangDapatDikreditkan)),
+			l3bPph: l3b.map((row) => Number(row.pph)),
+			e14AngsuranPph25TahunBerjalan: Number(e14AngsuranPph25TahunBerjalan),
+			e15StpPph25: Number(e15StpPph25),
+			f17bAdaSkPengangsuranPenundaan,
+			f17bJumlahDiangsurDitunda: Number(f17bJumlahDiangsurDitunda)
+		})
+	);
+
+	let h21aTransaksiHubunganIstimewa = $state(Boolean(spt.h21aTransaksiHubunganIstimewa));
+	let h21bDokumenPenentuanHargaTransfer = $state(Boolean(spt.h21bDokumenPenentuanHargaTransfer));
+	let h21cPenanamanModalAfiliasi = $state(Boolean(spt.h21cPenanamanModalAfiliasi));
+	let h21dUtangPiutangAfiliasi = $state(Boolean(spt.h21dUtangPiutangAfiliasi));
+	let h21ePenyusutanAmortisasiFiskal = $state(Boolean(spt.h21ePenyusutanAmortisasiFiskal));
+	let h21fBiayaEntertainment = $state(Boolean(spt.h21fBiayaEntertainment));
+	let h21gFasilitasPenanamanModalDaerahTertentu = $state(Boolean(spt.h21gFasilitasPenanamanModalDaerahTertentu));
+	let h21hSisaLebihSaranaPrasarana = $state(Boolean(spt.h21hSisaLebihSaranaPrasarana));
+	let h21iDividenLuarNegeri = $state(Boolean(spt.h21iDividenLuarNegeri));
 	let pernyataanBenar = $state(false);
 	let penandatangan = $state('wajib-pajak');
 	let currentTab = $state({
@@ -408,18 +461,43 @@
 	});
 	let saveError = $state('');
 
-	const tarifPajakOptions = [
-		'Tarif Ketentuan Umum sebagaimana Pasal 17 ayat (1) huruf b UU PPh',
-		'Tarif fasilitas sebagaimana Pasal 17 ayat (2b) UU PPh',
-		'Tarif fasilitas sebagaimana Pasal 31E ayat (1) UU PPh',
-		'Tarif Pajak Lainnya'
-	];
-	const tabs = ['Induk', 'L1', 'L2', 'L3', 'L4', 'L5', 'L6', 'L7', 'L8', 'L9', 'L10-A', 'L10-B', 'L10-C', 'L10-D', 'L11-B', 'L13-A', 'L13-B', 'L14'];
+	const tabs =['Induk', 'L1', 'L2', 'L3', 'L4', 'L5', 'L6', 'L7', 'L8', 'L9', 'L10-A', 'L10-B', 'L10-C', 'L10-D', 'L11-B', 'L13-A', 'L13-B', 'L14'];
 	const tabLabel = (tab: string) => {
 		if (tab !== 'L1') return tab;
 		const lampiranKode = lampiran1LabaRugiTemplatesBySektor.get(sektorUsaha)?.lampiranKode;
 		return `L1${lampiranKode ? `-${lampiranKode}` : ''}`;
 	};
+
+	// Some lampiran only apply when the corresponding Induk question is answered "Ya" -
+	// tabs without an entry here are always applicable. L2 is also conditional per Induk H
+	// (21.c/21.d) but isn't gated here: that condition only applies to its "Bagian B"
+	// sub-section, and gating the whole tab would also hide "Bagian A", which is
+	// unconditional. L11-B/L13-A/L14 are gated below even though they're currently static
+	// stubs with no working save/get - hiding them doesn't require the form behind them to
+	// be functional (see spt_pph_badan_induk_def_status memory).
+	const tabVisibility: Partial<Record<string, () => boolean>> = {
+		L3: () => e13AdaKreditPajakLuarNegeri,
+		L4: () => menerimaPenghasilanFinal || menerimaPenghasilanBukanObjekPajak,
+		L5: () => menerimaPenghasilanPp23,
+		L7: () => d8AdaKompensasiKerugian,
+		'L13-B': () => d6FasilitasBrutoVokasi || d10FasilitasBrutoLitbang,
+		'L10-A': () => h21aTransaksiHubunganIstimewa,
+		'L10-B': () => h21aTransaksiHubunganIstimewa,
+		'L10-C': () => h21aTransaksiHubunganIstimewa,
+		'L10-D': () => h21bDokumenPenentuanHargaTransfer,
+		L9: () => h21ePenyusutanAmortisasiFiskal,
+		'L11-B': () => h21fBiayaEntertainment,
+		'L13-A': () => d5FasilitasPenanamanModal || h21gFasilitasPenanamanModalDaerahTertentu,
+		L14: () => h21hSisaLebihSaranaPrasarana
+	};
+
+	let visibleTabs = $derived(tabs.filter((tab) => (tabVisibility[tab] ?? (() => true))()));
+
+	$effect(() => {
+		if (!visibleTabs.includes(currentTab.tab)) {
+			currentTab.tab = 'Induk';
+		}
+	});
 </script>
 
 <div class="tw:w-full tw:p-10">
@@ -517,10 +595,41 @@
 				<input type="hidden" name="l13bB" value={JSON.stringify(l13bB)} />
 				<input type="hidden" name="l13bC" value={JSON.stringify(l13bC)} />
 				<input type="hidden" name="l13bDTermanfaatkanTahunSebelumnya" value={l13bDTermanfaatkanTahunSebelumnya} />
+				<input type="hidden" name="d5FasilitasPenanamanModal" value={d5FasilitasPenanamanModal} />
+				<input type="hidden" name="d6FasilitasBrutoVokasi" value={d6FasilitasBrutoVokasi} />
+				<input type="hidden" name="d8AdaKompensasiKerugian" value={d8AdaKompensasiKerugian} />
+				<input type="hidden" name="d10FasilitasBrutoLitbang" value={d10FasilitasBrutoLitbang} />
+				<input type="hidden" name="tarifPajak" value={tarifPajak} />
+				<input type="hidden" name="persentaseTarifLainnya" value={persentaseTarifLainnya} />
+				<input type="hidden" name="e13AdaKreditPajakLuarNegeri" value={e13AdaKreditPajakLuarNegeri} />
+				<input type="hidden" name="e14AngsuranPph25TahunBerjalan" value={e14AngsuranPph25TahunBerjalan} />
+				<input type="hidden" name="e15StpPph25" value={e15StpPph25} />
+				<input type="hidden" name="e16FasilitasPenguranganPphTerutang" value={e16FasilitasPenguranganPphTerutang} />
+				<input type="hidden" name="f17bAdaSkPengangsuranPenundaan" value={f17bAdaSkPengangsuranPenundaan} />
+				<input type="hidden" name="f17bJumlahDiangsurDitunda" value={f17bJumlahDiangsurDitunda} />
+				<input
+					type="hidden"
+					name="f19aMetodePengembalian"
+					value={f19aMetodePengembalian ? 'pengembalian_pendahuluan' : 'pemeriksaan'}
+				/>
+				<input type="hidden" name="g20WajibLaporAngsuranPph25" value={g20WajibLaporAngsuranPph25} />
+				<input type="hidden" name="h21aTransaksiHubunganIstimewa" value={h21aTransaksiHubunganIstimewa} />
+				<input type="hidden" name="h21bDokumenPenentuanHargaTransfer" value={h21bDokumenPenentuanHargaTransfer} />
+				<input type="hidden" name="h21cPenanamanModalAfiliasi" value={h21cPenanamanModalAfiliasi} />
+				<input type="hidden" name="h21dUtangPiutangAfiliasi" value={h21dUtangPiutangAfiliasi} />
+				<input type="hidden" name="h21ePenyusutanAmortisasiFiskal" value={h21ePenyusutanAmortisasiFiskal} />
+				<input type="hidden" name="h21fBiayaEntertainment" value={h21fBiayaEntertainment} />
+				<input
+					type="hidden"
+					name="h21gFasilitasPenanamanModalDaerahTertentu"
+					value={h21gFasilitasPenanamanModalDaerahTertentu}
+				/>
+				<input type="hidden" name="h21hSisaLebihSaranaPrasarana" value={h21hSisaLebihSaranaPrasarana} />
+				<input type="hidden" name="h21iDividenLuarNegeri" value={h21iDividenLuarNegeri} />
 				<header class="tw:mb-5">
 					<nav class="tw:overflow-x-auto tw:border-b tw:border-[#A9A9A9]">
 						<ul class="tw:m-0! tw:flex tw:min-w-max tw:flex-row tw:p-0!">
-							{#each tabs as tab}
+							{#each visibleTabs as tab}
 								<li class:active-tab={currentTab.tab === tab}>
 									<button type="button" onclick={() => (currentTab.tab = tab)}>{tabLabel(tab)}</button>
 								</li>
@@ -529,7 +638,42 @@
 					</nav>
 				</header>
 
-				<Induk bind:currentTab {spt} {readonly} bind:sektorUsaha></Induk>
+				<Induk
+					bind:currentTab
+					{spt}
+					{readonly}
+					bind:sektorUsaha
+					bind:menerimaPenghasilanPp23
+					bind:hanyaPenghasilanPp23
+					bind:menerimaPenghasilanFinal
+					bind:menerimaPenghasilanBukanObjekPajak
+					{l4a}
+					{l4b}
+					computed={indukDEF}
+					bind:d5FasilitasPenanamanModal
+					bind:d6FasilitasBrutoVokasi
+					bind:d8AdaKompensasiKerugian
+					bind:d10FasilitasBrutoLitbang
+					bind:tarifPajak
+					bind:persentaseTarifLainnya
+					bind:e13AdaKreditPajakLuarNegeri
+					bind:e14AngsuranPph25TahunBerjalan
+					bind:e15StpPph25
+					bind:e16FasilitasPenguranganPphTerutang
+					bind:f17bAdaSkPengangsuranPenundaan
+					bind:f17bJumlahDiangsurDitunda
+					bind:f19aMetodePengembalian
+					bind:g20WajibLaporAngsuranPph25
+					bind:h21aTransaksiHubunganIstimewa
+					bind:h21bDokumenPenentuanHargaTransfer
+					bind:h21cPenanamanModalAfiliasi
+					bind:h21dUtangPiutangAfiliasi
+					bind:h21ePenyusutanAmortisasiFiskal
+					bind:h21fBiayaEntertainment
+					bind:h21gFasilitasPenanamanModalDaerahTertentu
+					bind:h21hSisaLebihSaranaPrasarana
+					bind:h21iDividenLuarNegeri
+				></Induk>
 
 				<!-- Lampiran -->
 				<div class="{currentTab.tab === "Induk" ? "tw:hidden" : ""}">
@@ -674,6 +818,7 @@
 					bind:l13bB
 					bind:l13bC
 					bind:l13bDTermanfaatkanTahunSebelumnya
+					penghasilanKenaPajakSebelumFasilitas={indukDEF.litbangCapBase}
 					{readonly}
 				/>
 				<L14 bind:currentTab/>

@@ -5,19 +5,36 @@
     import Alert from "$lib/components/Alert.svelte";
     import { getContext } from "svelte";
 
-    const { data }: {
-        data: {
-            menerimaPenghasilanPp23: boolean | null;
-            hanyaPenghasilanPp23: boolean | null;
-            menerimaPenghasilanFinal: boolean | null;
-            menerimaPenghasilanBukanObjekPajak: boolean | null;
-        }
+    interface L4ARow {
+        pphFinalTerutang: number;
+    }
+
+    interface L4BRow {
+        penghasilanBruto: number;
+    }
+
+    let {
+        menerimaPenghasilanPp23 = $bindable(),
+        hanyaPenghasilanPp23 = $bindable(),
+        menerimaPenghasilanFinal = $bindable(),
+        menerimaPenghasilanBukanObjekPajak = $bindable(),
+        l4a,
+        l4b,
+        readonly = false
+    }: {
+        menerimaPenghasilanPp23: boolean;
+        hanyaPenghasilanPp23: boolean;
+        menerimaPenghasilanFinal: boolean;
+        menerimaPenghasilanBukanObjekPajak: boolean;
+        l4a: L4ARow[];
+        l4b: L4BRow[];
+        readonly?: boolean;
     } = $props();
 
-    let C1a = $derived(data.menerimaPenghasilanPp23 ?? undefined);
-    let C1b = $derived(data.hanyaPenghasilanPp23 ?? undefined);
-    let C2 = $derived(data.menerimaPenghasilanFinal ?? undefined);
-    let C3 = $derived(data.menerimaPenghasilanBukanObjekPajak ?? undefined);
+    const rupiah = new Intl.NumberFormat('id-ID');
+
+    let pphFinalTotal = $derived(l4a.reduce((total, row) => total + Number(row.pphFinalTerutang || 0), 0));
+    let bukanObjekPajakTotal = $derived(l4b.reduce((total, row) => total + Number(row.penghasilanBruto || 0), 0));
 </script>
 
 <div class="tw:p-5">
@@ -38,29 +55,27 @@
                 <td class="tw:w-[10rem]">
                     <div class="tw:flex tw:gap-5">
                         <Label class="tw:flex tw:items-center tw:gap-1">
-                            <input type="radio" name="menerimaPenghasilanPp23" id="{getContext("id")}" value={false} bind:group={C1a}>
+                            <input type="radio" name="menerimaPenghasilanPp23" id="{getContext("id")}" value={false} bind:group={menerimaPenghasilanPp23} disabled={readonly}>
                             <span>Tidak</span>
                         </Label>
                         <Label class="tw:flex tw:items-center tw:gap-1">
-                            <input type="radio" name="menerimaPenghasilanPp23" id="{getContext("id")}" value={true} bind:group={C1a}>
+                            <input type="radio" name="menerimaPenghasilanPp23" id="{getContext("id")}" value={true} bind:group={menerimaPenghasilanPp23} disabled={readonly}>
                             <span>Ya</span>
                         </Label>
                     </div>
                 </td>
                 <td class="tw:w-[35rem]"></td>
                 <td class="tw:w-[30rem]">
-                {#if C1a != undefined}    
                     <Alert bg={"var(--color-primary)"}>
                         {#snippet head()}
                             <span>i</span>
                         {/snippet}
                         {#snippet body()}
                             <span>
-                            {C1a ? "Ya, silahkan mengisi lampiran 5" : "Tidak, silahkan lanjut pertanyaan berikutnya"}
+                            {menerimaPenghasilanPp23 ? "Ya, silahkan mengisi lampiran 5" : "Tidak, silahkan lanjut pertanyaan berikutnya"}
                             </span>
                         {/snippet}
                     </Alert>
-                {/if}
                 </td>
             </tr>
             <tr>
@@ -69,11 +84,11 @@
                 <td colspan="2">
                     <div class="tw:flex tw:gap-5">
                         <Label class="tw:flex tw:items-center tw:gap-1">
-                            <input type="radio" name="hanyaPenghasilanPp23" id="{getContext("id")}" value={false} bind:group={C1b} disabled={!C1a}>
+                            <input type="radio" name="hanyaPenghasilanPp23" id="{getContext("id")}" value={false} bind:group={hanyaPenghasilanPp23} disabled={!menerimaPenghasilanPp23 || readonly}>
                             <span>Tidak</span>
                         </Label>
                         <Label class="tw:flex tw:items-center tw:gap-1">
-                            <input type="radio" name="hanyaPenghasilanPp23" id="{getContext("id")}" value={true} bind:group={C1b} disabled={!C1a}>
+                            <input type="radio" name="hanyaPenghasilanPp23" id="{getContext("id")}" value={true} bind:group={hanyaPenghasilanPp23} disabled={!menerimaPenghasilanPp23 || readonly}>
                             <span>Ya</span>
                         </Label>
                     </div>
@@ -87,29 +102,27 @@
                 <td>
                     <div class="tw:flex tw:gap-5">
                         <Label class="tw:flex tw:items-center tw:gap-1">
-                            <input type="radio" name="menerimaPenghasilanFinal" id="{getContext("id")}" value={false} bind:group={C2}>
+                            <input type="radio" name="menerimaPenghasilanFinal" id="{getContext("id")}" value={false} bind:group={menerimaPenghasilanFinal} disabled={readonly}>
                             <span>Tidak</span>
                         </Label>
                         <Label class="tw:flex tw:items-center tw:gap-1">
-                            <input type="radio" name="menerimaPenghasilanFinal" id="{getContext("id")}" value={true} bind:group={C2}>
+                            <input type="radio" name="menerimaPenghasilanFinal" id="{getContext("id")}" value={true} bind:group={menerimaPenghasilanFinal} disabled={readonly}>
                             <span>Ya</span>
                         </Label>
                     </div>
                 </td>
-                <td><Input class={"tw:text-end"} type={"text"} value={0} disabled /></td>
+                <td><Input class={"tw:text-end"} type={"text"} value={rupiah.format(pphFinalTotal)} disabled /></td>
                 <td>
-                {#if C2 != undefined}    
                     <Alert bg={"var(--color-primary)"}>
                         {#snippet head()}
                             <span>i</span>
                         {/snippet}
                         {#snippet body()}
                             <span>
-                            {C2 ? "Ya, silahkan mengisi Lampiran 4 Bagian A" : "Tidak, silahkan lanjut pertanyaan berikutnya"}
+                            {menerimaPenghasilanFinal ? "Ya, silahkan mengisi Lampiran 4 Bagian A" : "Tidak, silahkan lanjut pertanyaan berikutnya"}
                             </span>
                         {/snippet}
                     </Alert>
-                {/if}
                 </td>
             </tr>
             <tr>
@@ -118,29 +131,27 @@
                 <td>
                     <div class="tw:flex tw:gap-5">
                         <Label class="tw:flex tw:items-center tw:gap-1">
-                            <input type="radio" name="menerimaPenghasilanBukanObjekPajak" id="{getContext("id")}" value={false} bind:group={C3}>
+                            <input type="radio" name="menerimaPenghasilanBukanObjekPajak" id="{getContext("id")}" value={false} bind:group={menerimaPenghasilanBukanObjekPajak} disabled={readonly}>
                             <span>Tidak</span>
                         </Label>
                         <Label class="tw:flex tw:items-center tw:gap-1">
-                            <input type="radio" name="menerimaPenghasilanBukanObjekPajak" id="{getContext("id")}" value={true} bind:group={C3}>
+                            <input type="radio" name="menerimaPenghasilanBukanObjekPajak" id="{getContext("id")}" value={true} bind:group={menerimaPenghasilanBukanObjekPajak} disabled={readonly}>
                             <span>Ya</span>
                         </Label>
                     </div>
                 </td>
-                <td><Input class={"tw:text-end"} type={"text"} value={0} disabled /></td>
+                <td><Input class={"tw:text-end"} type={"text"} value={rupiah.format(bukanObjekPajakTotal)} disabled /></td>
                 <td>
-                {#if C3 != undefined}    
                     <Alert bg={"var(--color-primary)"}>
                         {#snippet head()}
                             <span>i</span>
                         {/snippet}
                         {#snippet body()}
                             <span>
-                            {C3 ? "Ya, silahkan mengisi Lampiran 4 Bagian B" : "Tidak, silahkan lanjut pertanyaan berikutnya"}
+                            {menerimaPenghasilanBukanObjekPajak ? "Ya, silahkan mengisi Lampiran 4 Bagian B" : "Tidak, silahkan lanjut pertanyaan berikutnya"}
                             </span>
                         {/snippet}
                     </Alert>
-                {/if}
                 </td>
                 <td></td>
             </tr>

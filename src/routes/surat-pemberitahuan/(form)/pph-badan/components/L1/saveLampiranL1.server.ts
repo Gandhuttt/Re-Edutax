@@ -76,7 +76,7 @@ export async function saveLampiranL1(
 		.from(spt_pph_badan_lampiran_1_neraca_akun)
 		.where(eq(spt_pph_badan_lampiran_1_neraca_akun.sektorUsahaId, sektorUsahaId));
 
-	const pphKurangLebihBayar =
+	const netoFiskalSebelumFasilitas =
 		computeLabaRugiRows(
 			labaRugiTemplate,
 			input.labaRugi.map((row) => ({
@@ -141,5 +141,5 @@ export async function saveLampiranL1(
 			});
 	}
 
-	return pphKurangLebihBayar;
+	return netoFiskalSebelumFasilitas;
 }

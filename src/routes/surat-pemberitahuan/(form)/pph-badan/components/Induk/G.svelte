@@ -7,8 +7,21 @@
     import Button from "$lib/components/Button.svelte";
     import Alert from "$lib/components/Alert.svelte";
     import { getContext } from "svelte";
+    import type { computeIndukDEF } from "./computeIndukDEF";
 
-    let G20 = $state();
+    interface Props {
+        computed: ReturnType<typeof computeIndukDEF>;
+        g20WajibLaporAngsuranPph25: boolean;
+        readonly?: boolean;
+    }
+
+    let {
+        computed,
+        g20WajibLaporAngsuranPph25 = $bindable(),
+        readonly = false
+    }: Props = $props();
+
+    const rupiah = new Intl.NumberFormat('id-ID');
 </script>
 
 <div class="tw:p-5">
@@ -29,25 +42,25 @@
                 <td class="tw:w-[10rem]">
                     <div class="tw:flex tw:gap-5">
                         <Label for={getContext("id")} class="tw:flex tw:items-center tw:gap-1">
-                            <input type="radio" name="G20" value={false} bind:group={G20} required>
+                            <input type="radio" name="G20" value={false} bind:group={g20WajibLaporAngsuranPph25} required disabled={readonly}>
                             <span>Tidak</span>
                         </Label>
                         <Label for={getContext("id")} class="tw:flex tw:items-center tw:gap-1">
-                            <input type="radio" name="G20" value={true} bind:group={G20} required>
+                            <input type="radio" name="G20" value={true} bind:group={g20WajibLaporAngsuranPph25} required disabled={readonly}>
                             <span>Ya</span>
                         </Label>
                     </div>
                 </td>
-                <td class="tw:w-[35rem]"><Input class={"tw:text-end"} type={"text"} value={0} disabled/></td>
+                <td class="tw:w-[35rem]"><Input class={"tw:text-end"} type={"text"} value={rupiah.format(computed.angsuranPph25TahunDepan)} disabled/></td>
                 <td class="tw:w-[30rem]">
-                {#if G20 != undefined}    
+                {#if g20WajibLaporAngsuranPph25 != undefined}
                     <Alert bg={"var(--color-primary)"}>
                         {#snippet head()}
                             <span>i</span>
                         {/snippet}
                         {#snippet body()}
                             <span class="tw:whitespace-pre-line">
-                            {G20 ? "Ya, silahkan lanjut pertanyaan berikutnya.\nPastikan anda menyampaikan Laporan Penghitungan PPh Pasal 25." : "Ya, silahkan mengisi lampiran 6"}
+                            {g20WajibLaporAngsuranPph25 ? "Ya, silahkan lanjut pertanyaan berikutnya.\nPastikan anda menyampaikan Laporan Penghitungan PPh Pasal 25." : "Tidak, silahkan mengisi lampiran 6"}
                             </span>
                         {/snippet}
                     </Alert>

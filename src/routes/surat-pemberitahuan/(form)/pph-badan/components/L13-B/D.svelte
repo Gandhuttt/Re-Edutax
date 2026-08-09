@@ -6,10 +6,12 @@
     let {
         jumlahTambahanPengurangLitbang,
         termanfaatkanTahunSebelumnya = $bindable(),
+        penghasilanKenaPajakSebelumFasilitas,
         readonly = false
     }: {
         jumlahTambahanPengurangLitbang: number;
         termanfaatkanTahunSebelumnya: number;
+        penghasilanKenaPajakSebelumFasilitas: number;
         readonly?: boolean;
     } = $props();
 
@@ -19,9 +21,9 @@
         jumlahTambahanPengurangLitbang - Number(termanfaatkanTahunSebelumnya || 0)
     );
 
-    const batas40Persen = 0;
+    let batas40Persen = $derived(0.4 * Number(penghasilanKenaPajakSebelumFasilitas || 0));
 
-    let dapatDibebankanTahunIni = $derived(Math.min(belumTermanfaatkanTahunIni, batas40Persen));
+    let dapatDibebankanTahunIni = $derived(Math.max(0, Math.min(belumTermanfaatkanTahunIni, batas40Persen)));
 
     let sisaBelumTermanfaatkan = $derived(belumTermanfaatkanTahunIni - dapatDibebankanTahunIni);
 </script>
