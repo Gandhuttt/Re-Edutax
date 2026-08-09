@@ -14,7 +14,15 @@ export const spt_pph_badan_lampiran_9_harta = sqliteTable('spt_pph_badan_lampira
 		.notNull()
 		.references(() => jenis_harta_spt_pph_badan.id),
 	kelompokPenyusutan: text('kelompok_penyusutan', {
-		enum: ['kelompok_1', 'kelompok_2', 'kelompok_3', 'kelompok_4', 'kelompok_lainnya']
+		enum: [
+			'kelompok_1',
+			'kelompok_2',
+			'kelompok_3',
+			'kelompok_4',
+			'kelompok_lainnya',
+			'permanen',
+			'tidak_permanen'
+		]
 	}).notNull(),
 	kodeHarta: text('kode_harta').notNull(),
 	bulanTahunPerolehan: text('bulan_tahun_perolehan').notNull(),

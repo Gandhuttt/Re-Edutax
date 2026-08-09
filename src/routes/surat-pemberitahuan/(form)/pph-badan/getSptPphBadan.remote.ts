@@ -24,7 +24,9 @@ import {
 	spt_pph_badan_lampiran_5_tku,
 	spt_pph_badan_lampiran_6_komponen,
 	spt_pph_badan_lampiran_7_kompensasi_kerugian,
-	spt_pph_badan_lampiran_8_fasilitas_31e
+	spt_pph_badan_lampiran_8_fasilitas_31e,
+	spt_pph_badan_lampiran_9_harta,
+	jenis_harta_spt_pph_badan
 } from '$lib/server/db/schema';
 import { error } from '@sveltejs/kit';
 import { asc, and, eq } from 'drizzle-orm';
@@ -97,7 +99,8 @@ export const getSptPphBadan = query(async () => {
 		dipotongBulanan,
 		komponenL6,
 		komponenL7,
-		[l8]
+		[l8],
+		l9
 	] = await Promise.all([
 		db
 			.select({
@@ -329,7 +332,33 @@ export const getSptPphBadan = query(async () => {
 				pphTerutangJumlah: spt_pph_badan_lampiran_8_fasilitas_31e.pphTerutangJumlah
 			})
 			.from(spt_pph_badan_lampiran_8_fasilitas_31e)
-			.where(eq(spt_pph_badan_lampiran_8_fasilitas_31e.sptPphBadanId, id))
+			.where(eq(spt_pph_badan_lampiran_8_fasilitas_31e.sptPphBadanId, id)),
+		db
+			.select({
+				id: spt_pph_badan_lampiran_9_harta.id,
+				kelompokPenyusutan: spt_pph_badan_lampiran_9_harta.kelompokPenyusutan,
+				jenisHartaKode: jenis_harta_spt_pph_badan.kode,
+				kodeHarta: spt_pph_badan_lampiran_9_harta.kodeHarta,
+				bulanTahunPerolehan: spt_pph_badan_lampiran_9_harta.bulanTahunPerolehan,
+				hargaPerolehan: spt_pph_badan_lampiran_9_harta.hargaPerolehan,
+				nilaiSisaBukuFiskalAwalTahun: spt_pph_badan_lampiran_9_harta.nilaiSisaBukuFiskalAwalTahun,
+				metodePenyusutanKomersial: spt_pph_badan_lampiran_9_harta.metodePenyusutanKomersial,
+				metodePenyusutanFiskal: spt_pph_badan_lampiran_9_harta.metodePenyusutanFiskal,
+				penyusutanAmortisasiFiskalTahunIni: spt_pph_badan_lampiran_9_harta.penyusutanAmortisasiFiskalTahunIni,
+				penyusutanAmortisasiKomersialTahunIni:
+					spt_pph_badan_lampiran_9_harta.penyusutanAmortisasiKomersialTahunIni,
+				akumulasiPenyusutanAmortisasiFiskal:
+					spt_pph_badan_lampiran_9_harta.akumulasiPenyusutanAmortisasiFiskal,
+				nilaiSisaBukuFiskalAkhirTahun: spt_pph_badan_lampiran_9_harta.nilaiSisaBukuFiskalAkhirTahun,
+				keterangan: spt_pph_badan_lampiran_9_harta.keterangan
+			})
+			.from(spt_pph_badan_lampiran_9_harta)
+			.leftJoin(
+				jenis_harta_spt_pph_badan,
+				eq(spt_pph_badan_lampiran_9_harta.jenisHartaId, jenis_harta_spt_pph_badan.id)
+			)
+			.where(eq(spt_pph_badan_lampiran_9_harta.sptPphBadanId, id))
+			.orderBy(asc(spt_pph_badan_lampiran_9_harta.nomorUrut))
 	]);
 
 	const nilaiL6ByKode = new Map(komponenL6.map((row) => [row.kode, row.nilai]));
@@ -397,6 +426,7 @@ export const getSptPphBadan = query(async () => {
 			pphTerutangMendapatFasilitas: l8?.pphTerutangMendapatFasilitas ?? 0,
 			pphTerutangTidakMendapatFasilitas: l8?.pphTerutangTidakMendapatFasilitas ?? 0,
 			pphTerutangJumlah: l8?.pphTerutangJumlah ?? 0
-		}
+		},
+		lampiran9: l9.map((row) => ({ ...row, jenisHartaKode: row.jenisHartaKode ?? '' }))
 	};
 });

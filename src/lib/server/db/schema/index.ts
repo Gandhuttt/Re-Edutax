@@ -19,6 +19,7 @@ export * from './references/spt_pph_badan/opini_auditor';
 export * from './references/spt_pph_badan/negara';
 export * from './references/spt_pph_badan/mata_uang';
 export * from './references/spt_pph_badan/jenis_harta';
+export * from './references/spt_pph_badan/metode_penyusutan';
 export * from './references/spt_pph_badan/objek_pajak';
 export * from './references/spt_pph_badan/jenis_penghasilan_bukan_objek_pajak';
 export * from './references/spt_pph_badan/jenis_penghasilan_kredit_pajak_luar_negeri';

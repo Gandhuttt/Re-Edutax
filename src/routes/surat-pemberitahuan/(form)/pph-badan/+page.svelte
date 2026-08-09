@@ -39,6 +39,8 @@
 	import { getObjekPajak } from './components/L4/getObjekPajak.remote';
 	import { getJenisPenghasilanBukanObjekPajak } from './components/L4/getJenisPenghasilanBukanObjekPajak.remote';
 	import { hitungFasilitas31E } from './components/L8/fasilitas31e';
+	import { getJenisHarta } from './components/L9/getJenisHarta.remote';
+	import { getMetodePenyusutan } from './components/L9/getMetodePenyusutan.remote';
 	import { saveSptPphBadan } from './saveSptPphBadan.remote';
 
 	const {
@@ -51,7 +53,8 @@
 		lampiran5,
 		lampiran6,
 		lampiran7,
-		lampiran8
+		lampiran8,
+		lampiran9
 	} = await getSptPphBadan();
 	const opiniAuditorOptions = await getOpiniAuditor();
 	const sektorUsahaOptions = await getSektorUsaha();
@@ -64,6 +67,8 @@
 	const jenisPajakDipotongDipungutOptions = await getJenisPajakDipotongDipungut();
 	const objekPajakOptions = await getObjekPajak();
 	const jenisPenghasilanBukanObjekPajakOptions = await getJenisPenghasilanBukanObjekPajak();
+	const jenisHartaOptions = await getJenisHarta();
+	const metodePenyusutanOptions = await getMetodePenyusutan();
 	const saveForm = saveSptPphBadan.for(spt.id);
 
 	const lampiran1LabaRugiTemplatesBySektor = new Map<
@@ -234,6 +239,25 @@
 
 	let l8JumlahPeredaranBruto = $state(lampiran8.jumlahPeredaranBruto);
 
+	let l9 = $state(
+		lampiran9.map((row) => ({
+			id: row.id,
+			kelompokPenyusutan: row.kelompokPenyusutan,
+			jenisHarta: row.jenisHartaKode,
+			kodeHarta: row.kodeHarta,
+			bulanTahunPerolehan: row.bulanTahunPerolehan,
+			hargaPerolehan: row.hargaPerolehan,
+			nilaiSisaBukuFiskalAwalTahun: row.nilaiSisaBukuFiskalAwalTahun,
+			metodePenyusutanKomersial: row.metodePenyusutanKomersial,
+			metodePenyusutanFiskal: row.metodePenyusutanFiskal,
+			penyusutanAmortisasiFiskalTahunIni: row.penyusutanAmortisasiFiskalTahunIni,
+			penyusutanAmortisasiKomersialTahunIni: row.penyusutanAmortisasiKomersialTahunIni,
+			akumulasiPenyusutanAmortisasiFiskal: row.akumulasiPenyusutanAmortisasiFiskal,
+			nilaiSisaBukuFiskalAkhirTahun: row.nilaiSisaBukuFiskalAkhirTahun,
+			keterangan: row.keterangan
+		}))
+	);
+
 	let l6KompensasiKerugianAuto = $derived(
 		l7.reduce((sum, row) => sum + Number(row.kompensasiTahunIni || 0), 0)
 	);
@@ -358,6 +382,7 @@
 				<input type="hidden" name="l7" value={JSON.stringify(l7)} />
 				<input type="hidden" name="l8JumlahPeredaranBruto" value={l8JumlahPeredaranBruto} />
 				<input type="hidden" name="l8PenghasilanKenaPajak" value={l8PenghasilanKenaPajak} />
+				<input type="hidden" name="l9" value={JSON.stringify(l9)} />
 				<header class="tw:mb-5">
 					<nav class="tw:overflow-x-auto tw:border-b tw:border-[#A9A9A9]">
 						<ul class="tw:m-0! tw:flex tw:min-w-max tw:flex-row tw:p-0!">
@@ -446,7 +471,7 @@
 					penghasilanKenaPajak={l8PenghasilanKenaPajak}
 					{readonly}
 				/>
-				<L9 bind:currentTab/>
+				<L9 bind:currentTab bind:l9 {readonly} {jenisHartaOptions} {metodePenyusutanOptions}/>
 				<L10A bind:currentTab/>
 				<L10B bind:currentTab/>
 				<L10C bind:currentTab/>

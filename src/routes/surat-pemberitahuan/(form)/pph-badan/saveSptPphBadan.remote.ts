@@ -13,6 +13,7 @@ import { L5Schema, saveLampiranL5 } from './components/L5/saveLampiranL5.server'
 import { L6Schema, saveLampiranL6 } from './components/L6/saveLampiranL6.server';
 import { L7Schema, saveLampiranL7 } from './components/L7/saveLampiranL7.server';
 import { L8Schema, saveLampiranL8 } from './components/L8/saveLampiranL8.server';
+import { L9Schema, saveLampiranL9 } from './components/L9/saveLampiranL9.server';
 
 const SaveSptPphBadanSchema = v.object({
 	id: requiredString('SPT PPh Badan'),
@@ -35,7 +36,8 @@ const SaveSptPphBadanSchema = v.object({
 	...L5Schema.entries,
 	...L6Schema.entries,
 	...L7Schema.entries,
-	...L8Schema.entries
+	...L8Schema.entries,
+	...L9Schema.entries
 });
 
 export const saveSptPphBadan = form(SaveSptPphBadanSchema, async (input) => {
@@ -107,6 +109,7 @@ export const saveSptPphBadan = form(SaveSptPphBadanSchema, async (input) => {
 			l8JumlahPeredaranBruto: input.l8JumlahPeredaranBruto,
 			l8PenghasilanKenaPajak: input.l8PenghasilanKenaPajak
 		});
+		await saveLampiranL9(tx, input.id, { l9: input.l9 });
 	});
 
 	redirect(303, statusDraft === 'dilaporkan' ? '/surat-pemberitahuan/laporan' : '/surat-pemberitahuan/konsep');
