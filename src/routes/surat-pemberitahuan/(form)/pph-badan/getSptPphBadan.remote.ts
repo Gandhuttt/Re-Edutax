@@ -32,7 +32,9 @@ import {
 	bentuk_hubungan_istimewa_spt_pph_badan,
 	jenis_transaksi_hubungan_istimewa_spt_pph_badan,
 	metode_penentuan_harga_transfer_spt_pph_badan,
-	spt_pph_badan_lampiran_10b_pernyataan
+	spt_pph_badan_lampiran_10b_pernyataan,
+	spt_pph_badan_lampiran_10c_transaksi,
+	spt_pph_badan_lampiran_10c_pernyataan
 } from '$lib/server/db/schema';
 import { error } from '@sveltejs/kit';
 import { asc, and, eq } from 'drizzle-orm';
@@ -109,7 +111,9 @@ export const getSptPphBadan = query(async () => {
 		l9,
 		[l9Ringkasan],
 		l10a,
-		[l10bPernyataan]
+		[l10bPernyataan],
+		l10c,
+		[l10cPernyataan]
 	] = await Promise.all([
 		db
 			.select({
@@ -427,7 +431,27 @@ export const getSptPphBadan = query(async () => {
 				dokumenC: spt_pph_badan_lampiran_10b_pernyataan.dokumenC
 			})
 			.from(spt_pph_badan_lampiran_10b_pernyataan)
-			.where(eq(spt_pph_badan_lampiran_10b_pernyataan.sptPphBadanId, id))
+			.where(eq(spt_pph_badan_lampiran_10b_pernyataan.sptPphBadanId, id)),
+		db
+			.select({
+				id: spt_pph_badan_lampiran_10c_transaksi.id,
+				namaMitraTransaksi: spt_pph_badan_lampiran_10c_transaksi.namaMitraTransaksi,
+				jenisTransaksiKode: jenis_transaksi_hubungan_istimewa_spt_pph_badan.kode,
+				negaraKode: negara_spt_pph_badan.kode,
+				nilaiTransaksi: spt_pph_badan_lampiran_10c_transaksi.nilaiTransaksi
+			})
+			.from(spt_pph_badan_lampiran_10c_transaksi)
+			.leftJoin(
+				jenis_transaksi_hubungan_istimewa_spt_pph_badan,
+				eq(spt_pph_badan_lampiran_10c_transaksi.jenisTransaksiId, jenis_transaksi_hubungan_istimewa_spt_pph_badan.id)
+			)
+			.leftJoin(negara_spt_pph_badan, eq(spt_pph_badan_lampiran_10c_transaksi.negaraId, negara_spt_pph_badan.id))
+			.where(eq(spt_pph_badan_lampiran_10c_transaksi.sptPphBadanId, id))
+			.orderBy(asc(spt_pph_badan_lampiran_10c_transaksi.nomorUrut)),
+		db
+			.select({ ditentukanPrinsip: spt_pph_badan_lampiran_10c_pernyataan.ditentukanPrinsip })
+			.from(spt_pph_badan_lampiran_10c_pernyataan)
+			.where(eq(spt_pph_badan_lampiran_10c_pernyataan.sptPphBadanId, id))
 	]);
 
 	const nilaiL6ByKode = new Map(komponenL6.map((row) => [row.kode, row.nilai]));
@@ -525,6 +549,14 @@ export const getSptPphBadan = query(async () => {
 			dokumenA: l10bPernyataan?.dokumenA ?? null,
 			dokumenB: l10bPernyataan?.dokumenB ?? null,
 			dokumenC: l10bPernyataan?.dokumenC ?? null
+		},
+		lampiran10c: {
+			rows: l10c.map((row) => ({
+				...row,
+				jenisTransaksiKode: row.jenisTransaksiKode ?? '',
+				negaraKode: row.negaraKode ?? ''
+			})),
+			ditentukanPrinsip: l10cPernyataan?.ditentukanPrinsip ?? null
 		}
 	};
 });

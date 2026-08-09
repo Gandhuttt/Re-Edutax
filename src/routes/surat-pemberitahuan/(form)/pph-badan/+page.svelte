@@ -59,7 +59,8 @@
 		lampiran8,
 		lampiran9,
 		lampiran10a,
-		lampiran10b
+		lampiran10b,
+		lampiran10c
 	} = await getSptPphBadan();
 	const opiniAuditorOptions = await getOpiniAuditor();
 	const sektorUsahaOptions = await getSektorUsaha();
@@ -301,6 +302,18 @@
 	let l10bDokumenB = $state(Boolean(lampiran10b.dokumenB));
 	let l10bDokumenC = $state(Boolean(lampiran10b.dokumenC));
 
+	let l10c = $state(
+		lampiran10c.rows.map((row) => ({
+			id: row.id,
+			namaMitraTransaksi: row.namaMitraTransaksi,
+			jenisTransaksi: row.jenisTransaksiKode,
+			negara: row.negaraKode,
+			nilaiTransaksi: row.nilaiTransaksi
+		}))
+	);
+
+	let l10cDitentukanPrinsip = $state(Boolean(lampiran10c.ditentukanPrinsip));
+
 	let l6KompensasiKerugianAuto = $derived(
 		l7.reduce((sum, row) => sum + Number(row.kompensasiTahunIni || 0), 0)
 	);
@@ -445,6 +458,8 @@
 				<input type="hidden" name="l10bDokumenA" value={l10bDokumenA} />
 				<input type="hidden" name="l10bDokumenB" value={l10bDokumenB} />
 				<input type="hidden" name="l10bDokumenC" value={l10bDokumenC} />
+				<input type="hidden" name="l10c" value={JSON.stringify(l10c)} />
+				<input type="hidden" name="l10cDitentukanPrinsip" value={l10cDitentukanPrinsip} />
 				<header class="tw:mb-5">
 					<nav class="tw:overflow-x-auto tw:border-b tw:border-[#A9A9A9]">
 						<ul class="tw:m-0! tw:flex tw:min-w-max tw:flex-row tw:p-0!">
@@ -571,7 +586,14 @@
 					bind:dokumenC={l10bDokumenC}
 					{readonly}
 				/>
-				<L10C bind:currentTab/>
+				<L10C
+					bind:currentTab
+					bind:l10c
+					bind:ditentukanPrinsip={l10cDitentukanPrinsip}
+					{readonly}
+					{negaraOptions}
+					{jenisTransaksiOptions}
+				/>
 				<L10D bind:currentTab/>
 				<L13A bind:currentTab/>
 				<L13B bind:currentTab/>
