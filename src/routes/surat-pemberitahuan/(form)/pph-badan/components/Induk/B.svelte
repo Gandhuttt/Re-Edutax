@@ -83,7 +83,7 @@
                     </Select>
                 </td>
                 <td class="tw:w-[10rem]"></td>
-                <td></td>
+                <td class="tw:w-[35rem]"></td>
             </tr>
             <tr>
                 <td><span>2.</span></td>

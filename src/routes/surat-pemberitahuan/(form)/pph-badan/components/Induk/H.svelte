@@ -48,7 +48,7 @@
                     </div>
                 </td>
                 <td class="tw:w-[35rem]"></td>
-                <td>
+                <td class="tw:w-[30rem]">
                 {#if H21A != undefined}    
                     <Alert bg={"var(--color-primary)"}>
                         {#snippet head()}

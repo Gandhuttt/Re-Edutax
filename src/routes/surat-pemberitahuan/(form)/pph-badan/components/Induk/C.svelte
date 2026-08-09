@@ -48,7 +48,7 @@
                     </div>
                 </td>
                 <td class="tw:w-[35rem]"></td>
-                <td>
+                <td class="tw:w-[30rem]">
                 {#if C1a != undefined}    
                     <Alert bg={"var(--color-primary)"}>
                         {#snippet head()}
@@ -142,6 +142,7 @@
                     </Alert>
                 {/if}
                 </td>
+                <td></td>
             </tr>
             {/snippet}
     </Table>

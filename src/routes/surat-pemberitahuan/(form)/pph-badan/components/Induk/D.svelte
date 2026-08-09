@@ -29,7 +29,7 @@
                 <td class="tw:w-[40rem]"><span>Penghasilan Neto Fiskal sebelum Fasilitas Pajak</span></td>
                 <td class="tw:w-[10rem]"></td>
                 <td class="tw:w-[35rem]"><Input class={"tw:text-end"} type={"text"} value={0} disabled /></td>
-                <td></td>
+                <td class="tw:w-[30rem]"></td>
             </tr>
             <tr>
                 <td><span>5.</span></td>

@@ -29,7 +29,7 @@
                 <td class="tw:w-[40rem]"><span>PPh yang Kurang/Lebih Bayar</span></td>
                 <td class="tw:w-[10rem]"></td>
                 <td class="tw:w-[35rem]"><Input class={"tw:text-end"} type={"text"} value={0} disabled/></td>
-                <td></td>
+                <td class="tw:w-[30rem]"></td>
             </tr>
             <tr>
                 <td><span>17.b.</span></td>

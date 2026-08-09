@@ -39,7 +39,7 @@
                     </div>
                 </td>
                 <td class="tw:w-[35rem]"><Input class={"tw:text-end"} type={"text"} value={0} disabled/></td>
-                <td>
+                <td class="tw:w-[30rem]">
                 {#if G20 != undefined}    
                     <Alert bg={"var(--color-primary)"}>
                         {#snippet head()}
