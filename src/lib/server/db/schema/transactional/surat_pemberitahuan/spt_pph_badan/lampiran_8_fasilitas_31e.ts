@@ -11,6 +11,7 @@ export const spt_pph_badan_lampiran_8_fasilitas_31e = sqliteTable(
 			.notNull()
 			.references(() => spt_pph_badan.id, { onDelete: 'cascade' }),
 		jumlahPeredaranBruto: integer('jumlah_peredaran_bruto').notNull().default(0),
+		penghasilanKenaPajak: integer('penghasilan_kena_pajak').notNull().default(0),
 		penghasilanKenaPajakMendapatFasilitas: integer('penghasilan_kena_pajak_mendapat_fasilitas')
 			.notNull()
 			.default(0),

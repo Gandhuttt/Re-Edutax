@@ -37,10 +37,21 @@
 	import { getJenisPajakDipotongDipungut } from './components/L3/getJenisPajakDipotongDipungut.remote';
 	import { getObjekPajak } from './components/L4/getObjekPajak.remote';
 	import { getJenisPenghasilanBukanObjekPajak } from './components/L4/getJenisPenghasilanBukanObjekPajak.remote';
+	import { hitungFasilitas31E } from './components/L8/fasilitas31e';
 	import { saveSptPphBadan } from './saveSptPphBadan.remote';
 
-	const { readonly, spt, lampiran1, lampiran2, lampiran3, lampiran4, lampiran5, lampiran6, lampiran7 } =
-		await getSptPphBadan();
+	const {
+		readonly,
+		spt,
+		lampiran1,
+		lampiran2,
+		lampiran3,
+		lampiran4,
+		lampiran5,
+		lampiran6,
+		lampiran7,
+		lampiran8
+	} = await getSptPphBadan();
 	const opiniAuditorOptions = await getOpiniAuditor();
 	const sektorUsahaOptions = await getSektorUsaha();
 	const negaraOptions = await getNegara();
@@ -216,16 +227,28 @@
 	let l6PphTerutang = $state(lampiran6.pphTerutang);
 	let l6KreditPajakTahunLalu = $state(lampiran6.kreditPajakTahunLalu);
 	let l6KompensasiKerugianTouched = $state(false);
+	let l6PphTerutangTouched = $state(false);
 
 	let l7 = $state(lampiran7.map((row) => ({ ...row })));
+
+	let l8JumlahPeredaranBruto = $state(lampiran8.jumlahPeredaranBruto);
+	let l8PenghasilanKenaPajak = $state(lampiran8.penghasilanKenaPajak);
 
 	let l6KompensasiKerugianAuto = $derived(
 		l7.reduce((sum, row) => sum + Number(row.kompensasiTahunIni || 0), 0)
 	);
 
+	let l8Hasil = $derived(hitungFasilitas31E(Number(l8JumlahPeredaranBruto || 0), Number(l8PenghasilanKenaPajak || 0)));
+
 	$effect(() => {
 		if (!l6KompensasiKerugianTouched) {
 			l6KompensasiKerugian = l6KompensasiKerugianAuto;
+		}
+	});
+
+	$effect(() => {
+		if (!l6PphTerutangTouched) {
+			l6PphTerutang = l8Hasil.pphTerutangJumlah;
 		}
 	});
 
@@ -324,6 +347,8 @@
 				<input type="hidden" name="l6PphTerutang" value={l6PphTerutang} />
 				<input type="hidden" name="l6KreditPajakTahunLalu" value={l6KreditPajakTahunLalu} />
 				<input type="hidden" name="l7" value={JSON.stringify(l7)} />
+				<input type="hidden" name="l8JumlahPeredaranBruto" value={l8JumlahPeredaranBruto} />
+				<input type="hidden" name="l8PenghasilanKenaPajak" value={l8PenghasilanKenaPajak} />
 				<header class="tw:mb-5">
 					<nav class="tw:overflow-x-auto tw:border-b tw:border-[#A9A9A9]">
 						<ul class="tw:m-0! tw:flex tw:min-w-max tw:flex-row tw:p-0!">
@@ -402,10 +427,16 @@
 					bind:pphTerutang={l6PphTerutang}
 					bind:kreditPajakTahunLalu={l6KreditPajakTahunLalu}
 					onKompensasiKerugianEdit={() => (l6KompensasiKerugianTouched = true)}
+					onPphTerutangEdit={() => (l6PphTerutangTouched = true)}
 					{readonly}
 				/>
 				<L7 bind:currentTab bind:l7 {readonly}/>
-				<L8 bind:currentTab/>
+				<L8
+					bind:currentTab
+					bind:jumlahPeredaranBruto={l8JumlahPeredaranBruto}
+					bind:penghasilanKenaPajak={l8PenghasilanKenaPajak}
+					{readonly}
+				/>
 				<L9 bind:currentTab/>
 				<L10A bind:currentTab/>
 				<L10B bind:currentTab/>

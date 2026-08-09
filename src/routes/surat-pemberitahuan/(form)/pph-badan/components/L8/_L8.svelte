@@ -2,21 +2,34 @@
     import Card from "$lib/components/Card.svelte";
     import Table from "$lib/components/Table.svelte";
     import Input from "$lib/components/Input.svelte";
-    
+    import { hitungFasilitas31E } from "./fasilitas31e";
+
     interface Props {
         currentTab: {
             tab: string;
             title: string;
-        }
+        };
+        jumlahPeredaranBruto: number;
+        penghasilanKenaPajak: number;
+        readonly?: boolean;
     }
 
-    let { currentTab = $bindable() }: Props = $props();
+    let {
+        currentTab = $bindable(),
+        jumlahPeredaranBruto = $bindable(),
+        penghasilanKenaPajak = $bindable(),
+        readonly = false
+    }: Props = $props();
 
     $effect(() => {currentTab.title = currentTab.tab === "L8" ? "PERHITUNGAN FASILITAS PENGURANGAN TARIF PPh  BAGI WAJIB PAJAK BADAN DALAM NEGERI BERDASARKAN PASAL 31E AYAT (1) UDANG-UNDANG PPh" : currentTab.title})
+
+    const rupiah = new Intl.NumberFormat('id-ID');
+
+    let hasil = $derived(hitungFasilitas31E(Number(jumlahPeredaranBruto || 0), Number(penghasilanKenaPajak || 0)));
 </script>
 
 <div class="tw:mt-5 {currentTab.tab === "L8" ? "" : "tw:hidden"}">
-    <Card> 
+    <Card>
         {#snippet head()}
         <span class="tw:font-bold">PERHITUNGAN FASILITAS PENGURANGAN TARIF PPh  BAGI WAJIB PAJAK BADAN DALAM NEGERI BERDASARKAN PASAL 31E AYAT (1) UDANG-UNDANG PPh</span>
         {/snippet}
@@ -42,11 +55,11 @@
                     <td>
                         <div class="tw:flex tw:flex-row tw:items-center">
                             <span class="tw:flex tw:items-center tw:bg-(--color-disabled) tw:h-[2.5rem] tw:px-3 tw:rounded-s-sm tw:border-1 tw:border-(--color-input-secondary)">Rp.</span>
-                            <Input class={"tw:border-s-0 tw:rounded-s-none! tw:text-right"} type={"text"} value={0}/>
+                            <Input class={"tw:border-s-0 tw:rounded-s-none! tw:text-right"} type={"number"} bind:value={jumlahPeredaranBruto} disabled={readonly}/>
                         </div>
                     </td>
                 </tr>
-                
+
                 <!-- Penghasilan Kena Pajak -->
                 <tr class="data">
                     <td>2.</td>
@@ -54,11 +67,21 @@
                 </tr>
                 <tr class="data">
                     <td></td>
+                    <td>Penghasilan Kena Pajak</td>
+                    <td>
+                        <div class="tw:flex tw:flex-row tw:items-center">
+                            <span class="tw:flex tw:items-center tw:bg-(--color-disabled) tw:h-[2.5rem] tw:px-3 tw:rounded-s-sm tw:border-1 tw:border-(--color-input-secondary)">Rp.</span>
+                            <Input class={"tw:border-s-0 tw:rounded-s-none! tw:text-right"} type={"number"} bind:value={penghasilanKenaPajak} disabled={readonly}/>
+                        </div>
+                    </td>
+                </tr>
+                <tr class="data">
+                    <td></td>
                     <td>Penghasilan Kena Pajak dari bagian peredaran bruto yang memperoleh fasilitas</td>
                     <td>
                         <div class="tw:flex tw:flex-row tw:items-center">
                             <span class="tw:flex tw:items-center tw:bg-(--color-disabled) tw:h-[2.5rem] tw:px-3 tw:rounded-s-sm tw:border-1 tw:border-(--color-input-secondary)">Rp.</span>
-                            <Input class={"tw:border-s-0 tw:rounded-s-none! tw:text-right"} type={"text"} value={0} readonly/>
+                            <Input class={"tw:border-s-0 tw:rounded-s-none! tw:text-right"} type={"text"} value={rupiah.format(hasil.penghasilanKenaPajakMendapatFasilitas)} readonly/>
                         </div>
                     </td>
                 </tr>
@@ -68,11 +91,11 @@
                     <td>
                         <div class="tw:flex tw:flex-row tw:items-center">
                             <span class="tw:flex tw:items-center tw:bg-(--color-disabled) tw:h-[2.5rem] tw:px-3 tw:rounded-s-sm tw:border-1 tw:border-(--color-input-secondary)">Rp.</span>
-                            <Input class={"tw:border-s-0 tw:rounded-s-none! tw:text-right"} type={"text"} value={0} readonly/>
+                            <Input class={"tw:border-s-0 tw:rounded-s-none! tw:text-right"} type={"text"} value={rupiah.format(hasil.penghasilanKenaPajakTidakMendapatFasilitas)} readonly/>
                         </div>
                     </td>
                 </tr>
-                
+
                 <!-- Pajak Terutang -->
                 <tr class="data">
                     <td>3.</td>
@@ -84,7 +107,7 @@
                     <td>
                         <div class="tw:flex tw:flex-row tw:items-center">
                             <span class="tw:flex tw:items-center tw:bg-(--color-disabled) tw:h-[2.5rem] tw:px-3 tw:rounded-s-sm tw:border-1 tw:border-(--color-input-secondary)">Rp.</span>
-                            <Input class={"tw:border-s-0 tw:rounded-s-none! tw:text-right"} type={"text"} value={0} readonly/>
+                            <Input class={"tw:border-s-0 tw:rounded-s-none! tw:text-right"} type={"text"} value={rupiah.format(hasil.pphTerutangMendapatFasilitas)} readonly/>
                         </div>
                     </td>
                 </tr>
@@ -94,14 +117,14 @@
                     <td>
                         <div class="tw:flex tw:flex-row tw:items-center">
                             <span class="tw:flex tw:items-center tw:bg-(--color-disabled) tw:h-[2.5rem] tw:px-3 tw:rounded-s-sm tw:border-1 tw:border-(--color-input-secondary)">Rp.</span>
-                            <Input class={"tw:border-s-0 tw:rounded-s-none! tw:text-right"} type={"text"} value={0} readonly/>
+                            <Input class={"tw:border-s-0 tw:rounded-s-none! tw:text-right"} type={"text"} value={rupiah.format(hasil.pphTerutangTidakMendapatFasilitas)} readonly/>
                         </div>
                     </td>
                 </tr>
 
                 <tr class="footer tw:bg-[var(--color-primary)] tw:font-bold tw:text-right">
                     <td colspan="2">Jumlah PPh Terutang</td>
-                    <td>0</td>
+                    <td>{rupiah.format(hasil.pphTerutangJumlah)}</td>
                 </tr>
             {/snippet}
         </Table>

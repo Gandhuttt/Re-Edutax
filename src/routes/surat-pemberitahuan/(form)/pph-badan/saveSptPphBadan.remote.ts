@@ -12,6 +12,7 @@ import { L4Schema, saveLampiranL4 } from './components/L4/saveLampiranL4.server'
 import { L5Schema, saveLampiranL5 } from './components/L5/saveLampiranL5.server';
 import { L6Schema, saveLampiranL6 } from './components/L6/saveLampiranL6.server';
 import { L7Schema, saveLampiranL7 } from './components/L7/saveLampiranL7.server';
+import { L8Schema, saveLampiranL8 } from './components/L8/saveLampiranL8.server';
 
 const SaveSptPphBadanSchema = v.object({
 	id: requiredString('SPT PPh Badan'),
@@ -33,7 +34,8 @@ const SaveSptPphBadanSchema = v.object({
 	...L4Schema.entries,
 	...L5Schema.entries,
 	...L6Schema.entries,
-	...L7Schema.entries
+	...L7Schema.entries,
+	...L8Schema.entries
 });
 
 export const saveSptPphBadan = form(SaveSptPphBadanSchema, async (input) => {
@@ -101,6 +103,10 @@ export const saveSptPphBadan = form(SaveSptPphBadanSchema, async (input) => {
 			l6KreditPajakTahunLalu: input.l6KreditPajakTahunLalu
 		});
 		await saveLampiranL7(tx, input.id, { l7: input.l7 });
+		await saveLampiranL8(tx, input.id, {
+			l8JumlahPeredaranBruto: input.l8JumlahPeredaranBruto,
+			l8PenghasilanKenaPajak: input.l8PenghasilanKenaPajak
+		});
 	});
 
 	redirect(303, statusDraft === 'dilaporkan' ? '/surat-pemberitahuan/laporan' : '/surat-pemberitahuan/konsep');

@@ -12,6 +12,7 @@
         pphTerutang: number;
         kreditPajakTahunLalu: number;
         onKompensasiKerugianEdit?: () => void;
+        onPphTerutangEdit?: () => void;
         readonly?: boolean;
     }
 
@@ -22,6 +23,7 @@
         pphTerutang = $bindable(),
         kreditPajakTahunLalu = $bindable(),
         onKompensasiKerugianEdit,
+        onPphTerutangEdit,
         readonly = false
     }: Props = $props();
 
@@ -70,10 +72,16 @@
                     </div>
                 </div>
                 <div class="tw:flex tw:flex-row tw:items-center tw:gap-5 tw:p-1 tw:border-b-1 tw:border-(--color-disabled)">
-                    <span class="tw:block tw:w-[75rem]">4. PPh YANG TERUTANG</span>
+                    <span class="tw:block tw:w-[75rem]">4. PPh YANG TERUTANG (Diisi dari Formulir Lampiran-08 Jumlah PPh Terutang)</span>
                     <div class="tw:flex tw:flex-row tw:items-center">
                         <span class="tw:flex tw:items-center tw:bg-(--color-disabled) tw:h-[2.5rem] tw:px-3 tw:rounded-s-sm tw:border-1 tw:border-(--color-input-secondary)">Rp.</span>
-                        <Input class={"tw:w-[20rem]! tw:border-s-0 tw:rounded-s-none! tw:text-right"} type={"number"} bind:value={pphTerutang} disabled={readonly}/>
+                        <Input
+                            class={"tw:w-[20rem]! tw:border-s-0 tw:rounded-s-none! tw:text-right"}
+                            type={"number"}
+                            bind:value={pphTerutang}
+                            disabled={readonly}
+                            oninput={() => onPphTerutangEdit?.()}
+                        />
                     </div>
                 </div>
                 <div class="tw:flex tw:flex-row tw:items-center tw:gap-5 tw:p-1 tw:border-b-1 tw:border-(--color-disabled)">

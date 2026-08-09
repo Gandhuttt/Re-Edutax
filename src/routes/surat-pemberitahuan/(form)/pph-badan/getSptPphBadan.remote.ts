@@ -23,7 +23,8 @@ import {
 	spt_pph_badan_lampiran_5_pp23_dipotong_bulanan,
 	spt_pph_badan_lampiran_5_tku,
 	spt_pph_badan_lampiran_6_komponen,
-	spt_pph_badan_lampiran_7_kompensasi_kerugian
+	spt_pph_badan_lampiran_7_kompensasi_kerugian,
+	spt_pph_badan_lampiran_8_fasilitas_31e
 } from '$lib/server/db/schema';
 import { error } from '@sveltejs/kit';
 import { asc, and, eq } from 'drizzle-orm';
@@ -95,7 +96,8 @@ export const getSptPphBadan = query(async () => {
 		bulananPp23,
 		dipotongBulanan,
 		komponenL6,
-		komponenL7
+		komponenL7,
+		[l8]
 	] = await Promise.all([
 		db
 			.select({
@@ -312,7 +314,22 @@ export const getSptPphBadan = query(async () => {
 				kompensasiYPlus1: spt_pph_badan_lampiran_7_kompensasi_kerugian.kompensasiYPlus1
 			})
 			.from(spt_pph_badan_lampiran_7_kompensasi_kerugian)
-			.where(eq(spt_pph_badan_lampiran_7_kompensasi_kerugian.sptPphBadanId, id))
+			.where(eq(spt_pph_badan_lampiran_7_kompensasi_kerugian.sptPphBadanId, id)),
+		db
+			.select({
+				jumlahPeredaranBruto: spt_pph_badan_lampiran_8_fasilitas_31e.jumlahPeredaranBruto,
+				penghasilanKenaPajak: spt_pph_badan_lampiran_8_fasilitas_31e.penghasilanKenaPajak,
+				penghasilanKenaPajakMendapatFasilitas:
+					spt_pph_badan_lampiran_8_fasilitas_31e.penghasilanKenaPajakMendapatFasilitas,
+				penghasilanKenaPajakTidakMendapatFasilitas:
+					spt_pph_badan_lampiran_8_fasilitas_31e.penghasilanKenaPajakTidakMendapatFasilitas,
+				pphTerutangMendapatFasilitas: spt_pph_badan_lampiran_8_fasilitas_31e.pphTerutangMendapatFasilitas,
+				pphTerutangTidakMendapatFasilitas:
+					spt_pph_badan_lampiran_8_fasilitas_31e.pphTerutangTidakMendapatFasilitas,
+				pphTerutangJumlah: spt_pph_badan_lampiran_8_fasilitas_31e.pphTerutangJumlah
+			})
+			.from(spt_pph_badan_lampiran_8_fasilitas_31e)
+			.where(eq(spt_pph_badan_lampiran_8_fasilitas_31e.sptPphBadanId, id))
 	]);
 
 	const nilaiL6ByKode = new Map(komponenL6.map((row) => [row.kode, row.nilai]));
@@ -371,6 +388,15 @@ export const getSptPphBadan = query(async () => {
 				kompensasiTahunIni: existing?.kompensasiTahunIni ?? 0,
 				kompensasiYPlus1: existing?.kompensasiYPlus1 ?? 0
 			};
-		})
+		}),
+		lampiran8: {
+			jumlahPeredaranBruto: l8?.jumlahPeredaranBruto ?? 0,
+			penghasilanKenaPajak: l8?.penghasilanKenaPajak ?? 0,
+			penghasilanKenaPajakMendapatFasilitas: l8?.penghasilanKenaPajakMendapatFasilitas ?? 0,
+			penghasilanKenaPajakTidakMendapatFasilitas: l8?.penghasilanKenaPajakTidakMendapatFasilitas ?? 0,
+			pphTerutangMendapatFasilitas: l8?.pphTerutangMendapatFasilitas ?? 0,
+			pphTerutangTidakMendapatFasilitas: l8?.pphTerutangTidakMendapatFasilitas ?? 0,
+			pphTerutangJumlah: l8?.pphTerutangJumlah ?? 0
+		}
 	};
 });
