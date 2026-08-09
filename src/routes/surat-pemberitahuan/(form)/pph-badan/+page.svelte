@@ -25,6 +25,7 @@
 	import L10D from './components/L10-D/_L10D.svelte';
 	import L13A from './components/L13-A/_L13A.svelte';
 	import L13B from './components/L13-B/_L13B.svelte';
+	import L14 from './components/L14/_L14.svelte';
 	import { getSptPphBadan } from './getSptPphBadan.remote';
 	import { getOpiniAuditor } from './components/Induk/getOpiniAuditor.remote';
 	import { getSektorUsaha } from './components/Induk/getSektorUsaha.remote';
@@ -292,7 +293,7 @@
 		'Tarif fasilitas sebagaimana Pasal 31E ayat (1) UU PPh',
 		'Tarif Pajak Lainnya'
 	];
-	const tabs = ['Induk', 'L1', 'L2', 'L3', 'L4', 'L5', 'L6', 'L7', 'L8', 'L9', 'L10-A', 'L10-B', 'L10-C', 'L10-D', 'L11-B', 'L13-A', 'L13-B'];
+	const tabs = ['Induk', 'L1', 'L2', 'L3', 'L4', 'L5', 'L6', 'L7', 'L8', 'L9', 'L10-A', 'L10-B', 'L10-C', 'L10-D', 'L11-B', 'L13-A', 'L13-B', 'L14'];
 	const tabLabel = (tab: string) => {
 		if (tab !== 'L1') return tab;
 		const lampiranKode = lampiran1LabaRugiTemplatesBySektor.get(sektorUsaha)?.lampiranKode;
@@ -452,6 +453,7 @@
 				<L10D bind:currentTab/>
 				<L13A bind:currentTab/>
 				<L13B bind:currentTab/>
+				<L14 bind:currentTab/>
 
 				{#if saveError}
 					<div class="tw:mt-4">
