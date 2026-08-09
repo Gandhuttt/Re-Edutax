@@ -60,7 +60,8 @@
 		lampiran9,
 		lampiran10a,
 		lampiran10b,
-		lampiran10c
+		lampiran10c,
+		lampiran10d
 	} = await getSptPphBadan();
 	const opiniAuditorOptions = await getOpiniAuditor();
 	const sektorUsahaOptions = await getSektorUsaha();
@@ -314,6 +315,19 @@
 
 	let l10cDitentukanPrinsip = $state(Boolean(lampiran10c.ditentukanPrinsip));
 
+	let l10dDokumenIndukA = $state(Boolean(lampiran10d.dokumenIndukA));
+	let l10dDokumenIndukB = $state(Boolean(lampiran10d.dokumenIndukB));
+	let l10dDokumenIndukC = $state(Boolean(lampiran10d.dokumenIndukC));
+	let l10dDokumenIndukD = $state(Boolean(lampiran10d.dokumenIndukD));
+	let l10dDokumenIndukE = $state(Boolean(lampiran10d.dokumenIndukE));
+	let l10dDokumenLokalA = $state(Boolean(lampiran10d.dokumenLokalA));
+	let l10dDokumenLokalB = $state(Boolean(lampiran10d.dokumenLokalB));
+	let l10dDokumenLokalC = $state(Boolean(lampiran10d.dokumenLokalC));
+	let l10dDokumenLokalD = $state(Boolean(lampiran10d.dokumenLokalD));
+	let l10dDokumenLokalE = $state(Boolean(lampiran10d.dokumenLokalE));
+	let l10dTanggalDokumenIndukTersedia = $state(lampiran10d.tanggalDokumenIndukTersedia);
+	let l10dTanggalDokumenLokalTersedia = $state(lampiran10d.tanggalDokumenLokalTersedia);
+
 	let l6KompensasiKerugianAuto = $derived(
 		l7.reduce((sum, row) => sum + Number(row.kompensasiTahunIni || 0), 0)
 	);
@@ -460,6 +474,18 @@
 				<input type="hidden" name="l10bDokumenC" value={l10bDokumenC} />
 				<input type="hidden" name="l10c" value={JSON.stringify(l10c)} />
 				<input type="hidden" name="l10cDitentukanPrinsip" value={l10cDitentukanPrinsip} />
+				<input type="hidden" name="l10dDokumenIndukA" value={l10dDokumenIndukA} />
+				<input type="hidden" name="l10dDokumenIndukB" value={l10dDokumenIndukB} />
+				<input type="hidden" name="l10dDokumenIndukC" value={l10dDokumenIndukC} />
+				<input type="hidden" name="l10dDokumenIndukD" value={l10dDokumenIndukD} />
+				<input type="hidden" name="l10dDokumenIndukE" value={l10dDokumenIndukE} />
+				<input type="hidden" name="l10dDokumenLokalA" value={l10dDokumenLokalA} />
+				<input type="hidden" name="l10dDokumenLokalB" value={l10dDokumenLokalB} />
+				<input type="hidden" name="l10dDokumenLokalC" value={l10dDokumenLokalC} />
+				<input type="hidden" name="l10dDokumenLokalD" value={l10dDokumenLokalD} />
+				<input type="hidden" name="l10dDokumenLokalE" value={l10dDokumenLokalE} />
+				<input type="hidden" name="l10dTanggalDokumenIndukTersedia" value={l10dTanggalDokumenIndukTersedia} />
+				<input type="hidden" name="l10dTanggalDokumenLokalTersedia" value={l10dTanggalDokumenLokalTersedia} />
 				<header class="tw:mb-5">
 					<nav class="tw:overflow-x-auto tw:border-b tw:border-[#A9A9A9]">
 						<ul class="tw:m-0! tw:flex tw:min-w-max tw:flex-row tw:p-0!">
@@ -594,7 +620,22 @@
 					{negaraOptions}
 					{jenisTransaksiOptions}
 				/>
-				<L10D bind:currentTab/>
+				<L10D
+					bind:currentTab
+					bind:dokumenIndukA={l10dDokumenIndukA}
+					bind:dokumenIndukB={l10dDokumenIndukB}
+					bind:dokumenIndukC={l10dDokumenIndukC}
+					bind:dokumenIndukD={l10dDokumenIndukD}
+					bind:dokumenIndukE={l10dDokumenIndukE}
+					bind:dokumenLokalA={l10dDokumenLokalA}
+					bind:dokumenLokalB={l10dDokumenLokalB}
+					bind:dokumenLokalC={l10dDokumenLokalC}
+					bind:dokumenLokalD={l10dDokumenLokalD}
+					bind:dokumenLokalE={l10dDokumenLokalE}
+					bind:tanggalDokumenIndukTersedia={l10dTanggalDokumenIndukTersedia}
+					bind:tanggalDokumenLokalTersedia={l10dTanggalDokumenLokalTersedia}
+					{readonly}
+				/>
 				<L13A bind:currentTab/>
 				<L13B bind:currentTab/>
 				<L14 bind:currentTab/>

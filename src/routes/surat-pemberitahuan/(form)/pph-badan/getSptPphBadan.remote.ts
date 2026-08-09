@@ -34,7 +34,8 @@ import {
 	metode_penentuan_harga_transfer_spt_pph_badan,
 	spt_pph_badan_lampiran_10b_pernyataan,
 	spt_pph_badan_lampiran_10c_transaksi,
-	spt_pph_badan_lampiran_10c_pernyataan
+	spt_pph_badan_lampiran_10c_pernyataan,
+	spt_pph_badan_lampiran_10d_dokumen
 } from '$lib/server/db/schema';
 import { error } from '@sveltejs/kit';
 import { asc, and, eq } from 'drizzle-orm';
@@ -113,7 +114,8 @@ export const getSptPphBadan = query(async () => {
 		l10a,
 		[l10bPernyataan],
 		l10c,
-		[l10cPernyataan]
+		[l10cPernyataan],
+		[l10dDokumen]
 	] = await Promise.all([
 		db
 			.select({
@@ -451,7 +453,24 @@ export const getSptPphBadan = query(async () => {
 		db
 			.select({ ditentukanPrinsip: spt_pph_badan_lampiran_10c_pernyataan.ditentukanPrinsip })
 			.from(spt_pph_badan_lampiran_10c_pernyataan)
-			.where(eq(spt_pph_badan_lampiran_10c_pernyataan.sptPphBadanId, id))
+			.where(eq(spt_pph_badan_lampiran_10c_pernyataan.sptPphBadanId, id)),
+		db
+			.select({
+				dokumenIndukA: spt_pph_badan_lampiran_10d_dokumen.dokumenIndukA,
+				dokumenIndukB: spt_pph_badan_lampiran_10d_dokumen.dokumenIndukB,
+				dokumenIndukC: spt_pph_badan_lampiran_10d_dokumen.dokumenIndukC,
+				dokumenIndukD: spt_pph_badan_lampiran_10d_dokumen.dokumenIndukD,
+				dokumenIndukE: spt_pph_badan_lampiran_10d_dokumen.dokumenIndukE,
+				dokumenLokalA: spt_pph_badan_lampiran_10d_dokumen.dokumenLokalA,
+				dokumenLokalB: spt_pph_badan_lampiran_10d_dokumen.dokumenLokalB,
+				dokumenLokalC: spt_pph_badan_lampiran_10d_dokumen.dokumenLokalC,
+				dokumenLokalD: spt_pph_badan_lampiran_10d_dokumen.dokumenLokalD,
+				dokumenLokalE: spt_pph_badan_lampiran_10d_dokumen.dokumenLokalE,
+				tanggalDokumenIndukTersedia: spt_pph_badan_lampiran_10d_dokumen.tanggalDokumenIndukTersedia,
+				tanggalDokumenLokalTersedia: spt_pph_badan_lampiran_10d_dokumen.tanggalDokumenLokalTersedia
+			})
+			.from(spt_pph_badan_lampiran_10d_dokumen)
+			.where(eq(spt_pph_badan_lampiran_10d_dokumen.sptPphBadanId, id))
 	]);
 
 	const nilaiL6ByKode = new Map(komponenL6.map((row) => [row.kode, row.nilai]));
@@ -557,6 +576,20 @@ export const getSptPphBadan = query(async () => {
 				negaraKode: row.negaraKode ?? ''
 			})),
 			ditentukanPrinsip: l10cPernyataan?.ditentukanPrinsip ?? null
+		},
+		lampiran10d: {
+			dokumenIndukA: l10dDokumen?.dokumenIndukA ?? null,
+			dokumenIndukB: l10dDokumen?.dokumenIndukB ?? null,
+			dokumenIndukC: l10dDokumen?.dokumenIndukC ?? null,
+			dokumenIndukD: l10dDokumen?.dokumenIndukD ?? null,
+			dokumenIndukE: l10dDokumen?.dokumenIndukE ?? null,
+			dokumenLokalA: l10dDokumen?.dokumenLokalA ?? null,
+			dokumenLokalB: l10dDokumen?.dokumenLokalB ?? null,
+			dokumenLokalC: l10dDokumen?.dokumenLokalC ?? null,
+			dokumenLokalD: l10dDokumen?.dokumenLokalD ?? null,
+			dokumenLokalE: l10dDokumen?.dokumenLokalE ?? null,
+			tanggalDokumenIndukTersedia: l10dDokumen?.tanggalDokumenIndukTersedia ?? '',
+			tanggalDokumenLokalTersedia: l10dDokumen?.tanggalDokumenLokalTersedia ?? ''
 		}
 	};
 });

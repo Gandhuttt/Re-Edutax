@@ -17,6 +17,7 @@ import { L9Schema, saveLampiranL9 } from './components/L9/saveLampiranL9.server'
 import { L10ASchema, saveLampiranL10A } from './components/L10-A/saveLampiranL10A.server';
 import { L10BSchema, saveLampiranL10B } from './components/L10-B/saveLampiranL10B.server';
 import { L10CSchema, saveLampiranL10C } from './components/L10-C/saveLampiranL10C.server';
+import { L10DSchema, saveLampiranL10D } from './components/L10-D/saveLampiranL10D.server';
 
 const SaveSptPphBadanSchema = v.object({
 	id: requiredString('SPT PPh Badan'),
@@ -43,7 +44,8 @@ const SaveSptPphBadanSchema = v.object({
 	...L9Schema.entries,
 	...L10ASchema.entries,
 	...L10BSchema.entries,
-	...L10CSchema.entries
+	...L10CSchema.entries,
+	...L10DSchema.entries
 });
 
 export const saveSptPphBadan = form(SaveSptPphBadanSchema, async (input) => {
@@ -142,6 +144,20 @@ export const saveSptPphBadan = form(SaveSptPphBadanSchema, async (input) => {
 		await saveLampiranL10C(tx, input.id, {
 			l10c: input.l10c,
 			l10cDitentukanPrinsip: input.l10cDitentukanPrinsip
+		});
+		await saveLampiranL10D(tx, input.id, {
+			l10dDokumenIndukA: input.l10dDokumenIndukA,
+			l10dDokumenIndukB: input.l10dDokumenIndukB,
+			l10dDokumenIndukC: input.l10dDokumenIndukC,
+			l10dDokumenIndukD: input.l10dDokumenIndukD,
+			l10dDokumenIndukE: input.l10dDokumenIndukE,
+			l10dDokumenLokalA: input.l10dDokumenLokalA,
+			l10dDokumenLokalB: input.l10dDokumenLokalB,
+			l10dDokumenLokalC: input.l10dDokumenLokalC,
+			l10dDokumenLokalD: input.l10dDokumenLokalD,
+			l10dDokumenLokalE: input.l10dDokumenLokalE,
+			l10dTanggalDokumenIndukTersedia: input.l10dTanggalDokumenIndukTersedia,
+			l10dTanggalDokumenLokalTersedia: input.l10dTanggalDokumenLokalTersedia
 		});
 	});
 

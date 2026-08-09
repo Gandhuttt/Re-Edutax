@@ -45,4 +45,5 @@ export * from './transactional/surat_pemberitahuan/spt_pph_badan/lampiran_9_ring
 export * from './transactional/surat_pemberitahuan/spt_pph_badan/lampiran_10a_transaksi_hubungan_istimewa';
 export * from './transactional/surat_pemberitahuan/spt_pph_badan/lampiran_10b_pernyataan';
 export * from './transactional/surat_pemberitahuan/spt_pph_badan/lampiran_10c_tax_haven';
+export * from './transactional/surat_pemberitahuan/spt_pph_badan/lampiran_10d_dokumen';
 export * from './transactional/surat_pemberitahuan/spt_pph_badan/lampiran_11b_biaya_pinjaman';
