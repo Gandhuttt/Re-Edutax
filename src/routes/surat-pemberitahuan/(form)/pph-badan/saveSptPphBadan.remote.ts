@@ -29,6 +29,9 @@ const SaveSptPphBadanSchema = v.object({
 	menerimaPenghasilanFinal: booleanRadio(false),
 	menerimaPenghasilanBukanObjekPajak: booleanRadio(false),
 	l3aPengembalianPengurangan: v.optional(decimalInput('Pengembalian/pengurangan PPh luar negeri tahun sebelumnya'), 0),
+	l9AJumlahPenyusutanKomersial: v.optional(decimalInput('Jumlah penyusutan komersial harta berwujud'), 0),
+	l9BJumlahPenyusutanKomersial: v.optional(decimalInput('Jumlah penyusutan komersial bangunan'), 0),
+	l9CJumlahAmortisasiKomersial: v.optional(decimalInput('Jumlah amortisasi komersial harta tidak berwujud'), 0),
 	...L1Schema.entries,
 	...L2Schema.entries,
 	...L3Schema.entries,
@@ -89,6 +92,9 @@ export const saveSptPphBadan = form(SaveSptPphBadanSchema, async (input) => {
 				menerimaPenghasilanBukanObjekPajak: input.menerimaPenghasilanBukanObjekPajak,
 				pphKurangLebihBayar,
 				lampiran3PengembalianPenguranganPphLuarNegeriTahunSebelumnya: Number(input.l3aPengembalianPengurangan),
+				lampiran9AJumlahPenyusutanKomersial: Number(input.l9AJumlahPenyusutanKomersial),
+				lampiran9BJumlahPenyusutanKomersial: Number(input.l9BJumlahPenyusutanKomersial),
+				lampiran9CJumlahAmortisasiKomersial: Number(input.l9CJumlahAmortisasiKomersial),
 				statusDraft,
 				tanggalDilaporkan: statusDraft === 'dilaporkan' ? new Date() : null
 			})

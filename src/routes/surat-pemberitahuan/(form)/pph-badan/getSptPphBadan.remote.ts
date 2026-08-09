@@ -69,7 +69,10 @@ export const getSptPphBadan = query(async () => {
 			tarifPajak: spt_pph_badan.tarifPajak,
 			pphKurangLebihBayar: spt_pph_badan.pphKurangLebihBayar,
 			lampiran3PengembalianPenguranganPphLuarNegeriTahunSebelumnya:
-				spt_pph_badan.lampiran3PengembalianPenguranganPphLuarNegeriTahunSebelumnya
+				spt_pph_badan.lampiran3PengembalianPenguranganPphLuarNegeriTahunSebelumnya,
+			lampiran9AJumlahPenyusutanKomersial: spt_pph_badan.lampiran9AJumlahPenyusutanKomersial,
+			lampiran9BJumlahPenyusutanKomersial: spt_pph_badan.lampiran9BJumlahPenyusutanKomersial,
+			lampiran9CJumlahAmortisasiKomersial: spt_pph_badan.lampiran9CJumlahAmortisasiKomersial
 		})
 		.from(spt_pph_badan)
 		.innerJoin(mata_uang_spt_pph_badan, eq(spt_pph_badan.mataUangPembukuanId, mata_uang_spt_pph_badan.id))
@@ -427,6 +430,11 @@ export const getSptPphBadan = query(async () => {
 			pphTerutangTidakMendapatFasilitas: l8?.pphTerutangTidakMendapatFasilitas ?? 0,
 			pphTerutangJumlah: l8?.pphTerutangJumlah ?? 0
 		},
-		lampiran9: l9.map((row) => ({ ...row, jenisHartaKode: row.jenisHartaKode ?? '' }))
+		lampiran9: {
+			rows: l9.map((row) => ({ ...row, jenisHartaKode: row.jenisHartaKode ?? '' })),
+			jumlahPenyusutanKomersialA: spt.lampiran9AJumlahPenyusutanKomersial,
+			jumlahPenyusutanKomersialB: spt.lampiran9BJumlahPenyusutanKomersial,
+			jumlahAmortisasiKomersialC: spt.lampiran9CJumlahAmortisasiKomersial
+		}
 	};
 });

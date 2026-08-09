@@ -57,6 +57,15 @@ export const spt_pph_badan = sqliteTable(
 		)
 			.notNull()
 			.default(0),
+		lampiran9AJumlahPenyusutanKomersial: integer('lampiran9a_jumlah_penyusutan_komersial')
+			.notNull()
+			.default(0),
+		lampiran9BJumlahPenyusutanKomersial: integer('lampiran9b_jumlah_penyusutan_komersial')
+			.notNull()
+			.default(0),
+		lampiran9CJumlahAmortisasiKomersial: integer('lampiran9c_jumlah_amortisasi_komersial')
+			.notNull()
+			.default(0),
 		tanggalPosting: integer('tanggal_posting', { mode: 'timestamp_ms' }),
 		tanggalDilaporkan: integer('tanggal_dilaporkan', { mode: 'timestamp_ms' }),
 		createdAt: createdAt(),

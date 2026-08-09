@@ -15,9 +15,21 @@
         readonly?: boolean;
         jenisHartaOptions: { value: string; label: string; kelompok: 'harta_berwujud' | 'bangunan' | 'harta_tidak_berwujud' }[];
         metodePenyusutanOptions: { value: string; label: string; jenis: 'komersial' | 'fiskal' }[];
+        jumlahPenyusutanKomersialA: number;
+        jumlahPenyusutanKomersialB: number;
+        jumlahAmortisasiKomersialC: number;
     }
 
-    let { currentTab = $bindable(), l9 = $bindable(), readonly = false, jenisHartaOptions, metodePenyusutanOptions }: Props = $props();
+    let {
+        currentTab = $bindable(),
+        l9 = $bindable(),
+        readonly = false,
+        jenisHartaOptions,
+        metodePenyusutanOptions,
+        jumlahPenyusutanKomersialA = $bindable(),
+        jumlahPenyusutanKomersialB = $bindable(),
+        jumlahAmortisasiKomersialC = $bindable()
+    }: Props = $props();
 
     let metodeKomersialOptions = $derived(metodePenyusutanOptions.filter((o) => o.jenis === 'komersial'));
     let metodeFiskalOptions = $derived(metodePenyusutanOptions.filter((o) => o.jenis === 'fiskal'));
@@ -81,13 +93,13 @@
 <div class="{currentTab.tab === "L9" ? "" : "tw:hidden"}">
     <div class="accordion tw:mt-5">
         <Accordion item={"HARTA BERWUJUD"}>
-            <A data={dataBerwujud} {openModal} {deleteItem} jenisHartaOptions={jenisHartaOptionsBerwujud} {readonly}></A>
+            <A data={dataBerwujud} {openModal} {deleteItem} jenisHartaOptions={jenisHartaOptionsBerwujud} bind:jumlahPenyusutanKomersial={jumlahPenyusutanKomersialA} {readonly}></A>
         </Accordion>
         <Accordion item={"BANGUNAN"}>
-            <B data={dataBangunan} {openModal} {deleteItem} jenisHartaOptions={jenisHartaOptionsBangunan} {readonly}></B>
+            <B data={dataBangunan} {openModal} {deleteItem} jenisHartaOptions={jenisHartaOptionsBangunan} bind:jumlahPenyusutanKomersial={jumlahPenyusutanKomersialB} {readonly}></B>
         </Accordion>
         <Accordion item={"HARTA TIDAK BERWUJUD"}>
-            <C data={dataTidakBerwujud} {openModal} {deleteItem} jenisHartaOptions={jenisHartaOptionsTidakBerwujud} {readonly}></C>
+            <C data={dataTidakBerwujud} {openModal} {deleteItem} jenisHartaOptions={jenisHartaOptionsTidakBerwujud} bind:jumlahAmortisasiKomersial={jumlahAmortisasiKomersialC} {readonly}></C>
         </Accordion>
     </div>
 </div>

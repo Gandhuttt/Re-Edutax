@@ -3,6 +3,7 @@
     import Table from "$lib/components/Table.svelte";
     import Button from "$lib/components/Button.svelte";
     import Input from "$lib/components/Input.svelte";
+    import InputGroup from "$lib/components/InputGroup.svelte";
     import type { L9Row } from "./types";
 
     let {
@@ -10,12 +11,14 @@
         openModal,
         deleteItem,
         jenisHartaOptions,
+        jumlahAmortisasiKomersial = $bindable(),
         readonly = false
     }: {
         data: L9Row[];
         openModal: (row: L9Row | null, kelompokPenyusutan: L9Row['kelompokPenyusutan'], options: { value: string; label: string }[]) => void;
         deleteItem: (id: string | number) => void;
         jenisHartaOptions: { value: string; label: string }[];
+        jumlahAmortisasiKomersial: number;
         readonly?: boolean;
     } = $props();
 
@@ -36,11 +39,9 @@
     );
 
     const totalFiskal = (rows: L9Row[]) => rows.reduce((sum, row) => sum + Number(row.penyusutanAmortisasiFiskalTahunIni || 0), 0);
-    const totalKomersial = (rows: L9Row[]) => rows.reduce((sum, row) => sum + Number(row.penyusutanAmortisasiKomersialTahunIni || 0), 0);
 
     let jumlahAmortisasiFiskal = $derived(totalFiskal(data));
-    let jumlahAmortisasiKomersial = $derived(totalKomersial(data));
-    let selisihAmortisasi = $derived(jumlahAmortisasiFiskal - jumlahAmortisasiKomersial);
+    let selisihAmortisasi = $derived(jumlahAmortisasiFiskal - Number(jumlahAmortisasiKomersial || 0));
 </script>
 
 <div class="tw:flex tw:flex-col tw:gap-5 tw:p-5">
@@ -114,7 +115,7 @@
     </div>
     <div class="tw:flex tw:flex-row tw:items-center tw:w-fit">
         <span class="tw:block tw:w-[50rem] tw:font-medium">JUMLAH AMORTISASI KOMERSIAL</span>
-        <Input class={"tw:text-right tw:w-[30rem]!"} type={"text"} value={rupiah.format(jumlahAmortisasiKomersial)} readonly/>
+        <InputGroup class={"tw:w-[30rem]! tw:text-right"} type={"number"} bind:value={jumlahAmortisasiKomersial} disabled={readonly}>Rp.</InputGroup>
     </div>
     <div class="tw:flex tw:flex-row tw:items-center tw:w-fit">
         <span class="tw:block tw:w-[50rem] tw:font-medium">SELISIH AMORTISASI</span>

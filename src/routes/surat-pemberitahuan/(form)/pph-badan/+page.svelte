@@ -240,7 +240,7 @@
 	let l8JumlahPeredaranBruto = $state(lampiran8.jumlahPeredaranBruto);
 
 	let l9 = $state(
-		lampiran9.map((row) => ({
+		lampiran9.rows.map((row) => ({
 			id: row.id,
 			kelompokPenyusutan: row.kelompokPenyusutan,
 			jenisHarta: row.jenisHartaKode,
@@ -257,6 +257,10 @@
 			keterangan: row.keterangan
 		}))
 	);
+
+	let l9AJumlahPenyusutanKomersial = $state(lampiran9.jumlahPenyusutanKomersialA);
+	let l9BJumlahPenyusutanKomersial = $state(lampiran9.jumlahPenyusutanKomersialB);
+	let l9CJumlahAmortisasiKomersial = $state(lampiran9.jumlahAmortisasiKomersialC);
 
 	let l6KompensasiKerugianAuto = $derived(
 		l7.reduce((sum, row) => sum + Number(row.kompensasiTahunIni || 0), 0)
@@ -383,6 +387,9 @@
 				<input type="hidden" name="l8JumlahPeredaranBruto" value={l8JumlahPeredaranBruto} />
 				<input type="hidden" name="l8PenghasilanKenaPajak" value={l8PenghasilanKenaPajak} />
 				<input type="hidden" name="l9" value={JSON.stringify(l9)} />
+				<input type="hidden" name="l9AJumlahPenyusutanKomersial" value={l9AJumlahPenyusutanKomersial} />
+				<input type="hidden" name="l9BJumlahPenyusutanKomersial" value={l9BJumlahPenyusutanKomersial} />
+				<input type="hidden" name="l9CJumlahAmortisasiKomersial" value={l9CJumlahAmortisasiKomersial} />
 				<header class="tw:mb-5">
 					<nav class="tw:overflow-x-auto tw:border-b tw:border-[#A9A9A9]">
 						<ul class="tw:m-0! tw:flex tw:min-w-max tw:flex-row tw:p-0!">
@@ -471,7 +478,16 @@
 					penghasilanKenaPajak={l8PenghasilanKenaPajak}
 					{readonly}
 				/>
-				<L9 bind:currentTab bind:l9 {readonly} {jenisHartaOptions} {metodePenyusutanOptions}/>
+				<L9
+					bind:currentTab
+					bind:l9
+					bind:jumlahPenyusutanKomersialA={l9AJumlahPenyusutanKomersial}
+					bind:jumlahPenyusutanKomersialB={l9BJumlahPenyusutanKomersial}
+					bind:jumlahAmortisasiKomersialC={l9CJumlahAmortisasiKomersial}
+					{readonly}
+					{jenisHartaOptions}
+					{metodePenyusutanOptions}
+				/>
 				<L10A bind:currentTab/>
 				<L10B bind:currentTab/>
 				<L10C bind:currentTab/>
