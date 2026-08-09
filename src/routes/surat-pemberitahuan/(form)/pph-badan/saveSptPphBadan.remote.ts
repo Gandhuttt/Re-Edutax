@@ -15,6 +15,7 @@ import { L7Schema, saveLampiranL7 } from './components/L7/saveLampiranL7.server'
 import { L8Schema, saveLampiranL8 } from './components/L8/saveLampiranL8.server';
 import { L9Schema, saveLampiranL9 } from './components/L9/saveLampiranL9.server';
 import { L10ASchema, saveLampiranL10A } from './components/L10-A/saveLampiranL10A.server';
+import { L10BSchema, saveLampiranL10B } from './components/L10-B/saveLampiranL10B.server';
 
 const SaveSptPphBadanSchema = v.object({
 	id: requiredString('SPT PPh Badan'),
@@ -30,9 +31,6 @@ const SaveSptPphBadanSchema = v.object({
 	menerimaPenghasilanFinal: booleanRadio(false),
 	menerimaPenghasilanBukanObjekPajak: booleanRadio(false),
 	l3aPengembalianPengurangan: v.optional(decimalInput('Pengembalian/pengurangan PPh luar negeri tahun sebelumnya'), 0),
-	l9AJumlahPenyusutanKomersial: v.optional(decimalInput('Jumlah penyusutan komersial harta berwujud'), 0),
-	l9BJumlahPenyusutanKomersial: v.optional(decimalInput('Jumlah penyusutan komersial bangunan'), 0),
-	l9CJumlahAmortisasiKomersial: v.optional(decimalInput('Jumlah amortisasi komersial harta tidak berwujud'), 0),
 	...L1Schema.entries,
 	...L2Schema.entries,
 	...L3Schema.entries,
@@ -42,7 +40,8 @@ const SaveSptPphBadanSchema = v.object({
 	...L7Schema.entries,
 	...L8Schema.entries,
 	...L9Schema.entries,
-	...L10ASchema.entries
+	...L10ASchema.entries,
+	...L10BSchema.entries
 });
 
 export const saveSptPphBadan = form(SaveSptPphBadanSchema, async (input) => {
@@ -94,9 +93,6 @@ export const saveSptPphBadan = form(SaveSptPphBadanSchema, async (input) => {
 				menerimaPenghasilanBukanObjekPajak: input.menerimaPenghasilanBukanObjekPajak,
 				pphKurangLebihBayar,
 				lampiran3PengembalianPenguranganPphLuarNegeriTahunSebelumnya: Number(input.l3aPengembalianPengurangan),
-				lampiran9AJumlahPenyusutanKomersial: Number(input.l9AJumlahPenyusutanKomersial),
-				lampiran9BJumlahPenyusutanKomersial: Number(input.l9BJumlahPenyusutanKomersial),
-				lampiran9CJumlahAmortisasiKomersial: Number(input.l9CJumlahAmortisasiKomersial),
 				statusDraft,
 				tanggalDilaporkan: statusDraft === 'dilaporkan' ? new Date() : null
 			})
@@ -117,8 +113,30 @@ export const saveSptPphBadan = form(SaveSptPphBadanSchema, async (input) => {
 			l8JumlahPeredaranBruto: input.l8JumlahPeredaranBruto,
 			l8PenghasilanKenaPajak: input.l8PenghasilanKenaPajak
 		});
-		await saveLampiranL9(tx, input.id, { l9: input.l9 });
+		await saveLampiranL9(tx, input.id, {
+			l9: input.l9,
+			l9AJumlahPenyusutanKomersial: input.l9AJumlahPenyusutanKomersial,
+			l9BJumlahPenyusutanKomersial: input.l9BJumlahPenyusutanKomersial,
+			l9CJumlahAmortisasiKomersial: input.l9CJumlahAmortisasiKomersial
+		});
 		await saveLampiranL10A(tx, input.id, { l10a: input.l10a });
+		await saveLampiranL10B(tx, input.id, {
+			l10bHubunganA: input.l10bHubunganA,
+			l10bHubunganB: input.l10bHubunganB,
+			l10bHubunganC: input.l10bHubunganC,
+			l10bHubunganD: input.l10bHubunganD,
+			l10bTransaksiA: input.l10bTransaksiA,
+			l10bTransaksiB: input.l10bTransaksiB,
+			l10bTransaksiC: input.l10bTransaksiC,
+			l10bDokumentasiA: input.l10bDokumentasiA,
+			l10bDokumentasiB: input.l10bDokumentasiB,
+			l10bDokumentasiC: input.l10bDokumentasiC,
+			l10bDokumentasiD: input.l10bDokumentasiD,
+			l10bDokumentasiE: input.l10bDokumentasiE,
+			l10bDokumenA: input.l10bDokumenA,
+			l10bDokumenB: input.l10bDokumenB,
+			l10bDokumenC: input.l10bDokumenC
+		});
 	});
 
 	redirect(303, statusDraft === 'dilaporkan' ? '/surat-pemberitahuan/laporan' : '/surat-pemberitahuan/konsep');

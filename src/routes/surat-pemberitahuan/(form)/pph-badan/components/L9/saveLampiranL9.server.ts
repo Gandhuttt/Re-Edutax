@@ -1,7 +1,11 @@
 import { decimalInput, jsonRows, requiredString } from '$lib/helpers/valibot-schema';
 import { db } from '$lib/server/db';
 import type { Transaction } from '$lib/server/db';
-import { jenis_harta_spt_pph_badan, spt_pph_badan_lampiran_9_harta } from '$lib/server/db/schema';
+import {
+	jenis_harta_spt_pph_badan,
+	spt_pph_badan_lampiran_9_harta,
+	spt_pph_badan_lampiran_9_ringkasan_komersial
+} from '$lib/server/db/schema';
 import { error } from '@sveltejs/kit';
 import { and, eq } from 'drizzle-orm';
 import * as v from 'valibot';
@@ -39,7 +43,10 @@ export const L9Schema = v.object({
 			nilaiSisaBukuFiskalAkhirTahun: v.optional(decimalInput('Nilai sisa buku fiskal pada akhir tahun'), 0),
 			keterangan: v.optional(v.string(), '')
 		})
-	)
+	),
+	l9AJumlahPenyusutanKomersial: v.optional(decimalInput('Jumlah penyusutan komersial harta berwujud'), 0),
+	l9BJumlahPenyusutanKomersial: v.optional(decimalInput('Jumlah penyusutan komersial bangunan'), 0),
+	l9CJumlahAmortisasiKomersial: v.optional(decimalInput('Jumlah amortisasi komersial harta tidak berwujud'), 0)
 });
 
 type L9Input = v.InferOutput<typeof L9Schema>;
@@ -84,4 +91,15 @@ export async function saveLampiranL9(tx: Transaction, sptPphBadanId: string, inp
 			keterangan: row.keterangan
 		});
 	}
+
+	await tx
+		.delete(spt_pph_badan_lampiran_9_ringkasan_komersial)
+		.where(eq(spt_pph_badan_lampiran_9_ringkasan_komersial.sptPphBadanId, sptPphBadanId));
+
+	await tx.insert(spt_pph_badan_lampiran_9_ringkasan_komersial).values({
+		sptPphBadanId,
+		jumlahPenyusutanKomersialA: Number(input.l9AJumlahPenyusutanKomersial),
+		jumlahPenyusutanKomersialB: Number(input.l9BJumlahPenyusutanKomersial),
+		jumlahAmortisasiKomersialC: Number(input.l9CJumlahAmortisasiKomersial)
+	});
 }

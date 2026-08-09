@@ -41,5 +41,7 @@ export * from './transactional/surat_pemberitahuan/spt_pph_badan/lampiran_6_angs
 export * from './transactional/surat_pemberitahuan/spt_pph_badan/lampiran_7_kompensasi_kerugian_fiskal';
 export * from './transactional/surat_pemberitahuan/spt_pph_badan/lampiran_8_fasilitas_31e';
 export * from './transactional/surat_pemberitahuan/spt_pph_badan/lampiran_9_daftar_harta';
+export * from './transactional/surat_pemberitahuan/spt_pph_badan/lampiran_9_ringkasan_komersial';
 export * from './transactional/surat_pemberitahuan/spt_pph_badan/lampiran_10a_transaksi_hubungan_istimewa';
+export * from './transactional/surat_pemberitahuan/spt_pph_badan/lampiran_10b_pernyataan';
 export * from './transactional/surat_pemberitahuan/spt_pph_badan/lampiran_11b_biaya_pinjaman';

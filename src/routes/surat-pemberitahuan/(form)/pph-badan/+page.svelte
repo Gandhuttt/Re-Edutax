@@ -58,7 +58,8 @@
 		lampiran7,
 		lampiran8,
 		lampiran9,
-		lampiran10a
+		lampiran10a,
+		lampiran10b
 	} = await getSptPphBadan();
 	const opiniAuditorOptions = await getOpiniAuditor();
 	const sektorUsahaOptions = await getSektorUsaha();
@@ -284,6 +285,22 @@
 		}))
 	);
 
+	let l10bHubunganA = $state(Boolean(lampiran10b.hubunganA));
+	let l10bHubunganB = $state(Boolean(lampiran10b.hubunganB));
+	let l10bHubunganC = $state(Boolean(lampiran10b.hubunganC));
+	let l10bHubunganD = $state(Boolean(lampiran10b.hubunganD));
+	let l10bTransaksiA = $state(Boolean(lampiran10b.transaksiA));
+	let l10bTransaksiB = $state(Boolean(lampiran10b.transaksiB));
+	let l10bTransaksiC = $state(Boolean(lampiran10b.transaksiC));
+	let l10bDokumentasiA = $state(Boolean(lampiran10b.dokumentasiA));
+	let l10bDokumentasiB = $state(Boolean(lampiran10b.dokumentasiB));
+	let l10bDokumentasiC = $state(Boolean(lampiran10b.dokumentasiC));
+	let l10bDokumentasiD = $state(Boolean(lampiran10b.dokumentasiD));
+	let l10bDokumentasiE = $state(Boolean(lampiran10b.dokumentasiE));
+	let l10bDokumenA = $state(Boolean(lampiran10b.dokumenA));
+	let l10bDokumenB = $state(Boolean(lampiran10b.dokumenB));
+	let l10bDokumenC = $state(Boolean(lampiran10b.dokumenC));
+
 	let l6KompensasiKerugianAuto = $derived(
 		l7.reduce((sum, row) => sum + Number(row.kompensasiTahunIni || 0), 0)
 	);
@@ -413,6 +430,21 @@
 				<input type="hidden" name="l9BJumlahPenyusutanKomersial" value={l9BJumlahPenyusutanKomersial} />
 				<input type="hidden" name="l9CJumlahAmortisasiKomersial" value={l9CJumlahAmortisasiKomersial} />
 				<input type="hidden" name="l10a" value={JSON.stringify(l10a)} />
+				<input type="hidden" name="l10bHubunganA" value={l10bHubunganA} />
+				<input type="hidden" name="l10bHubunganB" value={l10bHubunganB} />
+				<input type="hidden" name="l10bHubunganC" value={l10bHubunganC} />
+				<input type="hidden" name="l10bHubunganD" value={l10bHubunganD} />
+				<input type="hidden" name="l10bTransaksiA" value={l10bTransaksiA} />
+				<input type="hidden" name="l10bTransaksiB" value={l10bTransaksiB} />
+				<input type="hidden" name="l10bTransaksiC" value={l10bTransaksiC} />
+				<input type="hidden" name="l10bDokumentasiA" value={l10bDokumentasiA} />
+				<input type="hidden" name="l10bDokumentasiB" value={l10bDokumentasiB} />
+				<input type="hidden" name="l10bDokumentasiC" value={l10bDokumentasiC} />
+				<input type="hidden" name="l10bDokumentasiD" value={l10bDokumentasiD} />
+				<input type="hidden" name="l10bDokumentasiE" value={l10bDokumentasiE} />
+				<input type="hidden" name="l10bDokumenA" value={l10bDokumenA} />
+				<input type="hidden" name="l10bDokumenB" value={l10bDokumenB} />
+				<input type="hidden" name="l10bDokumenC" value={l10bDokumenC} />
 				<header class="tw:mb-5">
 					<nav class="tw:overflow-x-auto tw:border-b tw:border-[#A9A9A9]">
 						<ul class="tw:m-0! tw:flex tw:min-w-max tw:flex-row tw:p-0!">
@@ -520,7 +552,25 @@
 					{jenisTransaksiOptions}
 					{metodeHargaTransferOptions}
 				/>
-				<L10B bind:currentTab/>
+				<L10B
+					bind:currentTab
+					bind:hubunganA={l10bHubunganA}
+					bind:hubunganB={l10bHubunganB}
+					bind:hubunganC={l10bHubunganC}
+					bind:hubunganD={l10bHubunganD}
+					bind:transaksiA={l10bTransaksiA}
+					bind:transaksiB={l10bTransaksiB}
+					bind:transaksiC={l10bTransaksiC}
+					bind:dokumentasiA={l10bDokumentasiA}
+					bind:dokumentasiB={l10bDokumentasiB}
+					bind:dokumentasiC={l10bDokumentasiC}
+					bind:dokumentasiD={l10bDokumentasiD}
+					bind:dokumentasiE={l10bDokumentasiE}
+					bind:dokumenA={l10bDokumenA}
+					bind:dokumenB={l10bDokumenB}
+					bind:dokumenC={l10bDokumenC}
+					{readonly}
+				/>
 				<L10C bind:currentTab/>
 				<L10D bind:currentTab/>
 				<L13A bind:currentTab/>
