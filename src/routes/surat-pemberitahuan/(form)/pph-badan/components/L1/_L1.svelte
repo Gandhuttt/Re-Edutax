@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Accordion from '$lib/components/AccordionItem.svelte';
-	import type { LabaRugiAkunTemplate } from '$lib/helpers/labaRugiRollup';
-	import type { NeracaAkunTemplate } from '$lib/helpers/neracaRollup';
+	import type { LabaRugiAkunTemplate } from './labaRugiRollup';
+	import type { NeracaAkunTemplate } from './neracaRollup';
 	import ModalEditLabaRugi from './_ModalEditLabaRugi.svelte';
 	import A from './A.svelte';
 	import B from './B.svelte';

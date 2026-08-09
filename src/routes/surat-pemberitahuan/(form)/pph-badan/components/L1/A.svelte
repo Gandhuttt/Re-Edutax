@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Table from '$lib/components/Table.svelte';
 	import Button from '$lib/components/Button.svelte';
-	import { computeLabaRugiRows, type LabaRugiAkunTemplate } from '$lib/helpers/labaRugiRollup';
+	import { computeLabaRugiRows, type LabaRugiAkunTemplate } from './labaRugiRollup';
 
 	interface LabaRugiLeaf {
 		id?: string;

@@ -1,6 +1,6 @@
 <script lang="ts">
 	import Table from '$lib/components/Table.svelte';
-	import { computeNeracaRows, type NeracaAkunTemplate, type NeracaComputedRow } from '$lib/helpers/neracaRollup';
+	import { computeNeracaRows, type NeracaAkunTemplate, type NeracaComputedRow } from './neracaRollup';
 
 	interface NeracaLeaf {
 		id?: string;

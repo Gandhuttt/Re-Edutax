@@ -1,5 +1,5 @@
 import { form, getRequestEvent } from '$app/server';
-import { computeLabaRugiRows } from '$lib/helpers/labaRugiRollup';
+import { computeLabaRugiRows } from './components/L1/labaRugiRollup';
 import { decimalString, requiredString } from '$lib/helpers/valibot-schema';
 import { db } from '$lib/server/db';
 import {
