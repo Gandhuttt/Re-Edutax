@@ -83,7 +83,20 @@
                     </div>
                 </td>
                 <td><Input class={"tw:text-end"} type={"text"} value={0} disabled/></td>
-                <td></td>
+                <td>
+                {#if E16 != undefined} 
+                    <Alert bg={"var(--color-primary)"}>
+                       {#snippet head()}
+                            <span>i</span>
+                       {/snippet} 
+                       {#snippet body()}
+                        <span>
+                        {E16 ? "Ya, silahkan mengisi lampiran 13C" : "Tidak, silahkan lanjut pertanyaan berikutnya"}
+                        </span>
+                       {/snippet}
+                    </Alert>
+                {/if}
+                </td>
             </tr>
         {/snippet}
     </Table>
