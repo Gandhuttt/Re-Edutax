@@ -39,7 +39,7 @@
 	import { getJenisPenghasilanBukanObjekPajak } from './components/L4/getJenisPenghasilanBukanObjekPajak.remote';
 	import { saveSptPphBadan } from './saveSptPphBadan.remote';
 
-	const { readonly, spt, lampiran1, lampiran2, lampiran3, lampiran4, lampiran5 } = await getSptPphBadan();
+	const { readonly, spt, lampiran1, lampiran2, lampiran3, lampiran4, lampiran5, lampiran6 } = await getSptPphBadan();
 	const opiniAuditorOptions = await getOpiniAuditor();
 	const sektorUsahaOptions = await getSektorUsaha();
 	const negaraOptions = await getNegara();
@@ -210,6 +210,11 @@
 		})
 	);
 
+	let l6DasarAngsuran = $state(lampiran6.dasarAngsuran);
+	let l6KompensasiKerugian = $state(lampiran6.kompensasiKerugian);
+	let l6PphTerutang = $state(lampiran6.pphTerutang);
+	let l6KreditPajakTahunLalu = $state(lampiran6.kreditPajakTahunLalu);
+
 	let menerimaPenghasilanPp23 = $state(Boolean(spt.menerimaPenghasilanPp23));
 	let hanyaPenghasilanPp23 = $state(Boolean(spt.hanyaPenghasilanPp23));
 	let menerimaPenghasilanFinal = $state(Boolean(spt.menerimaPenghasilanFinal));
@@ -300,6 +305,10 @@
 				<input type="hidden" name="l4b" value={JSON.stringify(l4b)} />
 				<input type="hidden" name="l5a" value={JSON.stringify(l5a)} />
 				<input type="hidden" name="l5bDipotong" value={JSON.stringify(l5bDipotong)} />
+				<input type="hidden" name="l6DasarAngsuran" value={l6DasarAngsuran} />
+				<input type="hidden" name="l6KompensasiKerugian" value={l6KompensasiKerugian} />
+				<input type="hidden" name="l6PphTerutang" value={l6PphTerutang} />
+				<input type="hidden" name="l6KreditPajakTahunLalu" value={l6KreditPajakTahunLalu} />
 				<header class="tw:mb-5">
 					<nav class="tw:overflow-x-auto tw:border-b tw:border-[#A9A9A9]">
 						<ul class="tw:m-0! tw:flex tw:min-w-max tw:flex-row tw:p-0!">
@@ -371,7 +380,14 @@
 				/>
 				<L4 bind:currentTab bind:l4a bind:l4b {readonly} {objekPajakOptions} jenisPenghasilanOptions={jenisPenghasilanBukanObjekPajakOptions}/>
 				<L5 bind:currentTab bind:l5a bind:l5bDipotong {readonly}/>
-				<L6 bind:currentTab/>
+				<L6
+					bind:currentTab
+					bind:dasarAngsuran={l6DasarAngsuran}
+					bind:kompensasiKerugian={l6KompensasiKerugian}
+					bind:pphTerutang={l6PphTerutang}
+					bind:kreditPajakTahunLalu={l6KreditPajakTahunLalu}
+					{readonly}
+				/>
 				<L7 bind:currentTab/>
 				<L8 bind:currentTab/>
 				<L9 bind:currentTab/>

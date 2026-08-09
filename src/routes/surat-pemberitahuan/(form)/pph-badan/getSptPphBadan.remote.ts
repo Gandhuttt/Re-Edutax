@@ -21,10 +21,12 @@ import {
 	spt_pph_badan_lampiran_4_pph_final,
 	spt_pph_badan_lampiran_5_pp23_bulanan,
 	spt_pph_badan_lampiran_5_pp23_dipotong_bulanan,
-	spt_pph_badan_lampiran_5_tku
+	spt_pph_badan_lampiran_5_tku,
+	spt_pph_badan_lampiran_6_komponen
 } from '$lib/server/db/schema';
 import { error } from '@sveltejs/kit';
 import { asc, and, eq } from 'drizzle-orm';
+import { L6_KODE } from './components/L6/saveLampiranL6.server';
 
 export const getSptPphBadan = query(async () => {
 	const event = getRequestEvent();
@@ -90,7 +92,8 @@ export const getSptPphBadan = query(async () => {
 		bukanObjekPajak,
 		tku,
 		bulananPp23,
-		dipotongBulanan
+		dipotongBulanan,
+		komponenL6
 	] = await Promise.all([
 		db
 			.select({
@@ -287,8 +290,17 @@ export const getSptPphBadan = query(async () => {
 				nilai: spt_pph_badan_lampiran_5_pp23_dipotong_bulanan.nilai
 			})
 			.from(spt_pph_badan_lampiran_5_pp23_dipotong_bulanan)
-			.where(eq(spt_pph_badan_lampiran_5_pp23_dipotong_bulanan.sptPphBadanId, id))
+			.where(eq(spt_pph_badan_lampiran_5_pp23_dipotong_bulanan.sptPphBadanId, id)),
+		db
+			.select({
+				kode: spt_pph_badan_lampiran_6_komponen.kode,
+				nilai: spt_pph_badan_lampiran_6_komponen.nilai
+			})
+			.from(spt_pph_badan_lampiran_6_komponen)
+			.where(eq(spt_pph_badan_lampiran_6_komponen.sptPphBadanId, id))
 	]);
+
+	const nilaiL6ByKode = new Map(komponenL6.map((row) => [row.kode, row.nilai]));
 
 	return {
 		readonly: spt.statusDraft !== 'konsep',
@@ -320,6 +332,15 @@ export const getSptPphBadan = query(async () => {
 			tku,
 			bulanan: bulananPp23,
 			dipotongBulanan
+		},
+		lampiran6: {
+			dasarAngsuran: nilaiL6ByKode.get(L6_KODE.DASAR_ANGSURAN) ?? 0,
+			kompensasiKerugian: nilaiL6ByKode.get(L6_KODE.KOMPENSASI_KERUGIAN) ?? 0,
+			penghasilanKenaPajak: nilaiL6ByKode.get(L6_KODE.PENGHASILAN_KENA_PAJAK) ?? 0,
+			pphTerutang: nilaiL6ByKode.get(L6_KODE.PPH_TERUTANG) ?? 0,
+			kreditPajakTahunLalu: nilaiL6ByKode.get(L6_KODE.KREDIT_PAJAK_TAHUN_LALU) ?? 0,
+			pphDibayarSendiri: nilaiL6ByKode.get(L6_KODE.PPH_DIBAYAR_SENDIRI) ?? 0,
+			angsuranPph25: nilaiL6ByKode.get(L6_KODE.ANGSURAN_PPH_25) ?? 0
 		}
 	};
 });
