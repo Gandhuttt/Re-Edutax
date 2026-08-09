@@ -2,6 +2,7 @@ import { getRequestEvent, query } from '$app/server';
 import { db } from '$lib/server/db';
 import {
 	jenis_pajak_dipotong_dipungut_spt_pph_badan,
+	jenis_penghasilan_bukan_objek_pajak_spt_pph_badan,
 	jenis_penghasilan_kredit_pajak_luar_negeri_spt_pph_badan,
 	kode_koreksi_fiskal_spt_pph_badan,
 	mata_uang_spt_pph_badan,
@@ -16,6 +17,7 @@ import {
 	spt_pph_badan_lampiran_2_pihak,
 	spt_pph_badan_lampiran_3_penghasilan_luar_negeri,
 	spt_pph_badan_lampiran_3_pph_dipotong,
+	spt_pph_badan_lampiran_4_bukan_objek_pajak,
 	spt_pph_badan_lampiran_4_pph_final,
 	spt_pph_badan_lampiran_5_pp23_bulanan,
 	spt_pph_badan_lampiran_5_pp23_dipotong_bulanan,
@@ -85,6 +87,7 @@ export const getSptPphBadan = query(async () => {
 		penghasilanLuarNegeri,
 		pphDipotong,
 		penghasilanFinal,
+		bukanObjekPajak,
 		tku,
 		bulananPp23,
 		dipotongBulanan
@@ -237,6 +240,24 @@ export const getSptPphBadan = query(async () => {
 			.orderBy(asc(spt_pph_badan_lampiran_4_pph_final.nomorUrut)),
 		db
 			.select({
+				id: spt_pph_badan_lampiran_4_bukan_objek_pajak.id,
+				jenisPenghasilanKode: jenis_penghasilan_bukan_objek_pajak_spt_pph_badan.kode,
+				sumberPenghasilan: spt_pph_badan_lampiran_4_bukan_objek_pajak.sumberPenghasilan,
+				penghasilanBruto: spt_pph_badan_lampiran_4_bukan_objek_pajak.penghasilanBruto,
+				keterangan: spt_pph_badan_lampiran_4_bukan_objek_pajak.keterangan
+			})
+			.from(spt_pph_badan_lampiran_4_bukan_objek_pajak)
+			.leftJoin(
+				jenis_penghasilan_bukan_objek_pajak_spt_pph_badan,
+				eq(
+					spt_pph_badan_lampiran_4_bukan_objek_pajak.jenisPenghasilanId,
+					jenis_penghasilan_bukan_objek_pajak_spt_pph_badan.id
+				)
+			)
+			.where(eq(spt_pph_badan_lampiran_4_bukan_objek_pajak.sptPphBadanId, id))
+			.orderBy(asc(spt_pph_badan_lampiran_4_bukan_objek_pajak.nomorUrut)),
+		db
+			.select({
 				id: spt_pph_badan_lampiran_5_tku.id,
 				nitku: spt_pph_badan_lampiran_5_tku.nitku,
 				nama: spt_pph_badan_lampiran_5_tku.nama,
@@ -292,7 +313,8 @@ export const getSptPphBadan = query(async () => {
 			pphDipotong: pphDipotong.map((row) => ({ ...row, jenisPajakKode: row.jenisPajakKode ?? '' }))
 		},
 		lampiran4: {
-			penghasilanFinal: penghasilanFinal.map((row) => ({ ...row, objekPajakKode: row.objekPajakKode ?? '' }))
+			penghasilanFinal: penghasilanFinal.map((row) => ({ ...row, objekPajakKode: row.objekPajakKode ?? '' })),
+			bukanObjekPajak: bukanObjekPajak.map((row) => ({ ...row, jenisPenghasilanKode: row.jenisPenghasilanKode ?? '' }))
 		},
 		lampiran5: {
 			tku,

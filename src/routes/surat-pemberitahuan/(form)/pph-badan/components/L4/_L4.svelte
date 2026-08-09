@@ -1,6 +1,7 @@
 <script lang="ts">
     import Accordion from "$lib/components/AccordionItem.svelte";
     import ModalEditA from "./_ModalEditA.svelte";
+    import ModalEditB from "./_ModalEditB.svelte";
     import A from "./A.svelte";
     import B from "./B.svelte";
 
@@ -21,15 +22,24 @@
             tanggalBuktiPotong: string;
             keterangan: string;
         }>;
+        l4b: Array<{
+            id: string | number;
+            jenisPenghasilan: string;
+            sumberPenghasilan: string;
+            penghasilanBruto: number;
+        }>;
         readonly?: boolean;
         objekPajakOptions: { value: string; label: string }[];
+        jenisPenghasilanOptions: { value: string; label: string }[];
     }
 
     let {
         currentTab = $bindable(),
         l4a: penghasilanFinal = $bindable(),
+        l4b: bukanObjekPajak = $bindable(),
         readonly = false,
-        objekPajakOptions
+        objekPajakOptions,
+        jenisPenghasilanOptions
     }: Props = $props();
 
     $effect(() => {currentTab.title = currentTab.tab === "L4" ? "PENGHASILAN YANG DIKENAKAN PAJAK FINAL DAN DAFTAR PENGHASILAN YANG BUKAN OBJEK PAJAK" : currentTab.title})
@@ -52,6 +62,25 @@
     function deleteItemA(id: string | number) {
         penghasilanFinal = penghasilanFinal.filter(item => item.id !== id);
     }
+
+    let editingB = $state<any>({});
+
+    function openModalB(item: any) {
+        editingB = item ? { ...item } : {};
+    }
+
+    function saveItemB() {
+        const index = bukanObjekPajak.findIndex(i => i.id === editingB.id);
+        if (index !== -1) {
+            bukanObjekPajak[index] = { ...editingB };
+        } else {
+            bukanObjekPajak.push({ ...editingB, id: Date.now() });
+        }
+    }
+
+    function deleteItemB(id: string | number) {
+        bukanObjekPajak = bukanObjekPajak.filter(item => item.id !== id);
+    }
 </script>
 
 <div class="{currentTab.tab === "L4" ? "" : "tw:hidden"}">
@@ -60,9 +89,10 @@
             <A data={penghasilanFinal} openModal={openModalA} deleteItem={deleteItemA} {objekPajakOptions}></A>
         </Accordion>
         <Accordion item={"B. PENGHASILAN YANG TIDAK TERMASUK OBJEK PAJAK"}>
-            <B></B>
+            <B data={bukanObjekPajak} openModal={openModalB} deleteItem={deleteItemB} {jenisPenghasilanOptions}></B>
         </Accordion>
     </div>
 </div>
 
 <ModalEditA bind:data={editingA} saveItem={saveItemA} {objekPajakOptions} />
+<ModalEditB bind:data={editingB} saveItem={saveItemB} {jenisPenghasilanOptions} />

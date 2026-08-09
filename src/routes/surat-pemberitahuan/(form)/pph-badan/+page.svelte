@@ -36,6 +36,7 @@
 	import { getMataUang } from './components/L3/getMataUang.remote';
 	import { getJenisPajakDipotongDipungut } from './components/L3/getJenisPajakDipotongDipungut.remote';
 	import { getObjekPajak } from './components/L4/getObjekPajak.remote';
+	import { getJenisPenghasilanBukanObjekPajak } from './components/L4/getJenisPenghasilanBukanObjekPajak.remote';
 	import { saveSptPphBadan } from './saveSptPphBadan.remote';
 
 	const { readonly, spt, lampiran1, lampiran2, lampiran3, lampiran4, lampiran5 } = await getSptPphBadan();
@@ -49,6 +50,7 @@
 	const mataUangOptions = await getMataUang();
 	const jenisPajakDipotongDipungutOptions = await getJenisPajakDipotongDipungut();
 	const objekPajakOptions = await getObjekPajak();
+	const jenisPenghasilanBukanObjekPajakOptions = await getJenisPenghasilanBukanObjekPajak();
 	const saveForm = saveSptPphBadan.for(spt.id);
 
 	const lampiran1LabaRugiTemplatesBySektor = new Map<
@@ -170,6 +172,15 @@
 		}))
 	);
 
+	let l4b = $state(
+		lampiran4.bukanObjekPajak.map((row) => ({
+			id: row.id,
+			jenisPenghasilan: row.jenisPenghasilanKode,
+			sumberPenghasilan: row.sumberPenghasilan,
+			penghasilanBruto: row.penghasilanBruto
+		}))
+	);
+
 	let l5a = $state(
 		lampiran5.tku.map((t) => ({
 			id: t.id,
@@ -286,6 +297,7 @@
 				<input type="hidden" name="l3aPengembalianPengurangan" value={l3aPengembalianPengurangan} />
 				<input type="hidden" name="l3b" value={JSON.stringify(l3b)} />
 				<input type="hidden" name="l4a" value={JSON.stringify(l4a)} />
+				<input type="hidden" name="l4b" value={JSON.stringify(l4b)} />
 				<input type="hidden" name="l5a" value={JSON.stringify(l5a)} />
 				<input type="hidden" name="l5bDipotong" value={JSON.stringify(l5bDipotong)} />
 				<header class="tw:mb-5">
@@ -357,7 +369,7 @@
 					{mataUangOptions}
 					jenisPajakOptions={jenisPajakDipotongDipungutOptions}
 				/>
-				<L4 bind:currentTab bind:l4a {readonly} {objekPajakOptions}/>
+				<L4 bind:currentTab bind:l4a bind:l4b {readonly} {objekPajakOptions} jenisPenghasilanOptions={jenisPenghasilanBukanObjekPajakOptions}/>
 				<L5 bind:currentTab bind:l5a bind:l5bDipotong {readonly}/>
 				<L6 bind:currentTab/>
 				<L7 bind:currentTab/>

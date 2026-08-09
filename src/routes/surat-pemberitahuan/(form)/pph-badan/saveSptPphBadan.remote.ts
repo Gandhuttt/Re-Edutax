@@ -88,7 +88,7 @@ export const saveSptPphBadan = form(SaveSptPphBadanSchema, async (input) => {
 
 		await saveLampiranL2(tx, input.id, { l2a: input.l2a, l2b: input.l2b });
 		await saveLampiranL3(tx, input.id, { l3a: input.l3a, l3b: input.l3b });
-		await saveLampiranL4(tx, input.id, { l4a: input.l4a });
+		await saveLampiranL4(tx, input.id, { l4a: input.l4a, l4b: input.l4b });
 		await saveLampiranL5(tx, input.id, { l5a: input.l5a, l5bDipotong: input.l5bDipotong });
 	});
 
