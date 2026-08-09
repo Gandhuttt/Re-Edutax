@@ -20,6 +20,9 @@ export * from './references/spt_pph_badan/negara';
 export * from './references/spt_pph_badan/mata_uang';
 export * from './references/spt_pph_badan/jenis_harta';
 export * from './references/spt_pph_badan/metode_penyusutan';
+export * from './references/spt_pph_badan/bentuk_hubungan_istimewa';
+export * from './references/spt_pph_badan/jenis_transaksi_hubungan_istimewa';
+export * from './references/spt_pph_badan/metode_penentuan_harga_transfer';
 export * from './references/spt_pph_badan/objek_pajak';
 export * from './references/spt_pph_badan/jenis_penghasilan_bukan_objek_pajak';
 export * from './references/spt_pph_badan/jenis_penghasilan_kredit_pajak_luar_negeri';
@@ -38,4 +41,5 @@ export * from './transactional/surat_pemberitahuan/spt_pph_badan/lampiran_6_angs
 export * from './transactional/surat_pemberitahuan/spt_pph_badan/lampiran_7_kompensasi_kerugian_fiskal';
 export * from './transactional/surat_pemberitahuan/spt_pph_badan/lampiran_8_fasilitas_31e';
 export * from './transactional/surat_pemberitahuan/spt_pph_badan/lampiran_9_daftar_harta';
+export * from './transactional/surat_pemberitahuan/spt_pph_badan/lampiran_10a_transaksi_hubungan_istimewa';
 export * from './transactional/surat_pemberitahuan/spt_pph_badan/lampiran_11b_biaya_pinjaman';

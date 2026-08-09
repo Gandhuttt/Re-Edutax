@@ -41,6 +41,9 @@
 	import { hitungFasilitas31E } from './components/L8/fasilitas31e';
 	import { getJenisHarta } from './components/L9/getJenisHarta.remote';
 	import { getMetodePenyusutan } from './components/L9/getMetodePenyusutan.remote';
+	import { getBentukHubungan } from './components/L10-A/getBentukHubungan.remote';
+	import { getJenisTransaksi } from './components/L10-A/getJenisTransaksi.remote';
+	import { getMetodeHargaTransfer } from './components/L10-A/getMetodeHargaTransfer.remote';
 	import { saveSptPphBadan } from './saveSptPphBadan.remote';
 
 	const {
@@ -54,7 +57,8 @@
 		lampiran6,
 		lampiran7,
 		lampiran8,
-		lampiran9
+		lampiran9,
+		lampiran10a
 	} = await getSptPphBadan();
 	const opiniAuditorOptions = await getOpiniAuditor();
 	const sektorUsahaOptions = await getSektorUsaha();
@@ -69,6 +73,9 @@
 	const jenisPenghasilanBukanObjekPajakOptions = await getJenisPenghasilanBukanObjekPajak();
 	const jenisHartaOptions = await getJenisHarta();
 	const metodePenyusutanOptions = await getMetodePenyusutan();
+	const bentukHubunganOptions = await getBentukHubungan();
+	const jenisTransaksiOptions = await getJenisTransaksi();
+	const metodeHargaTransferOptions = await getMetodeHargaTransfer();
 	const saveForm = saveSptPphBadan.for(spt.id);
 
 	const lampiran1LabaRugiTemplatesBySektor = new Map<
@@ -262,6 +269,21 @@
 	let l9BJumlahPenyusutanKomersial = $state(lampiran9.jumlahPenyusutanKomersialB);
 	let l9CJumlahAmortisasiKomersial = $state(lampiran9.jumlahAmortisasiKomersialC);
 
+	let l10a = $state(
+		lampiran10a.map((row) => ({
+			id: row.id,
+			nama: row.nama,
+			npwpTin: row.npwpTin,
+			negara: row.negaraKode,
+			bentukHubungan: row.bentukHubunganKode,
+			kegiatanUsaha: row.kegiatanUsaha,
+			jenisTransaksi: row.jenisTransaksiKode,
+			nilaiTransaksi: row.nilaiTransaksi,
+			metodePenentuanHargaTransfer: row.metodePenentuanHargaTransferKode,
+			alasanPenggunaanMetode: row.alasanPenggunaanMetode
+		}))
+	);
+
 	let l6KompensasiKerugianAuto = $derived(
 		l7.reduce((sum, row) => sum + Number(row.kompensasiTahunIni || 0), 0)
 	);
@@ -390,6 +412,7 @@
 				<input type="hidden" name="l9AJumlahPenyusutanKomersial" value={l9AJumlahPenyusutanKomersial} />
 				<input type="hidden" name="l9BJumlahPenyusutanKomersial" value={l9BJumlahPenyusutanKomersial} />
 				<input type="hidden" name="l9CJumlahAmortisasiKomersial" value={l9CJumlahAmortisasiKomersial} />
+				<input type="hidden" name="l10a" value={JSON.stringify(l10a)} />
 				<header class="tw:mb-5">
 					<nav class="tw:overflow-x-auto tw:border-b tw:border-[#A9A9A9]">
 						<ul class="tw:m-0! tw:flex tw:min-w-max tw:flex-row tw:p-0!">
@@ -488,7 +511,15 @@
 					{jenisHartaOptions}
 					{metodePenyusutanOptions}
 				/>
-				<L10A bind:currentTab/>
+				<L10A
+					bind:currentTab
+					bind:l10a
+					{readonly}
+					{negaraOptions}
+					{bentukHubunganOptions}
+					{jenisTransaksiOptions}
+					{metodeHargaTransferOptions}
+				/>
 				<L10B bind:currentTab/>
 				<L10C bind:currentTab/>
 				<L10D bind:currentTab/>

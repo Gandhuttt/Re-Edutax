@@ -26,7 +26,11 @@ import {
 	spt_pph_badan_lampiran_7_kompensasi_kerugian,
 	spt_pph_badan_lampiran_8_fasilitas_31e,
 	spt_pph_badan_lampiran_9_harta,
-	jenis_harta_spt_pph_badan
+	jenis_harta_spt_pph_badan,
+	spt_pph_badan_lampiran_10a_transaksi,
+	bentuk_hubungan_istimewa_spt_pph_badan,
+	jenis_transaksi_hubungan_istimewa_spt_pph_badan,
+	metode_penentuan_harga_transfer_spt_pph_badan
 } from '$lib/server/db/schema';
 import { error } from '@sveltejs/kit';
 import { asc, and, eq } from 'drizzle-orm';
@@ -103,7 +107,8 @@ export const getSptPphBadan = query(async () => {
 		komponenL6,
 		komponenL7,
 		[l8],
-		l9
+		l9,
+		l10a
 	] = await Promise.all([
 		db
 			.select({
@@ -361,7 +366,39 @@ export const getSptPphBadan = query(async () => {
 				eq(spt_pph_badan_lampiran_9_harta.jenisHartaId, jenis_harta_spt_pph_badan.id)
 			)
 			.where(eq(spt_pph_badan_lampiran_9_harta.sptPphBadanId, id))
-			.orderBy(asc(spt_pph_badan_lampiran_9_harta.nomorUrut))
+			.orderBy(asc(spt_pph_badan_lampiran_9_harta.nomorUrut)),
+		db
+			.select({
+				id: spt_pph_badan_lampiran_10a_transaksi.id,
+				nama: spt_pph_badan_lampiran_10a_transaksi.nama,
+				npwpTin: spt_pph_badan_lampiran_10a_transaksi.npwpTin,
+				negaraKode: negara_spt_pph_badan.kode,
+				bentukHubunganKode: bentuk_hubungan_istimewa_spt_pph_badan.kode,
+				kegiatanUsaha: spt_pph_badan_lampiran_10a_transaksi.kegiatanUsaha,
+				jenisTransaksiKode: jenis_transaksi_hubungan_istimewa_spt_pph_badan.kode,
+				nilaiTransaksi: spt_pph_badan_lampiran_10a_transaksi.nilaiTransaksi,
+				metodePenentuanHargaTransferKode: metode_penentuan_harga_transfer_spt_pph_badan.kode,
+				alasanPenggunaanMetode: spt_pph_badan_lampiran_10a_transaksi.alasanPenggunaanMetode
+			})
+			.from(spt_pph_badan_lampiran_10a_transaksi)
+			.leftJoin(negara_spt_pph_badan, eq(spt_pph_badan_lampiran_10a_transaksi.negaraId, negara_spt_pph_badan.id))
+			.leftJoin(
+				bentuk_hubungan_istimewa_spt_pph_badan,
+				eq(spt_pph_badan_lampiran_10a_transaksi.bentukHubunganId, bentuk_hubungan_istimewa_spt_pph_badan.id)
+			)
+			.leftJoin(
+				jenis_transaksi_hubungan_istimewa_spt_pph_badan,
+				eq(spt_pph_badan_lampiran_10a_transaksi.jenisTransaksiId, jenis_transaksi_hubungan_istimewa_spt_pph_badan.id)
+			)
+			.leftJoin(
+				metode_penentuan_harga_transfer_spt_pph_badan,
+				eq(
+					spt_pph_badan_lampiran_10a_transaksi.metodePenentuanHargaTransferId,
+					metode_penentuan_harga_transfer_spt_pph_badan.id
+				)
+			)
+			.where(eq(spt_pph_badan_lampiran_10a_transaksi.sptPphBadanId, id))
+			.orderBy(asc(spt_pph_badan_lampiran_10a_transaksi.nomorUrut))
 	]);
 
 	const nilaiL6ByKode = new Map(komponenL6.map((row) => [row.kode, row.nilai]));
@@ -435,6 +472,13 @@ export const getSptPphBadan = query(async () => {
 			jumlahPenyusutanKomersialA: spt.lampiran9AJumlahPenyusutanKomersial,
 			jumlahPenyusutanKomersialB: spt.lampiran9BJumlahPenyusutanKomersial,
 			jumlahAmortisasiKomersialC: spt.lampiran9CJumlahAmortisasiKomersial
-		}
+		},
+		lampiran10a: l10a.map((row) => ({
+			...row,
+			negaraKode: row.negaraKode ?? '',
+			bentukHubunganKode: row.bentukHubunganKode ?? '',
+			jenisTransaksiKode: row.jenisTransaksiKode ?? '',
+			metodePenentuanHargaTransferKode: row.metodePenentuanHargaTransferKode ?? ''
+		}))
 	};
 });

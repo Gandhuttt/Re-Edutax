@@ -12,6 +12,7 @@ import * as lampiran4ObjekPajak from './batches/008-lampiran-4-objek-pajak';
 import * as lampiran4BukanObjekPajak from './batches/009-lampiran-4-bukan-objek-pajak';
 import * as lampiran9JenisHarta from './batches/010-lampiran-9-jenis-harta';
 import * as lampiran9MetodePenyusutan from './batches/011-lampiran-9-metode-penyusutan';
+import * as lampiran10aReferensi from './batches/012-lampiran-10a-referensi';
 
 const batches = [
 	initialUsers,
@@ -25,6 +26,7 @@ const batches = [
 	lampiran4BukanObjekPajak,
 	lampiran9JenisHarta,
 	lampiran9MetodePenyusutan,
+	lampiran10aReferensi,
 	fakturDemo
 ];
 
