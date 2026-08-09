@@ -215,8 +215,19 @@
 	let l6KompensasiKerugian = $state(lampiran6.kompensasiKerugian);
 	let l6PphTerutang = $state(lampiran6.pphTerutang);
 	let l6KreditPajakTahunLalu = $state(lampiran6.kreditPajakTahunLalu);
+	let l6KompensasiKerugianTouched = $state(false);
 
 	let l7 = $state(lampiran7.map((row) => ({ ...row })));
+
+	let l6KompensasiKerugianAuto = $derived(
+		l7.reduce((sum, row) => sum + Number(row.kompensasiTahunIni || 0), 0)
+	);
+
+	$effect(() => {
+		if (!l6KompensasiKerugianTouched) {
+			l6KompensasiKerugian = l6KompensasiKerugianAuto;
+		}
+	});
 
 	let menerimaPenghasilanPp23 = $state(Boolean(spt.menerimaPenghasilanPp23));
 	let hanyaPenghasilanPp23 = $state(Boolean(spt.hanyaPenghasilanPp23));
@@ -390,6 +401,7 @@
 					bind:kompensasiKerugian={l6KompensasiKerugian}
 					bind:pphTerutang={l6PphTerutang}
 					bind:kreditPajakTahunLalu={l6KreditPajakTahunLalu}
+					onKompensasiKerugianEdit={() => (l6KompensasiKerugianTouched = true)}
 					{readonly}
 				/>
 				<L7 bind:currentTab bind:l7 {readonly}/>

@@ -11,6 +11,7 @@
         kompensasiKerugian: number;
         pphTerutang: number;
         kreditPajakTahunLalu: number;
+        onKompensasiKerugianEdit?: () => void;
         readonly?: boolean;
     }
 
@@ -20,6 +21,7 @@
         kompensasiKerugian = $bindable(),
         pphTerutang = $bindable(),
         kreditPajakTahunLalu = $bindable(),
+        onKompensasiKerugianEdit,
         readonly = false
     }: Props = $props();
 
@@ -51,7 +53,13 @@
                     <span class="tw:block tw:w-[75rem]">2. KOMPENSASI KERUGIAN FISKAL (Diisi dari Formulir Lampiran-07 Jumlah Kompensasi Kerugian Fiskal Tahun Pajak Berjalan)</span>
                     <div class="tw:flex tw:flex-row tw:items-center">
                         <span class="tw:flex tw:items-center tw:bg-(--color-disabled) tw:h-[2.5rem] tw:px-3 tw:rounded-s-sm tw:border-1 tw:border-(--color-input-secondary)">Rp.</span>
-                        <Input class={"tw:w-[20rem]! tw:border-s-0 tw:rounded-s-none! tw:text-right"} type={"number"} bind:value={kompensasiKerugian} disabled={readonly}/>
+                        <Input
+                            class={"tw:w-[20rem]! tw:border-s-0 tw:rounded-s-none! tw:text-right"}
+                            type={"number"}
+                            bind:value={kompensasiKerugian}
+                            disabled={readonly}
+                            oninput={() => onKompensasiKerugianEdit?.()}
+                        />
                     </div>
                 </div>
                 <div class="tw:flex tw:flex-row tw:items-center tw:gap-5 tw:p-1 tw:border-b-1 tw:border-(--color-disabled)">
