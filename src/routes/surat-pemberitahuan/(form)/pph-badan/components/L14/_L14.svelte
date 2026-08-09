@@ -13,6 +13,8 @@
     let { currentTab = $bindable() }: Props = $props();
 
     $effect(() => {currentTab.title = currentTab.tab === "L14" ? "PENGGUNAAN SISA LEBIH UNTUK PEMBANGUNAN DAN PENGADAAN SARAN DAN PRASARANA" : currentTab.title})
+
+    const currentYear = new Date().getFullYear();
 </script>
 
 <div class="{currentTab.tab === "L14" ? "" : "tw:hidden"}">
@@ -21,20 +23,20 @@
             <div class="tw:flex tw:flex-col tw:gap-1 tw:p-5">
                 <Button class={"tw:w-30 tw:text-white"} color={"var(--color-secondary)"}>Tambah</Button>
                 <div class="tw:overflow-scroll">
-                    <Table class={"tw:w-fit"}>
+                    <Table class={"tw:w-full"}>
                         {#snippet head()}
                             <tr class="tw:hidden"><td></td></tr>
                         {/snippet}
                         {#snippet body()}
                             <tr class="header tw:bg-[var(--color-primary)] tw:font-bold tw:text-center">
                                 <td class="tw:w-[10rem]" rowspan="3">TINDAKAN</td>
-                                <td rowspan="3">Tahun Pajak/Bagian Tahun Pajak</td>
-                                <td>PENYEDIAAN SISA LEBIH UNTUK DITANAMKAN KEMBALI SEALAM 4 TAHUN</td>
-                                <td rowspan="3">BENTUK PENANAMAN KEMBALI SISA LEBIH</td>
-                                <td colspan="4">PENGGUNAAN SISA LEBIH UNTUK PEMBANGUNAN DAN PENGADAAN SARANA DAN PRASARANA</td>
-                                <td>JUMLAH PENGGUNAAN SISA LEBIH</td>
-                                <td>SISA LEBIH YANG BELUM DITANAMKAN KEMBALI</td>
-                                <td>SISA LEBIH YANG MELEWATI JANGKA WAKTU PENANAMAN KEMBALI DALAM JANGKA WAKTU 4 TAHUN</td>
+                                <td class="tw:w-[7.5rem]" rowspan="3">Tahun Pajak/Bagian Tahun Pajak</td>
+                                <td class="tw:w-[10rem]">PENYEDIAAN SISA LEBIH UNTUK DITANAMKAN KEMBALI SEALAM 4 TAHUN</td>
+                                <td class="tw:w-[20rem]" rowspan="3">BENTUK PENANAMAN KEMBALI SISA LEBIH</td>
+                                <td class="tw:w-[40rem]" colspan="4">PENGGUNAAN SISA LEBIH UNTUK PEMBANGUNAN DAN PENGADAAN SARANA DAN PRASARANA</td>
+                                <td class="tw:w-[10rem]">JUMLAH PENGGUNAAN SISA LEBIH</td>
+                                <td class="tw:w-[10rem]">SISA LEBIH YANG BELUM DITANAMKAN KEMBALI</td>
+                                <td class="tw:w-[10rem]">SISA LEBIH YANG MELEWATI JANGKA WAKTU PENANAMAN KEMBALI DALAM JANGKA WAKTU 4 TAHUN</td>
                             </tr>
                             <tr class="header tw:bg-[var(--color-primary)] tw:font-bold tw:text-center">
                                 <td rowspan="2">RUPIAH</td>
@@ -52,12 +54,26 @@
                                 <td>RUPIAH</td>
                                 <td>RUPIAH</td>
                             </tr>
-                            {#if true}
-                            <tr class="data tw:text-center"><td colspan="11">Tidak ada data yang ditampilkan</td></tr>
-                            {:else}
-                            <tr class="data">
+                            {#each {length: 4} as _, index}
+                            {@const indexYear = currentYear - (3 - index)}
+                            <tr class="data tw:text-right">
+                                <td class="tw:text-center">
+                                    {#if !(indexYear === currentYear)}
+                                    <Button>Edit</Button>
+                                    {/if}
+                                </td>
+                                <td class="tw:text-center">{indexYear}</td>
+                                <td>0</td>
+                                <td></td>
+                                <td>0</td>
+                                <td>0</td>
+                                <td>0</td>
+                                <td>0</td>
+                                <td>0</td>
+                                <td>0</td>
+                                <td>0</td>
                             </tr>
-                            {/if}
+                            {/each}
                             <tr class="footer tw:bg-[var(--color-primary)] tw:font-bold tw:text-right">
                                 <td colspan="9">JUMLAH</td>
                                 <td>0</td>
