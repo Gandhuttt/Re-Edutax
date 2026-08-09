@@ -16,3 +16,15 @@ export const digitsString = (field: string) =>
 
 export const decimalString = (field: string) =>
 	v.pipe(v.string(), v.nonEmpty(`${field} harus diisi`), v.regex(decimalRegex, `${field} harus berupa angka`));
+
+export const decimalInput = (field: string) =>
+	v.union([decimalString(field), v.number(`${field} harus berupa angka`)]);
+
+export const booleanRadio = (fallback: boolean) =>
+	v.optional(
+		v.union([v.boolean(), v.pipe(v.picklist(['true', 'false']), v.transform((value) => value === 'true'))]),
+		fallback
+	);
+
+export const jsonRows = <TItem extends v.GenericSchema>(itemSchema: TItem) =>
+	v.optional(v.pipe(v.string(), v.parseJson(undefined, 'Data tidak valid'), v.array(itemSchema)), '[]');
