@@ -311,6 +311,11 @@
 		{#snippet body()}
 			<form
 				novalidate
+				onkeydown={(e) => {
+					if (e.key === 'Enter' && !(e.target instanceof HTMLTextAreaElement)) {
+						e.preventDefault();
+					}
+				}}
 				{...saveForm.enhance(async (form) => {
 					saveError = '';
 
