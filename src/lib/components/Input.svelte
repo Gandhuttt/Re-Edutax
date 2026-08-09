@@ -20,7 +20,8 @@
 
 <style>
 	input[type='text'],
-	input[type='date'] {
+	input[type='date'],
+	input[type='number'] {
 		height: 2.5rem;
 		width: 100%;
 		border-color: var(--color-input-secondary);
@@ -29,6 +30,7 @@
 		transition:
 			background 100ms linear,
 			border-color 100ms linear;
+		appearance: textfield;
 		&:hover {
 			border-color: hsl(from var(--color-input-secondary) h s calc(l - 20));
 		}
@@ -63,5 +65,11 @@
 		&:disabled:hover {
 			background: hsl(from var(--color-input-primary) h s calc(l - 20));
 		}
+	}
+
+	input::-webkit-outer-spin-button,
+	input::-webkit-inner-spin-button {
+		-webkit-appearance: none;
+		margin: 0;
 	}
 </style>
