@@ -17,7 +17,7 @@
     let {
         currentTab = $bindable(),
         jumlahPeredaranBruto = $bindable(),
-        penghasilanKenaPajak = $bindable(),
+        penghasilanKenaPajak,
         readonly = false
     }: Props = $props();
 
@@ -64,16 +64,6 @@
                 <tr class="data">
                     <td>2.</td>
                     <td colspan="2">Penghasilan Kena Pajak</td>
-                </tr>
-                <tr class="data">
-                    <td></td>
-                    <td>Penghasilan Kena Pajak</td>
-                    <td>
-                        <div class="tw:flex tw:flex-row tw:items-center">
-                            <span class="tw:flex tw:items-center tw:bg-(--color-disabled) tw:h-[2.5rem] tw:px-3 tw:rounded-s-sm tw:border-1 tw:border-(--color-input-secondary)">Rp.</span>
-                            <Input class={"tw:border-s-0 tw:rounded-s-none! tw:text-right"} type={"number"} bind:value={penghasilanKenaPajak} disabled={readonly}/>
-                        </div>
-                    </td>
                 </tr>
                 <tr class="data">
                     <td></td>

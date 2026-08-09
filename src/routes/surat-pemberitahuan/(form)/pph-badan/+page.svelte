@@ -232,11 +232,14 @@
 	let l7 = $state(lampiran7.map((row) => ({ ...row })));
 
 	let l8JumlahPeredaranBruto = $state(lampiran8.jumlahPeredaranBruto);
-	let l8PenghasilanKenaPajak = $state(lampiran8.penghasilanKenaPajak);
 
 	let l6KompensasiKerugianAuto = $derived(
 		l7.reduce((sum, row) => sum + Number(row.kompensasiTahunIni || 0), 0)
 	);
+
+	let l6PenghasilanKenaPajak = $derived(Number(l6DasarAngsuran || 0) - Number(l6KompensasiKerugian || 0));
+
+	let l8PenghasilanKenaPajak = $derived(l6PenghasilanKenaPajak);
 
 	let l8Hasil = $derived(hitungFasilitas31E(Number(l8JumlahPeredaranBruto || 0), Number(l8PenghasilanKenaPajak || 0)));
 
@@ -434,7 +437,7 @@
 				<L8
 					bind:currentTab
 					bind:jumlahPeredaranBruto={l8JumlahPeredaranBruto}
-					bind:penghasilanKenaPajak={l8PenghasilanKenaPajak}
+					penghasilanKenaPajak={l8PenghasilanKenaPajak}
 					{readonly}
 				/>
 				<L9 bind:currentTab/>
