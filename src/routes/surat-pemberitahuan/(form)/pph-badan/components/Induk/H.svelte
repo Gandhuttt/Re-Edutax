@@ -212,7 +212,7 @@
                         {/snippet}
                         {#snippet body()}
                             <span>
-                            {h21fBiayaEntertainment ? "Ya, silahkan mengisi lampiran 11B" : "Tidak, silahkan lanjut pertanyaan berikutnya"}
+                            {h21fBiayaEntertainment ? "Ya, silahkan mengisi lampiran 11A" : "Tidak, silahkan lanjut pertanyaan berikutnya"}
                             </span>
                         {/snippet}
                     </Alert>

@@ -23,6 +23,8 @@
 	import L10B from './components/L10-B/_L10B.svelte';
 	import L10C from './components/L10-C/_L10C.svelte';
 	import L10D from './components/L10-D/_L10D.svelte';
+	import L11A from './components/L11-A/_L11A.svelte';
+	import L11B from './components/L11-B/_L11B.svelte';
 	import L13A from './components/L13-A/_L13A.svelte';
 	import L13B from './components/L13-B/_L13B.svelte';
 	import L14 from './components/L14/_L14.svelte';
@@ -461,7 +463,7 @@
 	});
 	let saveError = $state('');
 
-	const tabs =['Induk', 'L1', 'L2', 'L3', 'L4', 'L5', 'L6', 'L7', 'L8', 'L9', 'L10-A', 'L10-B', 'L10-C', 'L10-D', 'L11-B', 'L13-A', 'L13-B', 'L14'];
+	const tabs = ['Induk', 'L1', 'L2', 'L3', 'L4', 'L5', 'L6', 'L7', 'L8', 'L9', 'L10-A', 'L10-B', 'L10-C', 'L10-D', 'L11-A', 'L11-B', 'L13-A', 'L13-B', 'L13-C', 'L14'];
 	const tabLabel = (tab: string) => {
 		if (tab !== 'L1') return tab;
 		const lampiranKode = lampiran1LabaRugiTemplatesBySektor.get(sektorUsaha)?.lampiranKode;
@@ -472,9 +474,12 @@
 	// tabs without an entry here are always applicable. L2 is also conditional per Induk H
 	// (21.c/21.d) but isn't gated here: that condition only applies to its "Bagian B"
 	// sub-section, and gating the whole tab would also hide "Bagian A", which is
-	// unconditional. L11-B/L13-A/L14 are gated below even though they're currently static
-	// stubs with no working save/get - hiding them doesn't require the form behind them to
-	// be functional (see spt_pph_badan_induk_def_status memory).
+	// unconditional. L11-A/L13-A/L13-C/L14 are gated below even though L13-A/L14 are still
+	// static stubs with no working save/get and L13-C doesn't exist as a component at all yet
+	// - hiding a tab doesn't require the form behind it to be functional (see
+	// spt_pph_badan_induk_def_status memory). L11-B ("Penghitungan Biaya Pinjaman" -
+	// thin-cap/EBITDA interest limitation) has no gating question anywhere in Induk yet, so
+	// it's left ungated (always visible) rather than guessed.
 	const tabVisibility: Partial<Record<string, () => boolean>> = {
 		L3: () => e13AdaKreditPajakLuarNegeri,
 		L4: () => menerimaPenghasilanFinal || menerimaPenghasilanBukanObjekPajak,
@@ -486,8 +491,9 @@
 		'L10-C': () => h21aTransaksiHubunganIstimewa,
 		'L10-D': () => h21bDokumenPenentuanHargaTransfer,
 		L9: () => h21ePenyusutanAmortisasiFiskal,
-		'L11-B': () => h21fBiayaEntertainment,
+		'L11-A': () => h21fBiayaEntertainment,
 		'L13-A': () => d5FasilitasPenanamanModal || h21gFasilitasPenanamanModalDaerahTertentu,
+		'L13-C': () => e16FasilitasPenguranganPphTerutang,
 		L14: () => h21hSisaLebihSaranaPrasarana
 	};
 
@@ -811,6 +817,8 @@
 					bind:tanggalDokumenLokalTersedia={l10dTanggalDokumenLokalTersedia}
 					{readonly}
 				/>
+				<L11A bind:currentTab/>
+				<L11B bind:currentTab/>
 				<L13A bind:currentTab/>
 				<L13B
 					bind:currentTab
