@@ -42,8 +42,8 @@
     {/snippet}
     {#snippet body()}
         <tr class="header tw:bg-[var(--color-primary)] tw:font-bold tw:text-center">
-            <td class="tw:w-20" rowspan="2">TINDAKAN</td>
-            <td class="tw:w-10" rowspan="2">NO</td>
+            <td class="tw:w-[10rem]" rowspan="2">TINDAKAN</td>
+            <td class="tw:w-[5rem]" rowspan="2">NO</td>
             <td class="tw:w-40" rowspan="2">NAMA</td>
             <td class="tw:w-30" rowspan="2">NEGARA</td>
             <td class="tw:w-30" rowspan="2">NPWP/NIK</td>
@@ -61,6 +61,9 @@
             <td class="tw:w-30">TAHUN</td>
             <td class="tw:w-30">BUNGA UTANG/TAHUN</td>
         </tr>
+        {#if data.length === 0}
+        <tr class="data tw:text-center"><td colspan="13">Tidak ada data yang ditampilkan</td></tr>
+        {:else}
         {#each data as item, i}
         <tr class="data tw:text-left">
             <td class="tw:text-center tw:flex tw:flex-row tw:gap-1 tw:justify-center">
@@ -81,6 +84,7 @@
             <td>{item.piutangBunga}</td>
         </tr>
         {/each}
+        {/if}
         <tr class="footer tw:bg-[#ffd230] tw:text-right tw:font-bold">
             <td colspan="7">JUMLAH</td>
             <td>{totalUtangNilai.toLocaleString('id-ID')}</td>

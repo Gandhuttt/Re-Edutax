@@ -2,6 +2,7 @@
     import Card from "$lib/components/Card.svelte";
     import Table from "$lib/components/Table.svelte";
     import Button from "$lib/components/Button.svelte";
+    import ModalEdit from "./_ModalEdit.svelte";
 
     interface Props {
         currentTab: {
@@ -57,7 +58,7 @@
                 </tr>
                 {#each {length: 10} as _, index}
                 <tr class="data tw:text-right">
-                    <td class="tw:text-center"><Button class={"tw:min-w-15!"}>Edit</Button></td>
+                    <td class="tw:text-center"><Button class={"tw:min-w-15!" } type={"button"} data-bs-target={"#modalL7"} data-bs-toggle={"modal"}>Edit</Button></td>
                     <td class="tw:text-center">{index + 1}</td>
                     <td class="tw:text-center">{currentYear - (9 - index)}</td>
                     <td>0</td>
@@ -83,6 +84,8 @@
         {/snippet}
     </Card>
 </div>
+
+<ModalEdit/>
 
 <style>
 .header td, .footer td {

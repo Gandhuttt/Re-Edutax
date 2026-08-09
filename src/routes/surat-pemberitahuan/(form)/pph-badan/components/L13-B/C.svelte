@@ -28,6 +28,9 @@
                 <td>DARI TAHUN</td>
                 <td>SAMPAI TAHUN</td>
             </tr>
+            {#if true}
+            <tr class="data tw:text-center"><td colspan="9">Tidak ada data yang ditampilkan</td></tr>
+            {:else}
             <tr class="data">
                 <td>testtttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt</td>
                 <td>testtttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt</td>
@@ -39,6 +42,7 @@
                 <td>testttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt</td>
                 <td>testttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt</td>
             </tr>
+            {/if}
             <tr class="footer tw:bg-[var(--color-primary)] tw:font-bold tw:text-right">
                 <td colspan="8">JUMLAH TAMBAHAN PENGURANG PENGHASILAN BRUTO PENELITIAN DAN PENGEMBANGAN</td>
                 <td><Input class={"tw:text-right tw:border-none! tw:bg-transparent!"} type={"text"} value={0}/></td>

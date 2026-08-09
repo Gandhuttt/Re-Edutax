@@ -43,6 +43,9 @@
                             <td class="tw:w-[15rem]">METODE PENENTUAN HARGA TRANSFER YANG DIGUNAKAN</td>
                             <td class="tw:w-[15rem]">ALASAN PENGGUNAAN METODE</td>
                         </tr>
+                        {#if true}
+                        <tr class="data tw:text-center"><td colspan="10">Tidak ada data yang ditampilkan</td></tr>
+                        {:else}
                         <tr class="data">
                             <td class="tw:flex tw:flex-row tw:gap-1 tw:justify-center">
                                 <Button type="button" class={"tw:min-w-15!"} data-bs-toggle="modal" data-bs-target="#modalL2">Edit</Button>
@@ -58,6 +61,7 @@
                             <td>tset</td>
                             <td>tset</td>
                         </tr>
+                        {/if}
                     {/snippet}
                 </Table>
             </div>

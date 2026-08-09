@@ -58,6 +58,9 @@
                             <td>DALAM RUPIAH</td>
                             <td>JUMLAH (Rp)</td>
                         </tr>
+                        {#if true}
+                        <tr class="data tw:text-center"><td colspan="16">Tidak ada data yang ditampilkan</td></tr>
+                        {:else}
                         <tr class="data">
                             <td>tsetaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</td>
                             <td>tsetaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</td>
@@ -76,6 +79,7 @@
                             <td>tset</td>
                             <td>tset</td>
                         </tr>
+                        {/if}
                     {/snippet}
                 </Table>
             </div>
