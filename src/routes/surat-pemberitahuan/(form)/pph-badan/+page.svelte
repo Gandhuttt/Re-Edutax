@@ -23,6 +23,8 @@
 	import L10B from './components/L10-B/_L10B.svelte';
 	import L10C from './components/L10-C/_L10C.svelte';
 	import L10D from './components/L10-D/_L10D.svelte';
+	import L11A from './components/L11-A/_L11A.svelte';
+	import L11B from './components/L11-B/_L11B.svelte';
 	import L13A from './components/L13-A/_L13A.svelte';
 	import L13B from './components/L13-B/_L13B.svelte';
 	import L14 from './components/L14/_L14.svelte';
@@ -414,7 +416,7 @@
 		'Tarif fasilitas sebagaimana Pasal 31E ayat (1) UU PPh',
 		'Tarif Pajak Lainnya'
 	];
-	const tabs = ['Induk', 'L1', 'L2', 'L3', 'L4', 'L5', 'L6', 'L7', 'L8', 'L9', 'L10-A', 'L10-B', 'L10-C', 'L10-D', 'L11-B', 'L13-A', 'L13-B', 'L14'];
+	const tabs = ['Induk', 'L1', 'L2', 'L3', 'L4', 'L5', 'L6', 'L7', 'L8', 'L9', 'L10-A', 'L10-B', 'L10-C', 'L10-D', 'L11-A', 'L11-B', 'L13-A', 'L13-B', 'L13-C', 'L14'];
 	const tabLabel = (tab: string) => {
 		if (tab !== 'L1') return tab;
 		const lampiranKode = lampiran1LabaRugiTemplatesBySektor.get(sektorUsaha)?.lampiranKode;
@@ -667,6 +669,8 @@
 					bind:tanggalDokumenLokalTersedia={l10dTanggalDokumenLokalTersedia}
 					{readonly}
 				/>
+				<L11A bind:currentTab/>
+				<L11B bind:currentTab/>
 				<L13A bind:currentTab/>
 				<L13B
 					bind:currentTab
