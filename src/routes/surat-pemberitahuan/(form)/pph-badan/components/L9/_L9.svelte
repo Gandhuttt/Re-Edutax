@@ -6,6 +6,7 @@
     import A from "./A.svelte";
     import B from "./B.svelte";
     import C from "./C.svelte";
+    import ModalEdit from "./_ModalEdit.svelte";
     
     interface Props {
         currentTab: {
@@ -32,3 +33,5 @@
         </Accordion>
     </div>
 </div>
+
+<ModalEdit/>

@@ -23,6 +23,7 @@
         flex-direction: row;
         align-items: center;
         width: 100%;
+        flex: 1;
     }
 
     div {

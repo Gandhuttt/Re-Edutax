@@ -13,7 +13,7 @@
         {/snippet}
         {#snippet body()}
         <div class="tw:flex tw:flex-col tw:gap-1">
-            <Button type="button" class={"tw:text-white tw:w-30"} color={"var(--color-secondary)"}>Tambah</Button>
+            <Button type="button" class={"tw:text-white tw:w-30"} color={"var(--color-secondary)"} data-bs-toggle={"modal"} data-bs-target={"#modalL9"}>Tambah</Button>
             <div class="tw:overflow-scroll">
                 <Table class={"tw:w-fit"}>
                     {#snippet head()}
@@ -61,7 +61,7 @@
         {/snippet}
         {#snippet body()}
         <div class="tw:flex tw:flex-col tw:gap-1">
-            <Button type="button" class={"tw:text-white tw:w-30"} color={"var(--color-secondary)"}>Tambah</Button>
+            <Button type="button" class={"tw:text-white tw:w-30"} color={"var(--color-secondary)"} data-bs-toggle={"modal"} data-bs-target={"#modalL9"}>Tambah</Button>
             <div class="tw:overflow-scroll">
                 <Table class={"tw:w-fit"}>
                     {#snippet head()}
@@ -109,7 +109,7 @@
         {/snippet}
         {#snippet body()}
         <div class="tw:flex tw:flex-col tw:gap-1">
-            <Button type="button" class={"tw:text-white tw:w-30"} color={"var(--color-secondary)"}>Tambah</Button>
+            <Button type="button" class={"tw:text-white tw:w-30"} color={"var(--color-secondary)"} data-bs-toggle={"modal"} data-bs-target={"#modalL9"}>Tambah</Button>
             <div class="tw:overflow-scroll">
                 <Table class={"tw:w-fit"}>
                     {#snippet head()}
@@ -157,7 +157,7 @@
         {/snippet}
         {#snippet body()}
         <div class="tw:flex tw:flex-col tw:gap-1">
-            <Button type="button" class={"tw:text-white tw:w-30"} color={"var(--color-secondary)"}>Tambah</Button>
+            <Button type="button" class={"tw:text-white tw:w-30"} color={"var(--color-secondary)"} data-bs-toggle={"modal"} data-bs-target={"#modalL9"}>Tambah</Button>
             <div class="tw:overflow-scroll">
                 <Table class={"tw:w-fit"}>
                     {#snippet head()}
