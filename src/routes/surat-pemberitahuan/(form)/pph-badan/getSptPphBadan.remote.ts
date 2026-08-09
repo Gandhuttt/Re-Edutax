@@ -35,10 +35,15 @@ import {
 	spt_pph_badan_lampiran_10b_pernyataan,
 	spt_pph_badan_lampiran_10c_transaksi,
 	spt_pph_badan_lampiran_10c_pernyataan,
-	spt_pph_badan_lampiran_10d_dokumen
+	spt_pph_badan_lampiran_10d_dokumen,
+	spt_pph_badan_lampiran_13b_a_kerjasama,
+	spt_pph_badan_lampiran_13b_b_biaya,
+	spt_pph_badan_lampiran_13b_c_litbang,
+	spt_pph_badan_lampiran_13b_d_penghitungan
 } from '$lib/server/db/schema';
 import { error } from '@sveltejs/kit';
 import { asc, and, eq } from 'drizzle-orm';
+import { L13B_BIAYA_NAMA, L13B_BIAYA_URUTAN } from './components/L13-B/biayaKode';
 import { L6_KODE } from './components/L6/saveLampiranL6.server';
 
 export const getSptPphBadan = query(async () => {
@@ -115,7 +120,11 @@ export const getSptPphBadan = query(async () => {
 		[l10bPernyataan],
 		l10c,
 		[l10cPernyataan],
-		[l10dDokumen]
+		[l10dDokumen],
+		l13bA,
+		komponenL13bB,
+		l13bC,
+		[l13bDPenghitungan]
 	] = await Promise.all([
 		db
 			.select({
@@ -470,11 +479,46 @@ export const getSptPphBadan = query(async () => {
 				tanggalDokumenLokalTersedia: spt_pph_badan_lampiran_10d_dokumen.tanggalDokumenLokalTersedia
 			})
 			.from(spt_pph_badan_lampiran_10d_dokumen)
-			.where(eq(spt_pph_badan_lampiran_10d_dokumen.sptPphBadanId, id))
+			.where(eq(spt_pph_badan_lampiran_10d_dokumen.sptPphBadanId, id)),
+		db
+			.select({
+				id: spt_pph_badan_lampiran_13b_a_kerjasama.id,
+				perjanjianNomor: spt_pph_badan_lampiran_13b_a_kerjasama.perjanjianNomor,
+				perjanjianTanggal: spt_pph_badan_lampiran_13b_a_kerjasama.perjanjianTanggal,
+				mitraKegiatan: spt_pph_badan_lampiran_13b_a_kerjasama.mitraKegiatan,
+				keterangan: spt_pph_badan_lampiran_13b_a_kerjasama.keterangan
+			})
+			.from(spt_pph_badan_lampiran_13b_a_kerjasama)
+			.where(eq(spt_pph_badan_lampiran_13b_a_kerjasama.sptPphBadanId, id))
+			.orderBy(asc(spt_pph_badan_lampiran_13b_a_kerjasama.nomorUrut)),
+		db
+			.select({ kode: spt_pph_badan_lampiran_13b_b_biaya.kode, nilai: spt_pph_badan_lampiran_13b_b_biaya.nilai })
+			.from(spt_pph_badan_lampiran_13b_b_biaya)
+			.where(eq(spt_pph_badan_lampiran_13b_b_biaya.sptPphBadanId, id)),
+		db
+			.select({
+				id: spt_pph_badan_lampiran_13b_c_litbang.id,
+				nomorProposal: spt_pph_badan_lampiran_13b_c_litbang.nomorProposal,
+				jangkaWaktuDariTahun: spt_pph_badan_lampiran_13b_c_litbang.jangkaWaktuDariTahun,
+				jangkaWaktuSampaiTahun: spt_pph_badan_lampiran_13b_c_litbang.jangkaWaktuSampaiTahun,
+				jumlahBiaya: spt_pph_badan_lampiran_13b_c_litbang.jumlahBiaya,
+				tahunPerolehanHki: spt_pph_badan_lampiran_13b_c_litbang.tahunPerolehanHki,
+				persentaseFasilitasPajak: spt_pph_badan_lampiran_13b_c_litbang.persentaseFasilitasPajak
+			})
+			.from(spt_pph_badan_lampiran_13b_c_litbang)
+			.where(eq(spt_pph_badan_lampiran_13b_c_litbang.sptPphBadanId, id))
+			.orderBy(asc(spt_pph_badan_lampiran_13b_c_litbang.nomorUrut)),
+		db
+			.select({
+				termanfaatkanTahunSebelumnya: spt_pph_badan_lampiran_13b_d_penghitungan.termanfaatkanTahunSebelumnya
+			})
+			.from(spt_pph_badan_lampiran_13b_d_penghitungan)
+			.where(eq(spt_pph_badan_lampiran_13b_d_penghitungan.sptPphBadanId, id))
 	]);
 
 	const nilaiL6ByKode = new Map(komponenL6.map((row) => [row.kode, row.nilai]));
 	const l7ByTahunPajak = new Map(komponenL7.map((row) => [row.tahunPajak, row]));
+	const nilaiL13bBByKode = new Map(komponenL13bB.map((row) => [row.kode, row.nilai]));
 
 	return {
 		readonly: spt.statusDraft !== 'konsep',
@@ -590,6 +634,23 @@ export const getSptPphBadan = query(async () => {
 			dokumenLokalE: l10dDokumen?.dokumenLokalE ?? null,
 			tanggalDokumenIndukTersedia: l10dDokumen?.tanggalDokumenIndukTersedia ?? '',
 			tanggalDokumenLokalTersedia: l10dDokumen?.tanggalDokumenLokalTersedia ?? ''
+		},
+		lampiran13b: {
+			a: l13bA,
+			b: L13B_BIAYA_URUTAN.map((kode) => ({
+				kode,
+				nama: L13B_BIAYA_NAMA[kode],
+				nilai: nilaiL13bBByKode.get(kode) ?? 0
+			})),
+			c: l13bC.map((row) => ({
+				...row,
+				jangkaWaktuDariTahun: row.jangkaWaktuDariTahun ?? 0,
+				jangkaWaktuSampaiTahun: row.jangkaWaktuSampaiTahun ?? 0,
+				tahunPerolehanHki: row.tahunPerolehanHki ?? 0
+			})),
+			d: {
+				termanfaatkanTahunSebelumnya: l13bDPenghitungan?.termanfaatkanTahunSebelumnya ?? 0
+			}
 		}
 	};
 });

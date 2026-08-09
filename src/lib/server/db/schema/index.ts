@@ -47,3 +47,7 @@ export * from './transactional/surat_pemberitahuan/spt_pph_badan/lampiran_10b_pe
 export * from './transactional/surat_pemberitahuan/spt_pph_badan/lampiran_10c_tax_haven';
 export * from './transactional/surat_pemberitahuan/spt_pph_badan/lampiran_10d_dokumen';
 export * from './transactional/surat_pemberitahuan/spt_pph_badan/lampiran_11b_biaya_pinjaman';
+export * from './transactional/surat_pemberitahuan/spt_pph_badan/lampiran_13b_kerjasama';
+export * from './transactional/surat_pemberitahuan/spt_pph_badan/lampiran_13b_biaya';
+export * from './transactional/surat_pemberitahuan/spt_pph_badan/lampiran_13b_litbang';
+export * from './transactional/surat_pemberitahuan/spt_pph_badan/lampiran_13b_penghitungan';

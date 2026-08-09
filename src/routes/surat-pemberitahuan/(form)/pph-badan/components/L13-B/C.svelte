@@ -2,10 +2,57 @@
     import Table from "$lib/components/Table.svelte";
     import Button from "$lib/components/Button.svelte";
     import Input from "$lib/components/Input.svelte";
+    import ModalEditC from "./_ModalEditC.svelte";
+    import type { L13BCRow } from "./types";
+
+    let {
+        data = $bindable(),
+        readonly = false
+    }: {
+        data: L13BCRow[];
+        readonly?: boolean;
+    } = $props();
+
+    const rupiah = new Intl.NumberFormat('id-ID');
+
+    const tambahanPengurang = (row: L13BCRow) =>
+        Math.round((Number(row.jumlahBiaya || 0) * Number(row.persentaseFasilitasPajak || 0)) / 100);
+
+    let totalTambahanPengurang = $derived(data.reduce((sum, row) => sum + tambahanPengurang(row), 0));
+
+    let editing = $state<Partial<L13BCRow>>({});
+
+    function emptyRow(): Partial<L13BCRow> {
+        return {
+            nomorProposal: '',
+            jangkaWaktuDariTahun: 0,
+            jangkaWaktuSampaiTahun: 0,
+            jumlahBiaya: 0,
+            tahunPerolehanHki: 0,
+            persentaseFasilitasPajak: 0
+        };
+    }
+
+    function openModal(row: L13BCRow | null) {
+        editing = row ? { ...row } : emptyRow();
+    }
+
+    function saveItem() {
+        const index = data.findIndex((row) => row.id === editing.id);
+        if (index !== -1) {
+            data[index] = { ...(editing as L13BCRow) };
+        } else {
+            data.push({ ...(editing as L13BCRow), id: Date.now() });
+        }
+    }
+
+    function deleteItem(id: string | number) {
+        data = data.filter((row) => row.id !== id);
+    }
 </script>
 
 <div class="tw:p-5 tw:flex tw:flex-col tw:gap-1">
-    <Button class={"tw:text-white tw:w-30"} color={"#1c398e"}>Tambah</Button>
+    <Button type="button" class={"tw:text-white tw:w-30"} color={"#1c398e"} disabled={readonly} onclick={() => openModal(null)} data-bs-toggle="modal" data-bs-target="#modalL13BC">Tambah</Button>
     <div class="tw:overflow-scroll">
         <Table class={"tw:w-full"}>
             {#snippet head()}
@@ -28,29 +75,36 @@
                 <td>DARI TAHUN</td>
                 <td>SAMPAI TAHUN</td>
             </tr>
-            {#if true}
+            {#if data.length === 0}
             <tr class="data tw:text-center"><td colspan="9">Tidak ada data yang ditampilkan</td></tr>
             {:else}
-            <tr class="data">
-                <td>testtttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt</td>
-                <td>testtttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt</td>
-                <td>testtttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt</td>
-                <td>testtttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt</td>
-                <td>testtttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt</td>
-                <td>testttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt</td>
-                <td>testttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt</td>
-                <td>testttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt</td>
-                <td>testttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt</td>
+            {#each data as row, index}
+            <tr class="data tw:text-right">
+                <td class="tw:flex tw:flex-row tw:gap-1 tw:justify-center">
+                    <Button type="button" class={"tw:min-w-15!"} disabled={readonly} onclick={() => openModal(row)} data-bs-toggle="modal" data-bs-target="#modalL13BC">Edit</Button>
+                    <Button type="button" class={"tw:min-w-15!"} disabled={readonly} onclick={() => deleteItem(row.id)}>Hapus</Button>
+                </td>
+                <td class="tw:text-center">{index + 1}</td>
+                <td>{row.nomorProposal}</td>
+                <td>{row.jangkaWaktuDariTahun}</td>
+                <td>{row.jangkaWaktuSampaiTahun}</td>
+                <td>{rupiah.format(row.jumlahBiaya)}</td>
+                <td>{row.tahunPerolehanHki}</td>
+                <td>{row.persentaseFasilitasPajak}</td>
+                <td>{rupiah.format(tambahanPengurang(row))}</td>
             </tr>
+            {/each}
             {/if}
             <tr class="footer tw:bg-[var(--color-primary)] tw:font-bold tw:text-right">
                 <td colspan="8">JUMLAH TAMBAHAN PENGURANG PENGHASILAN BRUTO PENELITIAN DAN PENGEMBANGAN</td>
-                <td><Input class={"tw:text-right tw:border-none! tw:bg-transparent!"} type={"text"} value={0}/></td>
+                <td><Input class={"tw:text-right tw:border-none! tw:bg-transparent!"} type={"text"} value={rupiah.format(totalTambahanPengurang)} readonly/></td>
             </tr>
             {/snippet}
         </Table>
     </div>
 </div>
+
+<ModalEditC bind:data={editing} {saveItem} {readonly}/>
 
 <style>
 .header, .footer {

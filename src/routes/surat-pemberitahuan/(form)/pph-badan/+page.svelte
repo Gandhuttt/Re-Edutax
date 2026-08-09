@@ -61,7 +61,8 @@
 		lampiran10a,
 		lampiran10b,
 		lampiran10c,
-		lampiran10d
+		lampiran10d,
+		lampiran13b
 	} = await getSptPphBadan();
 	const opiniAuditorOptions = await getOpiniAuditor();
 	const sektorUsahaOptions = await getSektorUsaha();
@@ -328,6 +329,32 @@
 	let l10dTanggalDokumenIndukTersedia = $state(lampiran10d.tanggalDokumenIndukTersedia);
 	let l10dTanggalDokumenLokalTersedia = $state(lampiran10d.tanggalDokumenLokalTersedia);
 
+	let l13bA = $state(
+		lampiran13b.a.map((row) => ({
+			id: row.id,
+			perjanjianNomor: row.perjanjianNomor,
+			perjanjianTanggal: row.perjanjianTanggal,
+			mitraKegiatan: row.mitraKegiatan,
+			keterangan: row.keterangan
+		}))
+	);
+
+	let l13bB = $state(lampiran13b.b.map((row) => ({ ...row })));
+
+	let l13bC = $state(
+		lampiran13b.c.map((row) => ({
+			id: row.id,
+			nomorProposal: row.nomorProposal,
+			jangkaWaktuDariTahun: row.jangkaWaktuDariTahun,
+			jangkaWaktuSampaiTahun: row.jangkaWaktuSampaiTahun,
+			jumlahBiaya: row.jumlahBiaya,
+			tahunPerolehanHki: row.tahunPerolehanHki,
+			persentaseFasilitasPajak: row.persentaseFasilitasPajak
+		}))
+	);
+
+	let l13bDTermanfaatkanTahunSebelumnya = $state(lampiran13b.d.termanfaatkanTahunSebelumnya);
+
 	let l6KompensasiKerugianAuto = $derived(
 		l7.reduce((sum, row) => sum + Number(row.kompensasiTahunIni || 0), 0)
 	);
@@ -486,6 +513,10 @@
 				<input type="hidden" name="l10dDokumenLokalE" value={l10dDokumenLokalE} />
 				<input type="hidden" name="l10dTanggalDokumenIndukTersedia" value={l10dTanggalDokumenIndukTersedia} />
 				<input type="hidden" name="l10dTanggalDokumenLokalTersedia" value={l10dTanggalDokumenLokalTersedia} />
+				<input type="hidden" name="l13bA" value={JSON.stringify(l13bA)} />
+				<input type="hidden" name="l13bB" value={JSON.stringify(l13bB)} />
+				<input type="hidden" name="l13bC" value={JSON.stringify(l13bC)} />
+				<input type="hidden" name="l13bDTermanfaatkanTahunSebelumnya" value={l13bDTermanfaatkanTahunSebelumnya} />
 				<header class="tw:mb-5">
 					<nav class="tw:overflow-x-auto tw:border-b tw:border-[#A9A9A9]">
 						<ul class="tw:m-0! tw:flex tw:min-w-max tw:flex-row tw:p-0!">
@@ -637,7 +668,14 @@
 					{readonly}
 				/>
 				<L13A bind:currentTab/>
-				<L13B bind:currentTab/>
+				<L13B
+					bind:currentTab
+					bind:l13bA
+					bind:l13bB
+					bind:l13bC
+					bind:l13bDTermanfaatkanTahunSebelumnya
+					{readonly}
+				/>
 				<L14 bind:currentTab/>
 
 				{#if saveError}
