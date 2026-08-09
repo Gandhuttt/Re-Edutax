@@ -34,6 +34,7 @@ export * from './transactional/surat_pemberitahuan/spt_pph_badan/lampiran_3_kred
 export * from './transactional/surat_pemberitahuan/spt_pph_badan/lampiran_4_penghasilan_final';
 export * from './transactional/surat_pemberitahuan/spt_pph_badan/lampiran_5_pp23';
 export * from './transactional/surat_pemberitahuan/spt_pph_badan/lampiran_6_angsuran_pph_pasal_25';
+export * from './transactional/surat_pemberitahuan/spt_pph_badan/lampiran_7_kompensasi_kerugian_fiskal';
 export * from './transactional/surat_pemberitahuan/spt_pph_badan/lampiran_8_fasilitas_31e';
 export * from './transactional/surat_pemberitahuan/spt_pph_badan/lampiran_9_daftar_harta';
 export * from './transactional/surat_pemberitahuan/spt_pph_badan/lampiran_11b_biaya_pinjaman';

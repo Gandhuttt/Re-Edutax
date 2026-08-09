@@ -39,7 +39,8 @@
 	import { getJenisPenghasilanBukanObjekPajak } from './components/L4/getJenisPenghasilanBukanObjekPajak.remote';
 	import { saveSptPphBadan } from './saveSptPphBadan.remote';
 
-	const { readonly, spt, lampiran1, lampiran2, lampiran3, lampiran4, lampiran5, lampiran6 } = await getSptPphBadan();
+	const { readonly, spt, lampiran1, lampiran2, lampiran3, lampiran4, lampiran5, lampiran6, lampiran7 } =
+		await getSptPphBadan();
 	const opiniAuditorOptions = await getOpiniAuditor();
 	const sektorUsahaOptions = await getSektorUsaha();
 	const negaraOptions = await getNegara();
@@ -215,6 +216,8 @@
 	let l6PphTerutang = $state(lampiran6.pphTerutang);
 	let l6KreditPajakTahunLalu = $state(lampiran6.kreditPajakTahunLalu);
 
+	let l7 = $state(lampiran7.map((row) => ({ ...row })));
+
 	let menerimaPenghasilanPp23 = $state(Boolean(spt.menerimaPenghasilanPp23));
 	let hanyaPenghasilanPp23 = $state(Boolean(spt.hanyaPenghasilanPp23));
 	let menerimaPenghasilanFinal = $state(Boolean(spt.menerimaPenghasilanFinal));
@@ -309,6 +312,7 @@
 				<input type="hidden" name="l6KompensasiKerugian" value={l6KompensasiKerugian} />
 				<input type="hidden" name="l6PphTerutang" value={l6PphTerutang} />
 				<input type="hidden" name="l6KreditPajakTahunLalu" value={l6KreditPajakTahunLalu} />
+				<input type="hidden" name="l7" value={JSON.stringify(l7)} />
 				<header class="tw:mb-5">
 					<nav class="tw:overflow-x-auto tw:border-b tw:border-[#A9A9A9]">
 						<ul class="tw:m-0! tw:flex tw:min-w-max tw:flex-row tw:p-0!">
@@ -388,7 +392,7 @@
 					bind:kreditPajakTahunLalu={l6KreditPajakTahunLalu}
 					{readonly}
 				/>
-				<L7 bind:currentTab/>
+				<L7 bind:currentTab bind:l7 {readonly}/>
 				<L8 bind:currentTab/>
 				<L9 bind:currentTab/>
 				<L10A bind:currentTab/>

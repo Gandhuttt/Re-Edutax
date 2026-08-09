@@ -22,7 +22,8 @@ import {
 	spt_pph_badan_lampiran_5_pp23_bulanan,
 	spt_pph_badan_lampiran_5_pp23_dipotong_bulanan,
 	spt_pph_badan_lampiran_5_tku,
-	spt_pph_badan_lampiran_6_komponen
+	spt_pph_badan_lampiran_6_komponen,
+	spt_pph_badan_lampiran_7_kompensasi_kerugian
 } from '$lib/server/db/schema';
 import { error } from '@sveltejs/kit';
 import { asc, and, eq } from 'drizzle-orm';
@@ -93,7 +94,8 @@ export const getSptPphBadan = query(async () => {
 		tku,
 		bulananPp23,
 		dipotongBulanan,
-		komponenL6
+		komponenL6,
+		komponenL7
 	] = await Promise.all([
 		db
 			.select({
@@ -297,10 +299,24 @@ export const getSptPphBadan = query(async () => {
 				nilai: spt_pph_badan_lampiran_6_komponen.nilai
 			})
 			.from(spt_pph_badan_lampiran_6_komponen)
-			.where(eq(spt_pph_badan_lampiran_6_komponen.sptPphBadanId, id))
+			.where(eq(spt_pph_badan_lampiran_6_komponen.sptPphBadanId, id)),
+		db
+			.select({
+				tahunPajak: spt_pph_badan_lampiran_7_kompensasi_kerugian.tahunPajak,
+				labaRugiNetoFiskal: spt_pph_badan_lampiran_7_kompensasi_kerugian.labaRugiNetoFiskal,
+				kompensasiYMin4: spt_pph_badan_lampiran_7_kompensasi_kerugian.kompensasiYMin4,
+				kompensasiYMin3: spt_pph_badan_lampiran_7_kompensasi_kerugian.kompensasiYMin3,
+				kompensasiYMin2: spt_pph_badan_lampiran_7_kompensasi_kerugian.kompensasiYMin2,
+				kompensasiYMin1: spt_pph_badan_lampiran_7_kompensasi_kerugian.kompensasiYMin1,
+				kompensasiTahunIni: spt_pph_badan_lampiran_7_kompensasi_kerugian.kompensasiTahunIni,
+				kompensasiYPlus1: spt_pph_badan_lampiran_7_kompensasi_kerugian.kompensasiYPlus1
+			})
+			.from(spt_pph_badan_lampiran_7_kompensasi_kerugian)
+			.where(eq(spt_pph_badan_lampiran_7_kompensasi_kerugian.sptPphBadanId, id))
 	]);
 
 	const nilaiL6ByKode = new Map(komponenL6.map((row) => [row.kode, row.nilai]));
+	const l7ByTahunPajak = new Map(komponenL7.map((row) => [row.tahunPajak, row]));
 
 	return {
 		readonly: spt.statusDraft !== 'konsep',
@@ -341,6 +357,20 @@ export const getSptPphBadan = query(async () => {
 			kreditPajakTahunLalu: nilaiL6ByKode.get(L6_KODE.KREDIT_PAJAK_TAHUN_LALU) ?? 0,
 			pphDibayarSendiri: nilaiL6ByKode.get(L6_KODE.PPH_DIBAYAR_SENDIRI) ?? 0,
 			angsuranPph25: nilaiL6ByKode.get(L6_KODE.ANGSURAN_PPH_25) ?? 0
-		}
+		},
+		lampiran7: Array.from({ length: 10 }, (_, i) => {
+			const tahunPajak = spt.tahunPajak - (9 - i);
+			const existing = l7ByTahunPajak.get(tahunPajak);
+			return {
+				tahunPajak,
+				labaRugiNetoFiskal: existing?.labaRugiNetoFiskal ?? 0,
+				kompensasiYMin4: existing?.kompensasiYMin4 ?? 0,
+				kompensasiYMin3: existing?.kompensasiYMin3 ?? 0,
+				kompensasiYMin2: existing?.kompensasiYMin2 ?? 0,
+				kompensasiYMin1: existing?.kompensasiYMin1 ?? 0,
+				kompensasiTahunIni: existing?.kompensasiTahunIni ?? 0,
+				kompensasiYPlus1: existing?.kompensasiYPlus1 ?? 0
+			};
+		})
 	};
 });
