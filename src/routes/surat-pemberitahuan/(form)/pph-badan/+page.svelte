@@ -27,6 +27,7 @@
 	import L11B from './components/L11-B/_L11B.svelte';
 	import L13A from './components/L13-A/_L13A.svelte';
 	import L13B from './components/L13-B/_L13B.svelte';
+	import L13C from './components/L13-C/_L13C.svelte';
 	import L14 from './components/L14/_L14.svelte';
 	import { getSptPphBadan } from './getSptPphBadan.remote';
 	import { getOpiniAuditor } from './components/Induk/getOpiniAuditor.remote';
@@ -829,16 +830,17 @@
 					penghasilanKenaPajakSebelumFasilitas={indukDEF.litbangCapBase}
 					{readonly}
 				/>
+				<L13C bind:currentTab/>
 				<L14 bind:currentTab/>
 
 				{#if saveError}
 					<div class="tw:mt-4">
 						<Alert bg={'#dc2626'}>
 							{#snippet head()}
-								<span>!</span>
+								<span class="tw:text-white">!</span>
 							{/snippet}
 							{#snippet body()}
-								<span>{saveError}</span>
+								<span class="tw:text-white">{saveError}</span>
 							{/snippet}
 						</Alert>
 					</div>
