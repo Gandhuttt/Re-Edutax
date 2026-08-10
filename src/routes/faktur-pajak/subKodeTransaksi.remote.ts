@@ -9,4 +9,4 @@ export const getSubKodeTransaksiFaktur = prerender(async () => {
 		.from(sub_kode_transaksi_faktur_pajak)
 		.where(eq(sub_kode_transaksi_faktur_pajak.aktif, true))
 		.orderBy(asc(sub_kode_transaksi_faktur_pajak.kode));
-});
+}, { dynamic: true });

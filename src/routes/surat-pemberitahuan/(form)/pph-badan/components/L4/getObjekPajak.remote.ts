@@ -19,4 +19,4 @@ export const getObjekPajak = prerender(async () => {
 		value: row.kode,
 		label: row.nama
 	}));
-});
+}, { dynamic: true });

@@ -21,4 +21,4 @@ export const getMetodePenyusutan = prerender(async () => {
 		label: row.nama,
 		jenis: row.jenis
 	}));
-});
+}, { dynamic: true });

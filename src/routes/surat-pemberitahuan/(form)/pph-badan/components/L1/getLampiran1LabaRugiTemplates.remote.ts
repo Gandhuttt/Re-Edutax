@@ -25,4 +25,4 @@ export const getLampiran1LabaRugiTemplates = prerender(async () => {
 		.orderBy(asc(spt_pph_badan_lampiran_1_akun.nomorUrut));
 
 	return rows;
-});
+}, { dynamic: true });

@@ -9,4 +9,4 @@ export const getJenisItemTransaksiFaktur = prerender(async () => {
 		.from(jenis_item_transaksi_faktur)
 		.where(eq(jenis_item_transaksi_faktur.aktif, true))
 		.orderBy(asc(jenis_item_transaksi_faktur.kode));
-});
+}, { dynamic: true });

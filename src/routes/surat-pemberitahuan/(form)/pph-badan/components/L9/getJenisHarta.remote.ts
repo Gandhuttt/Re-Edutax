@@ -21,4 +21,4 @@ export const getJenisHarta = prerender(async () => {
 		label: row.nama,
 		kelompok: row.kelompok
 	}));
-});
+}, { dynamic: true });

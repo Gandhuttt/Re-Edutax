@@ -27,4 +27,4 @@ export const getKodeItemTransaksiFaktur = prerender(async () => {
 		labelIndonesia: row.namaIndonesia,
 		labelInggris: row.namaInggris ?? ''
 	}));
-});
+}, { dynamic: true });

@@ -15,4 +15,4 @@ export const getJenisTransaksi = prerender(async () => {
 		.orderBy(asc(jenis_transaksi_hubungan_istimewa_spt_pph_badan.nomorUrut));
 
 	return rows.map((row) => ({ id: row.id, value: row.kode, label: row.nama }));
-});
+}, { dynamic: true });

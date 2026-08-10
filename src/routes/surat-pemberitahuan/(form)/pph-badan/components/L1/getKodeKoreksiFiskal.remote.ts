@@ -19,4 +19,4 @@ export const getKodeKoreksiFiskal = prerender(async () => {
 		label: row.nama,
 		group: row.jenis === 'positif' ? 'Penyesuaian Fiskal Positif' : 'Penyesuaian Fiskal Negatif'
 	}));
-});
+}, { dynamic: true });

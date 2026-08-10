@@ -15,4 +15,4 @@ export const getMetodeHargaTransfer = prerender(async () => {
 		.orderBy(asc(metode_penentuan_harga_transfer_spt_pph_badan.nomorUrut));
 
 	return rows.map((row) => ({ id: row.id, value: row.kode, label: row.nama }));
-});
+}, { dynamic: true });

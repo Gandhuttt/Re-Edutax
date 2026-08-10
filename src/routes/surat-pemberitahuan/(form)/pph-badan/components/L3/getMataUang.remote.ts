@@ -19,4 +19,4 @@ export const getMataUang = prerender(async () => {
 		value: row.kode,
 		label: row.nama
 	}));
-});
+}, { dynamic: true });

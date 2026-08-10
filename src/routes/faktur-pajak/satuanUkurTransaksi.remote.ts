@@ -27,4 +27,4 @@ export const getSatuanUkurTransaksiFaktur = prerender(async () => {
 		index: row.kode,
 		label: row.nama
 	}));
-});
+}, { dynamic: true });

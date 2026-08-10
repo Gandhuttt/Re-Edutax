@@ -15,4 +15,4 @@ export const getKodeTransaksiFaktur = prerender(async () => {
 		key: row.kode,
 		value: row.nama
 	}));
-});
+}, { dynamic: true });

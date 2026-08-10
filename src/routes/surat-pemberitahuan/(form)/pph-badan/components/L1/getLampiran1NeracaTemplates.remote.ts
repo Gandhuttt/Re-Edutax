@@ -24,4 +24,4 @@ export const getLampiran1NeracaTemplates = prerender(async () => {
 		.orderBy(asc(spt_pph_badan_lampiran_1_neraca_akun.nomorUrut));
 
 	return rows;
-});
+}, { dynamic: true });

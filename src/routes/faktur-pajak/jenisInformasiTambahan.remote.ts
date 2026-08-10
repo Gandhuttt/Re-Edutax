@@ -17,4 +17,4 @@ export const getJenisInformasiTambahanFaktur = prerender(async () => {
 		informasiTambahan: row.nama,
 		requiresDocument: row.butuhDokumenPendukung
 	}));
-});
+}, { dynamic: true });
