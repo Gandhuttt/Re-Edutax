@@ -1,5 +1,5 @@
 import { decimalInput, jsonRows, requiredString } from '$lib/helpers/valibot-schema';
-import type { Transaction } from '$lib/server/db';
+import { db, type Statement } from '$lib/server/db';
 import { spt_pph_badan_lampiran_2_afiliasi, spt_pph_badan_lampiran_2_pihak } from '$lib/server/db/schema';
 import { getNegaraId } from '../../getNegaraId.server';
 import { and, eq } from 'drizzle-orm';
@@ -37,55 +37,65 @@ export const L2Schema = v.object({
 
 type L2Input = v.InferOutput<typeof L2Schema>;
 
-export async function saveLampiranL2(tx: Transaction, sptPphBadanId: string, input: L2Input) {
-	await tx
-		.delete(spt_pph_badan_lampiran_2_pihak)
-		.where(
-			and(
-				eq(spt_pph_badan_lampiran_2_pihak.sptPphBadanId, sptPphBadanId),
-				eq(spt_pph_badan_lampiran_2_pihak.jenis, 'pemegang_saham')
+export async function saveLampiranL2(sptPphBadanId: string, input: L2Input): Promise<Statement[]> {
+	const statements: Statement[] = [
+		db
+			.delete(spt_pph_badan_lampiran_2_pihak)
+			.where(
+				and(
+					eq(spt_pph_badan_lampiran_2_pihak.sptPphBadanId, sptPphBadanId),
+					eq(spt_pph_badan_lampiran_2_pihak.jenis, 'pemegang_saham')
+				)
 			)
-		);
+	];
 
 	for (const [index, row] of input.l2a.entries()) {
 		const negaraId = row.negara ? await getNegaraId(row.negara) : null;
 
-		await tx.insert(spt_pph_badan_lampiran_2_pihak).values({
-			sptPphBadanId,
-			jenis: 'pemegang_saham',
-			nomorUrut: index + 1,
-			nama: row.nama,
-			alamat: row.alamat,
-			negaraId,
-			npwpNikTin: row.npwp,
-			jabatan: row.jabatan,
-			modalSahamNominal: Number(row.nilaiModal),
-			modalSahamPersentase: Number(row.persentase),
-			dividenDiterima: Number(row.dividen)
-		});
+		statements.push(
+			db.insert(spt_pph_badan_lampiran_2_pihak).values({
+				sptPphBadanId,
+				jenis: 'pemegang_saham',
+				nomorUrut: index + 1,
+				nama: row.nama,
+				alamat: row.alamat,
+				negaraId,
+				npwpNikTin: row.npwp,
+				jabatan: row.jabatan,
+				modalSahamNominal: Number(row.nilaiModal),
+				modalSahamPersentase: Number(row.persentase),
+				dividenDiterima: Number(row.dividen)
+			})
+		);
 	}
 
-	await tx
-		.delete(spt_pph_badan_lampiran_2_afiliasi)
-		.where(eq(spt_pph_badan_lampiran_2_afiliasi.sptPphBadanId, sptPphBadanId));
+	statements.push(
+		db
+			.delete(spt_pph_badan_lampiran_2_afiliasi)
+			.where(eq(spt_pph_badan_lampiran_2_afiliasi.sptPphBadanId, sptPphBadanId))
+	);
 
 	for (const [index, row] of input.l2b.entries()) {
 		const negaraId = row.negara ? await getNegaraId(row.negara) : null;
 
-		await tx.insert(spt_pph_badan_lampiran_2_afiliasi).values({
-			sptPphBadanId,
-			nomorUrut: index + 1,
-			namaPihakAfiliasi: row.nama,
-			negaraId,
-			npwpTin: row.npwp,
-			penyertaanModalNilai: Number(row.modalNilai),
-			penyertaanModalPersentase: Number(row.modalPersen),
-			utangNilai: Number(row.utangNilai),
-			utangTahun: Number(row.utangTahun),
-			utangBungaPersentase: Number(row.utangBunga),
-			piutangNilai: Number(row.piutangNilai),
-			piutangTahun: Number(row.piutangTahun),
-			piutangBungaPersentase: Number(row.piutangBunga)
-		});
+		statements.push(
+			db.insert(spt_pph_badan_lampiran_2_afiliasi).values({
+				sptPphBadanId,
+				nomorUrut: index + 1,
+				namaPihakAfiliasi: row.nama,
+				negaraId,
+				npwpTin: row.npwp,
+				penyertaanModalNilai: Number(row.modalNilai),
+				penyertaanModalPersentase: Number(row.modalPersen),
+				utangNilai: Number(row.utangNilai),
+				utangTahun: Number(row.utangTahun),
+				utangBungaPersentase: Number(row.utangBunga),
+				piutangNilai: Number(row.piutangNilai),
+				piutangTahun: Number(row.piutangTahun),
+				piutangBungaPersentase: Number(row.piutangBunga)
+			})
+		);
 	}
+
+	return statements;
 }

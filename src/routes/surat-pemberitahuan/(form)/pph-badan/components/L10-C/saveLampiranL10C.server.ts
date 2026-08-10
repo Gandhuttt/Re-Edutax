@@ -1,6 +1,5 @@
 import { booleanRadio, decimalInput, jsonRows, requiredString } from '$lib/helpers/valibot-schema';
-import { db } from '$lib/server/db';
-import type { Transaction } from '$lib/server/db';
+import { db, type Statement } from '$lib/server/db';
 import {
 	jenis_transaksi_hubungan_istimewa_spt_pph_badan,
 	spt_pph_badan_lampiran_10c_pernyataan,
@@ -44,31 +43,38 @@ async function getJenisTransaksiId(kode: string) {
 	return row.id;
 }
 
-export async function saveLampiranL10C(tx: Transaction, sptPphBadanId: string, input: L10CInput) {
-	await tx
-		.delete(spt_pph_badan_lampiran_10c_transaksi)
-		.where(eq(spt_pph_badan_lampiran_10c_transaksi.sptPphBadanId, sptPphBadanId));
+export async function saveLampiranL10C(sptPphBadanId: string, input: L10CInput): Promise<Statement[]> {
+	const statements: Statement[] = [
+		db
+			.delete(spt_pph_badan_lampiran_10c_transaksi)
+			.where(eq(spt_pph_badan_lampiran_10c_transaksi.sptPphBadanId, sptPphBadanId))
+	];
 
 	for (const [index, row] of input.l10c.entries()) {
 		const jenisTransaksiId = await getJenisTransaksiId(row.jenisTransaksi);
 		const negaraId = await getNegaraId(row.negara);
 
-		await tx.insert(spt_pph_badan_lampiran_10c_transaksi).values({
-			sptPphBadanId,
-			nomorUrut: index + 1,
-			namaMitraTransaksi: row.namaMitraTransaksi,
-			jenisTransaksiId,
-			negaraId,
-			nilaiTransaksi: Number(row.nilaiTransaksi)
-		});
+		statements.push(
+			db.insert(spt_pph_badan_lampiran_10c_transaksi).values({
+				sptPphBadanId,
+				nomorUrut: index + 1,
+				namaMitraTransaksi: row.namaMitraTransaksi,
+				jenisTransaksiId,
+				negaraId,
+				nilaiTransaksi: Number(row.nilaiTransaksi)
+			})
+		);
 	}
 
-	await tx
-		.delete(spt_pph_badan_lampiran_10c_pernyataan)
-		.where(eq(spt_pph_badan_lampiran_10c_pernyataan.sptPphBadanId, sptPphBadanId));
+	statements.push(
+		db
+			.delete(spt_pph_badan_lampiran_10c_pernyataan)
+			.where(eq(spt_pph_badan_lampiran_10c_pernyataan.sptPphBadanId, sptPphBadanId)),
+		db.insert(spt_pph_badan_lampiran_10c_pernyataan).values({
+			sptPphBadanId,
+			ditentukanPrinsip: input.l10cDitentukanPrinsip
+		})
+	);
 
-	await tx.insert(spt_pph_badan_lampiran_10c_pernyataan).values({
-		sptPphBadanId,
-		ditentukanPrinsip: input.l10cDitentukanPrinsip
-	});
+	return statements;
 }

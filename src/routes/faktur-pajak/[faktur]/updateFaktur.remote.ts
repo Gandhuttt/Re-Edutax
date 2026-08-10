@@ -193,8 +193,10 @@ export const updateFaktur = form(UpdateFakturSchema, async (input) => {
 		})
 	);
 
-	await db.transaction(async (tx) => {
-		await tx
+	// D1 has no real multi-statement transaction over the Workers binding, only db.batch()
+	// (which requires every statement to be built upfront, no reading results back mid-batch).
+	const statements = [
+		db
 			.update(faktur_pajak)
 			.set({
 				uangMuka: Boolean(input.dokumenTransaksi.uangMuka),
@@ -207,29 +209,28 @@ export const updateFaktur = form(UpdateFakturSchema, async (input) => {
 				alamat: input.dokumenTransaksi.alamat ?? '',
 				npwpPembeli: input.informasiPembeli.npwpPembeli ?? ''
 			})
-			.where(eq(faktur_pajak.id, fakturId));
-
-		await tx
+			.where(eq(faktur_pajak.id, fakturId)),
+		db
 			.delete(informasi_tambahan_faktur_pajak)
-			.where(eq(informasi_tambahan_faktur_pajak.fakturPajakId, fakturId));
-
-		if (jenisInformasiTambahan) {
-			await tx.insert(informasi_tambahan_faktur_pajak).values({
-				fakturPajakId: fakturId,
-				jenisInformasiTambahanId: jenisInformasiTambahan.id,
-				dokumenPendukung: input.dokumenTransaksi.dokumenPendukung?.trim() || null
-			});
-		}
-
-		await tx.delete(transaksi_faktur_pajak).where(eq(transaksi_faktur_pajak.fakturPajakId, fakturId));
-
-		for (const transaksi of validatedTransaksi) {
-			await tx.insert(transaksi_faktur_pajak).values({
+			.where(eq(informasi_tambahan_faktur_pajak.fakturPajakId, fakturId)),
+		...(jenisInformasiTambahan
+			? [
+					db.insert(informasi_tambahan_faktur_pajak).values({
+						fakturPajakId: fakturId,
+						jenisInformasiTambahanId: jenisInformasiTambahan.id,
+						dokumenPendukung: input.dokumenTransaksi.dokumenPendukung?.trim() || null
+					})
+				]
+			: []),
+		db.delete(transaksi_faktur_pajak).where(eq(transaksi_faktur_pajak.fakturPajakId, fakturId)),
+		...validatedTransaksi.map((transaksi) =>
+			db.insert(transaksi_faktur_pajak).values({
 				fakturPajakId: fakturId,
 				...transaksi
-			});
-		}
-	});
+			})
+		)
+	];
+	await db.batch(statements as [(typeof statements)[number], ...(typeof statements)[number][]]);
 
 	redirect(303, '/faktur-pajak/keluaran');
 });

@@ -1,6 +1,6 @@
 import { form, getRequestEvent } from '$app/server';
 import { booleanRadio, decimalInput, requiredString } from '$lib/helpers/valibot-schema';
-import { db } from '$lib/server/db';
+import { db, type Statement } from '$lib/server/db';
 import { opini_auditor_spt_pph_badan, sektor_usaha_spt_pph_badan, spt_pph_badan } from '$lib/server/db/schema';
 import { error, redirect } from '@sveltejs/kit';
 import { and, eq } from 'drizzle-orm';
@@ -101,11 +101,19 @@ export const saveSptPphBadan = form(SaveSptPphBadanSchema, async (input) => {
 	const sektorUsahaId = await getSektorUsahaId(input.sektorUsaha);
 	const opiniAuditorId = await getOpiniAuditorId(input.diaudit, input.opiniAuditor);
 
-	const statusDraft = await db.transaction(async (tx) => {
-		const netoFiskalSebelumFasilitas = await saveLampiranL1(tx, input.id, sektorUsahaId, {
-			labaRugi: input.labaRugi,
-			neraca: input.neraca
-		});
+	// D1 has no real multi-statement transaction over the Workers binding, only db.batch()
+	// (which requires every statement to be built upfront). Each saveLampiranXX() helper builds
+	// and returns its statements instead of executing them; they're all collected here and run
+	// atomically in one batch at the end.
+	const statusDraft = await (async () => {
+		const { statements: l1Statements, netoFiskalSebelumFasilitas } = await saveLampiranL1(
+			input.id,
+			sektorUsahaId,
+			{
+				labaRugi: input.labaRugi,
+				neraca: input.neraca
+			}
+		);
 
 		const computed = computeIndukDEF({
 			netoFiskalSebelumFasilitas,
@@ -139,116 +147,120 @@ export const saveSptPphBadan = form(SaveSptPphBadanSchema, async (input) => {
 					: 'dilaporkan'
 				: 'konsep';
 
-		await tx
-			.update(spt_pph_badan)
-			.set({
-				metodePembukuan: input.metodePembukuan,
-				sektorUsahaId,
-				diaudit: input.diaudit,
-				opiniAuditorId,
-				npwpKantorAkuntanPublik: input.diaudit ? input.npwpKantorAkuntanPublik : null,
-				namaKantorAkuntanPublik: input.diaudit ? input.namaKantorAkuntanPublik : null,
-				menerimaPenghasilanPp23: input.menerimaPenghasilanPp23,
-				hanyaPenghasilanPp23: input.hanyaPenghasilanPp23,
-				menerimaPenghasilanFinal: input.menerimaPenghasilanFinal,
-				menerimaPenghasilanBukanObjekPajak: input.menerimaPenghasilanBukanObjekPajak,
-				penghasilanNetoFiskalSebelumFasilitas: Math.round(netoFiskalSebelumFasilitas),
-				d5FasilitasPenanamanModal: input.d5FasilitasPenanamanModal,
-				d6FasilitasBrutoVokasi: input.d6FasilitasBrutoVokasi,
-				d8AdaKompensasiKerugian: input.d8AdaKompensasiKerugian,
-				d10FasilitasBrutoLitbang: input.d10FasilitasBrutoLitbang,
-				tarifPajak: input.tarifPajak,
-				persentaseTarifLainnya: Number(input.persentaseTarifLainnya),
-				e13AdaKreditPajakLuarNegeri: input.e13AdaKreditPajakLuarNegeri,
-				e14AngsuranPph25TahunBerjalan: Math.round(Number(input.e14AngsuranPph25TahunBerjalan)),
-				e15StpPph25: Math.round(Number(input.e15StpPph25)),
-				e16FasilitasPenguranganPphTerutang: input.e16FasilitasPenguranganPphTerutang,
-				f17bAdaSkPengangsuranPenundaan: input.f17bAdaSkPengangsuranPenundaan,
-				f17bJumlahDiangsurDitunda: Math.round(Number(input.f17bJumlahDiangsurDitunda)),
-				f19aMetodePengembalian: input.f19aMetodePengembalian ?? null,
-				g20WajibLaporAngsuranPph25: input.g20WajibLaporAngsuranPph25,
-				h21aTransaksiHubunganIstimewa: input.h21aTransaksiHubunganIstimewa,
-				h21bDokumenPenentuanHargaTransfer: input.h21bDokumenPenentuanHargaTransfer,
-				h21cPenanamanModalAfiliasi: input.h21cPenanamanModalAfiliasi,
-				h21dUtangPiutangAfiliasi: input.h21dUtangPiutangAfiliasi,
-				h21ePenyusutanAmortisasiFiskal: input.h21ePenyusutanAmortisasiFiskal,
-				h21fBiayaEntertainment: input.h21fBiayaEntertainment,
-				h21gFasilitasPenanamanModalDaerahTertentu: input.h21gFasilitasPenanamanModalDaerahTertentu,
-				h21hSisaLebihSaranaPrasarana: input.h21hSisaLebihSaranaPrasarana,
-				h21iDividenLuarNegeri: input.h21iDividenLuarNegeri,
-				pphKurangLebihBayar: Math.round(computed.f17c),
-				lampiran3PengembalianPenguranganPphLuarNegeriTahunSebelumnya: Number(input.l3aPengembalianPengurangan),
-				statusDraft,
-				tanggalDilaporkan: statusDraft === 'dilaporkan' ? new Date() : null
-			})
-			.where(eq(spt_pph_badan.id, input.id));
+		const statements: Statement[] = [
+			db
+				.update(spt_pph_badan)
+				.set({
+					metodePembukuan: input.metodePembukuan,
+					sektorUsahaId,
+					diaudit: input.diaudit,
+					opiniAuditorId,
+					npwpKantorAkuntanPublik: input.diaudit ? input.npwpKantorAkuntanPublik : null,
+					namaKantorAkuntanPublik: input.diaudit ? input.namaKantorAkuntanPublik : null,
+					menerimaPenghasilanPp23: input.menerimaPenghasilanPp23,
+					hanyaPenghasilanPp23: input.hanyaPenghasilanPp23,
+					menerimaPenghasilanFinal: input.menerimaPenghasilanFinal,
+					menerimaPenghasilanBukanObjekPajak: input.menerimaPenghasilanBukanObjekPajak,
+					penghasilanNetoFiskalSebelumFasilitas: Math.round(netoFiskalSebelumFasilitas),
+					d5FasilitasPenanamanModal: input.d5FasilitasPenanamanModal,
+					d6FasilitasBrutoVokasi: input.d6FasilitasBrutoVokasi,
+					d8AdaKompensasiKerugian: input.d8AdaKompensasiKerugian,
+					d10FasilitasBrutoLitbang: input.d10FasilitasBrutoLitbang,
+					tarifPajak: input.tarifPajak,
+					persentaseTarifLainnya: Number(input.persentaseTarifLainnya),
+					e13AdaKreditPajakLuarNegeri: input.e13AdaKreditPajakLuarNegeri,
+					e14AngsuranPph25TahunBerjalan: Math.round(Number(input.e14AngsuranPph25TahunBerjalan)),
+					e15StpPph25: Math.round(Number(input.e15StpPph25)),
+					e16FasilitasPenguranganPphTerutang: input.e16FasilitasPenguranganPphTerutang,
+					f17bAdaSkPengangsuranPenundaan: input.f17bAdaSkPengangsuranPenundaan,
+					f17bJumlahDiangsurDitunda: Math.round(Number(input.f17bJumlahDiangsurDitunda)),
+					f19aMetodePengembalian: input.f19aMetodePengembalian ?? null,
+					g20WajibLaporAngsuranPph25: input.g20WajibLaporAngsuranPph25,
+					h21aTransaksiHubunganIstimewa: input.h21aTransaksiHubunganIstimewa,
+					h21bDokumenPenentuanHargaTransfer: input.h21bDokumenPenentuanHargaTransfer,
+					h21cPenanamanModalAfiliasi: input.h21cPenanamanModalAfiliasi,
+					h21dUtangPiutangAfiliasi: input.h21dUtangPiutangAfiliasi,
+					h21ePenyusutanAmortisasiFiskal: input.h21ePenyusutanAmortisasiFiskal,
+					h21fBiayaEntertainment: input.h21fBiayaEntertainment,
+					h21gFasilitasPenanamanModalDaerahTertentu: input.h21gFasilitasPenanamanModalDaerahTertentu,
+					h21hSisaLebihSaranaPrasarana: input.h21hSisaLebihSaranaPrasarana,
+					h21iDividenLuarNegeri: input.h21iDividenLuarNegeri,
+					pphKurangLebihBayar: Math.round(computed.f17c),
+					lampiran3PengembalianPenguranganPphLuarNegeriTahunSebelumnya: Number(input.l3aPengembalianPengurangan),
+					statusDraft,
+					tanggalDilaporkan: statusDraft === 'dilaporkan' ? new Date() : null
+				})
+				.where(eq(spt_pph_badan.id, input.id)),
+			...l1Statements,
+			...(await saveLampiranL2(input.id, { l2a: input.l2a, l2b: input.l2b })),
+			...(await saveLampiranL3(input.id, { l3a: input.l3a, l3b: input.l3b })),
+			...(await saveLampiranL4(input.id, { l4a: input.l4a, l4b: input.l4b })),
+			...(await saveLampiranL5(input.id, { l5a: input.l5a, l5bDipotong: input.l5bDipotong })),
+			...(await saveLampiranL6(input.id, {
+				l6DasarAngsuran: input.l6DasarAngsuran,
+				l6KompensasiKerugian: input.l6KompensasiKerugian,
+				l6PphTerutang: input.l6PphTerutang,
+				l6KreditPajakTahunLalu: input.l6KreditPajakTahunLalu
+			})),
+			...(await saveLampiranL7(input.id, { l7: input.l7 })),
+			...(await saveLampiranL8(input.id, {
+				l8JumlahPeredaranBruto: input.l8JumlahPeredaranBruto,
+				l8PenghasilanKenaPajak: input.l8PenghasilanKenaPajak
+			})),
+			...(await saveLampiranL9(input.id, {
+				l9: input.l9,
+				l9AJumlahPenyusutanKomersial: input.l9AJumlahPenyusutanKomersial,
+				l9BJumlahPenyusutanKomersial: input.l9BJumlahPenyusutanKomersial,
+				l9CJumlahAmortisasiKomersial: input.l9CJumlahAmortisasiKomersial
+			})),
+			...(await saveLampiranL10A(input.id, { l10a: input.l10a })),
+			...(await saveLampiranL10B(input.id, {
+				l10bHubunganA: input.l10bHubunganA,
+				l10bHubunganB: input.l10bHubunganB,
+				l10bHubunganC: input.l10bHubunganC,
+				l10bHubunganD: input.l10bHubunganD,
+				l10bTransaksiA: input.l10bTransaksiA,
+				l10bTransaksiB: input.l10bTransaksiB,
+				l10bTransaksiC: input.l10bTransaksiC,
+				l10bDokumentasiA: input.l10bDokumentasiA,
+				l10bDokumentasiB: input.l10bDokumentasiB,
+				l10bDokumentasiC: input.l10bDokumentasiC,
+				l10bDokumentasiD: input.l10bDokumentasiD,
+				l10bDokumentasiE: input.l10bDokumentasiE,
+				l10bDokumenA: input.l10bDokumenA,
+				l10bDokumenB: input.l10bDokumenB,
+				l10bDokumenC: input.l10bDokumenC
+			})),
+			...(await saveLampiranL10C(input.id, {
+				l10c: input.l10c,
+				l10cDitentukanPrinsip: input.l10cDitentukanPrinsip
+			})),
+			...(await saveLampiranL10D(input.id, {
+				l10dDokumenIndukA: input.l10dDokumenIndukA,
+				l10dDokumenIndukB: input.l10dDokumenIndukB,
+				l10dDokumenIndukC: input.l10dDokumenIndukC,
+				l10dDokumenIndukD: input.l10dDokumenIndukD,
+				l10dDokumenIndukE: input.l10dDokumenIndukE,
+				l10dDokumenLokalA: input.l10dDokumenLokalA,
+				l10dDokumenLokalB: input.l10dDokumenLokalB,
+				l10dDokumenLokalC: input.l10dDokumenLokalC,
+				l10dDokumenLokalD: input.l10dDokumenLokalD,
+				l10dDokumenLokalE: input.l10dDokumenLokalE,
+				l10dTanggalDokumenIndukTersedia: input.l10dTanggalDokumenIndukTersedia,
+				l10dTanggalDokumenLokalTersedia: input.l10dTanggalDokumenLokalTersedia
+			})),
+			...(await saveLampiranL13B(input.id, {
+				l13bA: input.l13bA,
+				l13bB: input.l13bB,
+				l13bC: input.l13bC,
+				l13bDTermanfaatkanTahunSebelumnya: input.l13bDTermanfaatkanTahunSebelumnya
+			}))
+		];
 
-		await saveLampiranL2(tx, input.id, { l2a: input.l2a, l2b: input.l2b });
-		await saveLampiranL3(tx, input.id, { l3a: input.l3a, l3b: input.l3b });
-		await saveLampiranL4(tx, input.id, { l4a: input.l4a, l4b: input.l4b });
-		await saveLampiranL5(tx, input.id, { l5a: input.l5a, l5bDipotong: input.l5bDipotong });
-		await saveLampiranL6(tx, input.id, {
-			l6DasarAngsuran: input.l6DasarAngsuran,
-			l6KompensasiKerugian: input.l6KompensasiKerugian,
-			l6PphTerutang: input.l6PphTerutang,
-			l6KreditPajakTahunLalu: input.l6KreditPajakTahunLalu
-		});
-		await saveLampiranL7(tx, input.id, { l7: input.l7 });
-		await saveLampiranL8(tx, input.id, {
-			l8JumlahPeredaranBruto: input.l8JumlahPeredaranBruto,
-			l8PenghasilanKenaPajak: input.l8PenghasilanKenaPajak
-		});
-		await saveLampiranL9(tx, input.id, {
-			l9: input.l9,
-			l9AJumlahPenyusutanKomersial: input.l9AJumlahPenyusutanKomersial,
-			l9BJumlahPenyusutanKomersial: input.l9BJumlahPenyusutanKomersial,
-			l9CJumlahAmortisasiKomersial: input.l9CJumlahAmortisasiKomersial
-		});
-		await saveLampiranL10A(tx, input.id, { l10a: input.l10a });
-		await saveLampiranL10B(tx, input.id, {
-			l10bHubunganA: input.l10bHubunganA,
-			l10bHubunganB: input.l10bHubunganB,
-			l10bHubunganC: input.l10bHubunganC,
-			l10bHubunganD: input.l10bHubunganD,
-			l10bTransaksiA: input.l10bTransaksiA,
-			l10bTransaksiB: input.l10bTransaksiB,
-			l10bTransaksiC: input.l10bTransaksiC,
-			l10bDokumentasiA: input.l10bDokumentasiA,
-			l10bDokumentasiB: input.l10bDokumentasiB,
-			l10bDokumentasiC: input.l10bDokumentasiC,
-			l10bDokumentasiD: input.l10bDokumentasiD,
-			l10bDokumentasiE: input.l10bDokumentasiE,
-			l10bDokumenA: input.l10bDokumenA,
-			l10bDokumenB: input.l10bDokumenB,
-			l10bDokumenC: input.l10bDokumenC
-		});
-		await saveLampiranL10C(tx, input.id, {
-			l10c: input.l10c,
-			l10cDitentukanPrinsip: input.l10cDitentukanPrinsip
-		});
-		await saveLampiranL10D(tx, input.id, {
-			l10dDokumenIndukA: input.l10dDokumenIndukA,
-			l10dDokumenIndukB: input.l10dDokumenIndukB,
-			l10dDokumenIndukC: input.l10dDokumenIndukC,
-			l10dDokumenIndukD: input.l10dDokumenIndukD,
-			l10dDokumenIndukE: input.l10dDokumenIndukE,
-			l10dDokumenLokalA: input.l10dDokumenLokalA,
-			l10dDokumenLokalB: input.l10dDokumenLokalB,
-			l10dDokumenLokalC: input.l10dDokumenLokalC,
-			l10dDokumenLokalD: input.l10dDokumenLokalD,
-			l10dDokumenLokalE: input.l10dDokumenLokalE,
-			l10dTanggalDokumenIndukTersedia: input.l10dTanggalDokumenIndukTersedia,
-			l10dTanggalDokumenLokalTersedia: input.l10dTanggalDokumenLokalTersedia
-		});
-		await saveLampiranL13B(tx, input.id, {
-			l13bA: input.l13bA,
-			l13bB: input.l13bB,
-			l13bC: input.l13bC,
-			l13bDTermanfaatkanTahunSebelumnya: input.l13bDTermanfaatkanTahunSebelumnya
-		});
+		await db.batch(statements as [Statement, ...Statement[]]);
 
 		return statusDraft;
-	});
+	})();
 
 	if (statusDraft === 'menunggu_pembayaran') {
 		redirect(303, '/surat-pemberitahuan/pembayaran');

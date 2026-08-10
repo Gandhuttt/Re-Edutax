@@ -1,6 +1,5 @@
 import { decimalInput, jsonRows, requiredString } from '$lib/helpers/valibot-schema';
-import { db } from '$lib/server/db';
-import type { Transaction } from '$lib/server/db';
+import { db, type Statement } from '$lib/server/db';
 import {
 	jenis_pajak_dipotong_dipungut_spt_pph_badan,
 	jenis_penghasilan_kredit_pajak_luar_negeri_spt_pph_badan,
@@ -95,49 +94,59 @@ async function getJenisPajakDipotongDipungutId(kode: string) {
 	return jenisPajak.id;
 }
 
-export async function saveLampiranL3(tx: Transaction, sptPphBadanId: string, input: L3Input) {
-	await tx
-		.delete(spt_pph_badan_lampiran_3_penghasilan_luar_negeri)
-		.where(eq(spt_pph_badan_lampiran_3_penghasilan_luar_negeri.sptPphBadanId, sptPphBadanId));
+export async function saveLampiranL3(sptPphBadanId: string, input: L3Input): Promise<Statement[]> {
+	const statements: Statement[] = [
+		db
+			.delete(spt_pph_badan_lampiran_3_penghasilan_luar_negeri)
+			.where(eq(spt_pph_badan_lampiran_3_penghasilan_luar_negeri.sptPphBadanId, sptPphBadanId))
+	];
 
 	for (const [index, row] of input.l3a.entries()) {
 		const negaraId = await getNegaraId(row.negara);
 		const jenisPenghasilanId = await getJenisPenghasilanKreditPajakLuarNegeriId(row.jenisPenghasilan);
 		const mataUangId = row.mataUang ? await getMataUangId(row.mataUang) : null;
 
-		await tx.insert(spt_pph_badan_lampiran_3_penghasilan_luar_negeri).values({
-			sptPphBadanId,
-			nomorUrut: index + 1,
-			namaPemberiPenghasilan: row.namaPemberiPenghasilan,
-			negaraId,
-			tanggal: row.tanggal,
-			jenisPenghasilanId,
-			penghasilanNeto: Number(row.penghasilanNeto),
-			pphLuarNegeri: Number(row.pphLuarNegeri),
-			mataUangId,
-			pphLuarNegeriMataUangAsing: Number(row.pphLuarNegeriMataUangAsing),
-			kreditPajakYangDapatDikreditkan: Number(row.kreditPajakYangDapatDikreditkan),
-			keterangan: row.keterangan
-		});
+		statements.push(
+			db.insert(spt_pph_badan_lampiran_3_penghasilan_luar_negeri).values({
+				sptPphBadanId,
+				nomorUrut: index + 1,
+				namaPemberiPenghasilan: row.namaPemberiPenghasilan,
+				negaraId,
+				tanggal: row.tanggal,
+				jenisPenghasilanId,
+				penghasilanNeto: Number(row.penghasilanNeto),
+				pphLuarNegeri: Number(row.pphLuarNegeri),
+				mataUangId,
+				pphLuarNegeriMataUangAsing: Number(row.pphLuarNegeriMataUangAsing),
+				kreditPajakYangDapatDikreditkan: Number(row.kreditPajakYangDapatDikreditkan),
+				keterangan: row.keterangan
+			})
+		);
 	}
 
-	await tx
-		.delete(spt_pph_badan_lampiran_3_pph_dipotong)
-		.where(eq(spt_pph_badan_lampiran_3_pph_dipotong.sptPphBadanId, sptPphBadanId));
+	statements.push(
+		db
+			.delete(spt_pph_badan_lampiran_3_pph_dipotong)
+			.where(eq(spt_pph_badan_lampiran_3_pph_dipotong.sptPphBadanId, sptPphBadanId))
+	);
 
 	for (const [index, row] of input.l3b.entries()) {
 		const jenisPajakId = await getJenisPajakDipotongDipungutId(row.jenisPajak);
 
-		await tx.insert(spt_pph_badan_lampiran_3_pph_dipotong).values({
-			sptPphBadanId,
-			nomorUrut: index + 1,
-			namaPemotongPemungut: row.namaPemotongPemungut,
-			npwpPemotongPemungut: row.npwp,
-			jenisPajakId,
-			dpp: Number(row.dpp),
-			pph: Number(row.pph),
-			nomorBukti: row.nomorBukti,
-			tanggalBukti: row.tanggalBukti
-		});
+		statements.push(
+			db.insert(spt_pph_badan_lampiran_3_pph_dipotong).values({
+				sptPphBadanId,
+				nomorUrut: index + 1,
+				namaPemotongPemungut: row.namaPemotongPemungut,
+				npwpPemotongPemungut: row.npwp,
+				jenisPajakId,
+				dpp: Number(row.dpp),
+				pph: Number(row.pph),
+				nomorBukti: row.nomorBukti,
+				tanggalBukti: row.tanggalBukti
+			})
+		);
 	}
+
+	return statements;
 }

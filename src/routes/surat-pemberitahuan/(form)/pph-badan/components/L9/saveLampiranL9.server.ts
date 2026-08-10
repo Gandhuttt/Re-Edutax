@@ -1,6 +1,5 @@
 import { decimalInput, jsonRows, requiredString } from '$lib/helpers/valibot-schema';
-import { db } from '$lib/server/db';
-import type { Transaction } from '$lib/server/db';
+import { db, type Statement } from '$lib/server/db';
 import {
 	jenis_harta_spt_pph_badan,
 	spt_pph_badan_lampiran_9_harta,
@@ -65,41 +64,48 @@ async function getJenisHartaId(kode: string) {
 	return jenisHarta.id;
 }
 
-export async function saveLampiranL9(tx: Transaction, sptPphBadanId: string, input: L9Input) {
-	await tx
-		.delete(spt_pph_badan_lampiran_9_harta)
-		.where(eq(spt_pph_badan_lampiran_9_harta.sptPphBadanId, sptPphBadanId));
+export async function saveLampiranL9(sptPphBadanId: string, input: L9Input): Promise<Statement[]> {
+	const statements: Statement[] = [
+		db
+			.delete(spt_pph_badan_lampiran_9_harta)
+			.where(eq(spt_pph_badan_lampiran_9_harta.sptPphBadanId, sptPphBadanId))
+	];
 
 	for (const [index, row] of input.l9.entries()) {
 		const jenisHartaId = await getJenisHartaId(row.jenisHarta);
 
-		await tx.insert(spt_pph_badan_lampiran_9_harta).values({
-			sptPphBadanId,
-			nomorUrut: index + 1,
-			jenisHartaId,
-			kelompokPenyusutan: row.kelompokPenyusutan,
-			kodeHarta: row.kodeHarta,
-			bulanTahunPerolehan: row.bulanTahunPerolehan,
-			hargaPerolehan: Number(row.hargaPerolehan),
-			nilaiSisaBukuFiskalAwalTahun: Number(row.nilaiSisaBukuFiskalAwalTahun),
-			metodePenyusutanKomersial: row.metodePenyusutanKomersial,
-			metodePenyusutanFiskal: row.metodePenyusutanFiskal,
-			penyusutanAmortisasiFiskalTahunIni: Number(row.penyusutanAmortisasiFiskalTahunIni),
-			penyusutanAmortisasiKomersialTahunIni: Number(row.penyusutanAmortisasiKomersialTahunIni),
-			akumulasiPenyusutanAmortisasiFiskal: Number(row.akumulasiPenyusutanAmortisasiFiskal),
-			nilaiSisaBukuFiskalAkhirTahun: Number(row.nilaiSisaBukuFiskalAkhirTahun),
-			keterangan: row.keterangan
-		});
+		statements.push(
+			db.insert(spt_pph_badan_lampiran_9_harta).values({
+				sptPphBadanId,
+				nomorUrut: index + 1,
+				jenisHartaId,
+				kelompokPenyusutan: row.kelompokPenyusutan,
+				kodeHarta: row.kodeHarta,
+				bulanTahunPerolehan: row.bulanTahunPerolehan,
+				hargaPerolehan: Number(row.hargaPerolehan),
+				nilaiSisaBukuFiskalAwalTahun: Number(row.nilaiSisaBukuFiskalAwalTahun),
+				metodePenyusutanKomersial: row.metodePenyusutanKomersial,
+				metodePenyusutanFiskal: row.metodePenyusutanFiskal,
+				penyusutanAmortisasiFiskalTahunIni: Number(row.penyusutanAmortisasiFiskalTahunIni),
+				penyusutanAmortisasiKomersialTahunIni: Number(row.penyusutanAmortisasiKomersialTahunIni),
+				akumulasiPenyusutanAmortisasiFiskal: Number(row.akumulasiPenyusutanAmortisasiFiskal),
+				nilaiSisaBukuFiskalAkhirTahun: Number(row.nilaiSisaBukuFiskalAkhirTahun),
+				keterangan: row.keterangan
+			})
+		);
 	}
 
-	await tx
-		.delete(spt_pph_badan_lampiran_9_ringkasan_komersial)
-		.where(eq(spt_pph_badan_lampiran_9_ringkasan_komersial.sptPphBadanId, sptPphBadanId));
+	statements.push(
+		db
+			.delete(spt_pph_badan_lampiran_9_ringkasan_komersial)
+			.where(eq(spt_pph_badan_lampiran_9_ringkasan_komersial.sptPphBadanId, sptPphBadanId)),
+		db.insert(spt_pph_badan_lampiran_9_ringkasan_komersial).values({
+			sptPphBadanId,
+			jumlahPenyusutanKomersialA: Number(input.l9AJumlahPenyusutanKomersial),
+			jumlahPenyusutanKomersialB: Number(input.l9BJumlahPenyusutanKomersial),
+			jumlahAmortisasiKomersialC: Number(input.l9CJumlahAmortisasiKomersial)
+		})
+	);
 
-	await tx.insert(spt_pph_badan_lampiran_9_ringkasan_komersial).values({
-		sptPphBadanId,
-		jumlahPenyusutanKomersialA: Number(input.l9AJumlahPenyusutanKomersial),
-		jumlahPenyusutanKomersialB: Number(input.l9BJumlahPenyusutanKomersial),
-		jumlahAmortisasiKomersialC: Number(input.l9CJumlahAmortisasiKomersial)
-	});
+	return statements;
 }

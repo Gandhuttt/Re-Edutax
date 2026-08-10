@@ -1,5 +1,5 @@
 import { decimalInput, jsonRows } from '$lib/helpers/valibot-schema';
-import type { Transaction } from '$lib/server/db';
+import { db, type Statement } from '$lib/server/db';
 import {
 	spt_pph_badan_lampiran_13b_a_kerjasama,
 	spt_pph_badan_lampiran_13b_b_biaya,
@@ -43,63 +43,78 @@ export const L13BSchema = v.object({
 
 type L13BInput = v.InferOutput<typeof L13BSchema>;
 
-export async function saveLampiranL13B(tx: Transaction, sptPphBadanId: string, input: L13BInput) {
-	await tx
-		.delete(spt_pph_badan_lampiran_13b_a_kerjasama)
-		.where(eq(spt_pph_badan_lampiran_13b_a_kerjasama.sptPphBadanId, sptPphBadanId));
+export async function saveLampiranL13B(sptPphBadanId: string, input: L13BInput): Promise<Statement[]> {
+	const statements: Statement[] = [
+		db
+			.delete(spt_pph_badan_lampiran_13b_a_kerjasama)
+			.where(eq(spt_pph_badan_lampiran_13b_a_kerjasama.sptPphBadanId, sptPphBadanId))
+	];
 
 	for (const [index, row] of input.l13bA.entries()) {
-		await tx.insert(spt_pph_badan_lampiran_13b_a_kerjasama).values({
-			sptPphBadanId,
-			nomorUrut: index + 1,
-			perjanjianNomor: row.perjanjianNomor,
-			perjanjianTanggal: row.perjanjianTanggal,
-			mitraKegiatan: row.mitraKegiatan,
-			keterangan: row.keterangan
-		});
+		statements.push(
+			db.insert(spt_pph_badan_lampiran_13b_a_kerjasama).values({
+				sptPphBadanId,
+				nomorUrut: index + 1,
+				perjanjianNomor: row.perjanjianNomor,
+				perjanjianTanggal: row.perjanjianTanggal,
+				mitraKegiatan: row.mitraKegiatan,
+				keterangan: row.keterangan
+			})
+		);
 	}
 
-	await tx
-		.delete(spt_pph_badan_lampiran_13b_b_biaya)
-		.where(eq(spt_pph_badan_lampiran_13b_b_biaya.sptPphBadanId, sptPphBadanId));
+	statements.push(
+		db
+			.delete(spt_pph_badan_lampiran_13b_b_biaya)
+			.where(eq(spt_pph_badan_lampiran_13b_b_biaya.sptPphBadanId, sptPphBadanId))
+	);
 
 	for (const row of input.l13bB) {
-		await tx.insert(spt_pph_badan_lampiran_13b_b_biaya).values({
-			sptPphBadanId,
-			kode: row.kode,
-			nama: L13B_BIAYA_NAMA[row.kode],
-			nilai: Number(row.nilai)
-		});
+		statements.push(
+			db.insert(spt_pph_badan_lampiran_13b_b_biaya).values({
+				sptPphBadanId,
+				kode: row.kode,
+				nama: L13B_BIAYA_NAMA[row.kode],
+				nilai: Number(row.nilai)
+			})
+		);
 	}
 
-	await tx
-		.delete(spt_pph_badan_lampiran_13b_c_litbang)
-		.where(eq(spt_pph_badan_lampiran_13b_c_litbang.sptPphBadanId, sptPphBadanId));
+	statements.push(
+		db
+			.delete(spt_pph_badan_lampiran_13b_c_litbang)
+			.where(eq(spt_pph_badan_lampiran_13b_c_litbang.sptPphBadanId, sptPphBadanId))
+	);
 
 	for (const [index, row] of input.l13bC.entries()) {
 		const jumlahBiaya = Number(row.jumlahBiaya);
 		const persentaseFasilitasPajak = Number(row.persentaseFasilitasPajak);
 		const tambahanPengurang = Math.round((jumlahBiaya * persentaseFasilitasPajak) / 100);
 
-		await tx.insert(spt_pph_badan_lampiran_13b_c_litbang).values({
-			sptPphBadanId,
-			nomorUrut: index + 1,
-			nomorProposal: row.nomorProposal,
-			jangkaWaktuDariTahun: Number(row.jangkaWaktuDariTahun) || null,
-			jangkaWaktuSampaiTahun: Number(row.jangkaWaktuSampaiTahun) || null,
-			jumlahBiaya,
-			tahunPerolehanHki: Number(row.tahunPerolehanHki) || null,
-			persentaseFasilitasPajak,
-			tambahanPengurang
-		});
+		statements.push(
+			db.insert(spt_pph_badan_lampiran_13b_c_litbang).values({
+				sptPphBadanId,
+				nomorUrut: index + 1,
+				nomorProposal: row.nomorProposal,
+				jangkaWaktuDariTahun: Number(row.jangkaWaktuDariTahun) || null,
+				jangkaWaktuSampaiTahun: Number(row.jangkaWaktuSampaiTahun) || null,
+				jumlahBiaya,
+				tahunPerolehanHki: Number(row.tahunPerolehanHki) || null,
+				persentaseFasilitasPajak,
+				tambahanPengurang
+			})
+		);
 	}
 
-	await tx
-		.delete(spt_pph_badan_lampiran_13b_d_penghitungan)
-		.where(eq(spt_pph_badan_lampiran_13b_d_penghitungan.sptPphBadanId, sptPphBadanId));
+	statements.push(
+		db
+			.delete(spt_pph_badan_lampiran_13b_d_penghitungan)
+			.where(eq(spt_pph_badan_lampiran_13b_d_penghitungan.sptPphBadanId, sptPphBadanId)),
+		db.insert(spt_pph_badan_lampiran_13b_d_penghitungan).values({
+			sptPphBadanId,
+			termanfaatkanTahunSebelumnya: Number(input.l13bDTermanfaatkanTahunSebelumnya)
+		})
+	);
 
-	await tx.insert(spt_pph_badan_lampiran_13b_d_penghitungan).values({
-		sptPphBadanId,
-		termanfaatkanTahunSebelumnya: Number(input.l13bDTermanfaatkanTahunSebelumnya)
-	});
+	return statements;
 }

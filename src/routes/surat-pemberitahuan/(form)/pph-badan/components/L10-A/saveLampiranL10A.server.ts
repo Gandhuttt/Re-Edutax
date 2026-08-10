@@ -1,6 +1,5 @@
 import { decimalInput, jsonRows, requiredString } from '$lib/helpers/valibot-schema';
-import { db } from '$lib/server/db';
-import type { Transaction } from '$lib/server/db';
+import { db, type Statement } from '$lib/server/db';
 import {
 	bentuk_hubungan_istimewa_spt_pph_badan,
 	jenis_transaksi_hubungan_istimewa_spt_pph_badan,
@@ -82,10 +81,12 @@ async function getMetodeHargaTransferId(kode: string) {
 	return row.id;
 }
 
-export async function saveLampiranL10A(tx: Transaction, sptPphBadanId: string, input: L10AInput) {
-	await tx
-		.delete(spt_pph_badan_lampiran_10a_transaksi)
-		.where(eq(spt_pph_badan_lampiran_10a_transaksi.sptPphBadanId, sptPphBadanId));
+export async function saveLampiranL10A(sptPphBadanId: string, input: L10AInput): Promise<Statement[]> {
+	const statements: Statement[] = [
+		db
+			.delete(spt_pph_badan_lampiran_10a_transaksi)
+			.where(eq(spt_pph_badan_lampiran_10a_transaksi.sptPphBadanId, sptPphBadanId))
+	];
 
 	for (const [index, row] of input.l10a.entries()) {
 		const negaraId = row.negara ? await getNegaraId(row.negara) : null;
@@ -93,18 +94,22 @@ export async function saveLampiranL10A(tx: Transaction, sptPphBadanId: string, i
 		const jenisTransaksiId = await getJenisTransaksiId(row.jenisTransaksi);
 		const metodePenentuanHargaTransferId = await getMetodeHargaTransferId(row.metodePenentuanHargaTransfer);
 
-		await tx.insert(spt_pph_badan_lampiran_10a_transaksi).values({
-			sptPphBadanId,
-			nomorUrut: index + 1,
-			nama: row.nama,
-			npwpTin: row.npwpTin,
-			negaraId,
-			bentukHubunganId,
-			kegiatanUsaha: row.kegiatanUsaha,
-			jenisTransaksiId,
-			nilaiTransaksi: Number(row.nilaiTransaksi),
-			metodePenentuanHargaTransferId,
-			alasanPenggunaanMetode: row.alasanPenggunaanMetode
-		});
+		statements.push(
+			db.insert(spt_pph_badan_lampiran_10a_transaksi).values({
+				sptPphBadanId,
+				nomorUrut: index + 1,
+				nama: row.nama,
+				npwpTin: row.npwpTin,
+				negaraId,
+				bentukHubunganId,
+				kegiatanUsaha: row.kegiatanUsaha,
+				jenisTransaksiId,
+				nilaiTransaksi: Number(row.nilaiTransaksi),
+				metodePenentuanHargaTransferId,
+				alasanPenggunaanMetode: row.alasanPenggunaanMetode
+			})
+		);
 	}
+
+	return statements;
 }

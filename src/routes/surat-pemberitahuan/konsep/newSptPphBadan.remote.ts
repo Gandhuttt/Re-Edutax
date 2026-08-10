@@ -47,25 +47,23 @@ export const newSptPphBadan = form(NewSptPphBadanSchema, async ({ tahunPajak }) 
 		.limit(1);
 
 	if (!existing) {
-		await db.transaction(async (tx) => {
-			[existing] = await tx
-				.insert(spt_pph_badan)
-				.values({
-					npwp: activeNpwp,
-					tahunPajak,
-					periodePembukuanMulai: `${tahunPajak}-01-01`,
-					periodePembukuanSelesai: `${tahunPajak}-12-31`,
-					metodePembukuan: 'akrual',
-					mataUangPembukuanId: mataUang.id,
-					sektorUsahaId: sektorUsaha.id,
-					menerimaPenghasilanPp23: false,
-					hanyaPenghasilanPp23: false,
-					menerimaPenghasilanFinal: false,
-					menerimaPenghasilanBukanObjekPajak: false,
-					tarifPajak: 'pasal_17_1_b'
-				})
-				.returning({ id: spt_pph_badan.id });
-		});
+		[existing] = await db
+			.insert(spt_pph_badan)
+			.values({
+				npwp: activeNpwp,
+				tahunPajak,
+				periodePembukuanMulai: `${tahunPajak}-01-01`,
+				periodePembukuanSelesai: `${tahunPajak}-12-31`,
+				metodePembukuan: 'akrual',
+				mataUangPembukuanId: mataUang.id,
+				sektorUsahaId: sektorUsaha.id,
+				menerimaPenghasilanPp23: false,
+				hanyaPenghasilanPp23: false,
+				menerimaPenghasilanFinal: false,
+				menerimaPenghasilanBukanObjekPajak: false,
+				tarifPajak: 'pasal_17_1_b'
+			})
+			.returning({ id: spt_pph_badan.id });
 	}
 
 	redirect(303, `/surat-pemberitahuan/pph-badan?id=${existing.id}`);

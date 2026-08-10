@@ -1,5 +1,5 @@
 import { decimalInput } from '$lib/helpers/valibot-schema';
-import type { Transaction } from '$lib/server/db';
+import { db, type Statement } from '$lib/server/db';
 import { spt_pph_badan_lampiran_6_komponen } from '$lib/server/db/schema';
 import { eq } from 'drizzle-orm';
 import * as v from 'valibot';
@@ -33,7 +33,7 @@ export const L6Schema = v.object({
 
 type L6Input = v.InferOutput<typeof L6Schema>;
 
-export async function saveLampiranL6(tx: Transaction, sptPphBadanId: string, input: L6Input) {
+export async function saveLampiranL6(sptPphBadanId: string, input: L6Input): Promise<Statement[]> {
 	const dasarAngsuran = Number(input.l6DasarAngsuran);
 	const kompensasiKerugian = Number(input.l6KompensasiKerugian);
 	const pphTerutang = Number(input.l6PphTerutang);
@@ -53,16 +53,22 @@ export async function saveLampiranL6(tx: Transaction, sptPphBadanId: string, inp
 		[L6_KODE.ANGSURAN_PPH_25]: angsuranPph25
 	};
 
-	await tx
-		.delete(spt_pph_badan_lampiran_6_komponen)
-		.where(eq(spt_pph_badan_lampiran_6_komponen.sptPphBadanId, sptPphBadanId));
+	const statements: Statement[] = [
+		db
+			.delete(spt_pph_badan_lampiran_6_komponen)
+			.where(eq(spt_pph_badan_lampiran_6_komponen.sptPphBadanId, sptPphBadanId))
+	];
 
 	for (const [kode, nilai] of Object.entries(nilaiByKode)) {
-		await tx.insert(spt_pph_badan_lampiran_6_komponen).values({
-			sptPphBadanId,
-			kode,
-			nama: L6_NAMA[kode],
-			nilai
-		});
+		statements.push(
+			db.insert(spt_pph_badan_lampiran_6_komponen).values({
+				sptPphBadanId,
+				kode,
+				nama: L6_NAMA[kode],
+				nilai
+			})
+		);
 	}
+
+	return statements;
 }

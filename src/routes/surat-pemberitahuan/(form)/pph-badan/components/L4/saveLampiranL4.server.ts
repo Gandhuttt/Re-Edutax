@@ -1,6 +1,5 @@
 import { decimalInput, jsonRows, requiredString } from '$lib/helpers/valibot-schema';
-import { db } from '$lib/server/db';
-import type { Transaction } from '$lib/server/db';
+import { db, type Statement } from '$lib/server/db';
 import {
 	jenis_penghasilan_bukan_objek_pajak_spt_pph_badan,
 	objek_pajak_spt_pph_badan,
@@ -69,42 +68,52 @@ async function getJenisPenghasilanBukanObjekPajakId(kode: string) {
 	return jenisPenghasilan.id;
 }
 
-export async function saveLampiranL4(tx: Transaction, sptPphBadanId: string, input: L4Input) {
-	await tx
-		.delete(spt_pph_badan_lampiran_4_pph_final)
-		.where(eq(spt_pph_badan_lampiran_4_pph_final.sptPphBadanId, sptPphBadanId));
+export async function saveLampiranL4(sptPphBadanId: string, input: L4Input): Promise<Statement[]> {
+	const statements: Statement[] = [
+		db
+			.delete(spt_pph_badan_lampiran_4_pph_final)
+			.where(eq(spt_pph_badan_lampiran_4_pph_final.sptPphBadanId, sptPphBadanId))
+	];
 
 	for (const [index, row] of input.l4a.entries()) {
 		const objekPajakId = await getObjekPajakId(row.objekPajak);
 
-		await tx.insert(spt_pph_badan_lampiran_4_pph_final).values({
-			sptPphBadanId,
-			nomorUrut: index + 1,
-			npwpPemotongPemungutPenyetor: row.npwpPemotongPemungutPenyetor,
-			namaPemotongPemungutPenyetor: row.namaPemotongPemungutPenyetor,
-			objekPajakId,
-			dasarPengenaanPajak: Number(row.dasarPengenaanPajak),
-			tarif: Number(row.tarif),
-			pphFinalTerutang: Number(row.pphFinalTerutang),
-			nomorBuktiPotong: row.nomorBuktiPotong,
-			tanggalBuktiPotong: row.tanggalBuktiPotong,
-			keterangan: row.keterangan
-		});
+		statements.push(
+			db.insert(spt_pph_badan_lampiran_4_pph_final).values({
+				sptPphBadanId,
+				nomorUrut: index + 1,
+				npwpPemotongPemungutPenyetor: row.npwpPemotongPemungutPenyetor,
+				namaPemotongPemungutPenyetor: row.namaPemotongPemungutPenyetor,
+				objekPajakId,
+				dasarPengenaanPajak: Number(row.dasarPengenaanPajak),
+				tarif: Number(row.tarif),
+				pphFinalTerutang: Number(row.pphFinalTerutang),
+				nomorBuktiPotong: row.nomorBuktiPotong,
+				tanggalBuktiPotong: row.tanggalBuktiPotong,
+				keterangan: row.keterangan
+			})
+		);
 	}
 
-	await tx
-		.delete(spt_pph_badan_lampiran_4_bukan_objek_pajak)
-		.where(eq(spt_pph_badan_lampiran_4_bukan_objek_pajak.sptPphBadanId, sptPphBadanId));
+	statements.push(
+		db
+			.delete(spt_pph_badan_lampiran_4_bukan_objek_pajak)
+			.where(eq(spt_pph_badan_lampiran_4_bukan_objek_pajak.sptPphBadanId, sptPphBadanId))
+	);
 
 	for (const [index, row] of input.l4b.entries()) {
 		const jenisPenghasilanId = await getJenisPenghasilanBukanObjekPajakId(row.jenisPenghasilan);
 
-		await tx.insert(spt_pph_badan_lampiran_4_bukan_objek_pajak).values({
-			sptPphBadanId,
-			nomorUrut: index + 1,
-			jenisPenghasilanId,
-			sumberPenghasilan: row.sumberPenghasilan,
-			penghasilanBruto: Number(row.penghasilanBruto)
-		});
+		statements.push(
+			db.insert(spt_pph_badan_lampiran_4_bukan_objek_pajak).values({
+				sptPphBadanId,
+				nomorUrut: index + 1,
+				jenisPenghasilanId,
+				sumberPenghasilan: row.sumberPenghasilan,
+				penghasilanBruto: Number(row.penghasilanBruto)
+			})
+		);
 	}
+
+	return statements;
 }

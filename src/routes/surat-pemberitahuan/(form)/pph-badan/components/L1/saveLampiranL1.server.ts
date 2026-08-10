@@ -1,6 +1,5 @@
 import { decimalInput, jsonRows, requiredString } from '$lib/helpers/valibot-schema';
-import { db } from '$lib/server/db';
-import type { Transaction } from '$lib/server/db';
+import { db, type Statement } from '$lib/server/db';
 import {
 	kode_koreksi_fiskal_spt_pph_badan,
 	spt_pph_badan_lampiran_1_akun,
@@ -36,6 +35,9 @@ export const L1Schema = v.object({
 
 type L1Input = v.InferOutput<typeof L1Schema>;
 
+const labaRugiId = (sptPphBadanId: string, akunId: string) =>
+	`lampiran-1-laba-rugi-${sptPphBadanId}-${akunId}`;
+
 async function getKodePenyesuaianFiskalIds(kodes: string[]) {
 	if (kodes.length === 0) return new Map<string, string>();
 
@@ -61,12 +63,11 @@ async function getKodePenyesuaianFiskalIds(kodes: string[]) {
 }
 
 export async function saveLampiranL1(
-	tx: Transaction,
 	sptPphBadanId: string,
 	sektorUsahaId: string,
 	input: L1Input
-) {
-	const labaRugiTemplate = await tx
+): Promise<{ statements: Statement[]; netoFiskalSebelumFasilitas: number }> {
+	const labaRugiTemplate = await db
 		.select({
 			id: spt_pph_badan_lampiran_1_akun.id,
 			nomorUrut: spt_pph_badan_lampiran_1_akun.nomorUrut,
@@ -80,10 +81,12 @@ export async function saveLampiranL1(
 		.from(spt_pph_badan_lampiran_1_akun)
 		.where(eq(spt_pph_badan_lampiran_1_akun.sektorUsahaId, sektorUsahaId));
 
-	const neracaTemplate = await tx
+	const neracaTemplate = await db
 		.select({ id: spt_pph_badan_lampiran_1_neraca_akun.id, rowType: spt_pph_badan_lampiran_1_neraca_akun.rowType })
 		.from(spt_pph_badan_lampiran_1_neraca_akun)
 		.where(eq(spt_pph_badan_lampiran_1_neraca_akun.sektorUsahaId, sektorUsahaId));
+
+	const statements: Statement[] = [];
 
 	const netoFiskalSebelumFasilitas =
 		computeLabaRugiRows(
@@ -115,31 +118,39 @@ export async function saveLampiranL1(
 			penyesuaianFiskalNegatif: Number(row.penyesuaianFiskalNegatif)
 		};
 
-		const [labaRugiRow] = await tx
-			.insert(spt_pph_badan_lampiran_1_laba_rugi)
-			.values({
-				sptPphBadanId,
-				akunId: row.akunId,
-				...values
-			})
-			.onConflictDoUpdate({
-				target: [spt_pph_badan_lampiran_1_laba_rugi.sptPphBadanId, spt_pph_badan_lampiran_1_laba_rugi.akunId],
-				set: values
-			})
-			.returning({ id: spt_pph_badan_lampiran_1_laba_rugi.id });
+		// D1's batch() can't return generated ids mid-batch, so this uses a deterministic id
+		// (a pure function of sptPphBadanId + akunId) instead of relying on onConflictDoUpdate's
+		// returning() to learn an existing row's id.
+		const id = labaRugiId(sptPphBadanId, row.akunId);
 
-		await tx
-			.delete(spt_pph_badan_lampiran_1_laba_rugi_koreksi_fiskal)
-			.where(eq(spt_pph_badan_lampiran_1_laba_rugi_koreksi_fiskal.labaRugiId, labaRugiRow.id));
+		statements.push(
+			db
+				.insert(spt_pph_badan_lampiran_1_laba_rugi)
+				.values({
+					id,
+					sptPphBadanId,
+					akunId: row.akunId,
+					...values
+				})
+				.onConflictDoUpdate({
+					target: spt_pph_badan_lampiran_1_laba_rugi.id,
+					set: values
+				}),
+			db
+				.delete(spt_pph_badan_lampiran_1_laba_rugi_koreksi_fiskal)
+				.where(eq(spt_pph_badan_lampiran_1_laba_rugi_koreksi_fiskal.labaRugiId, id))
+		);
 
 		const kodeKoreksiFiskalIds = row.kodePenyesuaianFiskal.map((kode) => idByKode.get(kode)!);
 
 		if (kodeKoreksiFiskalIds.length > 0) {
-			await tx.insert(spt_pph_badan_lampiran_1_laba_rugi_koreksi_fiskal).values(
-				kodeKoreksiFiskalIds.map((kodeKoreksiFiskalId) => ({
-					labaRugiId: labaRugiRow.id,
-					kodeKoreksiFiskalId
-				}))
+			statements.push(
+				db.insert(spt_pph_badan_lampiran_1_laba_rugi_koreksi_fiskal).values(
+					kodeKoreksiFiskalIds.map((kodeKoreksiFiskalId) => ({
+						labaRugiId: id,
+						kodeKoreksiFiskalId
+					}))
+				)
 			);
 		}
 	}
@@ -151,18 +162,20 @@ export async function saveLampiranL1(
 
 		const values = { nilai: Number(row.nilai) };
 
-		await tx
-			.insert(spt_pph_badan_lampiran_1_neraca)
-			.values({
-				sptPphBadanId,
-				akunId: row.akunId,
-				...values
-			})
-			.onConflictDoUpdate({
-				target: [spt_pph_badan_lampiran_1_neraca.sptPphBadanId, spt_pph_badan_lampiran_1_neraca.akunId],
-				set: values
-			});
+		statements.push(
+			db
+				.insert(spt_pph_badan_lampiran_1_neraca)
+				.values({
+					sptPphBadanId,
+					akunId: row.akunId,
+					...values
+				})
+				.onConflictDoUpdate({
+					target: [spt_pph_badan_lampiran_1_neraca.sptPphBadanId, spt_pph_badan_lampiran_1_neraca.akunId],
+					set: values
+				})
+		);
 	}
 
-	return netoFiskalSebelumFasilitas;
+	return { statements, netoFiskalSebelumFasilitas };
 }

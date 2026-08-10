@@ -1,5 +1,5 @@
 import { decimalInput } from '$lib/helpers/valibot-schema';
-import type { Transaction } from '$lib/server/db';
+import { db, type Statement } from '$lib/server/db';
 import { spt_pph_badan_lampiran_8_fasilitas_31e } from '$lib/server/db/schema';
 import { eq } from 'drizzle-orm';
 import * as v from 'valibot';
@@ -12,21 +12,20 @@ export const L8Schema = v.object({
 
 type L8Input = v.InferOutput<typeof L8Schema>;
 
-export async function saveLampiranL8(tx: Transaction, sptPphBadanId: string, input: L8Input) {
+export async function saveLampiranL8(sptPphBadanId: string, input: L8Input): Promise<Statement[]> {
 	const jumlahPeredaranBruto = Number(input.l8JumlahPeredaranBruto);
 	const penghasilanKenaPajak = Number(input.l8PenghasilanKenaPajak);
 	const hasil = hitungFasilitas31E(jumlahPeredaranBruto, penghasilanKenaPajak);
 
-	await tx
-		.delete(spt_pph_badan_lampiran_8_fasilitas_31e)
-		.where(eq(spt_pph_badan_lampiran_8_fasilitas_31e.sptPphBadanId, sptPphBadanId));
-
-	await tx.insert(spt_pph_badan_lampiran_8_fasilitas_31e).values({
-		sptPphBadanId,
-		jumlahPeredaranBruto,
-		penghasilanKenaPajak,
-		...hasil
-	});
-
-	return hasil.pphTerutangJumlah;
+	return [
+		db
+			.delete(spt_pph_badan_lampiran_8_fasilitas_31e)
+			.where(eq(spt_pph_badan_lampiran_8_fasilitas_31e.sptPphBadanId, sptPphBadanId)),
+		db.insert(spt_pph_badan_lampiran_8_fasilitas_31e).values({
+			sptPphBadanId,
+			jumlahPeredaranBruto,
+			penghasilanKenaPajak,
+			...hasil
+		})
+	];
 }
