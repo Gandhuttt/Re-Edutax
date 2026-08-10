@@ -27,8 +27,6 @@ vite.config.ts.timestamp-*
 *.db
 .vscode/extensions.json
 
-# Drizzle
-drizzle/
 
 # Test
 src/routes/test/
