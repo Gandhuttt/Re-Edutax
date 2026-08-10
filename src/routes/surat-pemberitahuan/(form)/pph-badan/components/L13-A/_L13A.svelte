@@ -37,29 +37,37 @@
                             <td class="tw:w-[5rem]" rowspan="2">NO.</td>
                             <td class="tw:w-[15rem]" colspan="2">KEPUTUSAN PEMBERIAN FASILITAS</td>
                             <td class="tw:w-[15rem]" colspan="2">KEPUTUSAN PEMANFAATAN FASILITAS</td>
-                            <td class="tw:w-[30rem]" colspan="4">JUMLAH PENANAMAN MODAL YANG DISETUJUI</td>
-                            <td class="tw:w-[10rem]" rowspan="2">BENTUK PENANAMAN MODAL</td>
-                            <td class="tw:w-[10rem]" rowspan="2">DI BIDANG DAN/ATAU DAERAH</td>
-                            <td class="tw:w-[10rem]" rowspan="2">FASILITAS YANG DIBERIKAN</td>
-                            <td class="tw:w-[10rem]" rowspan="2">FASILITAS YANG DIBERIKAN</td>
-                            <td class="tw:w-[10rem]" rowspan="2">AKUMULASI S.D. TAHUN INI</td>
-                            <td class="tw:w-[10rem]" rowspan="2">PADA SAAT MULAI BERPRODUKSI KOMERSIAL</td>
+                            <td class="tw:w-[40rem]" colspan="4">JUMLAH PENANAMAN MODAL YANG DISETUJUI</td>
+                            <td class="tw:w-[15rem]" rowspan="2">BENTUK PENANAMAN MODAL</td>
+                            <td class="tw:w-[15rem]" rowspan="2">DI BIDANG DAN/ATAU DAERAH</td>
+                            <td class="tw:w-[15rem]" rowspan="2">FASILITAS YANG DIBERIKAN</td>
+                            <td class="tw:w-[15rem]" rowspan="2">PERSENTASE PENGURANGAN PENGHASILAN NETO</td>
+                            <td class="tw:w-[15rem]" rowspan="2">PENAMBAHAN JANGKA WAKTU KOMPENSASI KERUGIAN</td>
+                            <td class="tw:w-[15rem]" colspan="2">REALISASI PENANAMAN MODAL</td>
+                            <td class="tw:w-[15rem]" rowspan="2">SAAT MULAI BERPRODUKSI KOMERSIAL</td>
+                            <td class="tw:w-[15rem]" colspan="2">FASILITAS PENGURANGAN PENGHASILAN NETO</td>
                         </tr>
                         <tr class="header tw:bg-[var(--color-primary)] tw:font-bold tw:text-center">
                             <!-- KEPUTUSAN PEMBERIAN FASILITAS -->
-                            <td class="">NO.</td>
-                            <td class="">TANGGAL</td>
+                            <td class="tw:w-[5rem]">NO.</td>
+                            <td class="tw:w-[10rem]">TANGGAL</td>
                             <!-- KEPUTUSAN PEMANFAATAN FAISILITAS -->
-                            <td>NO.</td>
-                            <td>TANGGAL</td>
+                            <td class="tw:w-[5rem]">NO.</td>
+                            <td class="tw:w-[10rem]">TANGGAL</td>
                             <!-- JUMLAH PENANAMAN MODAL YANG DISETUJUI -->
-                            <td>DALAM MATA UANG ASING</td>
-                            <td>EKUIVALEN</td>
-                            <td>DALAM RUPIAH</td>
-                            <td>JUMLAH (Rp)</td>
+                            <td class="tw:w-[10rem]">DALAM MATA UANG ASING</td>
+                            <td class="tw:w-[10rem]">EKUIVALEN</td>
+                            <td class="tw:w-[10rem]">DALAM RUPIAH</td>
+                            <td class="tw:w-[10rem]">JUMLAH (Rp)</td>
+                            <!-- REALISASI PENANAMAN MODAL -->
+                            <td>PENYUSUTAN TAHUN INI</td>
+                            <td>S.D. TAHUN INI</td>
+                            <!-- FASILITAS PENGURANGAN PENGHASILAN NETO -->
+                             <td>TAHUN KE-</td>
+                             <td>JUMLAH (Rp)</td>
                         </tr>
                         {#if true}
-                        <tr class="data tw:text-center"><td colspan="16">Tidak ada data yang ditampilkan</td></tr>
+                        <tr class="data tw:text-center"><td colspan="20">Tidak ada data yang ditampilkan</td></tr>
                         {:else}
                         <tr class="data">
                             <td>tsetaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</td>
@@ -80,6 +88,10 @@
                             <td>tset</td>
                         </tr>
                         {/if}
+                        <tr class="footer tw:bg-(--color-primary) tw:font-bold tw:text-right">
+                            <td colspan="19">JUMLAH FASILITAS PENGURANGAN PENGHASILAN NETO</td>
+                            <td>0</td>
+                        </tr>
                     {/snippet}
                 </Table>
             </div>
@@ -89,7 +101,7 @@
 </div>
 
 <style>
-.header td{
+.header td, .footer td{
     border: 1px solid white;
 }
 
