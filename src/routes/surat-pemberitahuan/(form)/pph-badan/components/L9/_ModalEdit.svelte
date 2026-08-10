@@ -54,11 +54,11 @@
                 </Label>
                 <Label class={"tw:flex! tw:flex-row tw:w-full tw:items-center"}>
                     <span class="tw:block tw:w-[20rem]">Biaya Perolehan *</span>
-                    <InputGroup class={"tw:flex-1 tw:text-right"} type={"number"} bind:value={data.hargaPerolehan} disabled={readonly}>Rp.</InputGroup>
+                    <InputGroup class={"tw:flex-1 tw:text-right"} type={"rupiah"} bind:value={data.hargaPerolehan} disabled={readonly}>Rp.</InputGroup>
                 </Label>
                 <Label class={"tw:flex! tw:flex-row tw:w-full tw:items-center"}>
                     <span class="tw:block tw:w-[20rem]">Nilai Sisa Buku Fiskal Pada Awal Tahun</span>
-                    <InputGroup class={"tw:flex-1 tw:text-right"} type={"number"} bind:value={data.nilaiSisaBukuFiskalAwalTahun} disabled={readonly}>Rp.</InputGroup>
+                    <InputGroup class={"tw:flex-1 tw:text-right"} type={"rupiah"} bind:value={data.nilaiSisaBukuFiskalAwalTahun} disabled={readonly}>Rp.</InputGroup>
                 </Label>
                 <Label class={"tw:flex! tw:flex-row tw:w-full tw:items-center"}>
                     <span class="tw:block tw:w-[20rem]">Metode Penyusutan/Amortisasi</span>
@@ -85,19 +85,19 @@
                 </Label>
                 <Label class={"tw:flex! tw:flex-row tw:w-full tw:items-center"}>
                     <span class="tw:block tw:w-[20rem]">Penyusutan/Amortisasi Fiskal Tahun Ini</span>
-                    <InputGroup class={"tw:flex-1 tw:text-right"} type={"number"} bind:value={data.penyusutanAmortisasiFiskalTahunIni} disabled={readonly}>Rp.</InputGroup>
+                    <InputGroup class={"tw:flex-1 tw:text-right"} type={"rupiah"} bind:value={data.penyusutanAmortisasiFiskalTahunIni} disabled={readonly}>Rp.</InputGroup>
                 </Label>
                 <Label class={"tw:flex! tw:flex-row tw:w-full tw:items-center"}>
                     <span class="tw:block tw:w-[20rem]">Penyusutan/Amortisasi Komersial Tahun Ini</span>
-                    <InputGroup class={"tw:flex-1 tw:text-right"} type={"number"} bind:value={data.penyusutanAmortisasiKomersialTahunIni} disabled={readonly}>Rp.</InputGroup>
+                    <InputGroup class={"tw:flex-1 tw:text-right"} type={"rupiah"} bind:value={data.penyusutanAmortisasiKomersialTahunIni} disabled={readonly}>Rp.</InputGroup>
                 </Label>
                 <Label class={"tw:flex! tw:flex-row tw:w-full tw:items-center"}>
                     <span class="tw:block tw:w-[20rem]">Akumulasi Penyusutan/Amortisasi Fiskal</span>
-                    <InputGroup class={"tw:flex-1 tw:text-right"} type={"number"} bind:value={data.akumulasiPenyusutanAmortisasiFiskal} disabled={readonly}>Rp.</InputGroup>
+                    <InputGroup class={"tw:flex-1 tw:text-right"} type={"rupiah"} bind:value={data.akumulasiPenyusutanAmortisasiFiskal} disabled={readonly}>Rp.</InputGroup>
                 </Label>
                 <Label class={"tw:flex! tw:flex-row tw:w-full tw:items-center"}>
                     <span class="tw:block tw:w-[20rem]">Nilai Sisa Buku Fiskal Pada Akhir Tahun</span>
-                    <InputGroup class={"tw:flex-1 tw:text-right"} type={"number"} bind:value={data.nilaiSisaBukuFiskalAkhirTahun} disabled={readonly}>Rp.</InputGroup>
+                    <InputGroup class={"tw:flex-1 tw:text-right"} type={"rupiah"} bind:value={data.nilaiSisaBukuFiskalAkhirTahun} disabled={readonly}>Rp.</InputGroup>
                 </Label>
                 <Label class={"tw:flex! tw:flex-row tw:w-full tw:items-center"}>
                     <span class="tw:block tw:w-[20rem]">Keterangan</span>

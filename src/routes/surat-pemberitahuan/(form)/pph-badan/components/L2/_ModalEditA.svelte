@@ -1,4 +1,6 @@
 <script lang="ts">
+    import { applyRupiahInput, formatRupiah } from '$lib/helpers/rupiahInput';
+
     let {
         data = $bindable() as {
             id: string | number;
@@ -78,7 +80,14 @@
             <label for="nilaiModal" style="width: 200px;">Nilai (Rp) Modal Disetor *</label>
             <div style="flex: 1; display: flex; align-items: center;">
               <span style="margin-right: 5px;">Rp.</span>
-              <input type="number" id="nilaiModal" bind:value={data.nilaiModal} style="flex: 1; text-align: right;" />
+              <input
+                type="text"
+                inputmode="numeric"
+                id="nilaiModal"
+                value={formatRupiah(data.nilaiModal)}
+                oninput={(e) => (data.nilaiModal = applyRupiahInput(e))}
+                style="flex: 1; text-align: right;"
+              />
             </div>
           </div>
           <div style="display: flex; align-items: center;">
@@ -92,7 +101,14 @@
             <label for="dividen" style="width: 200px;">Dividen/Pembagian Laba</label>
             <div style="flex: 1; display: flex; align-items: center;">
               <span style="margin-right: 5px;">Rp.</span>
-              <input type="number" id="dividen" bind:value={data.dividen} style="flex: 1; text-align: right;" />
+              <input
+                type="text"
+                inputmode="numeric"
+                id="dividen"
+                value={formatRupiah(data.dividen)}
+                oninput={(e) => (data.dividen = applyRupiahInput(e))}
+                style="flex: 1; text-align: right;"
+              />
             </div>
           </div>
         </div>

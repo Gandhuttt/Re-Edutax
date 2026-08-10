@@ -1,4 +1,6 @@
 <script lang="ts">
+    import { applyRupiahInput, formatRupiah } from '$lib/helpers/rupiahInput';
+
     let {
         data = $bindable() as {
             id: string | number;
@@ -58,7 +60,14 @@
             <label for="penghasilanBruto" style="width: 260px;">Penghasilan Bruto *</label>
             <div style="flex: 1; display: flex; align-items: center;">
               <span style="margin-right: 5px;">Rp.</span>
-              <input type="number" id="penghasilanBruto" bind:value={data.penghasilanBruto} style="flex: 1; text-align: right;" />
+              <input
+                type="text"
+                inputmode="numeric"
+                id="penghasilanBruto"
+                value={formatRupiah(data.penghasilanBruto)}
+                oninput={(e) => (data.penghasilanBruto = applyRupiahInput(e))}
+                style="flex: 1; text-align: right;"
+              />
             </div>
           </div>
         </div>

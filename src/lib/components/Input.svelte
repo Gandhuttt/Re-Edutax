@@ -1,5 +1,8 @@
 <script lang="ts">
 	import type { HTMLInputAttributes } from 'svelte/elements';
+	import { applyRupiahInput, formatRupiah } from '$lib/helpers/rupiahInput';
+
+	type Props = Omit<HTMLInputAttributes, 'type'> & { type?: HTMLInputAttributes['type'] | 'rupiah' };
 
 	let {
 		value = $bindable(),
@@ -7,13 +10,25 @@
 		checked = $bindable(),
 		type,
 		...restProps
-	}: HTMLInputAttributes = $props();
+	}: Props = $props();
 </script>
 
 {#if type === 'checkbox'}
 	<input type="checkbox" bind:checked {...restProps} />
 {:else if type === 'radio'}
 	<input type="radio" {value} checked={Boolean(checked)} {...restProps} />
+{:else if type === 'rupiah'}
+	{@const { oninput: consumerOninput, ...rupiahRestProps } = restProps as HTMLInputAttributes}
+	<input
+		type="text"
+		inputmode="numeric"
+		value={formatRupiah(value as number | undefined)}
+		oninput={(e) => {
+			value = applyRupiahInput(e);
+			consumerOninput?.(e);
+		}}
+		{...rupiahRestProps}
+	/>
 {:else}
 	<input {type} bind:value {...restProps} />
 {/if}

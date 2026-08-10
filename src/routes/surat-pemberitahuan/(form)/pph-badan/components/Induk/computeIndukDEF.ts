@@ -33,14 +33,26 @@ export interface ComputeIndukDEFInput {
 	f17bJumlahDiangsurDitunda: number;
 }
 
-export function computeIndukDEF(input: ComputeIndukDEFInput) {
-	const d4 = input.netoFiskalSebelumFasilitas;
+export interface ComputePenghasilanKenaPajakInput {
+	netoFiskalSebelumFasilitas: number;
+	d6FasilitasBrutoVokasi: boolean;
+	l13bBNilai: number[];
+	d8AdaKompensasiKerugian: boolean;
+	l7KompensasiTahunIni: number[];
+}
 
+export function computePenghasilanKenaPajak(input: ComputePenghasilanKenaPajakInput) {
+	const d4 = input.netoFiskalSebelumFasilitas;
 	const d6Amt = input.d6FasilitasBrutoVokasi ? sum(input.l13bBNilai) : 0;
 	const d7 = d4 - d6Amt;
-
 	const d8Amt = input.d8AdaKompensasiKerugian ? sum(input.l7KompensasiTahunIni) : 0;
-	const litbangCapBase = d7 - d8Amt;
+	const d9 = Math.floor((d7 - d8Amt) / 1000) * 1000;
+
+	return { d4, d6Amt, d7, d8Amt, d9 };
+}
+
+export function computeIndukDEF(input: ComputeIndukDEFInput) {
+	const { d4, d6Amt, d7, d8Amt, d9: litbangCapBase } = computePenghasilanKenaPajak(input);
 
 	const jumlahTambahanPengurangLitbang = sum(
 		input.l13bC.map((row) => Math.round((row.jumlahBiaya * row.persentaseFasilitasPajak) / 100))
@@ -49,9 +61,17 @@ export function computeIndukDEF(input: ComputeIndukDEFInput) {
 	const dapatDibebankanTahunIni = Math.max(0, Math.min(belumTermanfaatkanTahunIni, 0.4 * litbangCapBase));
 	const d10Amt = input.d10FasilitasBrutoLitbang ? dapatDibebankanTahunIni : 0;
 
-	const d9 = d7 - d8Amt - d10Amt;
+	const d9 = litbangCapBase;
 
-	const d12 = computeD12(input.tarifPajak, d9, input.persentaseTarifLainnya, input.l8JumlahPeredaranBruto, input.l8PenghasilanKenaPajak);
+	const d9SetelahLitbang = d9 - d10Amt;
+
+	const d12 = computeD12(
+		input.tarifPajak,
+		d9SetelahLitbang,
+		input.persentaseTarifLainnya,
+		input.l8JumlahPeredaranBruto,
+		input.l8PenghasilanKenaPajak - d10Amt
+	);
 
 	const e13Amt = input.e13AdaKreditPajakLuarNegeri
 		? sum(input.l3aKreditPajak) + sum(input.l3bPph)

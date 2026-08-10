@@ -112,7 +112,7 @@
     </div>
     <div class="tw:flex tw:flex-row tw:items-center">
         <span class="tw:block tw:w-[50rem] tw:font-medium">JUMLAH PENYUSUTAN KOMERSIAL</span>
-        <InputGroup divClass={"tw:flex-0! tw:basis-[30rem]! tw:shrink!"} class={"tw:text-right"} type={"number"} bind:value={jumlahPenyusutanKomersial} disabled={readonly}>Rp.</InputGroup>
+        <InputGroup divClass={"tw:flex-0! tw:basis-[30rem]! tw:shrink!"} class={"tw:text-right"} type={"rupiah"} bind:value={jumlahPenyusutanKomersial} disabled={readonly}>Rp.</InputGroup>
     </div>
     <div class="tw:flex tw:flex-row tw:items-center">
         <span class="tw:block tw:w-[50rem] tw:font-medium">SELISIH PENYUSUTAN</span>

@@ -1,6 +1,7 @@
 <script lang="ts">
     import Table from "$lib/components/Table.svelte";
     import Button from "$lib/components/Button.svelte";
+    import { applyRupiahInput, formatRupiah } from '$lib/helpers/rupiahInput';
 
     const bulanNames = [
         'JANUARI', 'FEBRUARI', 'MARET', 'APRIL', 'MEI', 'JUNI',
@@ -106,8 +107,10 @@
                 {#each dipotongBulanan as item}
                     <td>
                         <input
-                            type="number"
-                            bind:value={item.nilai}
+                            type="text"
+                            inputmode="numeric"
+                            value={formatRupiah(item.nilai)}
+                            oninput={(e) => (item.nilai = applyRupiahInput(e))}
                             class="tw:w-full tw:text-right tw:bg-transparent"
                         />
                     </td>

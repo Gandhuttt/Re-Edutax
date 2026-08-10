@@ -66,7 +66,7 @@
                         </Label>
                     </div>
                 </td>
-                <td><Input class={"tw:text-end"} type={"number"} bind:value={f17bJumlahDiangsurDitunda} disabled={readonly || !f17bAdaSkPengangsuranPenundaan}/></td>
+                <td><Input class={"tw:text-end"} type={"rupiah"} bind:value={f17bJumlahDiangsurDitunda} disabled={readonly || !f17bAdaSkPengangsuranPenundaan}/></td>
                 <td>
                 {#if f17bAdaSkPengangsuranPenundaan != undefined}
                     <Alert bg={"var(--color-primary)"}>

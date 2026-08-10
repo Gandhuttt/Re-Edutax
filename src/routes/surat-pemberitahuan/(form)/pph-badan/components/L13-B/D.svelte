@@ -35,7 +35,7 @@
     </Label>
     <Label class={"tw:flex! tw:flex-row tw:w-full tw:items-center"}>
         <span class="tw:flex tw:w-full tw:text-sm">2. JUMLAH TAMBAHAN PENGURANGAN PENGHASILAN BRUTO PENELITIAN DAN PENGEMBANGAN YANG TERMANFAATKAN TAHUN-TAHUN SEBELUMNYA</span>
-        <InputGroup class={"tw:w-[25rem]! tw:text-right"} type={"number"} bind:value={termanfaatkanTahunSebelumnya} disabled={readonly}>Rp.</InputGroup>
+        <InputGroup class={"tw:w-[25rem]! tw:text-right"} type={"rupiah"} bind:value={termanfaatkanTahunSebelumnya} disabled={readonly}>Rp.</InputGroup>
     </Label>
     <Label class={"tw:flex! tw:flex-row tw:w-full tw:items-center"}>
         <span class="tw:flex tw:w-full tw:text-sm">3. JUMLAH TAMBAHAN PENGURANGAN PENGHASILAN BRUTO PENELITIAN DAN PENGEMBANGAN YANG BELUM TERMANFAATKAN TAHUN INI</span>

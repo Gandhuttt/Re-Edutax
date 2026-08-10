@@ -1,4 +1,6 @@
 <script lang="ts">
+    import { applyRupiahInput, formatRupiah } from '$lib/helpers/rupiahInput';
+
     let {
         data = $bindable() as {
             id: string | number;
@@ -85,14 +87,28 @@
             <label for="penghasilanNeto" style="width: 220px;">Penghasilan Neto *</label>
             <div style="flex: 1; display: flex; align-items: center;">
               <span style="margin-right: 5px;">Rp.</span>
-              <input type="number" id="penghasilanNeto" bind:value={data.penghasilanNeto} style="flex: 1; text-align: right;" />
+              <input
+                type="text"
+                inputmode="numeric"
+                id="penghasilanNeto"
+                value={formatRupiah(data.penghasilanNeto)}
+                oninput={(e) => (data.penghasilanNeto = applyRupiahInput(e))}
+                style="flex: 1; text-align: right;"
+              />
             </div>
           </div>
           <div style="display: flex; align-items: center;">
             <label for="pphLuarNegeri" style="width: 220px;">PPh Terutang/Dibayar/Dipotong di Luar Negeri *</label>
             <div style="flex: 1; display: flex; align-items: center;">
               <span style="margin-right: 5px;">Rp.</span>
-              <input type="number" id="pphLuarNegeri" bind:value={data.pphLuarNegeri} style="flex: 1; text-align: right;" />
+              <input
+                type="text"
+                inputmode="numeric"
+                id="pphLuarNegeri"
+                value={formatRupiah(data.pphLuarNegeri)}
+                oninput={(e) => (data.pphLuarNegeri = applyRupiahInput(e))}
+                style="flex: 1; text-align: right;"
+              />
             </div>
           </div>
           <div style="display: flex; align-items: center;">
@@ -107,14 +123,28 @@
           <div style="display: flex; align-items: center;">
             <label for="pphLuarNegeriMataUangAsing" style="width: 220px;">PPh yang Dibayar/Dipotong/Terutang di Luar Negeri dalam Mata Uang Asing *</label>
             <div style="flex: 1; display: flex; align-items: center;">
-              <input type="number" id="pphLuarNegeriMataUangAsing" bind:value={data.pphLuarNegeriMataUangAsing} style="flex: 1; text-align: right;" />
+              <input
+                type="text"
+                inputmode="numeric"
+                id="pphLuarNegeriMataUangAsing"
+                value={formatRupiah(data.pphLuarNegeriMataUangAsing)}
+                oninput={(e) => (data.pphLuarNegeriMataUangAsing = applyRupiahInput(e))}
+                style="flex: 1; text-align: right;"
+              />
             </div>
           </div>
           <div style="display: flex; align-items: center;">
             <label for="kreditPajakYangDapatDikreditkan" style="width: 220px;">Kredit Pajak yang Dapat Diperhitungkan *</label>
             <div style="flex: 1; display: flex; align-items: center;">
               <span style="margin-right: 5px;">Rp.</span>
-              <input type="number" id="kreditPajakYangDapatDikreditkan" bind:value={data.kreditPajakYangDapatDikreditkan} style="flex: 1; text-align: right;" />
+              <input
+                type="text"
+                inputmode="numeric"
+                id="kreditPajakYangDapatDikreditkan"
+                value={formatRupiah(data.kreditPajakYangDapatDikreditkan)}
+                oninput={(e) => (data.kreditPajakYangDapatDikreditkan = applyRupiahInput(e))}
+                style="flex: 1; text-align: right;"
+              />
             </div>
           </div>
           <div style="display: flex; align-items: center;">

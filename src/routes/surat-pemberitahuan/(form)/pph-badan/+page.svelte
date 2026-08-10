@@ -43,7 +43,7 @@
 	import { getJenisPenghasilanBukanObjekPajak } from './components/L4/getJenisPenghasilanBukanObjekPajak.remote';
 	import { hitungFasilitas31E } from './components/L8/fasilitas31e';
 	import { computeLabaRugiRows } from './components/L1/labaRugiRollup';
-	import { computeIndukDEF } from './components/Induk/computeIndukDEF';
+	import { computeIndukDEF, computePenghasilanKenaPajak } from './components/Induk/computeIndukDEF';
 	import { getJenisHarta } from './components/L9/getJenisHarta.remote';
 	import { getMetodePenyusutan } from './components/L9/getMetodePenyusutan.remote';
 	import { getBentukHubungan } from './components/L10-A/getBentukHubungan.remote';
@@ -364,21 +364,9 @@
 		l7.reduce((sum, row) => sum + Number(row.kompensasiTahunIni || 0), 0)
 	);
 
-	let l6PenghasilanKenaPajak = $derived(Number(l6DasarAngsuran || 0) - Number(l6KompensasiKerugian || 0));
-
-	let l8PenghasilanKenaPajak = $derived(l6PenghasilanKenaPajak);
-
-	let l8Hasil = $derived(hitungFasilitas31E(Number(l8JumlahPeredaranBruto || 0), Number(l8PenghasilanKenaPajak || 0)));
-
 	$effect(() => {
 		if (!l6KompensasiKerugianTouched) {
 			l6KompensasiKerugian = l6KompensasiKerugianAuto;
-		}
-	});
-
-	$effect(() => {
-		if (!l6PphTerutangTouched) {
-			l6PphTerutang = l8Hasil.pphTerutangJumlah;
 		}
 	});
 
@@ -418,6 +406,26 @@
 			}))
 		);
 		return rows.find((row) => row.kode === '4800')?.nilaiFiskal ?? 0;
+	});
+
+	let d9Live = $derived(
+		computePenghasilanKenaPajak({
+			netoFiskalSebelumFasilitas: d4Live,
+			d6FasilitasBrutoVokasi,
+			l13bBNilai: l13bB.map((row) => Number(row.nilai)),
+			d8AdaKompensasiKerugian,
+			l7KompensasiTahunIni: l7.map((row) => Number(row.kompensasiTahunIni))
+		}).d9
+	);
+
+	let l8PenghasilanKenaPajak = $derived(d9Live);
+
+	let l8Hasil = $derived(hitungFasilitas31E(Number(l8JumlahPeredaranBruto || 0), Number(l8PenghasilanKenaPajak || 0)));
+
+	$effect(() => {
+		if (!l6PphTerutangTouched) {
+			l6PphTerutang = l8Hasil.pphTerutangJumlah;
+		}
 	});
 
 	let indukDEF = $derived(

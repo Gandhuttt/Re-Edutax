@@ -33,7 +33,7 @@
         <tr class="data">
             <td class="tw:text-center">{index + 1}</td>
             <td>{kegiatan.nama}</td>
-            <td><Input class={"tw:text-right"} type={"number"} bind:value={kegiatan.nilai} disabled={readonly}/></td>
+            <td><Input class={"tw:text-right"} type={"rupiah"} bind:value={kegiatan.nilai} disabled={readonly}/></td>
         </tr>
         {/each}
         <tr class="footer tw:bg-[var(--color-primary)] tw:font-bold tw:text-right">

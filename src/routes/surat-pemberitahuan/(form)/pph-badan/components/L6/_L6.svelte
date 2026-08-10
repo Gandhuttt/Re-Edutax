@@ -48,7 +48,7 @@
                     <span class="tw:block tw:w-[75rem]">1. PENHGASILAN YANG MENJADI DASAR PENGHITUNGAN ANGSURAN</span>
                     <div class="tw:flex tw:flex-row tw:items-center">
                         <span class="tw:flex tw:items-center tw:bg-(--color-disabled) tw:h-[2.5rem] tw:px-3 tw:rounded-s-sm tw:border-1 tw:border-(--color-input-secondary)">Rp.</span>
-                        <Input class={"tw:w-[20rem]! tw:border-s-0 tw:rounded-s-none! tw:text-right"} type={"number"} bind:value={dasarAngsuran} disabled={readonly}/>
+                        <Input class={"tw:w-[20rem]! tw:border-s-0 tw:rounded-s-none! tw:text-right"} type={"rupiah"} bind:value={dasarAngsuran} disabled={readonly}/>
                     </div>
                 </div>
                 <div class="tw:flex tw:flex-row tw:items-center tw:gap-5 tw:p-1 tw:border-b-1 tw:border-(--color-disabled)">
@@ -57,7 +57,7 @@
                         <span class="tw:flex tw:items-center tw:bg-(--color-disabled) tw:h-[2.5rem] tw:px-3 tw:rounded-s-sm tw:border-1 tw:border-(--color-input-secondary)">Rp.</span>
                         <Input
                             class={"tw:w-[20rem]! tw:border-s-0 tw:rounded-s-none! tw:text-right"}
-                            type={"number"}
+                            type={"rupiah"}
                             bind:value={kompensasiKerugian}
                             disabled={readonly}
                             oninput={() => onKompensasiKerugianEdit?.()}
@@ -77,7 +77,7 @@
                         <span class="tw:flex tw:items-center tw:bg-(--color-disabled) tw:h-[2.5rem] tw:px-3 tw:rounded-s-sm tw:border-1 tw:border-(--color-input-secondary)">Rp.</span>
                         <Input
                             class={"tw:w-[20rem]! tw:border-s-0 tw:rounded-s-none! tw:text-right"}
-                            type={"number"}
+                            type={"rupiah"}
                             bind:value={pphTerutang}
                             disabled={readonly}
                             oninput={() => onPphTerutangEdit?.()}
@@ -88,7 +88,7 @@
                     <span class="tw:block tw:w-[75rem]">5. KREDIT PAJAK TAHUN PAJAK YANG LALU ATAS PENGHASILAN YANG TERMAUSK DALAM ANGKA 1 YANG DIPOTONG/DIPUNGUT PIHAK LAIN</span>
                     <div class="tw:flex tw:flex-row tw:items-center">
                         <span class="tw:flex tw:items-center tw:bg-(--color-disabled) tw:h-[2.5rem] tw:px-3 tw:rounded-s-sm tw:border-1 tw:border-(--color-input-secondary)">Rp.</span>
-                        <Input class={"tw:w-[20rem]! tw:border-s-0 tw:rounded-s-none! tw:text-right"} type={"number"} bind:value={kreditPajakTahunLalu} disabled={readonly}/>
+                        <Input class={"tw:w-[20rem]! tw:border-s-0 tw:rounded-s-none! tw:text-right"} type={"rupiah"} bind:value={kreditPajakTahunLalu} disabled={readonly}/>
                     </div>
                 </div>
                 <div class="tw:flex tw:flex-row tw:items-center tw:gap-5 tw:p-1 tw:border-b-1 tw:border-(--color-disabled)">

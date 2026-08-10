@@ -1,5 +1,6 @@
 <script lang="ts">
 	import CheckableSelect from '$lib/components/CheckableSelect.svelte';
+	import { applyRupiahInput, formatRupiah } from '$lib/helpers/rupiahInput';
 
 	let {
 		data = $bindable() as {
@@ -52,19 +53,11 @@
 		saveItem();
 	}
 
-	function formatRupiah(value: number | undefined): string {
-		return value ? value.toLocaleString('id-ID') : '';
-	}
-
 	function handleRupiahInput(
 		e: Event,
 		field: 'nilaiKomersial' | 'nonObjekPajak' | 'dikenakanPphFinal' | 'penyesuaianFiskalPositif' | 'penyesuaianFiskalNegatif'
 	): void {
-		const target = e.target as HTMLInputElement;
-		const digits = target.value.replace(/\D/g, '');
-		const num = digits ? Number(digits) : 0;
-		data[field] = num;
-		target.value = formatRupiah(num);
+		data[field] = applyRupiahInput(e);
 	}
 </script>
 

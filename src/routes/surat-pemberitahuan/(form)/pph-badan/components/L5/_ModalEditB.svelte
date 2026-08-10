@@ -1,4 +1,6 @@
 <script lang="ts">
+    import { applyRupiahInput, formatRupiah } from '$lib/helpers/rupiahInput';
+
     const bulanNames = [
         'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
         'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
@@ -55,7 +57,13 @@
               <tr>
                 <td>{bulanNames[item.bulan - 1]}</td>
                 <td>
-                  <input type="number" bind:value={item.jumlahPeredaranBruto} class="tw:w-full tw:text-right" />
+                  <input
+                    type="text"
+                    inputmode="numeric"
+                    value={formatRupiah(item.jumlahPeredaranBruto)}
+                    oninput={(e) => (item.jumlahPeredaranBruto = applyRupiahInput(e))}
+                    class="tw:w-full tw:text-right"
+                  />
                 </td>
               </tr>
             {/each}

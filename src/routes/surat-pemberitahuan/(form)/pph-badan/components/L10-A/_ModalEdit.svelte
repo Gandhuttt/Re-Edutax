@@ -78,7 +78,7 @@
                 </Label>
                 <Label class={"tw:flex! tw:flex-row tw:w-full tw:items-center"}>
                     <span class="tw:block tw:w-[20rem]">Nilai Transaksi *</span>
-                    <InputGroup class={"tw:flex-1 tw:text-right"} type={"number"} bind:value={data.nilaiTransaksi} disabled={readonly}>Rp.</InputGroup>
+                    <InputGroup class={"tw:flex-1 tw:text-right"} type={"rupiah"} bind:value={data.nilaiTransaksi} disabled={readonly}>Rp.</InputGroup>
                 </Label>
                 <Label class={"tw:flex! tw:flex-row tw:w-full tw:items-center"}>
                     <span class="tw:block tw:w-[20rem]">Metode Penentuan Harga Transfer yang Digunakan *</span>

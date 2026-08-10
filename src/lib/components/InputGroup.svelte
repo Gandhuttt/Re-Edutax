@@ -1,17 +1,33 @@
 <script lang="ts">
     import type { Snippet } from "svelte";
     import type { HTMLInputAttributes } from "svelte/elements";
+    import { applyRupiahInput, formatRupiah } from '$lib/helpers/rupiahInput';
 
     interface Props {
         children: Snippet;
         divClass?: string;
     }
-    let { children, divClass, value = $bindable(), ...restProps }: Props & HTMLInputAttributes = $props()
+    type InputGroupProps = Props & Omit<HTMLInputAttributes, 'type'> & { type?: HTMLInputAttributes['type'] | 'rupiah' };
+    let { children, divClass, value = $bindable(), type, ...restProps }: InputGroupProps = $props()
 </script>
 
 <div class={divClass}>
     <span>{@render children()}</span>
-    <input bind:value {...restProps}/>
+    {#if type === 'rupiah'}
+        {@const { oninput: consumerOninput, ...rupiahRestProps } = restProps as HTMLInputAttributes}
+        <input
+            type="text"
+            inputmode="numeric"
+            value={formatRupiah(value as number | undefined)}
+            oninput={(e) => {
+                value = applyRupiahInput(e);
+                consumerOninput?.(e);
+            }}
+            {...rupiahRestProps}
+        />
+    {:else}
+        <input {type} bind:value {...restProps}/>
+    {/if}
 </div>
 
 <style>

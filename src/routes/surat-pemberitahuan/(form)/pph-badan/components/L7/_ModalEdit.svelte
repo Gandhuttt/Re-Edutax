@@ -44,31 +44,31 @@
                 </Label>
                 <Label class={"tw:w-full"}>
                     <span>LABA (RUGI) NETTO FISKAL</span>
-                    <InputGroup class={"tw:text-right"} type={"number"} bind:value={data.labaRugiNetoFiskal} disabled={readonly}>Rp.</InputGroup>
+                    <InputGroup class={"tw:text-right"} type={"rupiah"} bind:value={data.labaRugiNetoFiskal} disabled={readonly}>Rp.</InputGroup>
                 </Label>
                 <Label class={"tw:w-full"}>
                     <span>KOMPENSASI KERUGIAN FISKAL Y-4</span>
-                    <InputGroup class={"tw:text-right"} type={"number"} bind:value={data.kompensasiYMin4} disabled={readonly}>Rp.</InputGroup>
+                    <InputGroup class={"tw:text-right"} type={"rupiah"} bind:value={data.kompensasiYMin4} disabled={readonly}>Rp.</InputGroup>
                 </Label>
                 <Label class={"tw:w-full"}>
                     <span>KOMPENSASI KERUGIAN FISKAL Y-3</span>
-                    <InputGroup class={"tw:text-right"} type={"number"} bind:value={data.kompensasiYMin3} disabled={readonly}>Rp.</InputGroup>
+                    <InputGroup class={"tw:text-right"} type={"rupiah"} bind:value={data.kompensasiYMin3} disabled={readonly}>Rp.</InputGroup>
                 </Label>
                 <Label class={"tw:w-full"}>
                     <span>KOMPENSASI KERUGIAN FISKAL Y-2</span>
-                    <InputGroup class={"tw:text-right"} type={"number"} bind:value={data.kompensasiYMin2} disabled={readonly}>Rp.</InputGroup>
+                    <InputGroup class={"tw:text-right"} type={"rupiah"} bind:value={data.kompensasiYMin2} disabled={readonly}>Rp.</InputGroup>
                 </Label>
                 <Label class={"tw:w-full"}>
                     <span>KOMPENSASI KERUGIAN FISKAL Y-1</span>
-                    <InputGroup class={"tw:text-right"} type={"number"} bind:value={data.kompensasiYMin1} disabled={readonly}>Rp.</InputGroup>
+                    <InputGroup class={"tw:text-right"} type={"rupiah"} bind:value={data.kompensasiYMin1} disabled={readonly}>Rp.</InputGroup>
                 </Label>
                 <Label class={"tw:w-full"}>
                     <span>KOMPENSASI KERUGIAN FISKAL TAHUN PAJAK INI</span>
-                    <InputGroup class={"tw:text-right"} type={"number"} bind:value={data.kompensasiTahunIni} disabled={readonly}>Rp.</InputGroup>
+                    <InputGroup class={"tw:text-right"} type={"rupiah"} bind:value={data.kompensasiTahunIni} disabled={readonly}>Rp.</InputGroup>
                 </Label>
                 <Label class={"tw:w-full"}>
                     <span>KOMPENSASI KERUGIAN FISKAL Y+1</span>
-                    <InputGroup class={"tw:text-right"} type={"number"} bind:value={data.kompensasiYPlus1} disabled={readonly}>Rp.</InputGroup>
+                    <InputGroup class={"tw:text-right"} type={"rupiah"} bind:value={data.kompensasiYPlus1} disabled={readonly}>Rp.</InputGroup>
                 </Label>
             </div>
         </div>

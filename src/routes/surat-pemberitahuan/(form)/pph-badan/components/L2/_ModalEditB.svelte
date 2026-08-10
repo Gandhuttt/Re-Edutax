@@ -1,4 +1,6 @@
 <script lang="ts">
+    import { applyRupiahInput, formatRupiah } from '$lib/helpers/rupiahInput';
+
     let {
         data = $bindable() as {
             id: string | number;
@@ -74,7 +76,14 @@
             <label for="modalNilai" style="width: 200px;">Penyertaan Modal</label>
             <div style="flex: 1; display: flex; align-items: center;">
               <span style="margin-right: 5px;">Rp.</span>
-              <input type="number" id="modalNilai" bind:value={data.modalNilai} style="flex: 1; text-align: right;" />
+              <input
+                type="text"
+                inputmode="numeric"
+                id="modalNilai"
+                value={formatRupiah(data.modalNilai)}
+                oninput={(e) => (data.modalNilai = applyRupiahInput(e))}
+                style="flex: 1; text-align: right;"
+              />
             </div>
           </div>
           <div style="display: flex; align-items: center;">
@@ -88,7 +97,14 @@
             <label for="utangNilai" style="width: 200px;">Utang</label>
             <div style="flex: 1; display: flex; align-items: center;">
               <span style="margin-right: 5px;">Rp.</span>
-              <input type="number" id="utangNilai" bind:value={data.utangNilai} style="flex: 1; text-align: right;" />
+              <input
+                type="text"
+                inputmode="numeric"
+                id="utangNilai"
+                value={formatRupiah(data.utangNilai)}
+                oninput={(e) => (data.utangNilai = applyRupiahInput(e))}
+                style="flex: 1; text-align: right;"
+              />
             </div>
           </div>
           <div style="display: flex; align-items: center;">
@@ -106,7 +122,14 @@
             <label for="piutangNilai" style="width: 200px;">Piutang</label>
             <div style="flex: 1; display: flex; align-items: center;">
               <span style="margin-right: 5px;">Rp.</span>
-              <input type="number" id="piutangNilai" bind:value={data.piutangNilai} style="flex: 1; text-align: right;" />
+              <input
+                type="text"
+                inputmode="numeric"
+                id="piutangNilai"
+                value={formatRupiah(data.piutangNilai)}
+                oninput={(e) => (data.piutangNilai = applyRupiahInput(e))}
+                style="flex: 1; text-align: right;"
+              />
             </div>
           </div>
           <div style="display: flex; align-items: center;">

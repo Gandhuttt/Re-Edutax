@@ -1,5 +1,6 @@
 <script lang="ts">
 	import Table from '$lib/components/Table.svelte';
+	import { applyRupiahInput } from '$lib/helpers/rupiahInput';
 	import { computeNeracaRows, type NeracaAkunTemplate, type NeracaComputedRow } from './neracaRollup';
 
 	interface NeracaLeaf {
@@ -43,14 +44,10 @@
 	}
 
 	function handleNeracaInput(e: Event, akunId: string): void {
-		const target = e.target as HTMLInputElement;
-		const digits = target.value.replace(/\D/g, '');
-		const num = digits ? Number(digits) : 0;
+		const num = applyRupiahInput(e);
 
 		const index = neraca.findIndex((item) => item.akunId === akunId);
 		if (index !== -1) neraca[index] = { ...neraca[index], nilai: num };
-
-		target.value = formatRupiahInput(num);
 	}
 </script>
 

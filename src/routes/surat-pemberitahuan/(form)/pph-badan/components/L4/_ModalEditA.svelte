@@ -1,4 +1,6 @@
 <script lang="ts">
+    import { applyRupiahInput, formatRupiah } from '$lib/helpers/rupiahInput';
+
     let {
         data = $bindable() as {
             id: string | number;
@@ -30,6 +32,10 @@
         saveItem: () => void;
         objekPajakOptions: { value: string; label: string }[];
     } = $props();
+
+    $effect(() => {
+        data.pphFinalTerutang = (Number(data.dasarPengenaanPajak || 0) * Number(data.tarif || 0)) / 100;
+    });
 
     function handleSave(): void {
         saveItem();
@@ -70,7 +76,14 @@
             <label for="dasarPengenaanPajak" style="width: 260px;">Dasar Pengenaan Pajak *</label>
             <div style="flex: 1; display: flex; align-items: center;">
               <span style="margin-right: 5px;">Rp.</span>
-              <input type="number" id="dasarPengenaanPajak" bind:value={data.dasarPengenaanPajak} style="flex: 1; text-align: right;" />
+              <input
+                type="text"
+                inputmode="numeric"
+                id="dasarPengenaanPajak"
+                value={formatRupiah(data.dasarPengenaanPajak)}
+                oninput={(e) => (data.dasarPengenaanPajak = applyRupiahInput(e))}
+                style="flex: 1; text-align: right;"
+              />
             </div>
           </div>
           <div style="display: flex; align-items: center;">
@@ -81,7 +94,13 @@
             <label for="pphFinalTerutang" style="width: 260px;">PPh Final Terutang *</label>
             <div style="flex: 1; display: flex; align-items: center;">
               <span style="margin-right: 5px;">Rp.</span>
-              <input type="number" id="pphFinalTerutang" bind:value={data.pphFinalTerutang} style="flex: 1; text-align: right;" />
+              <input
+                type="text"
+                id="pphFinalTerutang"
+                value={formatRupiah(data.pphFinalTerutang)}
+                readonly
+                style="flex: 1; text-align: right; background-color: #e9ecef;"
+              />
             </div>
           </div>
           <div style="display: flex; align-items: center;">

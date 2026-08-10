@@ -48,7 +48,7 @@
                 </Label>
                 <Label class={"tw:flex! tw:flex-row tw:w-full tw:items-center"}>
                     <span class="tw:block tw:w-[25rem]">Jumlah Biaya</span>
-                    <InputGroup class={"tw:flex-1 tw:text-right"} type={"number"} bind:value={data.jumlahBiaya} disabled={readonly}>Rp.</InputGroup>
+                    <InputGroup class={"tw:flex-1 tw:text-right"} type={"rupiah"} bind:value={data.jumlahBiaya} disabled={readonly}>Rp.</InputGroup>
                 </Label>
                 <Label class={"tw:flex! tw:flex-row tw:w-full tw:items-center"}>
                     <span class="tw:block tw:w-[25rem]">Tahun Perolehan Hak Kekayaan Intelektual / Komersialisasi</span>

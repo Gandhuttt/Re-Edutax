@@ -115,7 +115,7 @@
     </div>
     <div class="tw:flex tw:flex-row tw:items-center">
         <span class="tw:block tw:w-[50rem] tw:font-medium">JUMLAH AMORTISASI KOMERSIAL</span>
-        <InputGroup divClass={"tw:flex-0! tw:basis-[30rem]! tw:shrink!"} class={"tw:text-right"} type={"number"} bind:value={jumlahAmortisasiKomersial} disabled={readonly}>Rp.</InputGroup>
+        <InputGroup divClass={"tw:flex-0! tw:basis-[30rem]! tw:shrink!"} class={"tw:text-right"} type={"rupiah"} bind:value={jumlahAmortisasiKomersial} disabled={readonly}>Rp.</InputGroup>
     </div>
     <div class="tw:flex tw:flex-row tw:items-center">
         <span class="tw:block tw:w-[50rem] tw:font-medium">SELISIH AMORTISASI</span>

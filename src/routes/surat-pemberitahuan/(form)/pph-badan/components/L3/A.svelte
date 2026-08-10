@@ -1,6 +1,7 @@
 <script lang="ts">
 	import Table from "$lib/components/Table.svelte";
     import Button from "$lib/components/Button.svelte";
+    import { applyRupiahInput, formatRupiah } from '$lib/helpers/rupiahInput';
 
     let {
         data,
@@ -95,8 +96,10 @@
                     <td colspan="10" class="tw:text-right">PENGEMBALIAN/PENGURANGAN PAJAK PENGHASILAN LUAR NEGERI (PASAL 24) YANG TELAH DIKREDITKAN UNTUK TAHUN SEBELUMNYA</td>
                     <td class="tw:text-right">
                         <input
-                            type="number"
-                            bind:value={pengembalianPengurangan}
+                            type="text"
+                            inputmode="numeric"
+                            value={formatRupiah(pengembalianPengurangan)}
+                            oninput={(e) => (pengembalianPengurangan = applyRupiahInput(e))}
                             class="tw:w-full tw:text-right tw:bg-transparent"
                         />
                     </td>

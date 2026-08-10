@@ -74,14 +74,14 @@
                 <td><span>14.</span></td>
                 <td><span>Angsuran PPh Pasal 25</span></td>
                 <td></td>
-                <td><Input class={"tw:text-end"} type={"number"} bind:value={e14AngsuranPph25TahunBerjalan} disabled={readonly}/></td>
+                <td><Input class={"tw:text-end"} type={"rupiah"} bind:value={e14AngsuranPph25TahunBerjalan} disabled={readonly}/></td>
                 <td></td>
             </tr>
             <tr>
                 <td><span>15.</span></td>
                 <td><span>Surat Tagihan Pajak PPh Pasal 25 (hanya pokok pajak)</span></td>
                 <td></td>
-                <td><Input class={"tw:text-end"} type={"number"} bind:value={e15StpPph25} disabled={readonly}/></td>
+                <td><Input class={"tw:text-end"} type={"rupiah"} bind:value={e15StpPph25} disabled={readonly}/></td>
                 <td></td>
             </tr>
             <tr>
