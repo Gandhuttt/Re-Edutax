@@ -146,15 +146,23 @@ export const newPembetulanSptPphBadan = form(NewPembetulanSptPphBadanSchema, asy
 	redirect(303, `/surat-pemberitahuan/pph-badan?id=${newSptId}`);
 });
 
+// D1 caps the number of bound SQL parameters per statement well below desktop SQLite's
+// 999, so a single `.values([...])` covering every copied row can overflow it once a
+// table has enough rows × columns. Insert in fixed-size chunks instead.
+const CHUNK_SIZE = 10;
+
+function chunk<T>(arr: T[], size: number): T[][] {
+	const out: T[][] = [];
+	for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
+	return out;
+}
+
 async function copyTable(table: any, sourceSptId: string, newSptId: string): Promise<Statement[]> {
 	const rows: any[] = await db.select().from(table).where(eq(table.sptPphBadanId, sourceSptId));
 	if (!rows.length) return [];
 
-	return [
-		db
-			.insert(table)
-			.values(rows.map(({ id, ...restRow }) => ({ ...restRow, id: crypto.randomUUID(), sptPphBadanId: newSptId })))
-	];
+	const prepared = rows.map(({ id, ...restRow }) => ({ ...restRow, id: crypto.randomUUID(), sptPphBadanId: newSptId }));
+	return chunk(prepared, CHUNK_SIZE).map((batch) => db.insert(table).values(batch));
 }
 
 async function copyLampiran5Tku(sourceSptId: string, newSptId: string): Promise<Statement[]> {
@@ -179,13 +187,14 @@ async function copyLampiran5Tku(sourceSptId: string, newSptId: string): Promise<
 			.where(eq(spt_pph_badan_lampiran_5_pp23_bulanan.tkuId, oldTkuId));
 
 		if (bulananRows.length) {
-			statements.push(
-				db
-					.insert(spt_pph_badan_lampiran_5_pp23_bulanan)
-					.values(
-						bulananRows.map(({ id, ...bulananRest }) => ({ ...bulananRest, id: crypto.randomUUID(), tkuId: newTkuId }))
-					)
-			);
+			const preparedBulanan = bulananRows.map(({ id, ...bulananRest }) => ({
+				...bulananRest,
+				id: crypto.randomUUID(),
+				tkuId: newTkuId
+			}));
+			for (const batch of chunk(preparedBulanan, CHUNK_SIZE)) {
+				statements.push(db.insert(spt_pph_badan_lampiran_5_pp23_bulanan).values(batch));
+			}
 		}
 	}
 
