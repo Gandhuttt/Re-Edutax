@@ -20,7 +20,7 @@
 			<div class="tw:w-full tw:flex tw:flex-row tw:justify-between tw:items-center">
 				<span class="tw:text-2xl tw:h-10 tw:flex tw:items-center">Faktur Keluaran</span>
 				<form {...newEmpty}>
-					<Button color="#FFD230">Buat Faktur</Button>
+					<Button>Buat Faktur</Button>
 				</form>
 			</div>
 		{/snippet}
@@ -47,13 +47,13 @@
 								<td>
 									<div class="tw:flex tw:flex-row tw:gap-1">
 										<a href="/faktur-pajak/{id}" class="tw:text-black!">
-											<Button color="#FFD230">{!diupload ? 'Edit' : 'Lihat'}</Button>
+											<Button>{!diupload ? 'Edit' : 'Lihat'}</Button>
 										</a>
 										{#if !diupload}
-											<form {...delFaktur}><Button color="#FFD230">Hapus</Button></form>
-											<form {...upldFaktur}><Button color="#FFD230">Upload</Button></form>
+											<form {...delFaktur}><Button class={"tw:text-white"} color="var(--color-danger)">Hapus</Button></form>
+											<form {...upldFaktur}><Button class={"tw:text-white"} color="var(--color-secondary)">Upload</Button></form>
 										{:else if diupload && !dikreditkan}
-											<form {...undupldFaktur}><Button color="#FFD230">Tarik</Button></form>
+											<form {...undupldFaktur}><Button class={"tw:text-white"} color="var(--color-danger)">Tarik</Button></form>
 										{/if}
 									</div>
 								</td>

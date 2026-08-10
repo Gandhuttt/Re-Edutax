@@ -89,7 +89,7 @@
 		/>
 		{#if faktur.canEdit}
 			<div class="tw:flex tw:flex-row tw:justify-end tw:mt-5">
-				<Button color="#FFD230">Submit</Button>
+				<Button class={"tw:text-white"} color="var(--color-secondary)">Submit</Button>
 			</div>
 		{/if}
 	</div>

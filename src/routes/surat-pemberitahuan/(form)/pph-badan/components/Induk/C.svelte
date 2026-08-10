@@ -94,7 +94,18 @@
                     </div>
                 </td>
                 <td></td>
-                <td></td>
+                <td>
+                    <Alert bg={"var(--color-primary)"}>
+                        {#snippet head()}
+                            <span>i</span>
+                        {/snippet}
+                        {#snippet body()}
+                            <span>
+                            {hanyaPenghasilanPp23 ? "Ya, silahkan lanjut pertanyaan berikutnya" : "Tidak, jawablah pertanyaan di bagian D di bawah"}
+                            </span>
+                        {/snippet}
+                    </Alert>
+                </td>
             </tr>
             <tr>
                 <td><span>2.</span></td>

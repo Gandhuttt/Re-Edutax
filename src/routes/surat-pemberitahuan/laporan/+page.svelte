@@ -32,7 +32,7 @@
 							<tr>
 								<td>
 									<a href="/surat-pemberitahuan/ppn?id={row.id}" class="tw:text-black!">
-										<Button color="#FFD230">Lihat</Button>
+										<Button>Lihat</Button>
 									</a>
 								</td>
 								<td>SPT Masa PPN</td>
@@ -47,11 +47,11 @@
 							<tr>
 								<td class="tw:flex tw:gap-2">
 									<a href="/surat-pemberitahuan/pph-badan?id={row.id}" class="tw:text-black!">
-										<Button color="#FFD230">Lihat</Button>
+										<Button>Lihat</Button>
 									</a>
 									<form {...newPembetulanSptPphBadan}>
 										<input type="hidden" name="id" value={row.id} />
-										<Button color="#FFD230">Buat Pembetulan</Button>
+										<Button>Buat Pembetulan</Button>
 									</form>
 								</td>
 								<td>SPT Tahunan PPh Badan</td>

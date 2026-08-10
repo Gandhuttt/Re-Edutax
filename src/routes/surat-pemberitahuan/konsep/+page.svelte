@@ -37,7 +37,7 @@
 								<option value={year}>{year}</option>
 							{/each}
 						</Select>
-						<Button color="#FFD230" class="tw:w-[25rem]">Buat SPT PPN</Button>
+						<Button class="tw:w-[25rem]">Buat SPT PPN</Button>
 					</form>
 					<form {...newSptPphBadan} class="tw:flex tw:gap-2 tw:items-center">
 						<Select name="tahunPajak" value={String(pphBadanTahunPajakOptions[0])} class="tw:w-[7rem]">
@@ -46,7 +46,7 @@
 								<!-- <option value={year} selected>{year}</option> -->
 							<!-- {/each} -->
 						</Select>
-						<Button color="#FFD230" class="tw:w-[20rem]">Buat SPT PPh Badan</Button>
+						<Button class="tw:w-[20rem]">Buat SPT PPh Badan</Button>
 					</form>
 				</div>
 			</div>
@@ -71,7 +71,7 @@
 							<tr>
 								<td>
 									<a href="/surat-pemberitahuan/ppn?id={row.id}" class="tw:text-black!">
-										<Button color="#FFD230">Buka</Button>
+										<Button>Buka</Button>
 									</a>
 								</td>
 								<td>SPT Masa PPN</td>
@@ -87,7 +87,7 @@
 							<tr>
 								<td class="tw:flex tw:gap-2">
 									<a href="/surat-pemberitahuan/pph-badan?id={row.id}" class="tw:text-black!">
-										<Button color="#FFD230">Buka</Button>
+										<Button>Buka</Button>
 									</a>
 									<form
 										{...deleteSptPphBadan.enhance(async (form) => {
@@ -95,7 +95,7 @@
 										})}
 									>
 										<input type="hidden" name="id" value={row.id} />
-										<Button color="#dc2626">Hapus</Button>
+										<Button class={"tw:text-white"} color="var(--color-danger)">Hapus</Button>
 									</form>
 								</td>
 								<td>SPT Tahunan PPh Badan</td>

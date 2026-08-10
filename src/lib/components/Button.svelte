@@ -4,7 +4,7 @@
 
 	let {
 		children,
-		color = '#FFD230',
+		color = 'var(--color-primary)',
 		...restProps
 	}: { children: Snippet; color?: string } & HTMLButtonAttributes = $props();
 </script>

@@ -39,7 +39,7 @@
 								<td>
 									<div class="tw:flex tw:flex-row tw:gap-1">
 										<a href="/faktur-pajak/{id}" class="tw:text-black!">
-											<Button color="#FFD230">Lihat</Button>
+											<Button>Lihat</Button>
 										</a>
 										{#if !dikreditkan}
 											<form {...kreditFaktur}><Button color="#FFD230">Kreditkan</Button></form>

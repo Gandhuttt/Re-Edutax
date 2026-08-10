@@ -35,10 +35,10 @@
 								<td>
 									<div class="tw:flex tw:flex-row tw:gap-1">
 										<a href="/surat-pemberitahuan/ppn?id={row.id}" class="tw:text-black!">
-											<Button color="#FFD230">Lihat</Button>
+											<Button>Lihat</Button>
 										</a>
 										<form {...payForm}>
-											<Button color="#FFD230">Bayar</Button>
+											<Button>Bayar</Button>
 										</form>
 									</div>
 								</td>
@@ -60,10 +60,10 @@
 								<td>
 									<div class="tw:flex tw:flex-row tw:gap-1">
 										<a href="/surat-pemberitahuan/pph-badan?id={row.id}" class="tw:text-black!">
-											<Button color="#FFD230">Lihat</Button>
+											<Button>Lihat</Button>
 										</a>
 										<form {...payForm}>
-											<Button color="#FFD230">Bayar</Button>
+											<Button>Bayar</Button>
 										</form>
 									</div>
 								</td>
