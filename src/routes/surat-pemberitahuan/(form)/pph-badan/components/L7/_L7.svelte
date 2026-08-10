@@ -82,72 +82,74 @@
         <span class="tw:font-bold">PENGHITUNGAN KOMPNESASI KERUGIAN FISKAL</span>
         {/snippet}
         {#snippet body()}
-        <Table class={"tw:w-full"}>
-            {#snippet head()}
-            <!-- svelte-ignore block_empty -->
-            {/snippet}
-            {#snippet body()}
-                <tr class="header tw:bg-[var(--color-primary)] tw:font-bold tw:text-center">
-                    <td class="tw:w-[10rem]" rowspan="3">TINDAKAN</td>
-                    <td class="tw:w-[5rem]" rowspan="3">NO.</td>
-                    <td class="tw:w-[30rem]" rowspan="2" colspan="2">LABA (RUGI) NETTO FISKAL.</td>
-                    <td class="tw:w-[75rem]" colspan="6">KOMPENSASI KERUGIAN FISKAL</td>
-                </tr>
-                <tr class="header tw:bg-[var(--color-primary)] tw:font-bold tw:text-center">
-                    <td>Y-4</td>
-                    <td>Y-3</td>
-                    <td>Y-2</td>
-                    <td>Y-1</td>
-                    <td>{currentYear}</td>
-                    <td>Y+1</td>
-                </tr>
-                <tr class="header tw:bg-[var(--color-primary)] tw:font-bold tw:text-center">
-                    <!-- LABA (RUGI) NETTO FISKAL -->
-                    <td>TAHUN/BAGIAN TAHUN PAJAK</td>
-                    <td>NILAI (Rp)</td>
-
-                    <!-- KOMPENSASI KERUGIAN FISKAL -->
-                    <td>NILAI (Rp)</td>
-                    <td>NILAI (Rp)</td>
-                    <td>NILAI (Rp)</td>
-                    <td>NILAI (Rp)</td>
-                    <td>TAHUN PAJAK INI - NILAI (Rp)</td>
-                    <td>TAHUN PAJAK BERJALAN - NILAI (Rp)</td>
-                </tr>
-                {#each l7 as row, index}
-                <tr class="data tw:text-right">
-                    <td class="tw:text-center">
-                        <Button
-                            class={"tw:min-w-15!"}
-                            type={"button"}
-                            data-bs-target={"#modalL7"}
-                            data-bs-toggle={"modal"}
-                            disabled={readonly}
-                            onclick={() => openModal(row)}
-                        >Edit</Button>
-                    </td>
-                    <td class="tw:text-center">{index + 1}</td>
-                    <td class="tw:text-center">{row.tahunPajak}</td>
-                    <td>{rupiah.format(row.labaRugiNetoFiskal)}</td>
-                    <td>{rupiah.format(row.kompensasiYMin4)}</td>
-                    <td>{rupiah.format(row.kompensasiYMin3)}</td>
-                    <td>{rupiah.format(row.kompensasiYMin2)}</td>
-                    <td>{rupiah.format(row.kompensasiYMin1)}</td>
-                    <td>{rupiah.format(row.kompensasiTahunIni)}</td>
-                    <td>{rupiah.format(row.kompensasiYPlus1)}</td>
-                </tr>
-                {/each}
-                <tr class="footer tw:bg-[var(--color-primary)] tw:font-bold tw:text-right">
-                    <td colspan="4">JUMLAH</td>
-                    <td>{rupiah.format(jumlah.kompensasiYMin4)}</td>
-                    <td>{rupiah.format(jumlah.kompensasiYMin3)}</td>
-                    <td>{rupiah.format(jumlah.kompensasiYMin2)}</td>
-                    <td>{rupiah.format(jumlah.kompensasiYMin1)}</td>
-                    <td>{rupiah.format(jumlah.kompensasiTahunIni)}</td>
-                    <td>{rupiah.format(jumlah.kompensasiYPlus1)}</td>
-                </tr>
-            {/snippet}
-        </Table>
+        <div class="tw:overflow-scroll">
+            <Table class={"tw:min-w-full"}>
+                {#snippet head()}
+                <!-- svelte-ignore block_empty -->
+                {/snippet}
+                {#snippet body()}
+                    <tr class="header tw:bg-[var(--color-primary)] tw:font-bold tw:text-center">
+                        <td class="tw:w-[10rem]" rowspan="3">TINDAKAN</td>
+                        <td class="tw:w-[5rem]" rowspan="3">NO.</td>
+                        <td class="tw:w-[30rem]" rowspan="2" colspan="2">LABA (RUGI) NETTO FISKAL.</td>
+                        <td class="tw:w-[75rem]" colspan="6">KOMPENSASI KERUGIAN FISKAL</td>
+                    </tr>
+                    <tr class="header tw:bg-[var(--color-primary)] tw:font-bold tw:text-center">
+                        <td>Y-4</td>
+                        <td>Y-3</td>
+                        <td>Y-2</td>
+                        <td>Y-1</td>
+                        <td>{currentYear}</td>
+                        <td>Y+1</td>
+                    </tr>
+                    <tr class="header tw:bg-[var(--color-primary)] tw:font-bold tw:text-center">
+                        <!-- LABA (RUGI) NETTO FISKAL -->
+                        <td>TAHUN/BAGIAN TAHUN PAJAK</td>
+                        <td>NILAI (Rp)</td>
+    
+                        <!-- KOMPENSASI KERUGIAN FISKAL -->
+                        <td>NILAI (Rp)</td>
+                        <td>NILAI (Rp)</td>
+                        <td>NILAI (Rp)</td>
+                        <td>NILAI (Rp)</td>
+                        <td>TAHUN PAJAK INI - NILAI (Rp)</td>
+                        <td>TAHUN PAJAK BERJALAN - NILAI (Rp)</td>
+                    </tr>
+                    {#each l7 as row, index}
+                    <tr class="data tw:text-right">
+                        <td class="tw:text-center">
+                            <Button
+                                class={"tw:min-w-15!"}
+                                type={"button"}
+                                data-bs-target={"#modalL7"}
+                                data-bs-toggle={"modal"}
+                                disabled={readonly}
+                                onclick={() => openModal(row)}
+                            >Edit</Button>
+                        </td>
+                        <td class="tw:text-center">{index + 1}</td>
+                        <td class="tw:text-center">{row.tahunPajak}</td>
+                        <td>{rupiah.format(row.labaRugiNetoFiskal)}</td>
+                        <td>{rupiah.format(row.kompensasiYMin4)}</td>
+                        <td>{rupiah.format(row.kompensasiYMin3)}</td>
+                        <td>{rupiah.format(row.kompensasiYMin2)}</td>
+                        <td>{rupiah.format(row.kompensasiYMin1)}</td>
+                        <td>{rupiah.format(row.kompensasiTahunIni)}</td>
+                        <td>{rupiah.format(row.kompensasiYPlus1)}</td>
+                    </tr>
+                    {/each}
+                    <tr class="footer tw:bg-[var(--color-primary)] tw:font-bold tw:text-right">
+                        <td colspan="4">JUMLAH</td>
+                        <td>{rupiah.format(jumlah.kompensasiYMin4)}</td>
+                        <td>{rupiah.format(jumlah.kompensasiYMin3)}</td>
+                        <td>{rupiah.format(jumlah.kompensasiYMin2)}</td>
+                        <td>{rupiah.format(jumlah.kompensasiYMin1)}</td>
+                        <td>{rupiah.format(jumlah.kompensasiTahunIni)}</td>
+                        <td>{rupiah.format(jumlah.kompensasiYPlus1)}</td>
+                    </tr>
+                {/snippet}
+            </Table>
+        </div>
         {/snippet}
     </Card>
 </div>
@@ -160,7 +162,7 @@
 }
 
 .data {
-    &:nth-child(even) {
+    &:nth-child(odd of .data) {
         background-color: #F9F6EE;
     }
     td {

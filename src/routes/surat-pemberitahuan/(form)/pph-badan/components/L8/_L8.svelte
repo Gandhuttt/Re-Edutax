@@ -34,7 +34,7 @@
         <span class="tw:font-bold">PERHITUNGAN FASILITAS PENGURANGAN TARIF PPh  BAGI WAJIB PAJAK BADAN DALAM NEGERI BERDASARKAN PASAL 31E AYAT (1) UDANG-UNDANG PPh</span>
         {/snippet}
         {#snippet body()}
-        <Table class={"tw:w-full"}>
+        <Table class={"tw:min-w-full"}>
             {#snippet head()}
             <!-- svelte-ignore block_empty -->
             {/snippet}
@@ -129,7 +129,7 @@
 
 .data {
     height: 3rem ;
-    &:nth-child(even) {
+    &:nth-child(odd of .data) {
         background-color: #F9F6EE;
     }
     td {

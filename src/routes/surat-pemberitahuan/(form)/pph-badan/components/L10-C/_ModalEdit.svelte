@@ -42,7 +42,7 @@
                     <Select class={"tw:flex-1 tw:invalid:text-gray-500"} bind:value={data.jenisTransaksi} required disabled={readonly}>
                         <option value="" selected disabled hidden>Please Select</option>
                         {#each jenisTransaksiOptions as jenisTransaksi}
-                        <option value={jenisTransaksi.value}>{jenisTransaksi.label}</option>
+                        <option class="tw:text-black!" value={jenisTransaksi.value}>{jenisTransaksi.label}</option>
                         {/each}
                     </Select>
                 </Label>

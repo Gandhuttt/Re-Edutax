@@ -114,7 +114,7 @@
 }
 
 .data {
-    &:nth-child(even) {
+    &:nth-child(odd of .data) {
         background-color: #F9F6EE;
     }
     td {

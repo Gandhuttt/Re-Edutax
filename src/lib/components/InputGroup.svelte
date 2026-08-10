@@ -4,11 +4,12 @@
 
     interface Props {
         children: Snippet;
+        divClass?: string;
     }
-    let { children, value = $bindable(), ...restProps }: Props & HTMLInputAttributes = $props()
+    let { children, divClass, value = $bindable(), ...restProps }: Props & HTMLInputAttributes = $props()
 </script>
 
-<div>
+<div class={divClass}>
     <span>{@render children()}</span>
     <input bind:value {...restProps}/>
 </div>

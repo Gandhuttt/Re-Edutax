@@ -109,17 +109,17 @@
 {/each}
 </div>
 <div class="tw:flex tw:flex-col tw:border-t-1 tw:border-t-(--color-disabled) tw:p-5 tw:gap-1">
-    <div class="tw:flex tw:flex-row tw:items-center tw:w-fit">
+    <div class="tw:flex tw:flex-row tw:items-center">
         <span class="tw:block tw:w-[50rem] tw:font-medium">JUMLAH PENYUSUTAN FISKAL</span>
-        <Input class={"tw:text-right tw:w-[30rem]!"} type={"text"} value={rupiah.format(jumlahPenyusutanFiskal)} readonly/>
+        <Input class={"tw:text-right tw:basis-[30rem] tw:shrink"} type={"text"} value={rupiah.format(jumlahPenyusutanFiskal)} readonly/>
     </div>
-    <div class="tw:flex tw:flex-row tw:items-center tw:w-fit">
+    <div class="tw:flex tw:flex-row tw:items-center">
         <span class="tw:block tw:w-[50rem] tw:font-medium">JUMLAH PENYUSUTAN KOMERSIAL</span>
-        <InputGroup class={"tw:w-[30rem]! tw:text-right"} type={"number"} bind:value={jumlahPenyusutanKomersial} disabled={readonly}>Rp.</InputGroup>
+        <InputGroup divClass={"tw:flex-0! tw:basis-[30rem]! tw:shrink!"} class={"tw:text-right"} type={"number"} bind:value={jumlahPenyusutanKomersial} disabled={readonly}>Rp.</InputGroup>
     </div>
-    <div class="tw:flex tw:flex-row tw:items-center tw:w-fit">
+    <div class="tw:flex tw:flex-row tw:items-center tw:flex-0">
         <span class="tw:block tw:w-[50rem] tw:font-medium">SELISIH PENYUSUTAN</span>
-        <Input class={"tw:text-right tw:w-[30rem]!"} type={"text"} value={rupiah.format(selisihPenyusutan)} readonly/>
+        <Input class={"tw:text-right tw:basis-[30rem] tw:shrink"} type={"text"} value={rupiah.format(selisihPenyusutan)} readonly/>
     </div>
 </div>
 
@@ -129,7 +129,7 @@
 }
 
 .data {
-    &:nth-child(even) {
+    &:nth-child(odd of .data) {
         background-color: #F9F6EE;
     }
     td {
