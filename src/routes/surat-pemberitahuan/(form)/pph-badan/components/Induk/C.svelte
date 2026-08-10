@@ -81,7 +81,7 @@
             <tr>
                 <td><span>1.b.</span></td>
                 <td><span>Apakah penghasilan Wajib Pajak semata-mata hanya penghasilan dari usaha dengan peredaran bruto tertentu yang dikenakan PPh yang bersifat Final? *</span></td>
-                <td colspan="2">
+                <td>
                     <div class="tw:flex tw:gap-5">
                         <Label class="tw:flex tw:items-center tw:gap-1">
                             <input type="radio" name="hanyaPenghasilanPp23" id="{getContext("id")}" value={false} bind:group={hanyaPenghasilanPp23} disabled={!menerimaPenghasilanPp23 || readonly}>
