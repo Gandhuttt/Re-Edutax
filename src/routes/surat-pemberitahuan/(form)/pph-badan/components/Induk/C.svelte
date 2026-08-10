@@ -6,7 +6,7 @@
     import { getContext } from "svelte";
 
     interface L4ARow {
-        pphFinalTerutang: number;
+        dasarPengenaanPajak: number;
     }
 
     interface L4BRow {
@@ -33,7 +33,7 @@
 
     const rupiah = new Intl.NumberFormat('id-ID');
 
-    let pphFinalTotal = $derived(l4a.reduce((total, row) => total + Number(row.pphFinalTerutang || 0), 0));
+    let pphFinalTotal = $derived(l4a.reduce((total, row) => total + Number(row.dasarPengenaanPajak || 0), 0));
     let bukanObjekPajakTotal = $derived(l4b.reduce((total, row) => total + Number(row.penghasilanBruto || 0), 0));
 </script>
 

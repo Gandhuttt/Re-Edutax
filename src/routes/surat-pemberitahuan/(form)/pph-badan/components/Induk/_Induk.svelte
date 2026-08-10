@@ -28,7 +28,7 @@
         hanyaPenghasilanPp23: boolean;
         menerimaPenghasilanFinal: boolean;
         menerimaPenghasilanBukanObjekPajak: boolean;
-        l4a: { pphFinalTerutang: number }[];
+        l4a: { dasarPengenaanPajak: number }[];
         l4b: { penghasilanBruto: number }[];
         computed: ReturnType<typeof computeIndukDEF>;
         d5FasilitasPenanamanModal: boolean;
