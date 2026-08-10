@@ -36,7 +36,11 @@
 			</li>
 		</ul>
 		<div class="corner">
-			<span class="tw:w-auto tw:text-base tw:text-[.8em] tw:overflow-clip">{displayName}</span>
+			<ul class="nav-ul">
+				<li aria-current={page.url.pathname === '/profile' ? 'page' : undefined}>
+					<a class="tw:w-auto tw:text-base tw:text-[.8em] tw:overflow-clip" href="/profile">{displayName}</a>
+				</li>
+			</ul>
 			<div class="tw:w-20">
 				{#if authenticated}
 				<form {...logout}>

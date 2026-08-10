@@ -21,7 +21,8 @@
 <style>
 	input[type='text'],
 	input[type='date'],
-	input[type='number'] {
+	input[type='number'],
+	input[type='email'] {
 		height: 2.5rem;
 		width: 100%;
 		border-color: var(--color-input-secondary);
