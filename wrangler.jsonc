@@ -1,0 +1,25 @@
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "re-edutax",
+	"compatibility_date": "2026-08-01",
+	"compatibility_flags": ["nodejs_compat"],
+	"main": ".svelte-kit/cloudflare/_worker.js",
+	"routes": [
+		{
+			"pattern": "edutaxindo.warsidi.com",
+			"custom_domain": true
+		}
+	],
+	"assets": {
+		"directory": ".svelte-kit/cloudflare",
+		"binding": "ASSETS"
+	},
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "re-edutax",
+			"database_id": "60a7ca1c-df0c-47c7-a0e7-75f14a433165",
+			"migrations_dir": "drizzle"
+		}
+	]
+}

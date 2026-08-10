@@ -1,3 +1,4 @@
+/// <reference path="../worker-configuration.d.ts" />
 // See https://svelte.dev/docs/kit/types#app.d.ts
 // for information about these interfaces
 import type { auth } from '$lib/server/auth';
@@ -17,7 +18,11 @@ declare global {
 			user?: AuthUser | null;
 		}
 		// interface PageState {}
-		// interface Platform {}
+		interface Platform {
+			env: {
+				DB: D1Database;
+			};
+		}
 	}
 }
 

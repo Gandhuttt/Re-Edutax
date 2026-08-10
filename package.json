@@ -14,11 +14,12 @@
 		"db:generate": "drizzle-kit generate",
 		"db:migrate": "drizzle-kit migrate",
 		"db:studio": "drizzle-kit studio",
-		"db:seed": "tsx src/lib/server/db/seed/seed.ts"
+		"db:seed": "tsx src/lib/server/db/seed/seed.ts",
+		"cf-typegen": "wrangler types",
+		"deploy": "vite build && wrangler deploy"
 	},
 	"devDependencies": {
-		"@libsql/client": "^0.17.3",
-		"@sveltejs/adapter-auto": "^7.0.1",
+		"@sveltejs/adapter-cloudflare": "^7.2.9",
 		"@sveltejs/kit": "^2.63.0",
 		"@sveltejs/vite-plugin-svelte": "^7.1.2",
 		"@types/node": "^24",
@@ -27,7 +28,8 @@
 		"svelte": "^5.56.1",
 		"svelte-check": "^4.6.0",
 		"typescript": "^6.0.3",
-		"vite": "^8.0.16"
+		"vite": "^8.0.16",
+		"wrangler": "^4.120.0"
 	},
 	"dependencies": {
 		"@better-auth/drizzle-adapter": "^1.6.23",

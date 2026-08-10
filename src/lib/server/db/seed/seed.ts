@@ -35,12 +35,16 @@ const batches = [
 const seed = async () => {
 	console.log('Seeding Better Auth users and wajib_pajak profiles...\n');
 
-	const context = createSeedContext();
+	const context = await createSeedContext();
 	const seededAccounts = [];
 
-	for (const batch of batches) {
-		console.log(`Running batch: ${batch.name}`);
-		seededAccounts.push(...(await batch.run(context)));
+	try {
+		for (const batch of batches) {
+			console.log(`Running batch: ${batch.name}`);
+			seededAccounts.push(...(await batch.run(context)));
+		}
+	} finally {
+		await context.dispose();
 	}
 
 	console.log('\nSeed complete. Login credentials:');
