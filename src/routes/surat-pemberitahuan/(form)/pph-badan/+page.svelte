@@ -447,6 +447,9 @@
 		})
 	);
 
+	let f18a = $derived(spt.pembetulanKe > 0 ? (spt.previousPphKurangLebihBayar ?? 0) : 0);
+	let f18b = $derived(indukDEF.f17c - f18a);
+
 	let h21aTransaksiHubunganIstimewa = $state(Boolean(spt.h21aTransaksiHubunganIstimewa));
 	let h21bDokumenPenentuanHargaTransfer = $state(Boolean(spt.h21bDokumenPenentuanHargaTransfer));
 	let h21cPenanamanModalAfiliasi = $state(Boolean(spt.h21cPenanamanModalAfiliasi));
@@ -670,6 +673,8 @@
 					bind:f17bAdaSkPengangsuranPenundaan
 					bind:f17bJumlahDiangsurDitunda
 					bind:f19aMetodePengembalian
+					{f18a}
+					{f18b}
 					bind:g20WajibLaporAngsuranPph25
 					bind:h21aTransaksiHubunganIstimewa
 					bind:h21bDokumenPenentuanHargaTransfer

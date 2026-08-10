@@ -7,8 +7,23 @@ import {
 } from '$lib/server/db/schema';
 import { error, redirect } from '@sveltejs/kit';
 import { and, eq } from 'drizzle-orm';
+import * as v from 'valibot';
 
-export const newSptPphBadan = form(async () => {
+// This implementation follows tax-year-2025 rules specifically (rates, facilities,
+// thresholds) - restrict creation to that year until a future year is verified.
+const SUPPORTED_TAHUN_PAJAK = 2025;
+
+const NewSptPphBadanSchema = v.object({
+	tahunPajak: v.pipe(
+		v.string(),
+		v.nonEmpty('Tahun pajak'),
+		v.transform(Number),
+		v.integer('Tahun pajak harus berupa bilangan bulat'),
+		v.value(SUPPORTED_TAHUN_PAJAK, `Tahun pajak yang didukung saat ini hanya ${SUPPORTED_TAHUN_PAJAK}`)
+	)
+});
+
+export const newSptPphBadan = form(NewSptPphBadanSchema, async ({ tahunPajak }) => {
 	const event = getRequestEvent();
 	const activeNpwp = event.locals.user?.username;
 
@@ -16,7 +31,6 @@ export const newSptPphBadan = form(async () => {
 		error(401, 'Belum login');
 	}
 
-	const tahunPajak = new Date().getFullYear();
 	const mataUang = await getOrCreateMataUangRupiah();
 	const sektorUsaha = await getOrCreateSektorUsahaUmum();
 

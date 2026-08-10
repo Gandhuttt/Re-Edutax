@@ -20,6 +20,12 @@ const accounts: TaxpayerSeedAccount[] = [
 		nama: 'CV Demo Jaya',
 		email: 'demo@example.com'
 	},
+	{
+		npwp: '0456789012345000',
+		password: 'demo123',
+		nama: 'PT Dagang Makmur Sejahtera',
+		email: 'dagang.demo@example.com'
+	},
 	...Array.from({ length: 10 }, (_, index) => {
 		const number = index + 1;
 

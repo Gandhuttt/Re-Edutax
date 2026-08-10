@@ -11,7 +11,7 @@
 		dikenakanPphFinal: number;
 		penyesuaianFiskalPositif: number;
 		penyesuaianFiskalNegatif: number;
-		kodePenyesuaianFiskal: string;
+		kodePenyesuaianFiskal: string[];
 	}
 
 	interface Props {
@@ -62,7 +62,7 @@
 				dikenakanPphFinal: 0,
 				penyesuaianFiskalPositif: 0,
 				penyesuaianFiskalNegatif: 0,
-				kodePenyesuaianFiskal: ''
+				kodePenyesuaianFiskal: []
 			}))
 		);
 	});
@@ -127,7 +127,7 @@
 							<td class="tw:text-end">{formatCell(row, row.objekPajakTidakFinal)}</td>
 							<td class="tw:text-end">{showFiskalSplit(row) ? formatCell(row, row.penyesuaianFiskalPositif) : ''}</td>
 							<td class="tw:text-end">{showFiskalSplit(row) ? formatCell(row, row.penyesuaianFiskalNegatif) : ''}</td>
-							<td class="tw:text-center">{row.kodePenyesuaianFiskal}</td>
+							<td class="tw:text-center">{row.kodePenyesuaianFiskal.join(', ')}</td>
 							<td class="tw:text-end">{formatCell(row, row.nilaiFiskal)}</td>
 						</tr>
 					{/if}

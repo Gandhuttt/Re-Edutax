@@ -13,6 +13,7 @@ import * as lampiran4BukanObjekPajak from './batches/009-lampiran-4-bukan-objek-
 import * as lampiran9JenisHarta from './batches/010-lampiran-9-jenis-harta';
 import * as lampiran9MetodePenyusutan from './batches/011-lampiran-9-metode-penyusutan';
 import * as lampiran10aReferensi from './batches/012-lampiran-10a-referensi';
+import * as kodeKoreksiFiskal from './batches/013-kode-koreksi-fiskal';
 
 const batches = [
 	initialUsers,
@@ -27,6 +28,7 @@ const batches = [
 	lampiran9JenisHarta,
 	lampiran9MetodePenyusutan,
 	lampiran10aReferensi,
+	kodeKoreksiFiskal,
 	fakturDemo
 ];
 

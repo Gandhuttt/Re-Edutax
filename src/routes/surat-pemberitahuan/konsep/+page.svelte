@@ -8,12 +8,16 @@
 	import { listSptPpn } from '../listSptPpn.remote';
 	import { newSptPphBadan } from './newSptPphBadan.remote';
 	import { newSptPpn } from './newSptPpn.remote';
+	import { deleteSptPphBadan } from './deleteSptPphBadan.remote';
 
 	const rupiah = new Intl.NumberFormat('id-ID');
 
 	const today = new Date();
 	const months = Array.from({ length: 12 }, (_, i) => i + 1);
 	const years = Array.from({ length: 6 }, (_, i) => today.getFullYear() - 3 + i);
+	// This SPT PPh Badan implementation follows tax-year-2025 rules specifically (rates,
+	// facilities, thresholds) - restrict creation to that year until a future year is verified.
+	const pphBadanTahunPajakOptions = [2025];
 </script>
 
 <div class="tw:w-full tw:p-25">
@@ -33,10 +37,16 @@
 								<option value={year}>{year}</option>
 							{/each}
 						</Select>
-						<Button color="#FFD230">Buat SPT PPN</Button>
+						<Button color="#FFD230" class="tw:w-[25rem]">Buat SPT PPN</Button>
 					</form>
-					<form {...newSptPphBadan}>
-						<Button color="#FFD230">Buat SPT PPh Badan</Button>
+					<form {...newSptPphBadan} class="tw:flex tw:gap-2 tw:items-center">
+						<Select name="tahunPajak" value={String(pphBadanTahunPajakOptions[0])} class="tw:w-[7rem]">
+							<option value="2025">2025</option>
+							<!-- {#each pphBadanTahunPajakOptions as year} -->
+								<!-- <option value={year} selected>{year}</option> -->
+							<!-- {/each} -->
+						</Select>
+						<Button color="#FFD230" class="tw:w-[20rem]">Buat SPT PPh Badan</Button>
 					</form>
 				</div>
 			</div>
@@ -75,10 +85,18 @@
 						{/each}
 						{#each await listSptPphBadan({ status: 'konsep' }) as row}
 							<tr>
-								<td>
+								<td class="tw:flex tw:gap-2">
 									<a href="/surat-pemberitahuan/pph-badan?id={row.id}" class="tw:text-black!">
 										<Button color="#FFD230">Buka</Button>
 									</a>
+									<form
+										{...deleteSptPphBadan.enhance(async (form) => {
+											if (confirm('Hapus konsep SPT PPh Badan ini?')) await form.submit();
+										})}
+									>
+										<input type="hidden" name="id" value={row.id} />
+										<Button color="#dc2626">Hapus</Button>
+									</form>
 								</td>
 								<td>SPT Tahunan PPh Badan</td>
 								<td>-</td>

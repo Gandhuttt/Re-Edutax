@@ -20,7 +20,7 @@ export interface LabaRugiLeafInput {
 	dikenakanPphFinal: number;
 	penyesuaianFiskalPositif: number;
 	penyesuaianFiskalNegatif: number;
-	kodePenyesuaianFiskal: string;
+	kodePenyesuaianFiskal: string[];
 }
 
 export interface LabaRugiComputedRow {
@@ -44,7 +44,7 @@ export interface LabaRugiComputedRow {
 	objekPajakTidakFinal: number;
 	penyesuaianFiskalPositif: number;
 	penyesuaianFiskalNegatif: number;
-	kodePenyesuaianFiskal: string;
+	kodePenyesuaianFiskal: string[];
 	nilaiFiskal: number;
 }
 
@@ -120,7 +120,9 @@ export function computeLabaRugiRows(
 				objekPajakTidakFinal = nilaiKomersial - nonObjekPajak - dikenakanPphFinal;
 			}
 
-			const nilaiFiskal = objekPajakTidakFinal + penyesuaianFiskalPositif - penyesuaianFiskalNegatif;
+			const fiskalSign = row.classification === 'expense' ? -1 : 1;
+			const nilaiFiskal =
+				objekPajakTidakFinal + fiskalSign * (penyesuaianFiskalPositif - penyesuaianFiskalNegatif);
 
 			values = {
 				nilaiKomersial,
@@ -164,7 +166,7 @@ export function computeLabaRugiRows(
 					hasFiskalSplit: false,
 					id: null,
 					akunId: null,
-					kodePenyesuaianFiskal: '',
+					kodePenyesuaianFiskal: [],
 					...zeroValues()
 				};
 			}
@@ -181,7 +183,7 @@ export function computeLabaRugiRows(
 				hasFiskalSplit: row.rowType === 'data' && hasFiskalSplit(row),
 				id: leaf?.id ?? null,
 				akunId: row.rowType === 'data' ? row.id : null,
-				kodePenyesuaianFiskal: leaf?.kodePenyesuaianFiskal ?? '',
+				kodePenyesuaianFiskal: leaf?.kodePenyesuaianFiskal ?? [],
 				...values
 			};
 		});

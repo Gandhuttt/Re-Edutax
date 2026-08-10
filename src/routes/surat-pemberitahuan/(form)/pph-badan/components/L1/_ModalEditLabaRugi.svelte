@@ -1,4 +1,6 @@
 <script lang="ts">
+	import CheckableSelect from '$lib/components/CheckableSelect.svelte';
+
 	let {
 		data = $bindable() as {
 			id?: string;
@@ -11,7 +13,7 @@
 			dikenakanPphFinal?: number;
 			penyesuaianFiskalPositif?: number;
 			penyesuaianFiskalNegatif?: number;
-			kodePenyesuaianFiskal?: string;
+			kodePenyesuaianFiskal?: string[];
 		},
 		saveItem,
 		kodeKoreksiFiskalOptions
@@ -27,10 +29,10 @@
 			dikenakanPphFinal?: number;
 			penyesuaianFiskalPositif?: number;
 			penyesuaianFiskalNegatif?: number;
-			kodePenyesuaianFiskal?: string;
+			kodePenyesuaianFiskal?: string[];
 		};
 		saveItem: () => void;
-		kodeKoreksiFiskalOptions: { value: string; label: string }[];
+		kodeKoreksiFiskalOptions: { value: string; label: string; group?: string }[];
 	} = $props();
 
 	const hasFiskalSplit = $derived(Boolean(data.hasFiskalSplit));
@@ -40,8 +42,10 @@
 			? Number(data.nilaiKomersial || 0) - Number(data.nonObjekPajak || 0) - Number(data.dikenakanPphFinal || 0)
 			: Number(data.nilaiKomersial || 0)
 	);
+	const fiskalSign = $derived(data.classification === 'expense' ? -1 : 1);
 	const nilaiFiskal = $derived(
-		objekPajakTidakFinal + Number(data.penyesuaianFiskalPositif || 0) - Number(data.penyesuaianFiskalNegatif || 0)
+		objekPajakTidakFinal +
+			fiskalSign * (Number(data.penyesuaianFiskalPositif || 0) - Number(data.penyesuaianFiskalNegatif || 0))
 	);
 
 	function handleSave(): void {
@@ -149,12 +153,12 @@
 					</div>
 					<div style="display: flex; align-items: center;">
 						<label for="kodePenyesuaianFiskal" style="width: 220px;">Kode Penyesuaian Fiskal</label>
-						<select id="kodePenyesuaianFiskal" bind:value={data.kodePenyesuaianFiskal} style="flex: 1;">
-							<option value="">Tidak ada</option>
-							{#each kodeKoreksiFiskalOptions as kode}
-								<option value={kode.value}>{kode.label}</option>
-							{/each}
-						</select>
+						<CheckableSelect
+							id="kodePenyesuaianFiskal"
+							bind:value={data.kodePenyesuaianFiskal!}
+							options={kodeKoreksiFiskalOptions}
+							placeholder="Tidak ada"
+						/>
 					</div>
 
 					<div style="display: flex; align-items: center;">

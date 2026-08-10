@@ -44,6 +44,8 @@
         f17bAdaSkPengangsuranPenundaan: boolean;
         f17bJumlahDiangsurDitunda: number;
         f19aMetodePengembalian: boolean;
+        f18a: number;
+        f18b: number;
         g20WajibLaporAngsuranPph25: boolean;
         h21aTransaksiHubunganIstimewa: boolean;
         h21bDokumenPenentuanHargaTransfer: boolean;
@@ -81,6 +83,8 @@
         f17bAdaSkPengangsuranPenundaan = $bindable(),
         f17bJumlahDiangsurDitunda = $bindable(),
         f19aMetodePengembalian = $bindable(),
+        f18a,
+        f18b,
         g20WajibLaporAngsuranPph25 = $bindable(),
         h21aTransaksiHubunganIstimewa = $bindable(),
         h21bDokumenPenentuanHargaTransfer = $bindable(),
@@ -140,6 +144,8 @@
                 bind:f17bAdaSkPengangsuranPenundaan
                 bind:f17bJumlahDiangsurDitunda
                 bind:f19aMetodePengembalian
+                {f18a}
+                {f18b}
                 {readonly}
             />
         </Accordion>

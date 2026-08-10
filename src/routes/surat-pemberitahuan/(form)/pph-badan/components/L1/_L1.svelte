@@ -14,7 +14,7 @@
 		dikenakanPphFinal: number;
 		penyesuaianFiskalPositif: number;
 		penyesuaianFiskalNegatif: number;
-		kodePenyesuaianFiskal: string;
+		kodePenyesuaianFiskal: string[];
 	}
 
 	interface NeracaLeaf {
@@ -34,7 +34,7 @@
 		neracaTemplatesBySektor: Map<string, { rows: NeracaAkunTemplate[] }>;
 		neraca: NeracaLeaf[];
 		readonly?: boolean;
-		kodeKoreksiFiskalOptions: { value: string; label: string }[];
+		kodeKoreksiFiskalOptions: { value: string; label: string; group?: string }[];
 	}
 
 	let {
@@ -52,7 +52,7 @@
 		currentTab.title = currentTab.tab === 'L1' ? 'TRANSKRIP LAPORAN LABA RUGI DAN NERACA' : currentTab.title;
 	});
 
-	let editing = $state<any>({});
+	let editing = $state<any>({ kodePenyesuaianFiskal: [] });
 
 	function openModal(row: any) {
 		editing = { ...row };
@@ -69,7 +69,7 @@
 			dikenakanPphFinal: Number(editing.dikenakanPphFinal) || 0,
 			penyesuaianFiskalPositif: Number(editing.penyesuaianFiskalPositif) || 0,
 			penyesuaianFiskalNegatif: Number(editing.penyesuaianFiskalNegatif) || 0,
-			kodePenyesuaianFiskal: editing.kodePenyesuaianFiskal ?? ''
+			kodePenyesuaianFiskal: editing.kodePenyesuaianFiskal ?? []
 		};
 	}
 </script>

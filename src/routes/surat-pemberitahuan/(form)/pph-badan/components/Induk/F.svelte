@@ -14,6 +14,8 @@
         f17bAdaSkPengangsuranPenundaan: boolean;
         f17bJumlahDiangsurDitunda: number;
         f19aMetodePengembalian: boolean;
+        f18a: number;
+        f18b: number;
         readonly?: boolean;
     }
 
@@ -22,6 +24,8 @@
         f17bAdaSkPengangsuranPenundaan = $bindable(),
         f17bJumlahDiangsurDitunda = $bindable(),
         f19aMetodePengembalian = $bindable(),
+        f18a,
+        f18b,
         readonly = false
     }: Props = $props();
 
@@ -89,14 +93,14 @@
                 <td><span>18.a.</span></td>
                 <td><span>PPh yang kurang atau lebih bayar pada SPT yang dibetulkan</span></td>
                 <td></td>
-                <td><Input class={"tw:text-end"} type={"text"} value={0} disabled/></td>
+                <td><Input class={"tw:text-end"} type={"text"} value={rupiah.format(f18a)} disabled/></td>
                 <td></td>
             </tr>
             <tr>
                 <td><span>18.b.</span></td>
                 <td><span>PPh yang kurang atau lebih bayar karena pembetulan</span></td>
                 <td></td>
-                <td><Input class={"tw:text-end"} type={"text"} value={0} disabled/></td>
+                <td><Input class={"tw:text-end"} type={"text"} value={rupiah.format(f18b)} disabled/></td>
                 <td></td>
             </tr>
             <tr>

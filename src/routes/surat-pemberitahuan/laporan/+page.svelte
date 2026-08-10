@@ -5,6 +5,7 @@
 	import { formatMonth } from '$lib/helpers/date';
 	import { listSptPphBadan } from '../listSptPphBadan.remote';
 	import { listSptPpn } from '../listSptPpn.remote';
+	import { newPembetulanSptPphBadan } from '../konsep/newPembetulanSptPphBadan.remote';
 
 	const rupiah = new Intl.NumberFormat('id-ID');
 </script>
@@ -44,10 +45,14 @@
 						{/each}
 						{#each await listSptPphBadan({ status: 'dilaporkan' }) as row}
 							<tr>
-								<td>
+								<td class="tw:flex tw:gap-2">
 									<a href="/surat-pemberitahuan/pph-badan?id={row.id}" class="tw:text-black!">
 										<Button color="#FFD230">Lihat</Button>
 									</a>
+									<form {...newPembetulanSptPphBadan}>
+										<input type="hidden" name="id" value={row.id} />
+										<Button color="#FFD230">Buat Pembetulan</Button>
+									</form>
 								</td>
 								<td>SPT Tahunan PPh Badan</td>
 								<td>-</td>

@@ -110,7 +110,8 @@ export const getSptPphBadan = query(async () => {
 		lampiran10b,
 		lampiran10c,
 		lampiran10d,
-		lampiran13b
+		lampiran13b,
+		previousVersion
 	] = await Promise.all([
 		getLampiranL1(id),
 		getLampiranL2(id),
@@ -125,12 +126,26 @@ export const getSptPphBadan = query(async () => {
 		getLampiranL10B(id),
 		getLampiranL10C(id),
 		getLampiranL10D(id),
-		getLampiranL13B(id)
+		getLampiranL13B(id),
+		spt.pembetulanKe > 0
+			? db
+					.select({ pphKurangLebihBayar: spt_pph_badan.pphKurangLebihBayar })
+					.from(spt_pph_badan)
+					.where(
+						and(
+							eq(spt_pph_badan.npwp, spt.npwp),
+							eq(spt_pph_badan.tahunPajak, spt.tahunPajak),
+							eq(spt_pph_badan.pembetulanKe, spt.pembetulanKe - 1)
+						)
+					)
+					.limit(1)
+					.then((rows) => rows[0] ?? null)
+			: Promise.resolve(null)
 	]);
 
 	return {
 		readonly: spt.statusDraft !== 'konsep',
-		spt,
+		spt: { ...spt, previousPphKurangLebihBayar: previousVersion?.pphKurangLebihBayar ?? null },
 		lampiran1,
 		lampiran2,
 		lampiran3,

@@ -98,11 +98,10 @@ export const saveSptPphBadan = form(SaveSptPphBadanSchema, async (input) => {
 		error(404, 'Konsep SPT PPh Badan tidak ditemukan');
 	}
 
-	const statusDraft = input.action === 'Simpan Lapor' ? 'dilaporkan' : 'konsep';
 	const sektorUsahaId = await getSektorUsahaId(input.sektorUsaha);
 	const opiniAuditorId = await getOpiniAuditorId(input.diaudit, input.opiniAuditor);
 
-	await db.transaction(async (tx) => {
+	const statusDraft = await db.transaction(async (tx) => {
 		const netoFiskalSebelumFasilitas = await saveLampiranL1(tx, input.id, sektorUsahaId, {
 			labaRugi: input.labaRugi,
 			neraca: input.neraca
@@ -132,6 +131,13 @@ export const saveSptPphBadan = form(SaveSptPphBadanSchema, async (input) => {
 			f17bAdaSkPengangsuranPenundaan: input.f17bAdaSkPengangsuranPenundaan,
 			f17bJumlahDiangsurDitunda: Number(input.f17bJumlahDiangsurDitunda)
 		});
+
+		const statusDraft: 'konsep' | 'menunggu_pembayaran' | 'dilaporkan' =
+			input.action === 'Simpan Lapor'
+				? computed.f17c > 0
+					? 'menunggu_pembayaran'
+					: 'dilaporkan'
+				: 'konsep';
 
 		await tx
 			.update(spt_pph_badan)
@@ -240,9 +246,19 @@ export const saveSptPphBadan = form(SaveSptPphBadanSchema, async (input) => {
 			l13bC: input.l13bC,
 			l13bDTermanfaatkanTahunSebelumnya: input.l13bDTermanfaatkanTahunSebelumnya
 		});
+
+		return statusDraft;
 	});
 
-	redirect(303, statusDraft === 'dilaporkan' ? '/surat-pemberitahuan/laporan' : '/surat-pemberitahuan/konsep');
+	if (statusDraft === 'menunggu_pembayaran') {
+		redirect(303, '/surat-pemberitahuan/pembayaran');
+	}
+
+	if (statusDraft === 'dilaporkan') {
+		redirect(303, '/surat-pemberitahuan/laporan');
+	}
+
+	redirect(303, '/surat-pemberitahuan/konsep');
 });
 
 async function getOpiniAuditorId(diaudit: boolean, kode: string) {
