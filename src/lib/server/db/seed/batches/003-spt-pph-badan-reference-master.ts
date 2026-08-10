@@ -1,7 +1,7 @@
 import { fileURLToPath } from 'node:url';
 import { negara_spt_pph_badan, opini_auditor_spt_pph_badan, sektor_usaha_spt_pph_badan } from '../../schema';
 import type { SeedContext } from '../context';
-import { readCsv } from '../helpers';
+import { batchInsert, readCsv } from '../helpers';
 
 const negaraCsvPath = fileURLToPath(
 	new URL('../data/spt_pph_badan/negara.csv', import.meta.url)
@@ -42,58 +42,67 @@ const negaraId = (kode: string) => `negara-${kode}`;
 const negaraOptions = readCsv(negaraCsvPath) as { kode: string; nama: string }[];
 
 export const run = async ({ db }: SeedContext) => {
-	for (const row of sektorUsahaOptions) {
-		await db
-			.insert(sektor_usaha_spt_pph_badan)
-			.values({
-				id: sektorUsahaId(row.value),
-				kode: row.value,
-				nama: row.label,
-				lampiran1Kode: row.lampiran1Kode
-			})
-			.onConflictDoUpdate({
-				target: sektor_usaha_spt_pph_badan.kode,
-				set: {
+	await batchInsert(
+		db,
+		sektorUsahaOptions.map((row) =>
+			db
+				.insert(sektor_usaha_spt_pph_badan)
+				.values({
+					id: sektorUsahaId(row.value),
+					kode: row.value,
 					nama: row.label,
-					lampiran1Kode: row.lampiran1Kode,
-					aktif: true
-				}
-			});
-	}
+					lampiran1Kode: row.lampiran1Kode
+				})
+				.onConflictDoUpdate({
+					target: sektor_usaha_spt_pph_badan.kode,
+					set: {
+						nama: row.label,
+						lampiran1Kode: row.lampiran1Kode,
+						aktif: true
+					}
+				})
+		)
+	);
 
-	for (const row of auditorOptions) {
-		await db
-			.insert(opini_auditor_spt_pph_badan)
-			.values({
-				id: opiniAuditorId(row.value),
-				kode: row.value,
-				nama: row.label
-			})
-			.onConflictDoUpdate({
-				target: opini_auditor_spt_pph_badan.kode,
-				set: {
-					nama: row.label,
-					aktif: true
-				}
-			});
-	}
+	await batchInsert(
+		db,
+		auditorOptions.map((row) =>
+			db
+				.insert(opini_auditor_spt_pph_badan)
+				.values({
+					id: opiniAuditorId(row.value),
+					kode: row.value,
+					nama: row.label
+				})
+				.onConflictDoUpdate({
+					target: opini_auditor_spt_pph_badan.kode,
+					set: {
+						nama: row.label,
+						aktif: true
+					}
+				})
+		)
+	);
 
-	for (const row of negaraOptions) {
-		await db
-			.insert(negara_spt_pph_badan)
-			.values({
-				id: negaraId(row.kode),
-				kode: row.kode,
-				nama: row.nama
-			})
-			.onConflictDoUpdate({
-				target: negara_spt_pph_badan.kode,
-				set: {
-					nama: row.nama,
-					aktif: true
-				}
-			});
-	}
+	await batchInsert(
+		db,
+		negaraOptions.map((row) =>
+			db
+				.insert(negara_spt_pph_badan)
+				.values({
+					id: negaraId(row.kode),
+					kode: row.kode,
+					nama: row.nama
+				})
+				.onConflictDoUpdate({
+					target: negara_spt_pph_badan.kode,
+					set: {
+						nama: row.nama,
+						aktif: true
+					}
+				})
+		)
+	);
 
 	console.log(`Seeded SPT PPh Badan references: ${auditorOptions.length} auditor opinions`);
 	console.log(`Seeded SPT PPh Badan references: ${sektorUsahaOptions.length} business sectors`);

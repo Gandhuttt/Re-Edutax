@@ -4,6 +4,7 @@ import {
 	mata_uang_spt_pph_badan
 } from '../../schema';
 import type { SeedContext } from '../context';
+import { batchInsert } from '../helpers';
 
 export const name = '007 lampiran 3 kredit pajak luar negeri reference data';
 
@@ -170,55 +171,64 @@ const mataUangId = (kode: string) => `mata-uang-${kode}`;
 const jenisPajakDipotongDipungutId = (kode: string) => `jenis-pajak-dipotong-dipungut-${kode}`;
 
 export const run = async ({ db }: SeedContext) => {
-	for (const [index, nama] of jenisPenghasilanOptions.entries()) {
-		const kode = slugify(nama);
+	await batchInsert(
+		db,
+		jenisPenghasilanOptions.map((nama, index) => {
+			const kode = slugify(nama);
 
-		await db
-			.insert(jenis_penghasilan_kredit_pajak_luar_negeri_spt_pph_badan)
-			.values({
-				id: jenisPenghasilanId(kode),
-				kode,
-				nama,
-				nomorUrut: index + 1
-			})
-			.onConflictDoUpdate({
-				target: jenis_penghasilan_kredit_pajak_luar_negeri_spt_pph_badan.kode,
-				set: { nama, nomorUrut: index + 1, aktif: true }
-			});
-	}
+			return db
+				.insert(jenis_penghasilan_kredit_pajak_luar_negeri_spt_pph_badan)
+				.values({
+					id: jenisPenghasilanId(kode),
+					kode,
+					nama,
+					nomorUrut: index + 1
+				})
+				.onConflictDoUpdate({
+					target: jenis_penghasilan_kredit_pajak_luar_negeri_spt_pph_badan.kode,
+					set: { nama, nomorUrut: index + 1, aktif: true }
+				});
+		})
+	);
 
-	for (const nama of mataUangOptions) {
-		const kode = slugify(nama);
+	await batchInsert(
+		db,
+		mataUangOptions.map((nama) => {
+			const kode = slugify(nama);
 
-		await db
-			.insert(mata_uang_spt_pph_badan)
-			.values({
-				id: mataUangId(kode),
-				kode,
-				nama
-			})
-			.onConflictDoUpdate({
-				target: mata_uang_spt_pph_badan.kode,
-				set: { nama, aktif: true }
-			});
-	}
+			return db
+				.insert(mata_uang_spt_pph_badan)
+				.values({
+					id: mataUangId(kode),
+					kode,
+					nama
+				})
+				.onConflictDoUpdate({
+					target: mata_uang_spt_pph_badan.kode,
+					set: { nama, aktif: true }
+				});
+		})
+	);
 
-	for (const [index, nama] of jenisPajakDipotongDipungutOptions.entries()) {
-		const kode = slugify(nama);
+	await batchInsert(
+		db,
+		jenisPajakDipotongDipungutOptions.map((nama, index) => {
+			const kode = slugify(nama);
 
-		await db
-			.insert(jenis_pajak_dipotong_dipungut_spt_pph_badan)
-			.values({
-				id: jenisPajakDipotongDipungutId(kode),
-				kode,
-				nama,
-				nomorUrut: index + 1
-			})
-			.onConflictDoUpdate({
-				target: jenis_pajak_dipotong_dipungut_spt_pph_badan.kode,
-				set: { nama, nomorUrut: index + 1, aktif: true }
-			});
-	}
+			return db
+				.insert(jenis_pajak_dipotong_dipungut_spt_pph_badan)
+				.values({
+					id: jenisPajakDipotongDipungutId(kode),
+					kode,
+					nama,
+					nomorUrut: index + 1
+				})
+				.onConflictDoUpdate({
+					target: jenis_pajak_dipotong_dipungut_spt_pph_badan.kode,
+					set: { nama, nomorUrut: index + 1, aktif: true }
+				});
+		})
+	);
 
 	console.log(
 		`Seeded SPT PPh Badan references: ${jenisPenghasilanOptions.length} jenis penghasilan kredit pajak luar negeri`

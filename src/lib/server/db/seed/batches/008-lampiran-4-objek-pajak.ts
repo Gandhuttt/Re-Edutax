@@ -1,5 +1,6 @@
 import { objek_pajak_spt_pph_badan } from '../../schema';
 import type { SeedContext } from '../context';
+import { batchInsert } from '../helpers';
 
 export const name = '008 lampiran 4 objek pajak PPh final reference data';
 
@@ -81,22 +82,25 @@ const slugify = (value: string) =>
 const objekPajakId = (kode: string) => `objek-pajak-${kode}`;
 
 export const run = async ({ db }: SeedContext) => {
-	for (const [index, nama] of objekPajakOptions.entries()) {
-		const kode = slugify(nama);
+	await batchInsert(
+		db,
+		objekPajakOptions.map((nama, index) => {
+			const kode = slugify(nama);
 
-		await db
-			.insert(objek_pajak_spt_pph_badan)
-			.values({
-				id: objekPajakId(kode),
-				kode,
-				nama,
-				nomorUrut: index + 1
-			})
-			.onConflictDoUpdate({
-				target: objek_pajak_spt_pph_badan.kode,
-				set: { nama, nomorUrut: index + 1, aktif: true }
-			});
-	}
+			return db
+				.insert(objek_pajak_spt_pph_badan)
+				.values({
+					id: objekPajakId(kode),
+					kode,
+					nama,
+					nomorUrut: index + 1
+				})
+				.onConflictDoUpdate({
+					target: objek_pajak_spt_pph_badan.kode,
+					set: { nama, nomorUrut: index + 1, aktif: true }
+				});
+		})
+	);
 
 	console.log(`Seeded SPT PPh Badan references: ${objekPajakOptions.length} objek pajak PPh final`);
 

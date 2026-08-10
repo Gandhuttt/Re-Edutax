@@ -1,7 +1,28 @@
 import { readFileSync } from 'node:fs';
 import { eq } from 'drizzle-orm';
+import type { BatchItem } from 'drizzle-orm/batch';
 import { user, wajib_pajak } from '../schema';
 import type { SeedContext, TaxpayerSeedAccount } from './context';
+
+/**
+ * D1 pays a full network round-trip per statement, so awaiting inserts one by one in a loop
+ * is unusably slow for large reference tables. This groups statements into db.batch() calls,
+ * which execute as a single request.
+ */
+export const batchInsert = async <T extends BatchItem<'sqlite'>>(
+	db: SeedContext['db'],
+	statements: T[],
+	chunkSize = 50
+): Promise<void> => {
+	for (let i = 0; i < statements.length; i += chunkSize) {
+		const chunk = statements.slice(i, i + chunkSize);
+		if (chunk.length === 1) {
+			await chunk[0];
+		} else if (chunk.length > 1) {
+			await db.batch(chunk as [T, ...T[]]);
+		}
+	}
+};
 
 /**
  * Parses a CSV file with a header row into an array of column->value records.

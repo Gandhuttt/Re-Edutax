@@ -1,6 +1,7 @@
 import { eq } from 'drizzle-orm';
 import { sektor_usaha_spt_pph_badan, spt_pph_badan_lampiran_1_neraca_akun } from '../../schema';
 import type { SeedContext } from '../context';
+import { batchInsert } from '../helpers';
 
 type RowType = 'header' | 'data' | 'sum';
 type Section = 'aset' | 'liabilitas_ekuitas';
@@ -853,8 +854,8 @@ export const run = async ({ db }: SeedContext) => {
 			throw new Error(`Sektor usaha "${template.sektorKode}" belum di-seed`);
 		}
 
-		for (const [index, [kode, nama, type, section, parentKode, sign]] of template.rows.entries()) {
-			await db
+		const statements = template.rows.map(([kode, nama, type, section, parentKode, sign], index) =>
+			db
 				.insert(spt_pph_badan_lampiran_1_neraca_akun)
 				.values({
 					id: akunId(template.sektorKode, index),
@@ -878,9 +879,10 @@ export const run = async ({ db }: SeedContext) => {
 						parentKode: parentKode ?? null,
 						sign: sign ?? null
 					}
-				});
-			seeded += 1;
-		}
+				})
+		);
+		await batchInsert(db, statements);
+		seeded += template.rows.length;
 	}
 
 	console.log(`Seeded SPT PPh Badan references: ${seeded} lampiran 1 neraca akun rows`);

@@ -5,6 +5,7 @@ import {
 	metode_penentuan_harga_transfer_spt_pph_badan
 } from '../../schema';
 import type { SeedContext } from '../context';
+import { batchInsert } from '../helpers';
 
 export const name = '012 lampiran 10a bentuk hubungan/jenis transaksi/metode harga transfer reference data';
 
@@ -62,17 +63,18 @@ async function seedGroup(
 ) {
 	const currentKode = items.map((nama) => `${prefix}_${slugify(nama)}`);
 
-	for (const [index, nama] of items.entries()) {
+	const statements = items.map((nama, index) => {
 		const kode = currentKode[index];
 
-		await db
+		return db
 			.insert(table)
 			.values({ id: `${prefix}-${slugify(nama)}`, kode, nama, nomorUrut: index + 1 })
 			.onConflictDoUpdate({
 				target: table.kode,
 				set: { nama, nomorUrut: index + 1, aktif: true }
 			});
-	}
+	});
+	await batchInsert(db, statements);
 
 	await db.update(table).set({ aktif: false }).where(notInArray(table.kode, currentKode));
 

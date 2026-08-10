@@ -1,6 +1,7 @@
 import { notInArray } from 'drizzle-orm';
 import { kode_koreksi_fiskal_spt_pph_badan } from '../../schema';
 import type { SeedContext } from '../context';
+import { batchInsert } from '../helpers';
 
 export const name = '013 kode koreksi fiskal (PER 11/2025) reference data';
 
@@ -67,20 +68,23 @@ const kodeKoreksiFiskalId = (kode: string) => `kode-koreksi-fiskal-${kode.toLowe
 export const run = async ({ db }: SeedContext) => {
 	const currentKode = kodeKoreksiFiskal.map((row) => row.kode);
 
-	for (const row of kodeKoreksiFiskal) {
-		await db
-			.insert(kode_koreksi_fiskal_spt_pph_badan)
-			.values({
-				id: kodeKoreksiFiskalId(row.kode),
-				kode: row.kode,
-				nama: row.nama,
-				jenis: row.jenis
-			})
-			.onConflictDoUpdate({
-				target: kode_koreksi_fiskal_spt_pph_badan.kode,
-				set: { nama: row.nama, jenis: row.jenis, aktif: true }
-			});
-	}
+	await batchInsert(
+		db,
+		kodeKoreksiFiskal.map((row) =>
+			db
+				.insert(kode_koreksi_fiskal_spt_pph_badan)
+				.values({
+					id: kodeKoreksiFiskalId(row.kode),
+					kode: row.kode,
+					nama: row.nama,
+					jenis: row.jenis
+				})
+				.onConflictDoUpdate({
+					target: kode_koreksi_fiskal_spt_pph_badan.kode,
+					set: { nama: row.nama, jenis: row.jenis, aktif: true }
+				})
+		)
+	);
 
 	await db
 		.update(kode_koreksi_fiskal_spt_pph_badan)

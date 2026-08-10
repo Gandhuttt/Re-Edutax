@@ -1,5 +1,6 @@
 import { jenis_penghasilan_bukan_objek_pajak_spt_pph_badan } from '../../schema';
 import type { SeedContext } from '../context';
+import { batchInsert } from '../helpers';
 
 export const name = '009 lampiran 4 jenis penghasilan bukan objek pajak reference data';
 
@@ -23,21 +24,24 @@ const jenisPenghasilanOptions = [
 const jenisPenghasilanId = (kode: string) => `jenis-penghasilan-bukan-objek-pajak-${kode}`;
 
 export const run = async ({ db }: SeedContext) => {
-	for (const [index, nama] of jenisPenghasilanOptions.entries()) {
-		const kode = String(index + 1).padStart(2, '0');
+	await batchInsert(
+		db,
+		jenisPenghasilanOptions.map((nama, index) => {
+			const kode = String(index + 1).padStart(2, '0');
 
-		await db
-			.insert(jenis_penghasilan_bukan_objek_pajak_spt_pph_badan)
-			.values({
-				id: jenisPenghasilanId(kode),
-				kode,
-				nama
-			})
-			.onConflictDoUpdate({
-				target: jenis_penghasilan_bukan_objek_pajak_spt_pph_badan.kode,
-				set: { nama, aktif: true }
-			});
-	}
+			return db
+				.insert(jenis_penghasilan_bukan_objek_pajak_spt_pph_badan)
+				.values({
+					id: jenisPenghasilanId(kode),
+					kode,
+					nama
+				})
+				.onConflictDoUpdate({
+					target: jenis_penghasilan_bukan_objek_pajak_spt_pph_badan.kode,
+					set: { nama, aktif: true }
+				});
+		})
+	);
 
 	console.log(
 		`Seeded SPT PPh Badan references: ${jenisPenghasilanOptions.length} jenis penghasilan bukan objek pajak`

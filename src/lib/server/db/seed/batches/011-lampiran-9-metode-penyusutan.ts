@@ -1,6 +1,7 @@
 import { and, eq, notInArray } from 'drizzle-orm';
 import { metode_penyusutan_spt_pph_badan } from '../../schema';
 import type { SeedContext } from '../context';
+import { batchInsert } from '../helpers';
 
 export const name = '011 lampiran 9 metode penyusutan/amortisasi reference data';
 
@@ -35,10 +36,10 @@ export const run = async ({ db }: SeedContext) => {
 	for (const group of groups) {
 		const currentKode = group.items.map((nama) => `${group.jenis}_${slugify(nama)}`);
 
-		for (const [index, nama] of group.items.entries()) {
+		const statements = group.items.map((nama, index) => {
 			const kode = currentKode[index];
 
-			await db
+			return db
 				.insert(metode_penyusutan_spt_pph_badan)
 				.values({
 					id: metodePenyusutanId(kode),
@@ -51,9 +52,9 @@ export const run = async ({ db }: SeedContext) => {
 					target: metode_penyusutan_spt_pph_badan.kode,
 					set: { nama, jenis: group.jenis, nomorUrut: index + 1, aktif: true }
 				});
-
-			total += 1;
-		}
+		});
+		await batchInsert(db, statements);
+		total += group.items.length;
 
 		await db
 			.update(metode_penyusutan_spt_pph_badan)
