@@ -10,6 +10,7 @@
 	import Select from '$lib/components/Select.svelte';
 	import Table from '$lib/components/Table.svelte';
 	import Induk from './components/Induk/_Induk.svelte';
+	import Navbar from '../Navbar.svelte';
 	import L1 from './components/L1/_L1.svelte';
 	import L2 from './components/L2/_L2.svelte';
 	import L3 from './components/L3/_L3.svelte';
@@ -475,13 +476,8 @@
 	});
 	let saveError = $state('');
 
+	//vvvLOST & FOUNDvvv//
 	const tabs = ['Induk', 'L1', 'L2', 'L3', 'L4', 'L5', 'L6', 'L7', 'L8', 'L9', 'L10-A', 'L10-B', 'L10-C', 'L10-D', 'L11-A', 'L11-B', 'L13-A', 'L13-B', 'L13-C', 'L14'];
-	const tabLabel = (tab: string) => {
-		if (tab !== 'L1') return tab;
-		const lampiranKode = lampiran1LabaRugiTemplatesBySektor.get(sektorUsaha)?.lampiranKode;
-		return `L1${lampiranKode ? `-${lampiranKode}` : ''}`;
-	};
-
 	// Some lampiran only apply when the corresponding Induk question is answered "Ya" -
 	// tabs without an entry here are always applicable. L2 is also conditional per Induk H
 	// (21.c/21.d) but isn't gated here: that condition only applies to its "Bagian B"
@@ -508,367 +504,397 @@
 		'L13-C': () => e16FasilitasPenguranganPphTerutang,
 		L14: () => h21hSisaLebihSaranaPrasarana
 	};
-
 	let visibleTabs = $derived(tabs.filter((tab) => (tabVisibility[tab] ?? (() => true))()));
+	//^^^LOST & FOUND^^^//
 
-	$effect(() => {
-		if (!visibleTabs.includes(currentTab.tab)) {
-			currentTab.tab = 'Induk';
-		}
-	});
+	const tabLabel = (tab: string) => {
+		if (tab !== 'L1') return tab;
+		const lampiranKode = lampiran1LabaRugiTemplatesBySektor.get(sektorUsaha)?.lampiranKode;
+		return `L1${lampiranKode ? `-${lampiranKode}` : ''}`;
+	};
+
+	let test = $derived([
+		{tab: 'Induk', visibility: true},
+		{tab: 'L1', visibility: true},
+		{tab: 'L2', visibility: true},
+		{tab: 'L3', visibility: e13AdaKreditPajakLuarNegeri},
+		{tab: 'L4', visibility: menerimaPenghasilanFinal || menerimaPenghasilanBukanObjekPajak},
+		{tab: 'L5', visibility: menerimaPenghasilanPp23},
+		{tab: 'L6', visibility: true},
+		{tab: 'L7', visibility: d8AdaKompensasiKerugian},
+		{tab: 'L8', visibility: true},
+		{tab: 'L9', visibility: h21ePenyusutanAmortisasiFiskal},
+		{tab: 'L10-A', visibility: h21aTransaksiHubunganIstimewa},
+		{tab: 'L10-B', visibility: h21aTransaksiHubunganIstimewa},
+		{tab: 'L10-C', visibility: h21aTransaksiHubunganIstimewa},
+		{tab: 'L10-D', visibility: h21bDokumenPenentuanHargaTransfer},
+		{tab: 'L11-A', visibility: h21fBiayaEntertainment},
+		{tab: 'L11-B', visibility: true},
+		{tab: 'L13-A', visibility: d5FasilitasPenanamanModal || h21gFasilitasPenanamanModalDaerahTertentu},
+		{tab: 'L13-B', visibility: d6FasilitasBrutoVokasi || d10FasilitasBrutoLitbang},
+		{tab: 'L13-C', visibility: e16FasilitasPenguranganPphTerutang},
+		{tab: 'L14', visibility: h21hSisaLebihSaranaPrasarana},
+	])
+
+	// $effect(() => {
+	// 	if (!test.find((t) => t.tab === currentTab.tab)?.visibility) {
+	// 		currentTab.tab = 'Induk';
+	// 	}
+	// });
 </script>
 
-<div class="tw:w-full tw:p-10">
-	<Card>
-		{#snippet head()}
-			<div class="tw:flex tw:w-full tw:items-center tw:justify-between">
-				<span class="tw:text-2xl">SPT Tahunan PPh Badan</span>
-				<span class="tw:text-sm">Tahun Pajak {spt.tahunPajak}</span>
+<Card>
+	{#snippet head()}
+		<div class="tw:flex tw:w-full tw:items-center tw:justify-between">
+			<span class="tw:text-2xl">SPT Tahunan PPh Badan</span>
+			<span class="tw:text-sm">Tahun Pajak {spt.tahunPajak}</span>
+		</div>
+	{/snippet}
+	{#snippet body()}
+		<form
+			novalidate
+			onkeydown={(e) => {
+				if (e.key === 'Enter' && !(e.target instanceof HTMLTextAreaElement)) {
+					e.preventDefault();
+				}
+			}}
+			{...saveForm.enhance(async (form) => {
+				saveError = '';
+
+				try {
+					if (await form.submit()) {
+						await tick();
+						form.element.reset();
+					} else {
+						const issues = form.fields.allIssues();
+						saveError = issues?.length
+							? issues.map((issue) => issue.message).join('; ')
+							: 'Periksa kembali data yang diisi.';
+					}
+				} catch (e) {
+					console.error(e);
+					saveError = isHttpError(e)
+						? e.body.message
+						: e instanceof Error
+							? e.message
+							: 'Gagal menyimpan SPT PPh Badan.';
+				}
+			})}
+		>
+			<input type="hidden" name="labaRugi" value={JSON.stringify(labaRugi)} />
+			<input type="hidden" name="neraca" value={JSON.stringify(neraca)} />
+			<input type="hidden" name="l2a" value={JSON.stringify(l2a)} />
+			<input type="hidden" name="l2b" value={JSON.stringify(l2b)} />
+			<input type="hidden" name="l3a" value={JSON.stringify(l3a)} />
+			<input type="hidden" name="l3aPengembalianPengurangan" value={l3aPengembalianPengurangan} />
+			<input type="hidden" name="l3b" value={JSON.stringify(l3b)} />
+			<input type="hidden" name="l4a" value={JSON.stringify(l4a)} />
+			<input type="hidden" name="l4b" value={JSON.stringify(l4b)} />
+			<input type="hidden" name="l5a" value={JSON.stringify(l5a)} />
+			<input type="hidden" name="l5bDipotong" value={JSON.stringify(l5bDipotong)} />
+			<input type="hidden" name="l6DasarAngsuran" value={l6DasarAngsuran} />
+			<input type="hidden" name="l6KompensasiKerugian" value={l6KompensasiKerugian} />
+			<input type="hidden" name="l6PphTerutang" value={l6PphTerutang} />
+			<input type="hidden" name="l6KreditPajakTahunLalu" value={l6KreditPajakTahunLalu} />
+			<input type="hidden" name="l7" value={JSON.stringify(l7)} />
+			<input type="hidden" name="l8JumlahPeredaranBruto" value={l8JumlahPeredaranBruto} />
+			<input type="hidden" name="l8PenghasilanKenaPajak" value={l8PenghasilanKenaPajak} />
+			<input type="hidden" name="l9" value={JSON.stringify(l9)} />
+			<input type="hidden" name="l9AJumlahPenyusutanKomersial" value={l9AJumlahPenyusutanKomersial} />
+			<input type="hidden" name="l9BJumlahPenyusutanKomersial" value={l9BJumlahPenyusutanKomersial} />
+			<input type="hidden" name="l9CJumlahAmortisasiKomersial" value={l9CJumlahAmortisasiKomersial} />
+			<input type="hidden" name="l10a" value={JSON.stringify(l10a)} />
+			<input type="hidden" name="l10bHubunganA" value={l10bHubunganA} />
+			<input type="hidden" name="l10bHubunganB" value={l10bHubunganB} />
+			<input type="hidden" name="l10bHubunganC" value={l10bHubunganC} />
+			<input type="hidden" name="l10bHubunganD" value={l10bHubunganD} />
+			<input type="hidden" name="l10bTransaksiA" value={l10bTransaksiA} />
+			<input type="hidden" name="l10bTransaksiB" value={l10bTransaksiB} />
+			<input type="hidden" name="l10bTransaksiC" value={l10bTransaksiC} />
+			<input type="hidden" name="l10bDokumentasiA" value={l10bDokumentasiA} />
+			<input type="hidden" name="l10bDokumentasiB" value={l10bDokumentasiB} />
+			<input type="hidden" name="l10bDokumentasiC" value={l10bDokumentasiC} />
+			<input type="hidden" name="l10bDokumentasiD" value={l10bDokumentasiD} />
+			<input type="hidden" name="l10bDokumentasiE" value={l10bDokumentasiE} />
+			<input type="hidden" name="l10bDokumenA" value={l10bDokumenA} />
+			<input type="hidden" name="l10bDokumenB" value={l10bDokumenB} />
+			<input type="hidden" name="l10bDokumenC" value={l10bDokumenC} />
+			<input type="hidden" name="l10c" value={JSON.stringify(l10c)} />
+			<input type="hidden" name="l10cDitentukanPrinsip" value={l10cDitentukanPrinsip} />
+			<input type="hidden" name="l10dDokumenIndukA" value={l10dDokumenIndukA} />
+			<input type="hidden" name="l10dDokumenIndukB" value={l10dDokumenIndukB} />
+			<input type="hidden" name="l10dDokumenIndukC" value={l10dDokumenIndukC} />
+			<input type="hidden" name="l10dDokumenIndukD" value={l10dDokumenIndukD} />
+			<input type="hidden" name="l10dDokumenIndukE" value={l10dDokumenIndukE} />
+			<input type="hidden" name="l10dDokumenLokalA" value={l10dDokumenLokalA} />
+			<input type="hidden" name="l10dDokumenLokalB" value={l10dDokumenLokalB} />
+			<input type="hidden" name="l10dDokumenLokalC" value={l10dDokumenLokalC} />
+			<input type="hidden" name="l10dDokumenLokalD" value={l10dDokumenLokalD} />
+			<input type="hidden" name="l10dDokumenLokalE" value={l10dDokumenLokalE} />
+			<input type="hidden" name="l10dTanggalDokumenIndukTersedia" value={l10dTanggalDokumenIndukTersedia} />
+			<input type="hidden" name="l10dTanggalDokumenLokalTersedia" value={l10dTanggalDokumenLokalTersedia} />
+			<input type="hidden" name="l13bA" value={JSON.stringify(l13bA)} />
+			<input type="hidden" name="l13bB" value={JSON.stringify(l13bB)} />
+			<input type="hidden" name="l13bC" value={JSON.stringify(l13bC)} />
+			<input type="hidden" name="l13bDTermanfaatkanTahunSebelumnya" value={l13bDTermanfaatkanTahunSebelumnya} />
+			<input type="hidden" name="d5FasilitasPenanamanModal" value={d5FasilitasPenanamanModal} />
+			<input type="hidden" name="d6FasilitasBrutoVokasi" value={d6FasilitasBrutoVokasi} />
+			<input type="hidden" name="d8AdaKompensasiKerugian" value={d8AdaKompensasiKerugian} />
+			<input type="hidden" name="d10FasilitasBrutoLitbang" value={d10FasilitasBrutoLitbang} />
+			<input type="hidden" name="tarifPajak" value={tarifPajak} />
+			<input type="hidden" name="persentaseTarifLainnya" value={persentaseTarifLainnya} />
+			<input type="hidden" name="e13AdaKreditPajakLuarNegeri" value={e13AdaKreditPajakLuarNegeri} />
+			<input type="hidden" name="e14AngsuranPph25TahunBerjalan" value={e14AngsuranPph25TahunBerjalan} />
+			<input type="hidden" name="e15StpPph25" value={e15StpPph25} />
+			<input type="hidden" name="e16FasilitasPenguranganPphTerutang" value={e16FasilitasPenguranganPphTerutang} />
+			<input type="hidden" name="f17bAdaSkPengangsuranPenundaan" value={f17bAdaSkPengangsuranPenundaan} />
+			<input type="hidden" name="f17bJumlahDiangsurDitunda" value={f17bJumlahDiangsurDitunda} />
+			<input
+				type="hidden"
+				name="f19aMetodePengembalian"
+				value={f19aMetodePengembalian ? 'pengembalian_pendahuluan' : 'pemeriksaan'}
+			/>
+			<input type="hidden" name="g20WajibLaporAngsuranPph25" value={g20WajibLaporAngsuranPph25} />
+			<input type="hidden" name="h21aTransaksiHubunganIstimewa" value={h21aTransaksiHubunganIstimewa} />
+			<input type="hidden" name="h21bDokumenPenentuanHargaTransfer" value={h21bDokumenPenentuanHargaTransfer} />
+			<input type="hidden" name="h21cPenanamanModalAfiliasi" value={h21cPenanamanModalAfiliasi} />
+			<input type="hidden" name="h21dUtangPiutangAfiliasi" value={h21dUtangPiutangAfiliasi} />
+			<input type="hidden" name="h21ePenyusutanAmortisasiFiskal" value={h21ePenyusutanAmortisasiFiskal} />
+			<input type="hidden" name="h21fBiayaEntertainment" value={h21fBiayaEntertainment} />
+			<input
+				type="hidden"
+				name="h21gFasilitasPenanamanModalDaerahTertentu"
+				value={h21gFasilitasPenanamanModalDaerahTertentu}
+			/>
+			<input type="hidden" name="h21hSisaLebihSaranaPrasarana" value={h21hSisaLebihSaranaPrasarana} />
+			<input type="hidden" name="h21iDividenLuarNegeri" value={h21iDividenLuarNegeri} />
+
+			<!-- NAVBAR -->
+			<!-- <header class="tw:mb-5">
+				<nav class="tw:overflow-x-auto tw:border-b tw:border-[#A9A9A9]">
+					<ul class="tw:m-0! tw:flex tw:min-w-max tw:flex-row tw:p-0!">
+						{#each visibleTabs as tab}
+							<li class:active-tab={currentTab.tab === tab}>
+								<button type="button" onclick={() => (currentTab.tab = tab)}>{tabLabel(tab)}</button>
+							</li>
+						{/each}
+					</ul>
+				</nav>
+			</header> -->
+			<Navbar tabs={test} bind:currentTab={currentTab.tab} specialLabel={tabLabel}/>
+
+			<Induk
+				bind:currentTab
+				{spt}
+				{readonly}
+				bind:sektorUsaha
+				bind:menerimaPenghasilanPp23
+				bind:hanyaPenghasilanPp23
+				bind:menerimaPenghasilanFinal
+				bind:menerimaPenghasilanBukanObjekPajak
+				{l4a}
+				{l4b}
+				computed={indukDEF}
+				bind:d5FasilitasPenanamanModal
+				bind:d6FasilitasBrutoVokasi
+				bind:d8AdaKompensasiKerugian
+				bind:d10FasilitasBrutoLitbang
+				bind:tarifPajak
+				bind:persentaseTarifLainnya
+				bind:e13AdaKreditPajakLuarNegeri
+				bind:e14AngsuranPph25TahunBerjalan
+				bind:e15StpPph25
+				bind:e16FasilitasPenguranganPphTerutang
+				bind:f17bAdaSkPengangsuranPenundaan
+				bind:f17bJumlahDiangsurDitunda
+				bind:f19aMetodePengembalian
+				{f18a}
+				{f18b}
+				bind:g20WajibLaporAngsuranPph25
+				bind:h21aTransaksiHubunganIstimewa
+				bind:h21bDokumenPenentuanHargaTransfer
+				bind:h21cPenanamanModalAfiliasi
+				bind:h21dUtangPiutangAfiliasi
+				bind:h21ePenyusutanAmortisasiFiskal
+				bind:h21fBiayaEntertainment
+				bind:h21gFasilitasPenanamanModalDaerahTertentu
+				bind:h21hSisaLebihSaranaPrasarana
+				bind:h21iDividenLuarNegeri
+			></Induk>
+
+			<!-- Lampiran -->
+			<div class="{currentTab.tab === "Induk" ? "tw:hidden" : ""}">
+				<h2>{currentTab.title}</h2>
+
+				<!-- Header -->
+				<Card>
+				{#snippet head()}
+					<span class="tw:text-xl!">HEADER</span>
+				{/snippet}
+				{#snippet body()}
+					<div>
+						<Table class="tw:table-fixed tw:min-w-full tw:border-collapse" >
+						{#snippet head()}
+							<tr class="tw:hidden">
+								<td><Input hidden/></td>
+							</tr>
+						{/snippet}
+						{#snippet body()}
+							<tr>
+								<td class="tw:w-[20rem]"><span>Tahun Pajak/Bagian Tahun Pajak</span></td>
+								<td><Input type={"text"} value={spt.tahunPajak} disabled /></td>
+							</tr>
+							<tr>
+								<td><span class="tw:mr-10">Nomor Identitas WP</span></td>
+								<td><Input type={"text"} value={"00000000000000000"} disabled /></td>
+							</tr>
+						{/snippet}
+						</Table>
+					</div>
+				{/snippet}
+				</Card>
 			</div>
-		{/snippet}
-		{#snippet body()}
-			<form
-				novalidate
-				onkeydown={(e) => {
-					if (e.key === 'Enter' && !(e.target instanceof HTMLTextAreaElement)) {
-						e.preventDefault();
-					}
-				}}
-				{...saveForm.enhance(async (form) => {
-					saveError = '';
 
-					try {
-						if (await form.submit()) {
-							await tick();
-							form.element.reset();
-						} else {
-							const issues = form.fields.allIssues();
-							saveError = issues?.length
-								? issues.map((issue) => issue.message).join('; ')
-								: 'Periksa kembali data yang diisi.';
-						}
-					} catch (e) {
-						console.error(e);
-						saveError = isHttpError(e)
-							? e.body.message
-							: e instanceof Error
-								? e.message
-								: 'Gagal menyimpan SPT PPh Badan.';
-					}
-				})}
-			>
-				<input type="hidden" name="labaRugi" value={JSON.stringify(labaRugi)} />
-				<input type="hidden" name="neraca" value={JSON.stringify(neraca)} />
-				<input type="hidden" name="l2a" value={JSON.stringify(l2a)} />
-				<input type="hidden" name="l2b" value={JSON.stringify(l2b)} />
-				<input type="hidden" name="l3a" value={JSON.stringify(l3a)} />
-				<input type="hidden" name="l3aPengembalianPengurangan" value={l3aPengembalianPengurangan} />
-				<input type="hidden" name="l3b" value={JSON.stringify(l3b)} />
-				<input type="hidden" name="l4a" value={JSON.stringify(l4a)} />
-				<input type="hidden" name="l4b" value={JSON.stringify(l4b)} />
-				<input type="hidden" name="l5a" value={JSON.stringify(l5a)} />
-				<input type="hidden" name="l5bDipotong" value={JSON.stringify(l5bDipotong)} />
-				<input type="hidden" name="l6DasarAngsuran" value={l6DasarAngsuran} />
-				<input type="hidden" name="l6KompensasiKerugian" value={l6KompensasiKerugian} />
-				<input type="hidden" name="l6PphTerutang" value={l6PphTerutang} />
-				<input type="hidden" name="l6KreditPajakTahunLalu" value={l6KreditPajakTahunLalu} />
-				<input type="hidden" name="l7" value={JSON.stringify(l7)} />
-				<input type="hidden" name="l8JumlahPeredaranBruto" value={l8JumlahPeredaranBruto} />
-				<input type="hidden" name="l8PenghasilanKenaPajak" value={l8PenghasilanKenaPajak} />
-				<input type="hidden" name="l9" value={JSON.stringify(l9)} />
-				<input type="hidden" name="l9AJumlahPenyusutanKomersial" value={l9AJumlahPenyusutanKomersial} />
-				<input type="hidden" name="l9BJumlahPenyusutanKomersial" value={l9BJumlahPenyusutanKomersial} />
-				<input type="hidden" name="l9CJumlahAmortisasiKomersial" value={l9CJumlahAmortisasiKomersial} />
-				<input type="hidden" name="l10a" value={JSON.stringify(l10a)} />
-				<input type="hidden" name="l10bHubunganA" value={l10bHubunganA} />
-				<input type="hidden" name="l10bHubunganB" value={l10bHubunganB} />
-				<input type="hidden" name="l10bHubunganC" value={l10bHubunganC} />
-				<input type="hidden" name="l10bHubunganD" value={l10bHubunganD} />
-				<input type="hidden" name="l10bTransaksiA" value={l10bTransaksiA} />
-				<input type="hidden" name="l10bTransaksiB" value={l10bTransaksiB} />
-				<input type="hidden" name="l10bTransaksiC" value={l10bTransaksiC} />
-				<input type="hidden" name="l10bDokumentasiA" value={l10bDokumentasiA} />
-				<input type="hidden" name="l10bDokumentasiB" value={l10bDokumentasiB} />
-				<input type="hidden" name="l10bDokumentasiC" value={l10bDokumentasiC} />
-				<input type="hidden" name="l10bDokumentasiD" value={l10bDokumentasiD} />
-				<input type="hidden" name="l10bDokumentasiE" value={l10bDokumentasiE} />
-				<input type="hidden" name="l10bDokumenA" value={l10bDokumenA} />
-				<input type="hidden" name="l10bDokumenB" value={l10bDokumenB} />
-				<input type="hidden" name="l10bDokumenC" value={l10bDokumenC} />
-				<input type="hidden" name="l10c" value={JSON.stringify(l10c)} />
-				<input type="hidden" name="l10cDitentukanPrinsip" value={l10cDitentukanPrinsip} />
-				<input type="hidden" name="l10dDokumenIndukA" value={l10dDokumenIndukA} />
-				<input type="hidden" name="l10dDokumenIndukB" value={l10dDokumenIndukB} />
-				<input type="hidden" name="l10dDokumenIndukC" value={l10dDokumenIndukC} />
-				<input type="hidden" name="l10dDokumenIndukD" value={l10dDokumenIndukD} />
-				<input type="hidden" name="l10dDokumenIndukE" value={l10dDokumenIndukE} />
-				<input type="hidden" name="l10dDokumenLokalA" value={l10dDokumenLokalA} />
-				<input type="hidden" name="l10dDokumenLokalB" value={l10dDokumenLokalB} />
-				<input type="hidden" name="l10dDokumenLokalC" value={l10dDokumenLokalC} />
-				<input type="hidden" name="l10dDokumenLokalD" value={l10dDokumenLokalD} />
-				<input type="hidden" name="l10dDokumenLokalE" value={l10dDokumenLokalE} />
-				<input type="hidden" name="l10dTanggalDokumenIndukTersedia" value={l10dTanggalDokumenIndukTersedia} />
-				<input type="hidden" name="l10dTanggalDokumenLokalTersedia" value={l10dTanggalDokumenLokalTersedia} />
-				<input type="hidden" name="l13bA" value={JSON.stringify(l13bA)} />
-				<input type="hidden" name="l13bB" value={JSON.stringify(l13bB)} />
-				<input type="hidden" name="l13bC" value={JSON.stringify(l13bC)} />
-				<input type="hidden" name="l13bDTermanfaatkanTahunSebelumnya" value={l13bDTermanfaatkanTahunSebelumnya} />
-				<input type="hidden" name="d5FasilitasPenanamanModal" value={d5FasilitasPenanamanModal} />
-				<input type="hidden" name="d6FasilitasBrutoVokasi" value={d6FasilitasBrutoVokasi} />
-				<input type="hidden" name="d8AdaKompensasiKerugian" value={d8AdaKompensasiKerugian} />
-				<input type="hidden" name="d10FasilitasBrutoLitbang" value={d10FasilitasBrutoLitbang} />
-				<input type="hidden" name="tarifPajak" value={tarifPajak} />
-				<input type="hidden" name="persentaseTarifLainnya" value={persentaseTarifLainnya} />
-				<input type="hidden" name="e13AdaKreditPajakLuarNegeri" value={e13AdaKreditPajakLuarNegeri} />
-				<input type="hidden" name="e14AngsuranPph25TahunBerjalan" value={e14AngsuranPph25TahunBerjalan} />
-				<input type="hidden" name="e15StpPph25" value={e15StpPph25} />
-				<input type="hidden" name="e16FasilitasPenguranganPphTerutang" value={e16FasilitasPenguranganPphTerutang} />
-				<input type="hidden" name="f17bAdaSkPengangsuranPenundaan" value={f17bAdaSkPengangsuranPenundaan} />
-				<input type="hidden" name="f17bJumlahDiangsurDitunda" value={f17bJumlahDiangsurDitunda} />
-				<input
-					type="hidden"
-					name="f19aMetodePengembalian"
-					value={f19aMetodePengembalian ? 'pengembalian_pendahuluan' : 'pemeriksaan'}
-				/>
-				<input type="hidden" name="g20WajibLaporAngsuranPph25" value={g20WajibLaporAngsuranPph25} />
-				<input type="hidden" name="h21aTransaksiHubunganIstimewa" value={h21aTransaksiHubunganIstimewa} />
-				<input type="hidden" name="h21bDokumenPenentuanHargaTransfer" value={h21bDokumenPenentuanHargaTransfer} />
-				<input type="hidden" name="h21cPenanamanModalAfiliasi" value={h21cPenanamanModalAfiliasi} />
-				<input type="hidden" name="h21dUtangPiutangAfiliasi" value={h21dUtangPiutangAfiliasi} />
-				<input type="hidden" name="h21ePenyusutanAmortisasiFiskal" value={h21ePenyusutanAmortisasiFiskal} />
-				<input type="hidden" name="h21fBiayaEntertainment" value={h21fBiayaEntertainment} />
-				<input
-					type="hidden"
-					name="h21gFasilitasPenanamanModalDaerahTertentu"
-					value={h21gFasilitasPenanamanModalDaerahTertentu}
-				/>
-				<input type="hidden" name="h21hSisaLebihSaranaPrasarana" value={h21hSisaLebihSaranaPrasarana} />
-				<input type="hidden" name="h21iDividenLuarNegeri" value={h21iDividenLuarNegeri} />
-				<header class="tw:mb-5">
-					<nav class="tw:overflow-x-auto tw:border-b tw:border-[#A9A9A9]">
-						<ul class="tw:m-0! tw:flex tw:min-w-max tw:flex-row tw:p-0!">
-							{#each visibleTabs as tab}
-								<li class:active-tab={currentTab.tab === tab}>
-									<button type="button" onclick={() => (currentTab.tab = tab)}>{tabLabel(tab)}</button>
-								</li>
-							{/each}
-						</ul>
-					</nav>
-				</header>
+			<L1
+				bind:currentTab
+				{sektorUsaha}
+				templatesBySektor={lampiran1LabaRugiTemplatesBySektor}
+				bind:labaRugi
+				neracaTemplatesBySektor={lampiran1NeracaTemplatesBySektor}
+				bind:neraca
+				{readonly}
+				{kodeKoreksiFiskalOptions}
+			/>
+			<L2 bind:currentTab bind:l2a bind:l2b {readonly} {negaraOptions}/>
+			<L3
+				bind:currentTab
+				bind:l3a
+				bind:l3aPengembalianPengurangan
+				bind:l3b
+				{readonly}
+				{negaraOptions}
+				jenisPenghasilanOptions={jenisPenghasilanKreditPajakLuarNegeriOptions}
+				{mataUangOptions}
+				jenisPajakOptions={jenisPajakDipotongDipungutOptions}
+			/>
+			<L4 bind:currentTab bind:l4a bind:l4b {readonly} {objekPajakOptions} jenisPenghasilanOptions={jenisPenghasilanBukanObjekPajakOptions}/>
+			<L5 bind:currentTab bind:l5a bind:l5bDipotong {readonly}/>
+			<L6
+				bind:currentTab
+				bind:dasarAngsuran={l6DasarAngsuran}
+				bind:kompensasiKerugian={l6KompensasiKerugian}
+				bind:pphTerutang={l6PphTerutang}
+				bind:kreditPajakTahunLalu={l6KreditPajakTahunLalu}
+				onKompensasiKerugianEdit={() => (l6KompensasiKerugianTouched = true)}
+				onPphTerutangEdit={() => (l6PphTerutangTouched = true)}
+				{readonly}
+			/>
+			<L7 bind:currentTab bind:l7 {readonly}/>
+			<L8
+				bind:currentTab
+				bind:jumlahPeredaranBruto={l8JumlahPeredaranBruto}
+				penghasilanKenaPajak={l8PenghasilanKenaPajak}
+				{readonly}
+			/>
+			<L9
+				bind:currentTab
+				bind:l9
+				bind:jumlahPenyusutanKomersialA={l9AJumlahPenyusutanKomersial}
+				bind:jumlahPenyusutanKomersialB={l9BJumlahPenyusutanKomersial}
+				bind:jumlahAmortisasiKomersialC={l9CJumlahAmortisasiKomersial}
+				{readonly}
+				{jenisHartaOptions}
+				{metodePenyusutanOptions}
+			/>
+			<L10A
+				bind:currentTab
+				bind:l10a
+				{readonly}
+				{negaraOptions}
+				{bentukHubunganOptions}
+				{jenisTransaksiOptions}
+				{metodeHargaTransferOptions}
+			/>
+			<L10B
+				bind:currentTab
+				bind:hubunganA={l10bHubunganA}
+				bind:hubunganB={l10bHubunganB}
+				bind:hubunganC={l10bHubunganC}
+				bind:hubunganD={l10bHubunganD}
+				bind:transaksiA={l10bTransaksiA}
+				bind:transaksiB={l10bTransaksiB}
+				bind:transaksiC={l10bTransaksiC}
+				bind:dokumentasiA={l10bDokumentasiA}
+				bind:dokumentasiB={l10bDokumentasiB}
+				bind:dokumentasiC={l10bDokumentasiC}
+				bind:dokumentasiD={l10bDokumentasiD}
+				bind:dokumentasiE={l10bDokumentasiE}
+				bind:dokumenA={l10bDokumenA}
+				bind:dokumenB={l10bDokumenB}
+				bind:dokumenC={l10bDokumenC}
+				{readonly}
+			/>
+			<L10C
+				bind:currentTab
+				bind:l10c
+				bind:ditentukanPrinsip={l10cDitentukanPrinsip}
+				{readonly}
+				{negaraOptions}
+				{jenisTransaksiOptions}
+			/>
+			<L10D
+				bind:currentTab
+				bind:dokumenIndukA={l10dDokumenIndukA}
+				bind:dokumenIndukB={l10dDokumenIndukB}
+				bind:dokumenIndukC={l10dDokumenIndukC}
+				bind:dokumenIndukD={l10dDokumenIndukD}
+				bind:dokumenIndukE={l10dDokumenIndukE}
+				bind:dokumenLokalA={l10dDokumenLokalA}
+				bind:dokumenLokalB={l10dDokumenLokalB}
+				bind:dokumenLokalC={l10dDokumenLokalC}
+				bind:dokumenLokalD={l10dDokumenLokalD}
+				bind:dokumenLokalE={l10dDokumenLokalE}
+				bind:tanggalDokumenIndukTersedia={l10dTanggalDokumenIndukTersedia}
+				bind:tanggalDokumenLokalTersedia={l10dTanggalDokumenLokalTersedia}
+				{readonly}
+			/>
+			<L11A bind:currentTab/>
+			<L11B bind:currentTab/>
+			<L13A bind:currentTab/>
+			<L13B
+				bind:currentTab
+				bind:l13bA
+				bind:l13bB
+				bind:l13bC
+				bind:l13bDTermanfaatkanTahunSebelumnya
+				penghasilanKenaPajakSebelumFasilitas={indukDEF.litbangCapBase}
+				{readonly}
+			/>
+			<L13C bind:currentTab/>
+			<L14 bind:currentTab/>
 
-				<Induk
-					bind:currentTab
-					{spt}
-					{readonly}
-					bind:sektorUsaha
-					bind:menerimaPenghasilanPp23
-					bind:hanyaPenghasilanPp23
-					bind:menerimaPenghasilanFinal
-					bind:menerimaPenghasilanBukanObjekPajak
-					{l4a}
-					{l4b}
-					computed={indukDEF}
-					bind:d5FasilitasPenanamanModal
-					bind:d6FasilitasBrutoVokasi
-					bind:d8AdaKompensasiKerugian
-					bind:d10FasilitasBrutoLitbang
-					bind:tarifPajak
-					bind:persentaseTarifLainnya
-					bind:e13AdaKreditPajakLuarNegeri
-					bind:e14AngsuranPph25TahunBerjalan
-					bind:e15StpPph25
-					bind:e16FasilitasPenguranganPphTerutang
-					bind:f17bAdaSkPengangsuranPenundaan
-					bind:f17bJumlahDiangsurDitunda
-					bind:f19aMetodePengembalian
-					{f18a}
-					{f18b}
-					bind:g20WajibLaporAngsuranPph25
-					bind:h21aTransaksiHubunganIstimewa
-					bind:h21bDokumenPenentuanHargaTransfer
-					bind:h21cPenanamanModalAfiliasi
-					bind:h21dUtangPiutangAfiliasi
-					bind:h21ePenyusutanAmortisasiFiskal
-					bind:h21fBiayaEntertainment
-					bind:h21gFasilitasPenanamanModalDaerahTertentu
-					bind:h21hSisaLebihSaranaPrasarana
-					bind:h21iDividenLuarNegeri
-				></Induk>
-
-				<!-- Lampiran -->
-				<div class="{currentTab.tab === "Induk" ? "tw:hidden" : ""}">
-					<h2>{currentTab.title}</h2>
-
-					<!-- Header -->
-					<Card>
-					{#snippet head()}
-						<span class="tw:text-xl!">HEADER</span>
-					{/snippet}
-					{#snippet body()}
-						<div>
-							<Table class="tw:table-fixed tw:min-w-full tw:border-collapse" >
-							{#snippet head()}
-								<tr class="tw:hidden">
-									<td><Input hidden/></td>
-								</tr>
-							{/snippet}
-							{#snippet body()}
-								<tr>
-									<td class="tw:w-[20rem]"><span>Tahun Pajak/Bagian Tahun Pajak</span></td>
-									<td><Input type={"text"} value={spt.tahunPajak} disabled /></td>
-								</tr>
-								<tr>
-									<td><span class="tw:mr-10">Nomor Identitas WP</span></td>
-									<td><Input type={"text"} value={"00000000000000000"} disabled /></td>
-								</tr>
-							{/snippet}
-							</Table>
-						</div>
-					{/snippet}
-					</Card>
+			{#if saveError}
+				<div class="tw:mt-4">
+					<Alert bg={'#dc2626'}>
+						{#snippet head()}
+							<span class="tw:text-white">!</span>
+						{/snippet}
+						{#snippet body()}
+							<span class="tw:text-white">{saveError}</span>
+						{/snippet}
+					</Alert>
 				</div>
+			{/if}
 
-				<L1
-					bind:currentTab
-					{sektorUsaha}
-					templatesBySektor={lampiran1LabaRugiTemplatesBySektor}
-					bind:labaRugi
-					neracaTemplatesBySektor={lampiran1NeracaTemplatesBySektor}
-					bind:neraca
-					{readonly}
-					{kodeKoreksiFiskalOptions}
-				/>
-				<L2 bind:currentTab bind:l2a bind:l2b {readonly} {negaraOptions}/>
-				<L3
-					bind:currentTab
-					bind:l3a
-					bind:l3aPengembalianPengurangan
-					bind:l3b
-					{readonly}
-					{negaraOptions}
-					jenisPenghasilanOptions={jenisPenghasilanKreditPajakLuarNegeriOptions}
-					{mataUangOptions}
-					jenisPajakOptions={jenisPajakDipotongDipungutOptions}
-				/>
-				<L4 bind:currentTab bind:l4a bind:l4b {readonly} {objekPajakOptions} jenisPenghasilanOptions={jenisPenghasilanBukanObjekPajakOptions}/>
-				<L5 bind:currentTab bind:l5a bind:l5bDipotong {readonly}/>
-				<L6
-					bind:currentTab
-					bind:dasarAngsuran={l6DasarAngsuran}
-					bind:kompensasiKerugian={l6KompensasiKerugian}
-					bind:pphTerutang={l6PphTerutang}
-					bind:kreditPajakTahunLalu={l6KreditPajakTahunLalu}
-					onKompensasiKerugianEdit={() => (l6KompensasiKerugianTouched = true)}
-					onPphTerutangEdit={() => (l6PphTerutangTouched = true)}
-					{readonly}
-				/>
-				<L7 bind:currentTab bind:l7 {readonly}/>
-				<L8
-					bind:currentTab
-					bind:jumlahPeredaranBruto={l8JumlahPeredaranBruto}
-					penghasilanKenaPajak={l8PenghasilanKenaPajak}
-					{readonly}
-				/>
-				<L9
-					bind:currentTab
-					bind:l9
-					bind:jumlahPenyusutanKomersialA={l9AJumlahPenyusutanKomersial}
-					bind:jumlahPenyusutanKomersialB={l9BJumlahPenyusutanKomersial}
-					bind:jumlahAmortisasiKomersialC={l9CJumlahAmortisasiKomersial}
-					{readonly}
-					{jenisHartaOptions}
-					{metodePenyusutanOptions}
-				/>
-				<L10A
-					bind:currentTab
-					bind:l10a
-					{readonly}
-					{negaraOptions}
-					{bentukHubunganOptions}
-					{jenisTransaksiOptions}
-					{metodeHargaTransferOptions}
-				/>
-				<L10B
-					bind:currentTab
-					bind:hubunganA={l10bHubunganA}
-					bind:hubunganB={l10bHubunganB}
-					bind:hubunganC={l10bHubunganC}
-					bind:hubunganD={l10bHubunganD}
-					bind:transaksiA={l10bTransaksiA}
-					bind:transaksiB={l10bTransaksiB}
-					bind:transaksiC={l10bTransaksiC}
-					bind:dokumentasiA={l10bDokumentasiA}
-					bind:dokumentasiB={l10bDokumentasiB}
-					bind:dokumentasiC={l10bDokumentasiC}
-					bind:dokumentasiD={l10bDokumentasiD}
-					bind:dokumentasiE={l10bDokumentasiE}
-					bind:dokumenA={l10bDokumenA}
-					bind:dokumenB={l10bDokumenB}
-					bind:dokumenC={l10bDokumenC}
-					{readonly}
-				/>
-				<L10C
-					bind:currentTab
-					bind:l10c
-					bind:ditentukanPrinsip={l10cDitentukanPrinsip}
-					{readonly}
-					{negaraOptions}
-					{jenisTransaksiOptions}
-				/>
-				<L10D
-					bind:currentTab
-					bind:dokumenIndukA={l10dDokumenIndukA}
-					bind:dokumenIndukB={l10dDokumenIndukB}
-					bind:dokumenIndukC={l10dDokumenIndukC}
-					bind:dokumenIndukD={l10dDokumenIndukD}
-					bind:dokumenIndukE={l10dDokumenIndukE}
-					bind:dokumenLokalA={l10dDokumenLokalA}
-					bind:dokumenLokalB={l10dDokumenLokalB}
-					bind:dokumenLokalC={l10dDokumenLokalC}
-					bind:dokumenLokalD={l10dDokumenLokalD}
-					bind:dokumenLokalE={l10dDokumenLokalE}
-					bind:tanggalDokumenIndukTersedia={l10dTanggalDokumenIndukTersedia}
-					bind:tanggalDokumenLokalTersedia={l10dTanggalDokumenLokalTersedia}
-					{readonly}
-				/>
-				<L11A bind:currentTab/>
-				<L11B bind:currentTab/>
-				<L13A bind:currentTab/>
-				<L13B
-					bind:currentTab
-					bind:l13bA
-					bind:l13bB
-					bind:l13bC
-					bind:l13bDTermanfaatkanTahunSebelumnya
-					penghasilanKenaPajakSebelumFasilitas={indukDEF.litbangCapBase}
-					{readonly}
-				/>
-				<L13C bind:currentTab/>
-				<L14 bind:currentTab/>
-
-				{#if saveError}
-					<div class="tw:mt-4">
-						<Alert bg={'#dc2626'}>
-							{#snippet head()}
-								<span class="tw:text-white">!</span>
-							{/snippet}
-							{#snippet body()}
-								<span class="tw:text-white">{saveError}</span>
-							{/snippet}
-						</Alert>
-					</div>
-				{/if}
-
-				{#if !readonly}
-					<div class="tw:mt-4 tw:flex tw:gap-2">
-						<Button type="submit" name="action" value="Simpan Konsep" color="var(--color-secondary)"><span class="tw:text-white">Simpan Konsep</span></Button>
-						<Button type="submit" name="action" value="Simpan Lapor" color="var(--color-secondary)"><span class="tw:text-white">Simpan Lapor</span></Button>
-					</div>
-				{/if}
-			</form>
-		{/snippet}
-	</Card>
-</div>
+			{#if !readonly}
+				<div class="tw:mt-4 tw:flex tw:gap-2">
+					<Button type="submit" name="action" value="Simpan Konsep" color="var(--color-secondary)"><span class="tw:text-white">Simpan Konsep</span></Button>
+					<Button type="submit" name="action" value="Simpan Lapor" color="var(--color-secondary)"><span class="tw:text-white">Simpan Lapor</span></Button>
+				</div>
+			{/if}
+		</form>
+	{/snippet}
+</Card>
 
 <style>
 	nav button {

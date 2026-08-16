@@ -34,53 +34,51 @@
 	}
 </script>
 
-<div class="tw:w-full tw:p-10">
-	<form {...postForm} id="spt-post-form"></form>
-	<form {...newSptPpn} class="tw:hidden">
-		<input type="hidden" name="masaPajak" value={switchMasaPajak} />
-		<input type="hidden" name="tahun" value={switchTahun} />
+<form {...postForm} id="spt-post-form"></form>
+<form {...newSptPpn} class="tw:hidden">
+	<input type="hidden" name="masaPajak" value={switchMasaPajak} />
+	<input type="hidden" name="tahun" value={switchTahun} />
+</form>
+
+<div class="accordion" id="accordionSPT">
+	<form {...saveForm} id="spt-save-form">
+		<input type="hidden" name="sptBlob" value={JSON.stringify(displayedBlob)} />
+		<input type="hidden" name="sptPosted" value={postForm.result ? 'true' : ''} />
+		<Accordion item="Header" target="#accordionSPT">
+			<Header
+				{readonly}
+				postFormId="spt-post-form"
+				npwp={taxpayer.npwp}
+				namaPKP={taxpayer.nama}
+				alamat={taxpayer.alamat}
+				noTelepon={taxpayer.noTelepon}
+				teleponSeluler={taxpayer.teleponSeluler}
+				klasifikasiLapanganUsaha={taxpayer.klasifikasiLapanganUsaha}
+				periode={{ bulan: displayedBlob.periodeBulan, tahun: displayedBlob.periodeTahun }}
+				onPeriodeChange={handlePeriodeChange}
+			/>
+		</Accordion>
+		<Accordion item="I. PENYERAHAN BARANG DAN JASA" target="#accordionSPT"><I sptItem={displayedBlob.I} /></Accordion>
+		<Accordion item="II. PEROLEHAN BARANG DAN JASA" target="#accordionSPT"><II sptItem={displayedBlob.II} /></Accordion>
+		<Accordion item="III. PERHITUNGAN PPN KURANG BAYAR / LEBIH BAYAR" target="#accordionSPT">
+			<III sptItem={displayedBlob.III} />
+		</Accordion>
+		<Accordion item="IV. PPN TERUTANG ATAS KEGIATAN MEMBANGUN SENDIRI" target="#accordionSPT">
+			<IV sptItem={displayedBlob.IV} />
+		</Accordion>
+		<Accordion item="V. PEMBAYARAN KEMBALI PAJAK MASUKAN YANG TIDAK DAPAT DIKREDITKAN" target="#accordionSPT">
+			<V sptItem={displayedBlob.V} />
+		</Accordion>
+		<Accordion item="VI. PAJAK PENJUALAN ATAS BARANG MEWAH" target="#accordionSPT"><VI sptItem={displayedBlob.VI} /></Accordion>
+		<Accordion item="VII. PEMUNGUTAN PPN ATAU PPN DAN PPNBM OLEH PEMUNGUT PPN" target="#accordionSPT">
+			<VII sptItem={displayedBlob.VII} />
+		</Accordion>
+		<Accordion item="VIII. PEMUNGUTAN PPN ATAU PPN DAN PPNBM OLEH PIHAK LAIN" target="#accordionSPT">
+			<VIII sptItem={displayedBlob.VIII} />
+		</Accordion>
+		<Accordion item="IX. KELENGKAPAN" target="#accordionSPT"><IX sptItem={displayedBlob.IX} /></Accordion>
+		<Accordion item="X. PERNYATAAN" target="#accordionSPT"><X sptItem={displayedBlob.X} /></Accordion>
+
+		<Footer {readonly} saveFormId="spt-save-form" reportFormId="spt-save-form" />
 	</form>
-
-	<div class="accordion" id="accordionSPT">
-		<form {...saveForm} id="spt-save-form">
-			<input type="hidden" name="sptBlob" value={JSON.stringify(displayedBlob)} />
-			<input type="hidden" name="sptPosted" value={postForm.result ? 'true' : ''} />
-			<Accordion item="Header" target="#accordionSPT">
-				<Header
-					{readonly}
-					postFormId="spt-post-form"
-					npwp={taxpayer.npwp}
-					namaPKP={taxpayer.nama}
-					alamat={taxpayer.alamat}
-					noTelepon={taxpayer.noTelepon}
-					teleponSeluler={taxpayer.teleponSeluler}
-					klasifikasiLapanganUsaha={taxpayer.klasifikasiLapanganUsaha}
-					periode={{ bulan: displayedBlob.periodeBulan, tahun: displayedBlob.periodeTahun }}
-					onPeriodeChange={handlePeriodeChange}
-				/>
-			</Accordion>
-			<Accordion item="I. PENYERAHAN BARANG DAN JASA" target="#accordionSPT"><I sptItem={displayedBlob.I} /></Accordion>
-			<Accordion item="II. PEROLEHAN BARANG DAN JASA" target="#accordionSPT"><II sptItem={displayedBlob.II} /></Accordion>
-			<Accordion item="III. PERHITUNGAN PPN KURANG BAYAR / LEBIH BAYAR" target="#accordionSPT">
-				<III sptItem={displayedBlob.III} />
-			</Accordion>
-			<Accordion item="IV. PPN TERUTANG ATAS KEGIATAN MEMBANGUN SENDIRI" target="#accordionSPT">
-				<IV sptItem={displayedBlob.IV} />
-			</Accordion>
-			<Accordion item="V. PEMBAYARAN KEMBALI PAJAK MASUKAN YANG TIDAK DAPAT DIKREDITKAN" target="#accordionSPT">
-				<V sptItem={displayedBlob.V} />
-			</Accordion>
-			<Accordion item="VI. PAJAK PENJUALAN ATAS BARANG MEWAH" target="#accordionSPT"><VI sptItem={displayedBlob.VI} /></Accordion>
-			<Accordion item="VII. PEMUNGUTAN PPN ATAU PPN DAN PPNBM OLEH PEMUNGUT PPN" target="#accordionSPT">
-				<VII sptItem={displayedBlob.VII} />
-			</Accordion>
-			<Accordion item="VIII. PEMUNGUTAN PPN ATAU PPN DAN PPNBM OLEH PIHAK LAIN" target="#accordionSPT">
-				<VIII sptItem={displayedBlob.VIII} />
-			</Accordion>
-			<Accordion item="IX. KELENGKAPAN" target="#accordionSPT"><IX sptItem={displayedBlob.IX} /></Accordion>
-			<Accordion item="X. PERNYATAAN" target="#accordionSPT"><X sptItem={displayedBlob.X} /></Accordion>
-
-			<Footer {readonly} saveFormId="spt-save-form" reportFormId="spt-save-form" />
-		</form>
-	</div>
 </div>
