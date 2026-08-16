@@ -14,6 +14,8 @@ import * as lampiran9JenisHarta from './batches/010-lampiran-9-jenis-harta';
 import * as lampiran9MetodePenyusutan from './batches/011-lampiran-9-metode-penyusutan';
 import * as lampiran10aReferensi from './batches/012-lampiran-10a-referensi';
 import * as kodeKoreksiFiskal from './batches/013-kode-koreksi-fiskal';
+import * as adminUser from './batches/014-admin-user';
+import * as batchPeserta from './batches/015-batch-peserta';
 
 const batches = [
 	initialUsers,
@@ -29,6 +31,8 @@ const batches = [
 	lampiran9MetodePenyusutan,
 	lampiran10aReferensi,
 	kodeKoreksiFiskal,
+	adminUser,
+	batchPeserta,
 	fakturDemo
 ];
 

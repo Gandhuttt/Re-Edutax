@@ -11,6 +11,12 @@ export const user = sqliteTable(
 		image: text('image'),
 		username: text('username').unique(),
 		displayUsername: text('display_username'),
+		// Better Auth admin plugin fields. `role` drives the admin dashboard guard;
+		// 'user' is every seeded/created peserta, 'admin' is staff.
+		role: text('role').notNull().default('user'),
+		banned: integer('banned', { mode: 'boolean' }).notNull().default(false),
+		banReason: text('ban_reason'),
+		banExpires: integer('ban_expires', { mode: 'timestamp_ms' }),
 		createdAt: createdAt(),
 		updatedAt: updatedAt()
 	},

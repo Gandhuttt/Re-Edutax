@@ -8,6 +8,27 @@
       "when": 1786386675303,
       "tag": "0000_daily_whistler",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1786474846347,
+      "tag": "0001_green_black_cat",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1786480732000,
+      "tag": "0002_sticky_the_fallen",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1786481739877,
+      "tag": "0003_tiny_franklin_richards",
+      "breakpoints": true
     }
   ]
 }

@@ -2,9 +2,10 @@ import { getPlatformProxy } from 'wrangler';
 import { drizzle } from 'drizzle-orm/d1';
 import { drizzleAdapter } from '@better-auth/drizzle-adapter';
 import { betterAuth } from 'better-auth';
-import { username } from 'better-auth/plugins';
+import { admin, username } from 'better-auth/plugins';
 import process from 'node:process';
 import * as schema from '../schema';
+import { isValidUsername, usernameMaxLength, usernameMinLength } from '../../../helpers/username';
 
 export const createSeedContext = async () => {
 	process.loadEnvFile?.();
@@ -26,10 +27,14 @@ export const createSeedContext = async () => {
 		},
 		plugins: [
 			username({
-				minUsernameLength: 15,
-				maxUsernameLength: 16,
+				minUsernameLength: usernameMinLength,
+				maxUsernameLength: usernameMaxLength,
 				usernameNormalization: false,
-				usernameValidator: (value) => /^\d{15,16}$/.test(value)
+				usernameValidator: isValidUsername
+			}),
+			admin({
+				defaultRole: 'user',
+				adminRoles: ['admin']
 			})
 		]
 	});

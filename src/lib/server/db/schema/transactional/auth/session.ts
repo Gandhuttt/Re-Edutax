@@ -14,7 +14,9 @@ export const session = sqliteTable(
 		userAgent: text('user_agent'),
 		userId: text('user_id')
 			.notNull()
-			.references(() => user.id, { onDelete: 'cascade' })
+			.references(() => user.id, { onDelete: 'cascade' }),
+		// Set by the admin plugin when an admin impersonates a peserta.
+		impersonatedBy: text('impersonated_by')
 	},
 	(t) => [uniqueIndex('session_token_unique').on(t.token), index('session_user_id_idx').on(t.userId)]
 );

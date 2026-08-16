@@ -4,8 +4,9 @@
 
 	let {
 		authenticated = false,
-		loggedUsername = 'guest'
-	}: { authenticated?: boolean; loggedUsername?: string } = $props();
+		loggedUsername = 'guest',
+		isAdmin = false
+	}: { authenticated?: boolean; loggedUsername?: string; isAdmin?: boolean } = $props();
 
 	const displayName = $derived(loggedUsername.replace(/'/g, ''));
 </script>
@@ -16,24 +17,34 @@
 			<li aria-current={page.url.pathname === '/' ? 'page' : undefined}>
 				<a href="/">Home</a>
 			</li>
-			<li class="dropdown" aria-current={page.url.pathname.startsWith('/faktur-pajak') ? 'page' : undefined}>
-				<button class="dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">Faktur</button>
-				<ul class="dropdown-menu">
-					<li><a class="dropdown-item" href="/faktur-pajak/masukan">Faktur Pajak Masukan</a></li>
-					<li><a class="dropdown-item" href="/faktur-pajak/keluaran">Faktur Pajak Keluaran</a></li>
-				</ul>
-			</li>
-			<li
-				class="dropdown"
-				aria-current={page.url.pathname.startsWith('/surat-pemberitahuan') ? 'page' : undefined}
-			>
-				<button class="dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">SPT</button>
-				<ul class="dropdown-menu">
-					<li><a class="dropdown-item" href="/surat-pemberitahuan/konsep">Konsep SPT</a></li>
-					<li><a class="dropdown-item" href="/surat-pemberitahuan/pembayaran">SPT Menunggu Pembayaran</a></li>
-					<li><a class="dropdown-item" href="/surat-pemberitahuan/laporan">SPT Dilaporkan</a></li>
-				</ul>
-			</li>
+			{#if isAdmin}
+				<!-- Admins are not wajib pajak: the faktur/SPT sections have no data for them. -->
+				<li aria-current={page.url.pathname.startsWith('/admin') ? 'page' : undefined}>
+					<a href="/admin">Dasbor Admin</a>
+				</li>
+			{:else}
+				<li
+					class="dropdown"
+					aria-current={page.url.pathname.startsWith('/faktur-pajak') ? 'page' : undefined}
+				>
+					<button class="dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">Faktur</button>
+					<ul class="dropdown-menu">
+						<li><a class="dropdown-item" href="/faktur-pajak/masukan">Faktur Pajak Masukan</a></li>
+						<li><a class="dropdown-item" href="/faktur-pajak/keluaran">Faktur Pajak Keluaran</a></li>
+					</ul>
+				</li>
+				<li
+					class="dropdown"
+					aria-current={page.url.pathname.startsWith('/surat-pemberitahuan') ? 'page' : undefined}
+				>
+					<button class="dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">SPT</button>
+					<ul class="dropdown-menu">
+						<li><a class="dropdown-item" href="/surat-pemberitahuan/konsep">Konsep SPT</a></li>
+						<li><a class="dropdown-item" href="/surat-pemberitahuan/pembayaran">SPT Menunggu Pembayaran</a></li>
+						<li><a class="dropdown-item" href="/surat-pemberitahuan/laporan">SPT Dilaporkan</a></li>
+					</ul>
+				</li>
+			{/if}
 		</ul>
 		<div class="corner">
 			<ul class="nav-ul">

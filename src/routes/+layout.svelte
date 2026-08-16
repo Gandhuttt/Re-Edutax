@@ -16,7 +16,11 @@
 </svelte:head>
 
 <div class="app">
-	<Header authenticated={!!data.user} loggedUsername={data.user?.name ?? 'guest'} />
+	<Header
+		authenticated={!!data.user}
+		loggedUsername={data.user?.name ?? 'guest'}
+		isAdmin={data.isAdmin ?? false}
+	/>
 
 	<main>
 		{@render children()}

@@ -5,8 +5,9 @@ import { db } from '$lib/server/db';
 import * as schema from '$lib/server/db/schema';
 import { drizzleAdapter } from '@better-auth/drizzle-adapter';
 import { betterAuth } from 'better-auth';
-import { username } from 'better-auth/plugins';
+import { admin, username } from 'better-auth/plugins';
 import { sveltekitCookies } from 'better-auth/svelte-kit';
+import { isValidUsername, usernameMaxLength, usernameMinLength } from '$lib/helpers/username';
 
 const devSecret = 'dev-only-better-auth-secret-change-me-32';
 
@@ -19,14 +20,21 @@ export const auth = betterAuth({
 	}),
 	emailAndPassword: {
 		enabled: true,
-		disableSignUp: true
+		disableSignUp: true,
+		// Peserta accounts are handed out in class with short throwaway passwords (the seed
+		// batches use '123'), so the 8-char default would lock admins out of reusing them.
+		minPasswordLength: 3
 	},
 	plugins: [
 		username({
-			minUsernameLength: 15,
-			maxUsernameLength: 16,
+			minUsernameLength: usernameMinLength,
+			maxUsernameLength: usernameMaxLength,
 			usernameNormalization: false,
-			usernameValidator: (value) => /^\d{15,16}$/.test(value)
+			usernameValidator: isValidUsername
+		}),
+		admin({
+			defaultRole: 'user',
+			adminRoles: ['admin']
 		}),
 		sveltekitCookies(getRequestEvent)
 	]

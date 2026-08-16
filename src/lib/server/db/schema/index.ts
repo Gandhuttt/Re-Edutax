@@ -8,6 +8,8 @@ export * from './references/faktur/jenis_informasi_tambahan_faktur_pajak';
 export * from './references/transaksi_faktur/jenis_item_transaksi_faktur';
 export * from './references/transaksi_faktur/kode_item_transaksi_faktur';
 export * from './references/transaksi_faktur/satuan_ukur_transaksi_faktur';
+export * from './transactional/wajib_pajak/batch_peserta';
+export * from './transactional/wajib_pajak/npwp_terbit';
 export * from './transactional/wajib_pajak/wajib_pajak';
 export * from './transactional/wajib_pajak/tempat_kegiatan_usaha';
 export * from './transactional/faktur/faktur_pajak';
