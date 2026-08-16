@@ -1,0 +1,743 @@
+# Reference lists behind the SPT 1770 lampiran modal dropdowns
+# Captured 2026-08-17 from the maximal-state draft (see GATING.md).
+# 29 dropdowns across 15 row-editor modals, 20 distinct lists.
+# Opened each dropdown, read the full option panel, closed without selecting.
+
+========================================================================
+LIST1 - 9 options
+ used by: L-1 A1 KAS :: [0] Deskripsi
+------------------------------------------------------------------------
+ 1. Uang Tunai/Bank Note/Koin
+ 2. Tabungan (Bank/Lembaga Keuangan)
+ 3. Giro
+ 4. Deposito
+ 5. Uang elektronik
+ 6. Cek
+ 7. Wessel
+ 8. Commercial Paper
+ 9. Setara Kas Lainnya
+
+========================================================================
+LIST2 - 265 options
+ used by: L-1 A1 KAS :: [1] Lokasi Harta
+ used by: L-1 A2 PIUTANG :: [1] Lokasi Penerima
+ used by: L-1 A3 INVESTASI :: [1] Lokasi Harta
+ used by: L-1 B UTANG :: [1] Negara Kreditur
+ used by: L-2 C LUAR NEGERI :: [0] Negara
+------------------------------------------------------------------------
+ 1. Aruba
+ 2. Afganistan
+ 3. Angola
+ 4. Angola
+ 5. Kepulauan Aland
+ 6. Albania
+ 7. Andorra
+ 8. Uni Emirat Arab
+ 9. Argentina
+ 10. Armenia
+ 11. Samoa Amerika
+ 12. Antartika
+ 13. Wilayah Selatan Prancis
+ 14. Antigua dan Barbuda
+ 15. Australia
+ 16. Austria
+ 17. Azerbaijan
+ 18. Burundi
+ 19. Belgia
+ 20. Benin
+ 21. Bonaire, Sint Eustatius dan Saba
+ 22. Burkina Faso
+ 23. Bangladesh
+ 24. Bulgaria
+ 25. Bahrain
+ 26. Bahama
+ 27. Bosnia dan Herzegovina
+ 28. Santo Barthelemy
+ 29. Belarusia
+ 30. Belize
+ 31. Bermuda
+ 32. Negara Majemuk Bolivia
+ 33. Brasil
+ 34. Barbados
+ 35. Brunei Darussalam
+ 36. Bhutan
+ 37. Pulau Bouvet
+ 38. Botswana
+ 39. Republik Afrika Tengah
+ 40. Kanada
+ 41. Kepulauan Cocos (Keeling)
+ 42. Swiss
+ 43. Cile
+ 44. Tiongkok
+ 45. Pantai Gading
+ 46. Kamerun
+ 47. Republik Demokratik Kongo
+ 48. Kongo
+ 49. Kepulauan Cook
+ 50. Kolombia
+ 51. Komoro
+ 52. Cabo Verde
+ 53. Kosta Rika
+ 54. Kuba
+ 55. Curacao
+ 56. Pulau Natal
+ 57. Kepulauan Cayman
+ 58. Siprus
+ 59. Republik Ceko
+ 60. Jerman
+ 61. Djibouti
+ 62. Dominika
+ 63. Denmark
+ 64. Republik Dominika
+ 65. Aljazair
+ 66. Ekuador
+ 67. Mesir
+ 68. Eritrea
+ 69. Sahara Barat
+ 70. Spanyol
+ 71. Estonia
+ 72. Etiopia
+ 73. Finlandia
+ 74. Fiji
+ 75. Kepulauan Falkland (Malvinas)
+ 76. Prancis
+ 77. Kepulauan Faroe
+ 78. Negara Federasi Mikronesia
+ 79. Gabon
+ 80. Britania Raya
+ 81. Georgia
+ 82. Guernsey
+ 83. Ghana
+ 84. Gibraltar
+ 85. Guinea
+ 86. Guadeloupe
+ 87. Gambia
+ 88. Guinea-Bissau
+ 89. Ekuator Guinea
+ 90. Yunani
+ 91. Granada
+ 92. Greenland
+ 93. Georgia Selatan dan Kepulauan Sandwich Selatan
+ 94. Guatemala
+ 95. Guyana Prancis
+ 96. Guam
+ 97. Guyana
+ 98. Hongkong
+ 99. Pulau Heard dan Kepulauan McDonald
+ 100. Honduras
+ 101. Kroasia
+ 102. Haiti
+ 103. Hongaria
+ 104. Indonesia
+ 105. Pulau Man
+ 106. India
+ 107. Wilayah Samudra Hindia Britania
+ 108. Irlandia
+ 109. Republik Islam Iran
+ 110. Irak
+ 111. Islandia
+ 112. Israel
+ 113. Italia
+ 114. Jamaika
+ 115. Jersey
+ 116. Jersey
+ 117. Yordania
+ 118. Jepang
+ 119. Kazakstan
+ 120. Kenya
+ 121. Kirgistan
+ 122. Kamboja
+ 123. Kiribati
+ 124. Saint Kitts dan Nevis
+ 125. Korea (Republik)
+ 126. Kosovo
+ 127. KOREA (STH), REPUBLIC
+ 128. KOREA (NTH) - DEMOCRATIC PEOPLES
+ 129. Kuwait
+ 130. Republik Demokratik Rakyat Laos
+ 131. Libanon
+ 132. Liberia
+ 133. Libya
+ 134. Santa Lucia
+ 135. Liechtenstein
+ 136. Tanpa kewarganegaraan
+ 137. Sri Lanka
+ 138. Lesoto
+ 139. Lithuania
+ 140. Luksemburg
+ 141. Latvia
+ 142. Makao
+ 143. Santo Martin (bagian Prancis)
+ 144. Maroko
+ 145. Monako
+ 146. Republik Moldova
+ 147. Madagaskar
+ 148. Maladewa
+ 149. Meksiko
+ 150. Kepulauan Marshall
+ 151. Republik Makedonia Bekas Yugoslavia
+ 152. Mali
+ 153. Malta
+ 154. Myanmar
+ 155. Montenegro
+ 156. Mongolia
+ 157. Kepulauan Mariana Utara
+ 158. Mozambik
+ 159. Mauritania
+ 160. Montserrat
+ 161. Martinik
+ 162. Mauritius
+ 163. Malawi
+ 164. Malaysia
+ 165. Namibia
+ 166. Kaledonia Baru
+ 167. Niger
+ 168. Pulau Norfolk
+ 169. Nigeria
+ 170. Nikaragua
+ 171. Niue
+ 172. Belanda
+ 173. Belanda - Kerajaan
+ 174. Norwegia
+ 175. Nepal
+ 176. Nauru
+ 177. Selandia Baru
+ 178. Oman
+ 179. Pakistan
+ 180. Panama
+ 181. UNITED NATIONS AGENCY
+ 182. Pitcairn
+ 183. Peru
+ 184. Filipina
+ 185. Palau
+ 186. Papua Nugini
+ 187. Polandia
+ 188. Perancis
+ 189. Puerto Riko
+ 190. Republik Rakyat Demokratik Korea
+ 191. Portugal
+ 192. Paraguay
+ 193. Negara Palestina
+ 194. PALESTINE
+ 195. Polinesia
+ 196. Qatar
+ 197. Reuni
+ 198. Pengungsi (Konvensi Pasal 1, 1951)
+ 199. Republik Irlandia
+ 200. Rumania (New Code)
+ 201. Rumania
+ 202. Federasi Rusia
+ 203. Rwanda
+ 204. Arab Saudi
+ 205. Pulau Solomon
+ 206. Sudan
+ 207. Senegal
+ 208. Singapura
+ 209. Saint Helena, Ascension dan Tristan da Cunha
+ 210. Svalbard dan Jan Mayen
+ 211. Sierra Leone
+ 212. El Salvador
+ 213. San Marino
+ 214. Somalia
+ 215. Saint Pierre dan Miquelon
+ 216. Serbia
+ 217. Sudan Selatan
+ 218. Sao Tome dan Principe
+ 219. Suriname
+ 220. Slowakia
+ 221. Slovenia
+ 222. SLOVAK REPUBLIC
+ 223. SWAZILAND
+ 224. Swedia
+ 225. Eswatini
+ 226. Sint Maarten (bagian Belanda)
+ 227. Seychelles
+ 228. Republik Arab Suriah
+ 229. Kepulauan Turks dan Caicos
+ 230. Chad
+ 231. Togo
+ 232. Thailand
+ 233. Tajikistan
+ 234. Tokelau
+ 235. Turkmenistan
+ 236. Timor Leste
+ 237. TIMOR LESTE DEMOCRATIC REPUBLIC
+ 238. Tonga
+ 239. Trinidad dan Tobago
+ 240. Tunisia
+ 241. Turki
+ 242. Tuvalu
+ 243. TAIWAN - PROVINCE OF CHINA
+ 244. Taiwan
+ 245. Tanzania, Republik Bersatu
+ 246. Uganda
+ 247. Ukraina
+ 248. Kepulauan Terpencil Kecil Amerika Serikat
+ 249. Uruguay
+ 250. Amerika Serikat
+ 251. Uzbekistan
+ 252. Tahta Suci (Negara Kota Vatikan)
+ 253. Saint Vincent dan Grenadines
+ 254. Venezuela (Republik Bolivarian)
+ 255. Kepulauan Virgin (Inggris)
+ 256. Kepulauan Virgin (Amerika Serikat)
+ 257. Vietnam
+ 258. Vanuatu
+ 259. Wallis dan Futuna
+ 260. Samoa
+ 261. Yaman
+ 262. Mayotte
+ 263. Afrika Selatan
+ 264. Zambia
+ 265. Zimbabwe
+
+========================================================================
+LIST3 - 2 options
+ used by: L-1 A1 KAS :: [2] Keterangan
+ used by: L-1 A2 PIUTANG :: [2] Keterangan
+ used by: L-1 A3 INVESTASI :: [2] Keterangan
+ used by: L-1 A4 HARTA BERGERAK :: [2] Keterangan
+ used by: L-1 A5 HARTA TIDAK BERGERAK :: [2] Keterangan
+ used by: L-1 A6 ASET LAIN-LAIN :: [1] Keterangan
+------------------------------------------------------------------------
+ 1. Harta PPS
+ 2. Harta Investasi PPS
+
+========================================================================
+LIST4 - 3 options
+ used by: L-1 A2 PIUTANG :: [0] Deskripsi
+------------------------------------------------------------------------
+ 1. Piutang Usaha
+ 2. Piutang Afiliasi
+ 3. Piutang lainnya
+
+========================================================================
+LIST5 - 12 options
+ used by: L-1 A3 INVESTASI :: [0] Deskripsi
+------------------------------------------------------------------------
+ 1. Saham yang dibeli untuk dijual kembali
+ 2. Saham non bursa
+ 3. Saham bursa
+ 4. Obligasi perusahaan
+ 5. Obligasi pemerintah Indonesia (Obligasi Ritel Indonesia, Surat Berharga Syariah Negara, dll)
+ 6. Surat Utang lainnya
+ 7. Kontrak Investasi Kolektif (KIK) termasuk Reksadana, dan investasi yang dikonversikan ke unit..
+ 8. Instrumen derivatif (right, warran, kontrak berjangka, opsi, dll)
+ 9. Penyertaan modal dalam perusahaan lain yang bukan atas saham meliputi penyertaan modal pada C..
+ 10. Asuransi
+ 11. Unit Link di Asuransi
+ 12. Investasi lainnya (termasuk Cryptocurrency, Trust Fund dan Investasi lainnya)
+
+========================================================================
+LIST6 - 13 options
+ used by: L-1 A4 HARTA BERGERAK :: [0] Tipe
+------------------------------------------------------------------------
+ 1. Sepeda
+ 2. Sepeda Motor
+ 3. Mobil Penumpang
+ 4. Bis
+ 5. Kendaraan Angkutan Jalan
+ 6. Kendaraan Tujuan Khusus
+ 7. Kereta
+ 8. Pesawat Terbang
+ 9. Kapal
+ 10. Mesin
+ 11. Gerobak
+ 12. Kapal Pesiar
+ 13. Harta bergerak lainnya
+
+========================================================================
+LIST7 - 2 options
+ used by: L-1 A4 HARTA BERGERAK :: [1] Kepemilikan
+------------------------------------------------------------------------
+ 1. Atas nama pihak lain
+ 2. Atas nama sendiri
+
+========================================================================
+LIST8 - 8 options
+ used by: L-1 A5 HARTA TIDAK BERGERAK :: [0] Deskripsi
+------------------------------------------------------------------------
+ 1. Tanah Kosong
+ 2. Tanah dan/atau Bangunan untuk Tempat Tinggal
+ 3. Apartemen
+ 4. Kapal
+ 5. Tanah atau Lahan untuk Usaha (seperti lahan pertanian, perkebunan, perikanan darat, dan sejen..
+ 6. Tanah dan/atau Bangunan untuk Usaha (toko, pabrik, gudang, dan sejenisnya)
+ 7. Tanah dan/atau Bangunan yang Disewakan
+ 8. Harta Tidak Bergerak Lainnya
+
+========================================================================
+LIST9 - 6 options
+ used by: L-1 A5 HARTA TIDAK BERGERAK :: [1] Sumber Kepemilikan
+------------------------------------------------------------------------
+ 1. Utang
+ 2. Hadiah
+ 3. Hibah
+ 4. Warisan
+ 5. Sumber lainnya
+ 6. Hasil Sendiri
+
+========================================================================
+LIST10 - 17 options
+ used by: L-1 A6 ASET LAIN-LAIN :: [0] Deskripsi
+------------------------------------------------------------------------
+ 1. Paten
+ 2. Royalti
+ 3. Merek dagang
+ 4. Harta Tidak Berwujud Lainnya
+ 5. Emas Batangan
+ 6. Emas Perhiasan
+ 7. Batangan Non-Emas
+ 8. Perhiasan Non-Emas
+ 9. Permata (intan,berlian,batu mulia lainnya)
+ 10. Barang-barang seni dan antik (barang-barang seni, barang-barang antik)
+ 11. Peralatan olahraga khusus
+ 12. Peralatan elektronik
+ 13. Perabot Rumah Tangga
+ 14. Peralatan Kantor
+ 15. Jet Ski
+ 16. Persediaan usaha
+ 17. Harta lainnya
+
+========================================================================
+LIST11 - 4 options
+ used by: L-1 B UTANG :: [0] Deskripsi
+------------------------------------------------------------------------
+ 1. Utang Bank / Lembaga Keuangan Bukan Bank (KPR, Leasing Kendaraan Bermotor, dan sejenisnya)
+ 2. Kartu Kredit
+ 3. Utang Afiliasi (Pinjaman dari pihak yang memiliki hubungan istimewa sebagaimana dimaksud dala..
+ 4. Utang Lainnya
+
+========================================================================
+LIST12 - 1 options
+ used by: L-1 B UTANG :: [2] Keterangan
+------------------------------------------------------------------------
+ 1. Debt in relation to Voluntary Disclosure Program Assets/Utang terkait PPS
+
+========================================================================
+LIST13 - 8 options
+ used by: L-1 E BUKTI POTONG :: [0] Jenis Pajak
+------------------------------------------------------------------------
+ 1. PPh Pasal 15
+ 2. PPh Pasal 21
+ 3. PPh Pasal 22
+ 4. PPh Pasal 23
+ 5. PPh Pasal 26
+ 6. PPh Ditanggung Pemerintah
+ 7. PPh Ditanggung Pemerintah(Proyek Bantuan Luar Negeri)
+ 8. Nilai LB dalam SPT yang dianggap bukan merupakan lebih bayar
+
+========================================================================
+LIST14 - 104 options
+ used by: L-2 A PENGHASILAN FINAL :: [0] Jenis Penghasilan
+------------------------------------------------------------------------
+ 1. Upah Pegawai Tidak Tetap yang Dibayarkan secara Bulanan yang Mendapat Fasilitas di Daerah Ter..
+ 2. Imbalan kepada Bukan Pegawai Lainnya yang mendapat fasilitas di daerah tertentu
+ 3. Upah Pegawai Tidak Tetap yang Dibayarkan secara Harian, Mingguan, Satuan dan Borongan dengan ..
+ 4. Upah Pegawai Tidak Tetap yang Dibayarkan secara Harian, Mingguan, Satuan dan Borongan dengan ..
+ 5. Penghasilan yang Diterima atau Diperoleh Pegawai Tetap yang Menerima Fasilitas di Daerah Tert..
+ 6. Uang Pesangon yang Dibayarkan Sekaligus
+ 7. Uang Manfaat Pensiun, Tunjangan Hari Tua atau Jaminan Hari Tua dan Pembayaran Sejenis yang Di..
+ 8. Honor dan Imbalan Lain yang Dibebankan Dibebankan kepada APBN atau APBD yang Diterima oleh PN..
+ 9. Honor atau Imbalan Lain yang Dibebankan kepada APBN atau APBD yang Diterima oleh PNS Golongan..
+ 10. Honor atau Imbalan Lain yang Dibebankan kepada APBN atau APBD yang Diterima oleh Pejabat Nega.
+ 11. Honor atau Imbalan Lain yang Dibebankan kepada APBN atau APBD yang Diterima oleh PNS Golongan.
+ 12. Objek PPh Pasal 21 yang Bersifat Final Lainnya
+ 13. Penghasilan Sehubungan dengan Transaksi Penjualan Barang, Penyerahan Jasa, dan/atau Persewaan.
+ 14. Penghasilan yang Diterima atau Diperoleh Pedagang Dalam Negeri Penjualan Barang, Penyerahan J.
+ 15. Penjualan BBM oleh Pertamina atau Anak Perusahaan Pertamina Kepada SPBU (Final)
+ 16. Penjualan BBM oleh Badan Usaha Selain Pertamina atau Anak Perusahaan Pertamina Kepada SPBU/Ag.
+ 17. Penjualan BBG oleh produsen/importir Kepada SPBU/Agen/Penyalur (Final)
+ 18. Penjualan BBM oleh Pertamina atau Anak Perusahaan Pertamina kepada Agen/Penyalur selain SPBU .
+ 19. Penghasilan Sehubungan dengan Aset Kripto yang dipungut oleh Penyelenggara Perdagangan Melalu.
+ 20. Penghasilan Sehubungan dengan Aset Kripto yang dipungut oleh Penyelenggara Perdagangan Melalu.
+ 21. Penghasilan Sehubungan dengan Aset Kripto (Setor Sendiri)
+ 22. Penghasilan Sehubungan dengan Aset Kripto yang dipungut oleh Penyelenggara Perdagangan Melalu.
+ 23. Penghasilan Sehubungan dengan Aset Kripto yang dipungut oleh Penyelenggara Perdagangan Melalu.
+ 24. Penghasilan Sehubungan dengan Transaksi Aset Kripto di Penyelenggara Perdagangan Melalui Sist.
+ 25. Penghasilan Sehubungan dengan Transaksi Aset Kripto di Penyelenggara Perdagangan Melalui Sist.
+ 26. Bunga Obligasi, Surat Utang Negara, atau Obligasi Daerah yang Diterima Wajib Pajak Dalam Nege.
+ 27. Bunga Obligasi yang Diterima Wajib Pajak Dalam Negeri dan Bentuk Usaha Tetap yang diadministr.
+ 28. Diskonto Surat Perbendaharaan Negara yang Diterima Wajib Pajak Dalam Negeri dan Bentuk Usaha .
+ 29. Diskonto Surat Perbendaharaan Negara yang Diterima Wajib Pajak Penduduk/Berkedudukan di Luar .
+ 30. Bunga Obligasi yang Diterima Wajib Pajak Dalam Negeri dan Bentuk Usaha Tetap
+ 31. Pengalihan Hak atas Tanah dan/atau Bangunan
+ 32. Pengalihan Rumah Sederhana dan Rumah Susun Sederhana yang Dilakukan oleh WP yang Usaha Pokokn.
+ 33. Pengalihan Hak atas Tanah dan/atau Bangunan kepada Pemerintah, BUMN yang Mendapat Penugasan K.
+ 34. Persewaan Tanah dan/atau Bangunan
+ 35. Kekurangan penyetoran PPh final dari pemungutan Pihak Lain (SIPP)-Persewaan Tanah dan/atau Ba.
+ 36. Bunga Tabungan dan Bunga Deposito yang Ditempatkan di Dalam Negeri yang Dananya Bersumber Sel.
+ 37. Bunga Deposito yang Ditempatkan di Dalam Negeri (mata uang IDR bersumber dari DHE tenor 1 bul.
+ 38. Bunga Deposito yang Ditempatkan di Dalam Negeri (mata uang IDR bersumber dari DHE tenor 3 bul.
+ 39. Bunga Deposito yang Ditempatkan di Dalam Negeri (mata uang IDR bersumber dari DHE tenor 6 bul.
+ 40. Bunga Deposito yang Ditempatkan di Dalam Negeri (mata uang USD bersumber dari DHE tenor 1 bul.
+ 41. Bunga Deposito yang Ditempatkan di Dalam Negeri (mata uang USD bersumber dari DHE tenor 3 bul.
+ 42. Bunga Deposito yang Ditempatkan di Dalam Negeri (mata uang USD bersumber dari DHE tenor 6 bul.
+ 43. Bunga Deposito yang Ditempatkan di Dalam Negeri (mata uang USD bersumber dari DHE tenor lebih.
+ 44. Bunga Deposito/Tabungan yang Ditempatkan di Luar Negeri Melalui Bank yang Didirikan atau Bert.
+ 45. Diskonto Sertifikat Bank Indonesia
+ 46. Jasa Giro
+ 47. Hadiah Undian
+ 48. Transaksi Penjualan Saham di Bursa Efek (Bukan Saham Pendiri)
+ 49. Transaksi Penjualan Saham di Bursa Efek (Saham Pendiri)
+ 50. Transaksi Penjualan Saham Milik Perusahaan Modal Ventura Tidak di Bursa Efek
+ 51. Jasa Konstruksi Berupa Jasa Perencanaan Konstruksi (Dengan Kualifikasi Usaha) yang Disetor Se.
+ 52. Jasa Konstruksi Berupa Jasa Perencanaan Konstruksi (Tanpa Kualifikasi Usaha)
+ 53. Jasa Konstruksi Berupa Jasa Pelaksanaan Konstruksi (Kualifikasi Usaha Kecil)
+ 54. Jasa Konstruksi Berupa Jasa Pelaksanaan Konstruksi (Kualifikasi Usaha Menengah dan Besar)
+ 55. Jasa Konstruksi Berupa Jasa Pelaksanaan Konstruksi (Tanpa Kualifikasi Usaha)
+ 56. Jasa Konstruksi Berupa Jasa Pengawasan Konstruksi (Dengan Kualifikasi Usaha)
+ 57. Jasa Konstruksi Berupa Jasa Pengawasan Konstruksi (Tanpa Kualifikasi Usaha)
+ 58. Pekerjaan Konstruksi yang Dilakukan oleh Penyedia Jasa yang Memiliki Sertifikat Badan Usaha K.
+ 59. Pekerjaan Konstruksi yang Dilakukan oleh Penyedia Jasa yang Tidak Memiliki Sertifikat Badan U.
+ 60. Pekerjaan Konstruksi yang Dilakukan oleh Penyedia Jasa yang Memiliki Sertifikat Selain Sertif.
+ 61. Pekerjaan Konstruksi Terintegrasi yang Dilakukan oleh Penyedia Jasa yang Memiliki Sertifikat .
+ 62. Pekerjaan Konstruksi Terintegrasi yang Dilakukan oleh Penyedia Jasa yang Tidak Memiliki Serti.
+ 63. Jasa Konsultansi Konstruksi yang Dilakukan oleh Penyedia Jasa yang Memiliki Sertifikat Badan .
+ 64. Jasa Konsultansi Konstruksi yang Dilakukan oleh Penyedia Jasa yang Tidak Memiliki Sertifikat .
+ 65. Kekurangan penyetoran PPh final dari pemungutan Pihak Lain (SIPP)-Pekerjaan Konstruksi yang D.
+ 66. Kekurangan penyetoran PPh final dari pemungutan Pihak Lain (SIPP)-Pekerjaan Konstruksi yang D.
+ 67. Kekurangan penyetoran PPh final dari pemungutan Pihak Lain (SIPP)-Pekerjaan Konstruksi yang D.
+ 68. Kekurangan penyetoran PPh final dari pemungutan Pihak Lain (SIPP)-Pekerjaan Konstruksi Terint.
+ 69. Kekurangan penyetoran PPh final dari pemungutan Pihak Lain (SIPP)-Pekerjaan Konstruksi Terint.
+ 70. Kekurangan penyetoran PPh final dari pemungutan Pihak Lain (SIPP)-Jasa Konsultansi Konstruksi.
+ 71. Kekurangan penyetoran PPh final dari pemungutan Pihak Lain (SIPP)-Jasa Konsultansi Konstruksi.
+ 72. Kekurangan penyetoran PPh final dari pemungutan Pihak Lain (SIPP)-Jasa Konstruksi Berupa Jasa.
+ 73. Kekurangan penyetoran PPh final dari pemungutan Pihak Lain (SIPP)-Jasa Konstruksi Berupa Jasa.
+ 74. Kekurangan penyetoran PPh final dari pemungutan Pihak Lain (SIPP)-Jasa Konstruksi Berupa Jasa.
+ 75. Kekurangan penyetoran PPh final dari pemungutan Pihak Lain (SIPP)-Jasa Konstruksi Berupa Jasa.
+ 76. Kekurangan penyetoran PPh final dari pemungutan Pihak Lain (SIPP)-Jasa Konstruksi Berupa Jasa.
+ 77. Kekurangan penyetoran PPh final dari pemungutan Pihak Lain (SIPP)-Jasa Konstruksi Berupa Jasa.
+ 78. Kekurangan penyetoran PPh final dari pemungutan Pihak Lain (SIPP)-Jasa Konstruksi Berupa Jasa.
+ 79. Imbalan yang Diterima/Diperoleh Sehubungan dengan Pengangkutan Orang dan/atau Barang Termasuk.
+ 80. Imbalan yang Dibayarkan/Terutang kepada Perusahaan Pelayaran Dalam Negeri
+ 81. Kekurangan penyetoran PPh final dari pemungutan Pihak Lain (SIPP)-Imbalan yang Dibayarkan/Ter.
+ 82. Kekurangan penyetoran PPh final dari pemungutan Pihak Lain (SIPP)-Imbalan yang Diterima/Diper.
+ 83. Imbalan yang Dibayarkan/Terutang kepada Perusahaan Pelayaran dan/atau Penerbangan Luar Negeri.
+ 84. Imbalan Charter Kapal Laut dan/atau Pesawat Udara yang Dibayarkan/ Terutang kepada Perusahaan.
+ 85. Kekurangan penyetoran PPh final dari pemungutan Pihak Lain (SIPP)-Imbalan Charter Kapal Laut .
+ 86. Penghasilan Wajib Pajak Luar Negeri yang Mempunyai Kantor Perwakilan Dagang di Indonesia
+ 87. Revaluasi atau penilaian kembali aset tetap
+ 88. Bunga Simpanan yang Dibayarkan oleh Koperasi kepada Anggota Wajib Pajak Orang Pribadi (bunga .
+ 89. Bunga Simpanan yang Dibayarkan oleh Koperasi kepada Anggota Wajib Pajak Orang Pribadi (bunga .
+ 90. Dividen yang Diterima/Diperoleh Wajib Pajak Orang Pribadi Dalam Negeri
+ 91. Uplift Hulu Migas
+ 92. Participating Interest Eksplorasi Hulu Migas
+ 93. Participating Interest Eksploitasi Hulu Migas
+ 94. Pemotongan atau pemungutan PPh atas penjualan barang atau penyerahan jasa yang dilakukan oleh.
+ 95. Pemotongan atau pemungutan PPh atas transaksi pembelian yang dilakukan oleh Wajib Pajak denga.
+ 96. Pemotongan atau Pemungutan PPh atas transaksi penjualan barang atau penyerahan jasa yang dila.
+ 97. Pemotongan atau Pemungutan PPh atas transaksi penjualan barang atau penyerahan jasa yang dila.
+ 98. Pemotongan atau pemungutan PPh atas transaksi pembelian yang dilakukan oleh Wajib Pajak yang .
+ 99. Penghasilan yang dikenakan pajak bersifat final sesuai Peraturan Pemerintah Nomor 23/55 (Dise.
+ 100. Perjanjian Pengikatan Jual Beli
+ 101. Penghasilan Wajib Pajak yang Melakukan Kegiatan Usaha Jasa Maklon (Contract Manufacturing) In
+ 102. Penghasilan yang Diterima atau Diperoleh Sehubungan dengan Kerja Sama dengan Lembaga Pengelol
+ 103. Penghasilan istri dari satu pemberi kerja
+ 104. Penghasilan Final Lainnya
+
+========================================================================
+LIST15 - 14 options
+ used by: L-2 B BUKAN OBJEK PAJAK :: [0] Jenis Penghasilan
+------------------------------------------------------------------------
+ 1. Dividen atau bagian laba
+ 2. Pembebasan utang
+ 3. Hibah
+ 4. Bantuan/Sumbangan
+ 5. Warisan
+ 6. Penerimaan Zakat dan Sumbangan Keagamaan yang sifatnya wajib
+ 7. Bagian Laba Anggota Perseroan Komanditer Tidak Atas Saham, Persekutuan, Perkumpulan, Firma, K..
+ 8. Klaim asuransi kesehatan, kecelakaan, jiwa, dwiguna, beasiswa
+ 9. Beasiswa
+ 10. Hadiah langsung yang diberikan kepada semua pembeli/konsumen akhir tanpa diundi
+ 11. Objek PPh tertentu bagi TKA yang memiliki keahlian tertentu (expatriate regime)
+ 12. Natura dan kenikmatan yang dikecualikan dari objek pajak
+ 13. SHU dari koperasi
+ 14. Penghasilan lain yang tidak termasuk objek pajak
+
+========================================================================
+LIST16 - 29 options
+ used by: L-2 C LUAR NEGERI :: [1] Jenis Penghasilan
+------------------------------------------------------------------------
+ 1. Penghasilan dari Pekerjaan Bebas
+ 2. Penghasilan dari kegiatan usaha
+ 3. Pendapatan lain dari kegiatan usaha atau pekerjaan bebas
+ 4. Gaji, tunjangan, honorarium, bonus, jasa produksi
+ 5. Upah honorarium yg diterima oleh pegawai tidak tetap
+ 6. Uang pesangon diterima sekaligus
+ 7. Manfaat Pensiun, Tunjangan Hari Tua, atau Jaminan Hari Tua dibayarkan sekaligus
+ 8. Uang pensiun yang diterima secara berkala/bulanan oleh penerima pensiun
+ 9. Penghasilan lain yang berhubungan dengan pekerjaan
+ 10. Sewa tanah dan atau bangunan
+ 11. Sewa harta selain tanah dan atau bangunan
+ 12. Dividen
+ 13. Bunga
+ 14. Obligasi
+ 15. Royalti
+ 16. Keuntungan Penjualan Harta
+ 17. Bunga Deposito
+ 18. Bunga Tabungan
+ 19. Surat Berharga/Sekuritas
+ 20. Penjualan Saham di Bursa
+ 21. Pengalihan atau Penjualan Tanah Bangunan
+ 22. Keuntungan Selisih Mata Uang Asing
+ 23. Penghasilan lain-lain dari Modal atau Aset/Harta
+ 24. Pembebasan Utang
+ 25. Hibah
+ 26. Bantuan/Sumbangan
+ 27. Warisan
+ 28. Hadiah/Undian
+ 29. Penghasilan lain
+
+========================================================================
+LIST17 - 111 options
+ used by: L-2 C LUAR NEGERI :: [2] Mata Uang
+------------------------------------------------------------------------
+ 1. UAE Dirham: UNITED ARAB EMIRATES
+ 2. Afghani Afghanistan
+ 3. Albania Lek
+ 4. Gulden Antillen Belanda
+ 5. Peso Argentina
+ 6. Dolar Australia
+ 7. Gulden Aruba
+ 8. Manat Azerbaijan
+ 9. Mark Konvertibel Bosnia dan Herzegovina
+ 10. Dolar Barbados
+ 11. Bangladeshi Taka
+ 12. Lev Bulgaria
+ 13. Dolar Bermuda
+ 14. Dolar Brunei Darussalam
+ 15. Boliviano Bolivia
+ 16. Real Brazil
+ 17. Dolar Bahama
+ 18. Pula Botswana
+ 19. Rubel Belarusia
+ 20. Dolar Belize
+ 21. Dolar Kanada
+ 22. Franc Swiss
+ 23. Peso Chili
+ 24. Yuan Renminbi: CHINA
+ 25. Peso Kolombia
+ 26. Kolon Kosta Rika
+ 27. Peso Kuba
+ 28. Koruna Republik Ceko
+ 29. Krone Denmark
+ 30. Peso Republik Dominika
+ 31. Pound Mesir
+ 32. Negara Anggota Euro
+ 33. Dolar Fiji
+ 34. Kepulauan Falkland (Malvinas) Pound
+ 35. Pound Inggris
+ 36. Pound Guernsey
+ 37. Cedi Ghana
+ 38. Pound Gibraltar
+ 39. Quetzal Guatemala
+ 40. Dolar Guyana
+ 41. Dollar Hongkong
+ 42. Lempira Honduras
+ 43. Kuna Kroasia
+ 44. Forint Hongaria
+ 45. Rupiah Indonesia
+ 46. Shekel Israel
+ 47. Pulau Man Pound
+ 48. Rupee India
+ 49. Rial Iran
+ 50. Krona Islandia
+ 51. Jersey Pound
+ 52. Dolar Jamaika
+ 53. Yen Jepang
+ 54. Som Kirgistan
+ 55. Kamboja Riel
+ 56. Won Korea Utara
+ 57. Won Korea Selatan
+ 58. Dolar Kepulauan Cayman
+ 59. Tenge Kazakstan
+ 60. Kip Laos
+ 61. Pound Lebanon
+ 62. Rupee Sri Lanka
+ 63. Dolar Liberia
+ 64. Denar Makedonia
+ 65. Tughrik Mongolia
+ 66. Rupee Mauritius
+ 67. Peso Meksiko
+ 68. Ringgit Malaysia
+ 69. Metical Mozambik
+ 70. Dolar Namibia
+ 71. Naira Nigeria
+ 72. Cordoba Nikaragua
+ 73. Krone Norwegia
+ 74. Rupee Nepal
+ 75. Dolar Selandia Baru
+ 76. Rial Oman
+ 77. Balboa Panama
+ 78. Sol Peru
+ 79. Peso Filipina
+ 80. Rupee Pakistan
+ 81. Zloty Polandia
+ 82. Guarani Paraguay
+ 83. Riyal Qatar
+ 84. Leu Romania
+ 85. Dinar Serbia
+ 86. Rubel Rusia
+ 87. Riyal Arab Saudi
+ 88. Dolar Kepulauan Solomon
+ 89. Rupee Seychelles
+ 90. Krona Swedia
+ 91. Dolar Singapura
+ 92. Pound Saint Helena
+ 93. Shilling Somalia
+ 94. Dolar Suriname
+ 95. Kolon El Salvador
+ 96. Pound Suriah
+ 97. Baht Thailand
+ 98. Lira Turki
+ 99. Dolar Trinidad dan Tobago
+ 100. Dolar Tuvalu
+ 101. Dolar Baru Taiwan
+ 102. Ukraina Ukraina
+ 103. Dolar Amerika Serikat
+ 104. Peso Uruguay
+ 105. Som Uzbekistan
+ 106. Bolivar Venezuela
+ 107. Dong Vietnam
+ 108. Dolar Karibia Timur
+ 109. Rial Yaman
+ 110. Rand Afrika Selatan
+ 111. Dolar Zimbabwe
+
+========================================================================
+LIST18 - 15 options
+ used by: L-3A-4 B DN LAINNYA :: [0] Jenis Penghasilan
+------------------------------------------------------------------------
+ 1. Penggantian atau imbalan yang diberikan dalam bentuk natura atau kenikmatan
+ 2. Sewa harta selain tanah dan/atau bangunan
+ 3. Bunga
+ 4. Royalti
+ 5. Keuntungan karena Penjualan atau karena Pengalihan Harta
+ 6. Imbalan Bunga
+ 7. Keuntungan Seilisih Kurs Mata Uang Asing
+ 8. Penghasilan Lain dari Modal atau Aset
+ 9. Pembebasan Utang
+ 10. Hibah
+ 11. Bantuan/Sumbangan
+ 12. Klaim Asuransi
+ 13. Beasiswa
+ 14. Hadiah
+ 15. Penghasilan Dalam Negeri Lainnya
+
+========================================================================
+LIST19 - 5 options
+ used by: L-5 B PENGURANG PENGH NETO :: [0] Jenis Pengurang Penghasilan Neto
+------------------------------------------------------------------------
+ 1. Zakat (Sesuai PP Nomor 60 Tahun 2010)
+ 2. Sumbangan keagamaan (Sesuai PP Nomor 60 Tahun 2010)
+ 3. Fasilitas pengurang penghasilan Neto (Tax allowance)
+ 4. Fasilitas keringanan pajak lainnya (Tax reliefs)
+ 5. Pengurang penghasilan neto lainnya
+
+========================================================================
+LIST20 - 2 options
+ used by: L-5 C PENGURANG PPh :: [0] Jenis Pengurang PPh Terutang
+------------------------------------------------------------------------
+ 1. Fasilitas pembebasan atau pengurangan PPh (Tax holiday)
+ 2. Pengurang PPh Lainnya

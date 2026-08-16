@@ -31,6 +31,24 @@ vite.config.ts.timestamp-*
 # Test
 src/routes/test/
 
-# UI reference captures from live Coretax — screenshots may carry real taxpayer
-# data, so they stay local until they have been reviewed and redacted.
-/docs/
+# UI reference captures from live Coretax.
+#
+# Screenshots carry real taxpayer data (the owner's own identity fields, and
+# dependants' names/NIKs/DOBs in L-1 Section C), so images stay local until
+# they have been reviewed and redacted.
+#
+# The written notes are PII-free and are tracked: they are the actual value of
+# the capture work, and having them in git history is what makes stale claims
+# visible as diffs instead of something to rediscover.
+/docs/**/*.jpg
+/docs/**/*.jpeg
+/docs/**/*.png
+/docs/**/*.gif
+/docs/**/*.webp
+/docs/**/*.pdf
+
+# Raw accessibility-tree dumps stay local: they are verbatim DOM captures and
+# contain dependants' names and NIKs (L-1 Section C). The owner's decision to
+# leave dependant PII unredacted was conditional on docs/ not being tracked.
+# Regenerate from the live form if one is needed; do not commit one.
+/docs/**/a11y-*.txt
