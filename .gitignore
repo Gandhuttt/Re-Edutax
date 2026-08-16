@@ -30,3 +30,7 @@ vite.config.ts.timestamp-*
 
 # Test
 src/routes/test/
+
+# UI reference captures from live Coretax — screenshots may carry real taxpayer
+# data, so they stay local until they have been reviewed and redacted.
+/docs/
