@@ -16,6 +16,7 @@ import * as lampiran10aReferensi from './batches/012-lampiran-10a-referensi';
 import * as kodeKoreksiFiskal from './batches/013-kode-koreksi-fiskal';
 import * as adminUser from './batches/014-admin-user';
 import * as batchPeserta from './batches/015-batch-peserta';
+import * as pphOpLampiranReferensi from './batches/016-pph-op-lampiran-referensi';
 
 const batches = [
 	initialUsers,
@@ -33,6 +34,7 @@ const batches = [
 	kodeKoreksiFiskal,
 	adminUser,
 	batchPeserta,
+	pphOpLampiranReferensi,
 	fakturDemo
 ];
 

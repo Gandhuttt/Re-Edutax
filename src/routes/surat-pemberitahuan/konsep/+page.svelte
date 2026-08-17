@@ -5,8 +5,10 @@
 	import Table from '$lib/components/Table.svelte';
 	import { formatMonth } from '$lib/helpers/date';
 	import { listSptPphBadan } from '../listSptPphBadan.remote';
+	import { listSptPphOrangPribadi } from '../listSptPphOrangPribadi.remote';
 	import { listSptPpn } from '../listSptPpn.remote';
 	import { newSptPphBadan } from './newSptPphBadan.remote';
+	import { newSptPphOrangPribadi } from './newSptPphOrangPribadi.remote';
 	import { newSptPpn } from './newSptPpn.remote';
 	import { deleteSptPphBadan } from './deleteSptPphBadan.remote';
 
@@ -15,9 +17,10 @@
 	const today = new Date();
 	const months = Array.from({ length: 12 }, (_, i) => i + 1);
 	const years = Array.from({ length: 6 }, (_, i) => today.getFullYear() - 3 + i);
-	// This SPT PPh Badan implementation follows tax-year-2025 rules specifically (rates,
-	// facilities, thresholds) - restrict creation to that year until a future year is verified.
-	const pphBadanTahunPajakOptions = [2025];
+	// Both SPT PPh implementations follow tax-year-2025 rules specifically (rates, facilities,
+	// thresholds; PTKP and the progressive tariff on the orang pribadi side) - restrict creation
+	// to that year until a future year is verified.
+	const pphTahunPajakOptions = [2025];
 </script>
 
 <div class="tw:w-full tw:p-25">
@@ -40,13 +43,20 @@
 						<Button class="tw:w-[25rem]">Buat SPT PPN</Button>
 					</form>
 					<form {...newSptPphBadan} class="tw:flex tw:gap-2 tw:items-center">
-						<Select name="tahunPajak" value={String(pphBadanTahunPajakOptions[0])} class="tw:w-[7rem]">
-							<option value="2025">2025</option>
-							<!-- {#each pphBadanTahunPajakOptions as year} -->
-								<!-- <option value={year} selected>{year}</option> -->
-							<!-- {/each} -->
+						<Select name="tahunPajak" value={String(pphTahunPajakOptions[0])} class="tw:w-[7rem]">
+							{#each pphTahunPajakOptions as year}
+								<option value={year}>{year}</option>
+							{/each}
 						</Select>
 						<Button class="tw:w-[20rem]">Buat SPT PPh Badan</Button>
+					</form>
+					<form {...newSptPphOrangPribadi} class="tw:flex tw:gap-2 tw:items-center">
+						<Select name="tahunPajak" value={String(pphTahunPajakOptions[0])} class="tw:w-[7rem]">
+							{#each pphTahunPajakOptions as year}
+								<option value={year}>{year}</option>
+							{/each}
+						</Select>
+						<Button class="tw:w-[25rem]">Buat SPT PPh Orang Pribadi</Button>
 					</form>
 				</div>
 			</div>
@@ -99,6 +109,22 @@
 									</form>
 								</td>
 								<td>SPT Tahunan PPh Badan</td>
+								<td>-</td>
+								<td>{row.tahunPajak}</td>
+								<td>{row.pembetulanKe}</td>
+								<td>-</td>
+								<td>-</td>
+								<td>{rupiah.format(row.pphKurangLebihBayar)}</td>
+							</tr>
+						{/each}
+						{#each await listSptPphOrangPribadi({ status: 'konsep' }) as row}
+							<tr>
+								<td>
+									<a href="/surat-pemberitahuan/pph-orang-pribadi?id={row.id}" class="tw:text-black!">
+										<Button>Buka</Button>
+									</a>
+								</td>
+								<td>SPT Tahunan PPh Orang Pribadi</td>
 								<td>-</td>
 								<td>{row.tahunPajak}</td>
 								<td>{row.pembetulanKe}</td>

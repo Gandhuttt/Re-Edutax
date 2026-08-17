@@ -53,3 +53,8 @@ export * from './transactional/surat_pemberitahuan/spt_pph_badan/lampiran_13b_ke
 export * from './transactional/surat_pemberitahuan/spt_pph_badan/lampiran_13b_biaya';
 export * from './transactional/surat_pemberitahuan/spt_pph_badan/lampiran_13b_litbang';
 export * from './transactional/surat_pemberitahuan/spt_pph_badan/lampiran_13b_penghitungan';
+export * from './transactional/surat_pemberitahuan/spt_pph_orang_pribadi/spt_pph_orang_pribadi';
+export * from './transactional/surat_pemberitahuan/spt_pph_orang_pribadi/sumber_penghasilan';
+export * from './references/spt_pph_orang_pribadi/referensi_lampiran';
+export * from './transactional/surat_pemberitahuan/spt_pph_orang_pribadi/lampiran_1_harta';
+export * from './transactional/surat_pemberitahuan/spt_pph_orang_pribadi/lampiran_1_lainnya';
