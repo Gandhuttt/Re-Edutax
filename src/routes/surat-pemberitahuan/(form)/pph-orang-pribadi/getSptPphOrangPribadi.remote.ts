@@ -12,6 +12,7 @@ import { getLampiranL2 } from './components/L-2/getLampiranL2.server';
 import { getLampiranL3A } from './components/L-3A/getLampiranL3A.server';
 import { getLampiranL3A4 } from './components/L-3A-4/getLampiranL3A4.server';
 import { getLampiranL3B } from './components/L-3B/getLampiranL3B.server';
+import { getLampiranL4 } from './components/L-4/getLampiranL4.server';
 import { getLampiranL5 } from './components/L-5/getLampiranL5.server';
 
 export const getSptPphOrangPribadi = query(async () => {
@@ -45,6 +46,7 @@ export const getSptPphOrangPribadi = query(async () => {
 		lampiran3a,
 		lampiran3a4,
 		lampiran3b,
+		lampiran4,
 		lampiran5,
 		previousVersion
 	] = await Promise.all([
@@ -69,6 +71,7 @@ export const getSptPphOrangPribadi = query(async () => {
 		getLampiranL3A(id),
 		getLampiranL3A4(id),
 		getLampiranL3B(id),
+		getLampiranL4(id),
 		getLampiranL5(id, spt.tahunPajak),
 		// Row 12a is read from the SPT being amended rather than typed, matching the
 		// Badan pembetulan mechanic.
@@ -101,6 +104,7 @@ export const getSptPphOrangPribadi = query(async () => {
 		lampiran3a,
 		lampiran3a4,
 		lampiran3b,
+		lampiran4,
 		lampiran5
 	};
 });

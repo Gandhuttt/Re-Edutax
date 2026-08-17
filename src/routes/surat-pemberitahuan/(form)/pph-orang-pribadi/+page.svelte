@@ -11,11 +11,17 @@
 	import L3A from './components/L-3A/_L3A.svelte';
 	import L3A4 from './components/L-3A-4/_L3A4.svelte';
 	import L3B from './components/L-3B/_L3B.svelte';
+	import L4 from './components/L-4/_L4.svelte';
 	import L5 from './components/L-5/_L5.svelte';
 	import { getSptPphOrangPribadi } from './getSptPphOrangPribadi.remote';
 	import { getReferensiLampiran } from './getReferensiLampiran.remote';
 	import { saveSptPphOrangPribadi } from './saveSptPphOrangPribadi.remote';
-	import { hitungInduk, type PtkpStatus } from './components/Induk/hitungPphOrangPribadi';
+	import {
+		hitungInduk,
+		hitungLampiranL4,
+		hitungLampiranL4SectionB,
+		type PtkpStatus
+	} from './components/Induk/hitungPphOrangPribadi';
 	import { computeLabaRugiRows } from '../pph-badan/components/L1/labaRugiRollup';
 	import type {
 		BarisA1,
@@ -34,6 +40,7 @@
 	import type { BarisLabaRugi, KodeKoreksiFiskal, Sektor } from './components/L-3A/types';
 	import type { BarisLainnya } from './components/L-3A-4/types';
 	import type { BarisFinalBulanan, BarisPeredaranBulanan, TkuL3B } from './components/L-3B/types';
+	import type { LampiranL4 } from './components/L-4/types';
 	import type { BarisKompensasi, BarisPengurang } from './components/L-5/types';
 
 	const {
@@ -46,6 +53,7 @@
 		lampiran3a,
 		lampiran3a4,
 		lampiran3b,
+		lampiran4,
 		lampiran5
 	} = await getSptPphOrangPribadi();
 	const referensi = await getReferensiLampiran();
@@ -240,6 +248,8 @@
 	let l3bB = $state<BarisPeredaranBulanan[]>(lampiran3b.b.map((row) => ({ ...row })));
 	let l3bC = $state<BarisPeredaranBulanan[]>(lampiran3b.c.map((row) => ({ ...row })));
 
+	let l4 = $state<LampiranL4>({ ...lampiran4 });
+
 	let l5Kompensasi = $state<BarisKompensasi[]>(lampiran5.kompensasi.map((row) => ({ ...row })));
 	let l5PengurangNeto = $state<BarisPengurang[]>(lampiran5.pengurangNeto.map((row) => ({ ...row })));
 	let l5PengurangPph = $state<BarisPengurang[]>(lampiran5.pengurangPph.map((row) => ({ ...row })));
@@ -318,26 +328,70 @@
 
 	let f12a = $derived(spt.pembetulanKe > 0 ? (spt.previousPphKurangLebihBayar ?? 0) : 0);
 
+	// Shared inputs for hitungInduk, reused by both the base pass (below) and
+	// the final, override-aware pass so the input object literal isn't
+	// duplicated.
+	let indukInputs = $derived({
+		n1a: Number(n1a),
+		n1b: Number(n1b),
+		n1c: Number(n1c),
+		n1d: Number(n1d),
+		c3AdaPengurangPenghasilanNeto: Boolean(c3AdaPengurangPenghasilanNeto),
+		n3: Number(n3),
+		c5PtkpStatus: (c5PtkpStatus || null) as PtkpStatus | null,
+		c8AdaPengurangPphTerutang: Boolean(c8AdaPengurangPphTerutang),
+		n8: Number(n8),
+		d10aAdaPphDipotongPihakLain: Boolean(d10aAdaPphDipotongPihakLain),
+		n10a: Number(n10a),
+		d10bAngsuranPph25: Number(d10bAngsuranPph25),
+		d10cStpPph25: Number(d10cStpPph25),
+		d10dAdaPengembalianKreditLuarNegeri: Boolean(d10dAdaPengembalianKreditLuarNegeri),
+		d10dJumlah: Number(d10dJumlah),
+		e11bAdaSkPengangsuranPenundaan: Boolean(e11bAdaSkPengangsuranPenundaan),
+		e11bJumlah: Number(e11bJumlah),
+		f12a
+	});
+
+	// Base pass: row 4 (penghasilan neto after pengurang) is computed before
+	// rows 6/7 in hitungInduk, so it does not depend on the PH/MT override.
+	// This pass is only used to read n4 for feeding L-4 Section B below, which
+	// in turn produces the override that the final `computed` pass consumes.
+	let computedBase = $derived(hitungInduk(indukInputs));
+
+	let isPhMt = $derived(
+		a7StatusKewajibanSuamiIstri === 'ph' || a7StatusKewajibanSuamiIstri === 'mt'
+	);
+
+	let computedL4SectionB = $derived(
+		isPhMt
+			? hitungLampiranL4SectionB({
+					netoWp: computedBase.n4,
+					setelahDikurangiSuamiIstri: Number(l4.setelahDikurangiSuamiIstri),
+					ptkpGabunganStatus: (l4.ptkpGabunganStatus || null) as PtkpStatus | null
+				})
+			: null
+	);
+
 	let computed = $derived(
 		hitungInduk({
-			n1a: Number(n1a),
-			n1b: Number(n1b),
-			n1c: Number(n1c),
-			n1d: Number(n1d),
-			c3AdaPengurangPenghasilanNeto: Boolean(c3AdaPengurangPenghasilanNeto),
-			n3: Number(n3),
-			c5PtkpStatus: (c5PtkpStatus || null) as PtkpStatus | null,
-			c8AdaPengurangPphTerutang: Boolean(c8AdaPengurangPphTerutang),
-			n8: Number(n8),
-			d10aAdaPphDipotongPihakLain: Boolean(d10aAdaPphDipotongPihakLain),
-			n10a: Number(n10a),
-			d10bAngsuranPph25: Number(d10bAngsuranPph25),
-			d10cStpPph25: Number(d10cStpPph25),
-			d10dAdaPengembalianKreditLuarNegeri: Boolean(d10dAdaPengembalianKreditLuarNegeri),
-			d10dJumlah: Number(d10dJumlah),
-			e11bAdaSkPengangsuranPenundaan: Boolean(e11bAdaSkPengangsuranPenundaan),
-			e11bJumlah: Number(e11bJumlah),
-			f12a
+			...indukInputs,
+			phMtOverride: computedL4SectionB
+				? { pphDitanggungWp: computedL4SectionB.pphDitanggungWp }
+				: undefined
+		})
+	);
+
+	// L-4 Bagian A's own computed figures, mirrored onto Induk row 13.b's
+	// inline amount cell (see L4.md's intro: the live form shows a read-only
+	// numeric field next to 13.b once answered Ya).
+	let computedL4 = $derived(
+		hitungLampiranL4({
+			penghasilanNeto: Number(l4.penghasilanNeto),
+			kompensasiKerugian: Number(l4.kompensasiKerugian),
+			zakatSumbangan: Number(l4.zakatSumbangan),
+			ptkpStatus: (l4.ptkpStatus || null) as PtkpStatus | null,
+			pengurangPphTerutang: Number(l4.pengurangPphTerutang),
+			kreditPajak: Number(l4.kreditPajak)
 		})
 	);
 
@@ -543,6 +597,31 @@
 			<input type="hidden" name="l3bA" value={JSON.stringify(l3bA)} />
 			<input type="hidden" name="l3bB" value={JSON.stringify(l3bB)} />
 			<input type="hidden" name="l3bC" value={JSON.stringify(l3bC)} />
+			<!-- L-4 Bagian A. Flat scalar fields, not a repeating grid. Only the
+			     six manual inputs are submitted: the five derived fields
+			     (Jumlah penghasilan neto, Penghasilan Kena Pajak, Pajak
+			     Terutang, PPh yang harus dibayar, Angsuran PPh 25) are
+			     computed client-side via hitungLampiranL4 and never persisted. -->
+			<input type="hidden" name="l4PenghasilanNeto" value={l4.penghasilanNeto} />
+			<input type="hidden" name="l4KompensasiKerugian" value={l4.kompensasiKerugian} />
+			<input type="hidden" name="l4ZakatSumbangan" value={l4.zakatSumbangan} />
+			<input type="hidden" name="l4PtkpStatus" value={l4.ptkpStatus} />
+			<input type="hidden" name="l4PengurangPphTerutang" value={l4.pengurangPphTerutang} />
+			<input type="hidden" name="l4KreditPajak" value={l4.kreditPajak} />
+			<!-- L-4 Bagian B. Gated on Induk row 7 (ph/mt), a different gate from
+			     Bagian A's 13b. Only the manual inputs are submitted: every
+			     gabungan figure is computed client-side via
+			     hitungLampiranL4SectionB and never persisted. -->
+			<input type="hidden" name="l4BrutoWp" value={l4.brutoWp} />
+			<input type="hidden" name="l4BrutoSuamiIstri" value={l4.brutoSuamiIstri} />
+			<input type="hidden" name="l4NetoSuamiIstri" value={l4.netoSuamiIstri} />
+			<input
+				type="hidden"
+				name="l4SetelahDikurangiSuamiIstri"
+				value={l4.setelahDikurangiSuamiIstri}
+			/>
+			<input type="hidden" name="l4PtkpGabunganStatus" value={l4.ptkpGabunganStatus} />
+			<input type="hidden" name="l4NamaSuamiIstri" value={l4.namaSuamiIstri} />
 			<!-- L-5 rows. Bagian A is the fixed ten-row matrix. -->
 			<input type="hidden" name="l5Kompensasi" value={JSON.stringify(l5Kompensasi)} />
 			<input type="hidden" name="l5PengurangNeto" value={JSON.stringify(l5PengurangNeto)} />
@@ -590,6 +669,7 @@
 				bind:h13aAngsuranTeratur
 				bind:h13bPerhitunganTersendiri
 				bind:h13cAngsuranOppt
+				l4AngsuranPph25={computedL4.angsuranPph25}
 				bind:i14bMemilikiUtang
 				bind:i14cPenghasilanFinal
 				bind:i14dBukanObjekPajak
@@ -672,6 +752,16 @@
 				{readonly}
 			/>
 
+			<L4
+				{currentTab}
+				bind:data={l4}
+				n4={computed.n4}
+				statusKewajibanSuamiIstri={a7StatusKewajibanSuamiIstri}
+				{identitas}
+				npwpSuamiIstri={a8NpwpSuamiIstri}
+				{readonly}
+			/>
+
 			<L5
 				{currentTab}
 				{referensi}
@@ -685,7 +775,7 @@
 			/>
 
 			<!-- The remaining lampiran tabs are gated above but not built yet. -->
-			{#if currentTab !== 'Induk' && currentTab !== 'L-1' && currentTab !== 'L-2' && currentTab !== 'L-3A-1' && currentTab !== 'L-3A-2' && currentTab !== 'L-3A-3' && currentTab !== 'L-3A-4' && currentTab !== 'L-3B' && currentTab !== 'L-5'}
+			{#if currentTab !== 'Induk' && currentTab !== 'L-1' && currentTab !== 'L-2' && currentTab !== 'L-3A-1' && currentTab !== 'L-3A-2' && currentTab !== 'L-3A-3' && currentTab !== 'L-3A-4' && currentTab !== 'L-3B' && currentTab !== 'L-4' && currentTab !== 'L-5'}
 				<div class="tw:p-5">
 					<Alert bg={'var(--color-primary)'}>
 						{#snippet head()}

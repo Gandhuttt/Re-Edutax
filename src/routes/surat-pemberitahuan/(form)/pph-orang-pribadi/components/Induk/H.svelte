@@ -8,6 +8,10 @@
         h13aAngsuranTeratur: boolean | undefined;
         h13bPerhitunganTersendiri: boolean | undefined;
         h13cAngsuranOppt: boolean | undefined;
+        // L-4 Bagian A's computed Angsuran PPh Pasal 25 Tahun Pajak
+        // Berikutnya, mirrored onto 13.b's inline amount cell. On the live
+        // form this cell appears the moment 13.b is answered Ya (L4.md).
+        l4AngsuranPph25?: number;
         readonly?: boolean;
     }
 
@@ -15,6 +19,7 @@
         h13aAngsuranTeratur = $bindable(),
         h13bPerhitunganTersendiri = $bindable(),
         h13cAngsuranOppt = $bindable(),
+        l4AngsuranPph25 = 0,
         readonly = false
     }: Props = $props();
 
@@ -63,6 +68,9 @@
                 name={"H13b"}
                 bind:answer={h13bPerhitunganTersendiri}
                 hint={HINTS.h13b}
+                amount={"derived"}
+                amountWhen={true}
+                amountValue={l4AngsuranPph25}
                 {readonly}
             />
             <RowTanya

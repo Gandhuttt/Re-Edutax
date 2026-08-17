@@ -27,6 +27,7 @@ duplicating another file's content, cross-reference it instead.
 | How does the form behave when filled and saved? | `coretax/spt-1770-lampiran/BEHAVIOR.md` |
 | How is the tax actually computed (PTKP, tariff, rounding)? | `coretax/spt-1770-induk/COMPUTATION.md` |
 | What is L-3B, and why can't I select Norma? | `coretax/spt-1770-lampiran/L3B.md` |
+| What is L-4 (own-calc PPh Pasal 25 installment)? | `coretax/spt-1770-lampiran/L4.md` |
 | Which sektor usaha maps to which L-3A-N, and what accounts does it have? | `coretax/spt-1770-lampiran/L3A.md` |
 | What do the HEADER fields do (Status, Metode, Sumber Penghasilan)? | `coretax/spt-1770-induk/HEADER-FIELDS.md` |
 | How do add / edit / delete behave on a grid row? | `coretax/spt-1770-lampiran/GRID-ROW-ACTIONS.md` |

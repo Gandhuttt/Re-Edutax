@@ -64,6 +64,9 @@
         h13aAngsuranTeratur: boolean | undefined;
         h13bPerhitunganTersendiri: boolean | undefined;
         h13cAngsuranOppt: boolean | undefined;
+        // L-4 Bagian A's computed Angsuran PPh Pasal 25, mirrored onto 13.b's
+        // inline amount cell once answered Ya. See H.svelte.
+        l4AngsuranPph25: number;
 
         i14bMemilikiUtang: boolean | undefined;
         i14cPenghasilanFinal: boolean | undefined;
@@ -132,6 +135,7 @@
         h13aAngsuranTeratur = $bindable(),
         h13bPerhitunganTersendiri = $bindable(),
         h13cAngsuranOppt = $bindable(),
+        l4AngsuranPph25,
         i14bMemilikiUtang = $bindable(),
         i14cPenghasilanFinal = $bindable(),
         i14dBukanObjekPajak = $bindable(),
@@ -247,7 +251,13 @@
             </Accordion>
         {/if}
         <Accordion item={"H. ANGSURAN PPh PASAL 25 TAHUN PAJAK BERIKUTNYA"}>
-            <H bind:h13aAngsuranTeratur bind:h13bPerhitunganTersendiri bind:h13cAngsuranOppt {readonly} />
+            <H
+                bind:h13aAngsuranTeratur
+                bind:h13bPerhitunganTersendiri
+                bind:h13cAngsuranOppt
+                {l4AngsuranPph25}
+                {readonly}
+            />
         </Accordion>
         <Accordion item={"I. PERNYATAAN TRANSAKSI LAINNYA"}>
             <I

@@ -122,6 +122,19 @@ export interface HitungIndukInput {
 
 	// Row 12a, carried from the SPT being amended. 0 on a normal return.
 	f12a: number;
+
+	// When set, this SPT is PH/MT (row 7's a7StatusKewajibanSuamiIstri is 'ph'
+	// or 'mt') and L-4 Section B's WP-share PPh Terutang overrides the normal
+	// bracket calculation for rows 6/7: row 6 goes to 0 and row 7 takes this
+	// value directly, instead of hitungPphTerutang(n6). Measured on the live
+	// form, see docs/ui-reference/coretax/spt-1770-lampiran/L4.md's "Section B
+	// feeds back into Induk's PPh Terutang chain". Confirmed on exactly two
+	// cases (PTKP gabungan unset, then K/I/0) with the WP-share value from
+	// hitungLampiranL4SectionB matching row 7 to the rupiah both times, and
+	// propagating correctly through row 9/11a; not exhaustively fuzzed, but
+	// the mechanism (row 6 bypassed to 0, row 7 sourced from Section B) is
+	// solid.
+	phMtOverride?: { pphDitanggungWp: number };
 }
 
 export function hitungInduk(input: HitungIndukInput) {
@@ -136,9 +149,12 @@ export function hitungInduk(input: HitungIndukInput) {
 	// and floors at 0. Both confirmed by measurement: 601.527.777 - 63.000.000
 	// displays as 538.527.000, and an income below PTKP displays 0 rather than a
 	// negative. Getting either wrong makes every downstream figure drift.
-	const n6 = Math.max(0, Math.floor((n4 - n5) / 1000) * 1000);
+	// PH/MT override: row 6 is bypassed to 0 and row 7 is sourced directly from
+	// L-4 Section B's WP-share PPh Terutang instead of the normal bracket
+	// formula. See phMtOverride's doc comment on HitungIndukInput above.
+	const n6 = input.phMtOverride ? 0 : Math.max(0, Math.floor((n4 - n5) / 1000) * 1000);
 
-	const n7 = hitungPphTerutang(n6);
+	const n7 = input.phMtOverride ? input.phMtOverride.pphDitanggungWp : hitungPphTerutang(n6);
 
 	const n8 = input.c8AdaPengurangPphTerutang ? input.n8 : 0;
 	const n9 = n7 - n8;
@@ -179,5 +195,102 @@ export function hitungInduk(input: HitungIndukInput) {
 		n12b,
 		statusSpt,
 		angsuranPph25TahunDepan
+	};
+}
+
+// L-4 Bagian A: PENGHITUNGAN ANGSURAN PPh PASAL 25 TAHUN PAJAK BERIKUTNYA.
+// Measured against two real cases on the live form (see
+// docs/ui-reference/coretax/spt-1770-lampiran/L4.md) — a separate, smaller
+// computation chain from hitungInduk above, but reusing the same PTKP table
+// and bracket function since both ultimately apply the UU HPP schedule.
+export interface HitungLampiranL4Input {
+	penghasilanNeto: number;
+	kompensasiKerugian: number;
+	zakatSumbangan: number;
+	ptkpStatus: PtkpStatus | null | undefined;
+	pengurangPphTerutang: number;
+	kreditPajak: number;
+}
+
+export function hitungLampiranL4(input: HitungLampiranL4Input) {
+	const jumlahPenghasilanNeto =
+		input.penghasilanNeto - input.kompensasiKerugian - input.zakatSumbangan;
+
+	const ptkpNilai = hitungPtkp(input.ptkpStatus);
+
+	// Mirrors Induk row 6's floor-to-nearest-1.000 (see hitungInduk's n6 comment
+	// above). Both measured L-4 cases happened to already be exact multiples of
+	// 1.000, so this floor is unconfirmed for L-4 specifically — applied here
+	// for consistency with Induk, pending a future capture with a non-round PKP.
+	const penghasilanKenaPajak = Math.max(0, Math.floor((jumlahPenghasilanNeto - ptkpNilai) / 1000) * 1000);
+
+	const pajakTerutang = hitungPphTerutang(penghasilanKenaPajak);
+
+	const pphYangHarusDibayar = pajakTerutang - input.pengurangPphTerutang - input.kreditPajak;
+
+	// Induk's own angsuranPph25TahunDepan uses Math.round, not truncation. The
+	// one measured L-4 value (118.870.833 from 118.870.833,33) is consistent
+	// with either Math.round or Math.floor since the fractional part was .33;
+	// Math.round is chosen to match Induk's own convention, unconfirmed for a
+	// case where the two would actually differ.
+	const angsuranPph25 = Math.round(pphYangHarusDibayar / 12);
+
+	return {
+		jumlahPenghasilanNeto,
+		penghasilanKenaPajak,
+		pajakTerutang,
+		pphYangHarusDibayar,
+		angsuranPph25
+	};
+}
+
+// L-4 Bagian B: PENGHITUNGAN PPh TERUTANG WAJIB PAJAK DAN SUAMI/ISTRI. Gated
+// on Induk row 7 (a7StatusKewajibanSuamiIstri) being 'ph' or 'mt', a
+// different gate from Bagian A's (Induk 13b). Measured against two real
+// cases on the live form (see docs/ui-reference/coretax/spt-1770-lampiran/
+// L4.md's "Section B fields, in order" and "Measured test cases").
+export interface HitungLampiranL4SectionBInput {
+	// WP's "Penghasilan Neto" and "...setelah dikurangi..." cells both mirror
+	// Induk row 4 (n4 from hitungInduk above) — WP has no zakat/kompensasi
+	// inputs of its own in this section to subtract, so the same value feeds
+	// both. Threaded in as a prop rather than re-derived here.
+	netoWp: number;
+	// Suami/Istri's "...setelah dikurangi zakat/sumbangan keagamaan wajib dan
+	// kompensasi kerugian" cell. This is the field that actually feeds the
+	// gabungan sum, NOT the plain "Penghasilan Neto (Suami/Istri)" cell above
+	// it (that one is captured but never referenced by any formula here).
+	setelahDikurangiSuamiIstri: number;
+	ptkpGabunganStatus: PtkpStatus | null | undefined;
+}
+
+export function hitungLampiranL4SectionB(input: HitungLampiranL4SectionBInput) {
+	const netoGabungan = input.netoWp + input.setelahDikurangiSuamiIstri;
+
+	const ptkpGabunganNilai = hitungPtkp(input.ptkpGabunganStatus);
+
+	// Confirmed exact on the live form's two test cases with no floor/rounding
+	// applied (800.000.000 - 112.500.000 = 687.500.000 to the rupiah), unlike
+	// Induk row 6 and L-4 Bagian A's penghasilanKenaPajak which both floor to
+	// the nearest 1.000. Both measured cases here also happened to already be
+	// round millions, so a hidden floor can't be ruled out either way; kept
+	// unfloored since that is what the doc's formula literally states.
+	const penghasilanKenaPajakGabungan = Math.max(0, netoGabungan - ptkpGabunganNilai);
+
+	const pphTerutangGabungan = hitungPphTerutang(penghasilanKenaPajakGabungan);
+
+	// Proportional split by each spouse's share of neto gabungan. Confirmed
+	// exact on both measured cases (75%/25% split in both). Guards against a
+	// zero neto gabungan (e.g. before any input is filled) to avoid NaN.
+	const wpShare = netoGabungan > 0 ? input.netoWp / netoGabungan : 0;
+	const pphDitanggungWp = Math.round(pphTerutangGabungan * wpShare);
+	const pphDitanggungSuamiIstri = pphTerutangGabungan - pphDitanggungWp;
+
+	return {
+		netoGabungan,
+		ptkpGabunganNilai,
+		penghasilanKenaPajakGabungan,
+		pphTerutangGabungan,
+		pphDitanggungWp,
+		pphDitanggungSuamiIstri
 	};
 }

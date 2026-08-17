@@ -8,7 +8,7 @@
 //
 // The repo has no test runner, so this is a standalone script rather than a
 // spec, run with the same tsx that db:seed uses.
-import { hitungPphTerutang, hitungInduk, PTKP } from './hitungPphOrangPribadi';
+import { hitungPphTerutang, hitungInduk, hitungLampiranL4SectionB, PTKP } from './hitungPphOrangPribadi';
 
 let fail = 0;
 const eq = (label: string, got: number, want: number) => {
@@ -55,5 +55,23 @@ const f = hitungInduk({ ...base, n1a: 1_527_777, n1b: 0, n1c: 0, n1d: 0,
   n3: 0, c5PtkpStatus: 'tk_2', n8: 0, n10a: 0 });
 eq('row 6 floor at 0', f.n6, 0);
 eq('row 7 follows at 0', f.n7, 0);
+
+// L-4 Bagian B, both measured test cases from L4.md
+const l4bNoPtkp = hitungLampiranL4SectionB({
+  netoWp: 600_000_000, setelahDikurangiSuamiIstri: 200_000_000, ptkpGabunganStatus: null,
+});
+eq('L4B neto gabungan', l4bNoPtkp.netoGabungan, 800_000_000);
+eq('L4B PKP gabungan (no PTKP)', l4bNoPtkp.penghasilanKenaPajakGabungan, 800_000_000);
+eq('L4B PPh gabungan (no PTKP)', l4bNoPtkp.pphTerutangGabungan, 184_000_000);
+eq('L4B PPh WP (no PTKP)', l4bNoPtkp.pphDitanggungWp, 138_000_000);
+eq('L4B PPh Suami/Istri (no PTKP)', l4bNoPtkp.pphDitanggungSuamiIstri, 46_000_000);
+
+const l4bKi0 = hitungLampiranL4SectionB({
+  netoWp: 600_000_000, setelahDikurangiSuamiIstri: 200_000_000, ptkpGabunganStatus: 'k_i_0',
+});
+eq('L4B PKP gabungan (K/I/0)', l4bKi0.penghasilanKenaPajakGabungan, 687_500_000);
+eq('L4B PPh gabungan (K/I/0)', l4bKi0.pphTerutangGabungan, 150_250_000);
+eq('L4B PPh WP (K/I/0)', l4bKi0.pphDitanggungWp, 112_687_500);
+eq('L4B PPh Suami/Istri (K/I/0)', l4bKi0.pphDitanggungSuamiIstri, 37_562_500);
 
 console.log(fail === 0 ? '\nAll checks passed.' : `\n${fail} FAILED`);

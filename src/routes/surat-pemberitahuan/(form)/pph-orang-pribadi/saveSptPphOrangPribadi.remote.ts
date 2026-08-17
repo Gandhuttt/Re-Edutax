@@ -14,6 +14,7 @@ import { L2Schema, saveLampiranL2 } from './components/L-2/saveLampiranL2.server
 import { L3ASchema, saveLampiranL3A } from './components/L-3A/saveLampiranL3A.server';
 import { L3A4Schema, saveLampiranL3A4 } from './components/L-3A-4/saveLampiranL3A4.server';
 import { L3BSchema, saveLampiranL3B } from './components/L-3B/saveLampiranL3B.server';
+import { L4Schema, saveLampiranL4 } from './components/L-4/saveLampiranL4.server';
 import { L5Schema, saveLampiranL5 } from './components/L-5/saveLampiranL5.server';
 
 const optionalPicklist = <const T extends string>(options: readonly T[]) =>
@@ -109,6 +110,7 @@ const SaveSptPphOrangPribadiSchema = v.object({
 	...L3ASchema.entries,
 	...L3A4Schema.entries,
 	...L3BSchema.entries,
+	...L4Schema.entries,
 	...L5Schema.entries
 });
 
@@ -173,6 +175,7 @@ export const saveSptPphOrangPribadi = form(SaveSptPphOrangPribadiSchema, async (
 	);
 	const lampiran3a4 = saveLampiranL3A4(input.id, input);
 	const lampiran3b = saveLampiranL3B(input.id, input);
+	const lampiran4 = saveLampiranL4(input.id, input);
 	const lampiran5 = saveLampiranL5(input.id, input);
 
 	// Induk 10a reads L-1's JUMLAH BAGIAN E, which is not L-1 E alone: the footer
@@ -290,6 +293,7 @@ export const saveSptPphOrangPribadi = form(SaveSptPphOrangPribadiSchema, async (
 		...lampiran3a.statements,
 		...lampiran3a4.statements,
 		...lampiran3b.statements,
+		...lampiran4.statements,
 		...lampiran5.statements
 	];
 
