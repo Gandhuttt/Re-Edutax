@@ -11,6 +11,8 @@ import * as v from 'valibot';
 import { hitungInduk, type PtkpStatus } from './components/Induk/hitungPphOrangPribadi';
 import { L1Schema, saveLampiranL1 } from './components/L-1/saveLampiranL1.server';
 import { L2Schema, saveLampiranL2 } from './components/L-2/saveLampiranL2.server';
+import { L3A4Schema, saveLampiranL3A4 } from './components/L-3A-4/saveLampiranL3A4.server';
+import { L5Schema, saveLampiranL5 } from './components/L-5/saveLampiranL5.server';
 
 const optionalPicklist = <const T extends string>(options: readonly T[]) =>
 	v.optional(v.union([v.picklist(options), v.literal('')]), '');
@@ -101,16 +103,13 @@ const SaveSptPphOrangPribadiSchema = v.object({
 
 	...L1Schema.entries,
 	...L2Schema.entries,
+	...L3A4Schema.entries,
+	...L5Schema.entries,
 
-	// Amounts fed by lampiran that do not exist yet, so they still travel through
-	// the form as zeros. Rows 1.a, 1.d, 10.a, 14c and 14d are NOT here: L-1 and
-	// L-2 supply them, recomputed server-side from the rows being written rather
-	// than trusted from the browser. Each of these drops off as its lampiran
-	// lands (1.b from L-3A, 1.c from L-3A-4, 3 from L-5 A and B, 8 from L-5 C).
-	n1b: v.optional(decimalInput('Penghasilan neto dari usaha'), 0),
-	n1c: v.optional(decimalInput('Penghasilan dalam negeri lainnya'), 0),
-	n3: v.optional(decimalInput('Pengurang penghasilan neto'), 0),
-	n8: v.optional(decimalInput('Pengurang PPh terutang'), 0)
+	// The only amount still fed by a lampiran that does not exist yet. 1.b
+	// awaits L-3A (the sektor-gated 4xxx/5xxx fiscal grid, a separate and much
+	// larger build reusing the SPT Badan L1 shape).
+	n1b: v.optional(decimalInput('Penghasilan neto dari usaha'), 0)
 });
 
 export const saveSptPphOrangPribadi = form(SaveSptPphOrangPribadiSchema, async (input) => {
@@ -165,6 +164,8 @@ export const saveSptPphOrangPribadi = form(SaveSptPphOrangPribadiSchema, async (
 	// upward, all derived from the rows about to be written.
 	const lampiran1 = saveLampiranL1(input.id, input);
 	const lampiran2 = saveLampiranL2(input.id, input);
+	const lampiran3a4 = saveLampiranL3A4(input.id, input);
+	const lampiran5 = saveLampiranL5(input.id, input);
 
 	// Induk 10a reads L-1's JUMLAH BAGIAN E, which is not L-1 E alone: the footer
 	// adds a KREDIT PAJAK ATAS PENGHASILAN LUAR NEGERI row imported from L-2 C.
@@ -175,13 +176,13 @@ export const saveSptPphOrangPribadi = form(SaveSptPphOrangPribadiSchema, async (
 	const computed = hitungInduk({
 		n1a: lampiran1.n1a,
 		n1b: Number(input.n1b),
-		n1c: Number(input.n1c),
+		n1c: lampiran3a4.n1c,
 		n1d: lampiran2.n1d,
 		c3AdaPengurangPenghasilanNeto: input.c3AdaPengurangPenghasilanNeto,
-		n3: Number(input.n3),
+		n3: lampiran5.n3,
 		c5PtkpStatus: (input.c5PtkpStatus || null) as PtkpStatus | null,
 		c8AdaPengurangPphTerutang: input.c8AdaPengurangPphTerutang,
-		n8: Number(input.n8),
+		n8: lampiran5.n8,
 		d10aAdaPphDipotongPihakLain: input.d10aAdaPphDipotongPihakLain,
 		n10a,
 		d10bAngsuranPph25: Number(input.d10bAngsuranPph25),
@@ -271,7 +272,9 @@ export const saveSptPphOrangPribadi = form(SaveSptPphOrangPribadiSchema, async (
 				.values({ sptPphOrangPribadiId: input.id, kode })
 		),
 		...lampiran1.statements,
-		...lampiran2.statements
+		...lampiran2.statements,
+		...lampiran3a4.statements,
+		...lampiran5.statements
 	];
 
 	await db.batch(statements as [Statement, ...Statement[]]);

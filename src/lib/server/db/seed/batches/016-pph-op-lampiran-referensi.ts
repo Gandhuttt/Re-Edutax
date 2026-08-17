@@ -13,8 +13,8 @@ export const name = '016 SPT PPh Orang Pribadi lampiran reference lists';
 // is preserved verbatim, including the duplicates and non-country entries in the
 // negara list (Angola and Jersey each appear twice). Do not sort or dedupe.
 //
-// These are the 17 lists that L-1 and L-2 need. The remaining 3 (L-3A-4 B and
-// L-5 B/C) are in the same source file and can be added the same way.
+// All 20 lists in the source file: L-1 (13), L-2 (4: L-2 A/B/C + shared Mata
+// Uang), L-3A-4 B, and L-5 B/C.
 const daftar: Record<string, readonly string[]> = {
 	l1_a1_deskripsi: [
 		'Uang Tunai/Bank Note/Koin',
@@ -657,6 +657,34 @@ const daftar: Record<string, readonly string[]> = {
 		'Rial Yaman',
 		'Rand Afrika Selatan',
 		'Dolar Zimbabwe'
+	],
+	l3a4_b_jenis_penghasilan: [
+		'Penggantian atau imbalan yang diberikan dalam bentuk natura atau kenikmatan',
+		'Sewa harta selain tanah dan/atau bangunan',
+		'Bunga',
+		'Royalti',
+		'Keuntungan karena Penjualan atau karena Pengalihan Harta',
+		'Imbalan Bunga',
+		'Keuntungan Seilisih Kurs Mata Uang Asing',
+		'Penghasilan Lain dari Modal atau Aset',
+		'Pembebasan Utang',
+		'Hibah',
+		'Bantuan/Sumbangan',
+		'Klaim Asuransi',
+		'Beasiswa',
+		'Hadiah',
+		'Penghasilan Dalam Negeri Lainnya'
+	],
+	l5_b_jenis: [
+		'Zakat (Sesuai PP Nomor 60 Tahun 2010)',
+		'Sumbangan keagamaan (Sesuai PP Nomor 60 Tahun 2010)',
+		'Fasilitas pengurang penghasilan Neto (Tax allowance)',
+		'Fasilitas keringanan pajak lainnya (Tax reliefs)',
+		'Pengurang penghasilan neto lainnya'
+	],
+	l5_c_jenis: [
+		'Fasilitas pembebasan atau pengurangan PPh (Tax holiday)',
+		'Pengurang PPh Lainnya'
 	],
 };
 

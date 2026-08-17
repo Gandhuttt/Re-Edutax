@@ -8,6 +8,8 @@
 	import Induk from './components/Induk/_Induk.svelte';
 	import L1 from './components/L-1/_L1.svelte';
 	import L2 from './components/L-2/_L2.svelte';
+	import L3A4 from './components/L-3A-4/_L3A4.svelte';
+	import L5 from './components/L-5/_L5.svelte';
 	import { getSptPphOrangPribadi } from './getSptPphOrangPribadi.remote';
 	import { getReferensiLampiran } from './getReferensiLampiran.remote';
 	import { saveSptPphOrangPribadi } from './saveSptPphOrangPribadi.remote';
@@ -26,6 +28,8 @@
 		Harta
 	} from './components/L-1/types';
 	import type { BarisBukanObjek, BarisFinal, BarisLuarNegeri } from './components/L-2/types';
+	import type { BarisLainnya } from './components/L-3A-4/types';
+	import type { BarisKompensasi, BarisPengurang } from './components/L-5/types';
 
 	const {
 		readonly,
@@ -33,7 +37,9 @@
 		identitas,
 		sumberPenghasilan: sumberAwal,
 		lampiran1,
-		lampiran2
+		lampiran2,
+		lampiran3a4,
+		lampiran5
 	} = await getSptPphOrangPribadi();
 	const referensi = await getReferensiLampiran();
 	const saveForm = saveSptPphOrangPribadi.for(spt.id);
@@ -113,9 +119,10 @@
 	//   10a  <- L-1 E  JUMLAH BAGIAN E (which itself imports from L-2 C)
 	//   14a  <- L-1 A7 rollup
 	//
-	// L-1 and L-2 are built, so 1.a, 1.d, 10a, 14a, 14b, 14c and 14d are live and
-	// derived below from their rows. Rows 1.b, 1.c, 3 and 8 stay 0 until L-3A,
-	// L-3A-4 and L-5 land.
+	// L-1, L-2, L-3A-4 and L-5 are built, so every row above except 1.b is live
+	// and derived below from lampiran rows. 1.b awaits L-3A, the sektor-gated
+	// 4xxx/5xxx fiscal grid reusing the SPT Badan L1 shape, a separate and much
+	// larger build.
 	// DB columns for the fields that only some harta sub-tables use are nullable
 	// (which fields a sub-table shows is a property of its modal, not of the
 	// storage), so loading coerces null to the same empty value a fresh row
@@ -219,6 +226,12 @@
 	let l2BukanObjek = $state<BarisBukanObjek[]>(lampiran2.bukanObjek.map((row) => ({ ...row })));
 	let l2LuarNegeri = $state<BarisLuarNegeri[]>(lampiran2.luarNegeri.map((row) => ({ ...row })));
 
+	let l3a4Lainnya = $state<BarisLainnya[]>(lampiran3a4.lainnya.map((row) => ({ ...row })));
+
+	let l5Kompensasi = $state<BarisKompensasi[]>(lampiran5.kompensasi.map((row) => ({ ...row })));
+	let l5PengurangNeto = $state<BarisPengurang[]>(lampiran5.pengurangNeto.map((row) => ({ ...row })));
+	let l5PengurangPph = $state<BarisPengurang[]>(lampiran5.pengurangPph.map((row) => ({ ...row })));
+
 	// 1.a takes the JUMLAH BAGIAN D footer, which totals the neto, not the bruto.
 	let n1a = $derived(jumlah(l1Pekerjaan, 'penghasilanNeto'));
 	// 10a is the JUMLAH BAGIAN E footer, which is L-1 E's own total plus the
@@ -241,11 +254,20 @@
 	);
 	// 14b takes the L-1 Bagian B utang total.
 	let n14b = $derived(jumlah(l1Utang, 'saldo'));
+	// 1.c feeds straight from L-3A-4 B, no other source.
+	let n1c = $derived(jumlah(l3a4Lainnya, 'penghasilanNeto'));
+	// Row 3 is L-5 A's kompensasiTahunIni column plus the whole of Bagian B.
+	// Only the tahun-pajak-ini column of the fixed ten-row matrix counts; the
+	// other five are historical record only and do not reach the Induk.
+	let n3 = $derived(
+		jumlah(l5Kompensasi, 'kompensasiTahunIni') + jumlah(l5PengurangNeto, 'jumlah')
+	);
+	// Row 8 is L-5 C in full.
+	let n8 = $derived(jumlah(l5PengurangPph, 'jumlah'));
 
+	// 1.b awaits L-3A, the sektor-gated 4xxx/5xxx fiscal grid, a separate and
+	// much larger build reusing the SPT Badan L1 shape.
 	let n1b = $state(0);
-	let n1c = $state(0);
-	let n3 = $state(0);
-	let n8 = $state(0);
 
 	let f12a = $derived(spt.pembetulanKe > 0 ? (spt.previousPphKurangLebihBayar ?? 0) : 0);
 
@@ -441,14 +463,14 @@
 			<input type="hidden" name="l2Final" value={JSON.stringify(l2Final)} />
 			<input type="hidden" name="l2BukanObjek" value={JSON.stringify(l2BukanObjek)} />
 			<input type="hidden" name="l2LuarNegeri" value={JSON.stringify(l2LuarNegeri)} />
-			<!-- Figures from lampiran that do not exist yet. Rows 1.a, 1.d, 10a,
-			     14a to 14d are absent because L-1 and L-2 supply them and the
-			     server recomputes them from the rows above rather than trusting a
-			     submitted total. -->
+			<!-- L-3A-4 Bagian B rows. Bagian A (Norma) is not implemented. -->
+			<input type="hidden" name="l3a4Lainnya" value={JSON.stringify(l3a4Lainnya)} />
+			<!-- L-5 rows. Bagian A is the fixed ten-row matrix. -->
+			<input type="hidden" name="l5Kompensasi" value={JSON.stringify(l5Kompensasi)} />
+			<input type="hidden" name="l5PengurangNeto" value={JSON.stringify(l5PengurangNeto)} />
+			<input type="hidden" name="l5PengurangPph" value={JSON.stringify(l5PengurangPph)} />
+			<!-- The only figure still fed by a lampiran that does not exist yet. -->
 			<input type="hidden" name="n1b" value={n1b} />
-			<input type="hidden" name="n1c" value={n1c} />
-			<input type="hidden" name="n3" value={n3} />
-			<input type="hidden" name="n8" value={n8} />
 
 			<Navbar {tabs} bind:currentTab />
 
@@ -541,8 +563,28 @@
 				{readonly}
 			/>
 
+			<L3A4
+				{currentTab}
+				{referensi}
+				bind:lainnya={l3a4Lainnya}
+				{b1cPenghasilanDalamNegeriLainnya}
+				{readonly}
+			/>
+
+			<L5
+				{currentTab}
+				{referensi}
+				tahunPajak={spt.tahunPajak}
+				bind:kompensasi={l5Kompensasi}
+				bind:pengurangNeto={l5PengurangNeto}
+				bind:pengurangPph={l5PengurangPph}
+				{c3AdaPengurangPenghasilanNeto}
+				{c8AdaPengurangPphTerutang}
+				{readonly}
+			/>
+
 			<!-- The remaining lampiran tabs are gated above but not built yet. -->
-			{#if currentTab !== 'Induk' && currentTab !== 'L-1' && currentTab !== 'L-2'}
+			{#if currentTab !== 'Induk' && currentTab !== 'L-1' && currentTab !== 'L-2' && currentTab !== 'L-3A-4' && currentTab !== 'L-5'}
 				<div class="tw:p-5">
 					<Alert bg={'var(--color-primary)'}>
 						{#snippet head()}

@@ -9,6 +9,8 @@ import { error } from '@sveltejs/kit';
 import { and, eq } from 'drizzle-orm';
 import { getLampiranL1 } from './components/L-1/getLampiranL1.server';
 import { getLampiranL2 } from './components/L-2/getLampiranL2.server';
+import { getLampiranL3A4 } from './components/L-3A-4/getLampiranL3A4.server';
+import { getLampiranL5 } from './components/L-5/getLampiranL5.server';
 
 export const getSptPphOrangPribadi = query(async () => {
 	const event = getRequestEvent();
@@ -33,7 +35,8 @@ export const getSptPphOrangPribadi = query(async () => {
 		error(404, 'SPT PPh Orang Pribadi tidak ditemukan');
 	}
 
-	const [identitas, sumberPenghasilan, lampiran1, lampiran2, previousVersion] = await Promise.all([
+	const [identitas, sumberPenghasilan, lampiran1, lampiran2, lampiran3a4, lampiran5, previousVersion] =
+		await Promise.all([
 		// Section A rows 1 to 6 are prefilled read-only rather than stored on the SPT.
 		db
 			.select({
@@ -52,6 +55,8 @@ export const getSptPphOrangPribadi = query(async () => {
 			.where(eq(spt_pph_orang_pribadi_sumber_penghasilan.sptPphOrangPribadiId, id)),
 		getLampiranL1(id),
 		getLampiranL2(id),
+		getLampiranL3A4(id),
+		getLampiranL5(id, spt.tahunPajak),
 		// Row 12a is read from the SPT being amended rather than typed, matching the
 		// Badan pembetulan mechanic.
 		spt.pembetulanKe > 0
@@ -79,6 +84,8 @@ export const getSptPphOrangPribadi = query(async () => {
 		identitas,
 		sumberPenghasilan: sumberPenghasilan.map((row) => row.kode),
 		lampiran1,
-		lampiran2
+		lampiran2,
+		lampiran3a4,
+		lampiran5
 	};
 });
