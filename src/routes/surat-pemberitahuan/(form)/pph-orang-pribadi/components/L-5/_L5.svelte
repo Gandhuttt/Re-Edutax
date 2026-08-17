@@ -35,28 +35,34 @@
 <div class="{currentTab === 'L-5' ? '' : 'tw:hidden'}">
     <div class="accordion">
         <Accordion item={"A. PENGHITUNGAN KOMPENSASI KERUGIAN FISKAL"}>
-            <A
-                bind:rows={kompensasi}
-                {tahunPajak}
-                dapatDiubah={Boolean(c3AdaPengurangPenghasilanNeto)}
-                {readonly}
-            />
+            <div class="tw:p-5">
+                <A
+                    bind:rows={kompensasi}
+                    {tahunPajak}
+                    dapatDiubah={Boolean(c3AdaPengurangPenghasilanNeto)}
+                    {readonly}
+                />
+            </div>
         </Accordion>
         <Accordion item={"B. PENGURANG PENGHASILAN NETO"}>
-            <B
-                bind:rows={pengurangNeto}
-                {referensi}
-                dapatDiubah={Boolean(c3AdaPengurangPenghasilanNeto)}
-                {readonly}
-            />
+            <div class="tw:p-5">
+                <B
+                    bind:rows={pengurangNeto}
+                    {referensi}
+                    dapatDiubah={Boolean(c3AdaPengurangPenghasilanNeto)}
+                    {readonly}
+                />
+            </div>
         </Accordion>
         <Accordion item={"C. PENGURANG PPh TERUTANG"}>
-            <C
-                bind:rows={pengurangPph}
-                {referensi}
-                dapatDiubah={Boolean(c8AdaPengurangPphTerutang)}
-                {readonly}
-            />
+            <div class="tw:p-5">
+                <C
+                    bind:rows={pengurangPph}
+                    {referensi}
+                    dapatDiubah={Boolean(c8AdaPengurangPphTerutang)}
+                    {readonly}
+                />
+            </div>
         </Accordion>
     </div>
 </div>

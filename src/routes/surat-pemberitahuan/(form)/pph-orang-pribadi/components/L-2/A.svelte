@@ -1,8 +1,6 @@
 <script lang="ts">
     import Button from "$lib/components/Button.svelte";
-    import Input from "$lib/components/Input.svelte";
-    import Label from "$lib/components/Label.svelte";
-    import Select from "$lib/components/Select.svelte";
+    import { closeBsModal } from "$lib/helpers/bsModal";
     import Table from "$lib/components/Table.svelte";
     import { applyRupiahInput, formatRupiah } from "$lib/helpers/rupiahInput";
     import type { BarisFinal } from "./types";
@@ -29,8 +27,6 @@
         npwpPemotong: '', namaPemotong: '', kodeObjekPajak: '',
         jenisPenghasilan: '', dasarPengenaanPajak: 0, pphTerutang: 0
     });
-
-    let modalTerbuka = $state(false);
     let indeksDiubah = $state<number | null>(null);
     let draft = $state<BarisFinal>(kosong());
     let errors = $state<Record<string, string>>({});
@@ -42,14 +38,12 @@
         indeksDiubah = null;
         draft = kosong();
         errors = {};
-        modalTerbuka = true;
     }
 
     function bukaUbah(index: number) {
         indeksDiubah = index;
         draft = { ...rows[index] };
         errors = {};
-        modalTerbuka = true;
     }
 
     function simpanModal() {
@@ -67,7 +61,7 @@
 
         if (indeksDiubah === null) rows = [...rows, draft];
         else rows = rows.map((r, i) => (i === indeksDiubah ? draft : r));
-        modalTerbuka = false;
+        closeBsModal('modalOpL2A');
     }
 
     function hapus(index: number) {
@@ -79,7 +73,7 @@
     {#if bisaEdit}
         <div class="tw:mb-2 tw:flex tw:justify-end tw:gap-2">
             <!-- Tambah only: this grid has no Hapus Semua on the live form. -->
-            <Button type="button" onclick={bukaTambah}>Tambah</Button>
+            <Button type="button" onclick={bukaTambah} data-bs-toggle="modal" data-bs-target="#modalOpL2A">Tambah</Button>
         </div>
     {/if}
 
@@ -102,7 +96,7 @@
                     <tr>
                         {#if bisaEdit}
                             <td class="tw:flex tw:gap-1">
-                                <Button type="button" onclick={() => bukaUbah(index)}>Ubah</Button>
+                                <Button type="button" onclick={() => bukaUbah(index)} data-bs-toggle="modal" data-bs-target="#modalOpL2A">Ubah</Button>
                                 <Button type="button" color="var(--color-danger)" onclick={() => hapus(index)}>
                                     <span class="tw:text-white">Hapus</span>
                                 </Button>
@@ -129,72 +123,75 @@
     </div>
 </div>
 
-{#if modalTerbuka}
-    <div class="overlay">
-        <div class="modal">
-            <header>
-                <span class="tw:text-lg">PENGHASILAN YANG DIKENAKAN PAJAK PENGHASILAN BERSIFAT FINAL</span>
-                <button type="button" onclick={() => (modalTerbuka = false)} aria-label="Tutup">&times;</button>
-            </header>
-            <div class="body">
-                <div class="field">
-                    <Label for="l2a-npwp"><span>NPWP Pemotong/Pemungut *</span></Label>
-                    <Input id="l2a-npwp" type={"text"} bind:value={draft.npwpPemotong} />
-                    {#if errors.npwpPemotong}<span class="error">{errors.npwpPemotong}</span>{/if}
-                </div>
-                <div class="field">
-                    <Label for="l2a-nama"><span>Nama Pemotong/Pemungut *</span></Label>
-                    <Input id="l2a-nama" type={"text"} bind:value={draft.namaPemotong} />
-                    {#if errors.namaPemotong}<span class="error">{errors.namaPemotong}</span>{/if}
-                </div>
-                <div class="field">
-                    <!-- Derived from Jenis Penghasilan on the live form, using the
-                         real DJP object-code format (21-100-27). Plain text here. -->
-                    <Label for="l2a-kode"><span>Kode Objek Pajak</span></Label>
-                    <Input id="l2a-kode" type={"text"} bind:value={draft.kodeObjekPajak} />
-                </div>
-                <div class="field">
-                    <Label for="l2a-jenis"><span>Jenis Penghasilan *</span></Label>
-                    <Select id="l2a-jenis" bind:value={draft.jenisPenghasilan}>
-                        <option class="tw:text-black" value={""}>Silakan pilih</option>
-                        {#each referensi.l2_a_jenis_penghasilan ?? [] as opsi}
-                            <option class="tw:text-black" value={opsi}>{opsi}</option>
-                        {/each}
-                    </Select>
-                    {#if errors.jenisPenghasilan}<span class="error">{errors.jenisPenghasilan}</span>{/if}
-                </div>
-                <div class="field">
-                    <Label for="l2a-dpp"><span>Dasar Pengenaan Pajak *</span></Label>
-                    <Input
-                        id="l2a-dpp"
-                        class={"tw:text-end"}
-                        type={"text"}
-                        value={formatRupiah(draft.dasarPengenaanPajak)}
-                        oninput={(e: Event) => (draft.dasarPengenaanPajak = applyRupiahInput(e))}
-                    />
-                    {#if errors.dasarPengenaanPajak}<span class="error">{errors.dasarPengenaanPajak}</span>{/if}
-                </div>
-                <div class="field">
-                    <Label for="l2a-pph"><span>PPh Terutang *</span></Label>
-                    <Input
-                        id="l2a-pph"
-                        class={"tw:text-end"}
-                        type={"text"}
-                        value={formatRupiah(draft.pphTerutang)}
-                        oninput={(e: Event) => (draft.pphTerutang = applyRupiahInput(e))}
-                    />
-                    {#if errors.pphTerutang}<span class="error">{errors.pphTerutang}</span>{/if}
-                </div>
-            </div>
-            <footer>
-                <Button type="button" onclick={() => (modalTerbuka = false)}>Tutup</Button>
-                <Button type="button" onclick={simpanModal} color="var(--color-secondary)">
-                    <span class="tw:text-white">Simpan</span>
-                </Button>
-            </footer>
+<div class="modal fade" id="modalOpL2A" tabindex="-1" aria-labelledby="modalOpL2ALabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="modalOpL2ALabel" style="font-weight: bold; text-transform: uppercase;">
+          PENGHASILAN YANG DIKENAKAN PAJAK PENGHASILAN BERSIFAT FINAL
+        </h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+      </div>
+      <div class="modal-body">
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <div style="display: flex; align-items: center;">
+            <label for="l2a-npwp" style="width: 220px;">NPWP Pemotong/Pemungut *</label>
+            <input type="text" id="l2a-npwp" bind:value={draft.npwpPemotong} style="flex: 1;" />
+          </div>
+          {#if errors.npwpPemotong}<span class="error">{errors.npwpPemotong}</span>{/if}
+          <div style="display: flex; align-items: center;">
+            <label for="l2a-nama" style="width: 220px;">Nama Pemotong/Pemungut *</label>
+            <input type="text" id="l2a-nama" bind:value={draft.namaPemotong} style="flex: 1;" />
+          </div>
+          {#if errors.namaPemotong}<span class="error">{errors.namaPemotong}</span>{/if}
+          <div style="display: flex; align-items: center;">
+            <label for="l2a-kode" style="width: 220px;">Kode Objek Pajak</label>
+            <input type="text" id="l2a-kode" bind:value={draft.kodeObjekPajak} style="flex: 1;" />
+          </div>
+          {#if errors.kodeObjekPajak}<span class="error">{errors.kodeObjekPajak}</span>{/if}
+          <div style="display: flex; align-items: center;">
+            <label for="l2a-jenis" style="width: 220px;">Jenis Penghasilan *</label>
+            <select id="l2a-jenis" bind:value={draft.jenisPenghasilan} style="flex: 1;">
+              <option value={""}>Silakan pilih</option>
+              {#each referensi.l2_a_jenis_penghasilan ?? [] as opsi}
+                <option value={opsi}>{opsi}</option>
+              {/each}
+            </select>
+          </div>
+          {#if errors.jenisPenghasilan}<span class="error">{errors.jenisPenghasilan}</span>{/if}
+          <div style="display: flex; align-items: center;">
+            <label for="l2a-dpp" style="width: 220px;">Dasar Pengenaan Pajak *</label>
+            <input
+              type="text"
+              inputmode="numeric"
+              id="l2a-dpp"
+              value={formatRupiah(draft.dasarPengenaanPajak)}
+              oninput={(e: Event) => (draft.dasarPengenaanPajak = applyRupiahInput(e))}
+              style="flex: 1; text-align: right;"
+            />
+          </div>
+          {#if errors.dasarPengenaanPajak}<span class="error">{errors.dasarPengenaanPajak}</span>{/if}
+          <div style="display: flex; align-items: center;">
+            <label for="l2a-pph" style="width: 220px;">PPh Terutang *</label>
+            <input
+              type="text"
+              inputmode="numeric"
+              id="l2a-pph"
+              value={formatRupiah(draft.pphTerutang)}
+              oninput={(e: Event) => (draft.pphTerutang = applyRupiahInput(e))}
+              style="flex: 1; text-align: right;"
+            />
+          </div>
+          {#if errors.pphTerutang}<span class="error">{errors.pphTerutang}</span>{/if}
         </div>
+      </div>
+      <div class="modal-footer" style="justify-content: flex-end;">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+        <button type="button" class="btn btn-primary" style="background-color: #1c398e; color: white;" onclick={simpanModal}>Simpan</button>
+      </div>
     </div>
-{/if}
+  </div>
+</div>
 
 <style>
     th {
@@ -219,34 +216,5 @@
     	background-color: var(--color-primary);
     	border: 1px solid white;
     }
-
-    .overlay {
-        position: fixed;
-        inset: 0;
-        background: rgba(0, 0, 0, 0.4);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 50;
-    }
-    .modal {
-        background: white;
-        width: min(48rem, 92vw);
-        max-height: 88vh;
-        display: flex;
-        flex-direction: column;
-        border-radius: 0.25rem;
-    }
-    header, footer {
-        display: flex;
-        align-items: center;
-        padding: 0.75rem 1rem;
-    }
-    header { justify-content: space-between; border-bottom: 1px solid #ddd; }
-    header button { font-size: 1.5rem; line-height: 1; background: none; border: none; cursor: pointer; }
-    footer { justify-content: flex-end; gap: 0.5rem; border-top: 1px solid #ddd; }
-    .body { overflow-y: auto; padding: 1rem; display: grid; gap: 0.75rem; }
-    .field { display: grid; gap: 0.25rem; }
-    .field span { font-size: 0.8rem; }
-    .error { background: #fde8e8; color: #b91c1c; font-size: 0.75rem; padding: 0.25rem 0.5rem; }
+    .error { background: #fde8e8; color: #b91c1c; font-size: 0.75rem; padding: 0.25rem 0.5rem; margin-left: 220px; }
 </style>

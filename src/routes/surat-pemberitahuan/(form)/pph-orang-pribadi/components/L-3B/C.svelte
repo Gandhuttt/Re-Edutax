@@ -1,8 +1,7 @@
 <script lang="ts">
     import Button from "$lib/components/Button.svelte";
-    import Input from "$lib/components/Input.svelte";
-    import Label from "$lib/components/Label.svelte";
     import Table from "$lib/components/Table.svelte";
+    import { closeBsModal } from "$lib/helpers/bsModal";
     import { applyRupiahInput, formatRupiah } from "$lib/helpers/rupiahInput";
     import type { BarisPeredaranBulanan } from "./types";
 
@@ -35,20 +34,18 @@
     let bisaEdit = $derived(dapatDiubah && !readonly);
     let jumlahBruto = $derived(rows.reduce((s, r) => s + Number(r.peredaranBruto || 0), 0));
 
-    let modalTerbuka = $state(false);
     let draft = $state<BarisPeredaranBulanan[]>(rows.map((r) => ({ ...r })));
     let draftJenisUsaha = $state('');
 
     function bukaUbah() {
         draft = rows.map((r) => ({ ...r }));
         draftJenisUsaha = jenisUsahaPekerjaanBebas;
-        modalTerbuka = true;
     }
 
     function simpanModal() {
         rows = draft.map((r) => ({ ...r, peredaranBruto: Number(r.peredaranBruto || 0) }));
         jenisUsahaPekerjaanBebas = draftJenisUsaha;
-        modalTerbuka = false;
+        closeBsModal('modalOpL3BC');
     }
 </script>
 
@@ -70,7 +67,7 @@
                 <tr>
                     {#if bisaEdit}
                         <td>
-                            <Button type="button" onclick={bukaUbah}>Ubah</Button>
+                            <Button type="button" onclick={bukaUbah} data-bs-toggle="modal" data-bs-target="#modalOpL3BC">Ubah</Button>
                         </td>
                     {/if}
                     <td>{namaTku}</td>
@@ -101,58 +98,58 @@
     </div>
 </div>
 
-{#if modalTerbuka}
-    <div class="overlay">
-        <div class="modal">
-            <header>
-                <span class="tw:text-lg">PENGGUNA NORMA PENGHITUNGAN PENGHASILAN NETO - {namaTku}</span>
-                <button type="button" onclick={() => (modalTerbuka = false)} aria-label="Tutup">&times;</button>
-            </header>
-            <div class="body">
-                <div class="field tw:mb-3">
-                    <Label for="l3bc-jenis"><span>Jenis Usaha/Pekerjaan Bebas</span></Label>
-                    <Input id="l3bc-jenis" type={"text"} bind:value={draftJenisUsaha} />
-                </div>
-                <table class="tw:w-full tw:text-sm">
-                    <thead>
-                        <tr>
-                            <th class="tw:text-left">Bulan</th>
-                            <th class="tw:text-end">Peredaran Bruto</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {#each draft as item, index}
-                            <tr>
-                                <td>{bulanNames[index]}</td>
-                                <td>
-                                    <input
-                                        type="text"
-                                        inputmode="numeric"
-                                        value={formatRupiah(item.peredaranBruto)}
-                                        oninput={(e) => (draft[index].peredaranBruto = applyRupiahInput(e))}
-                                        class="tw:w-full tw:text-end"
-                                    />
-                                </td>
-                            </tr>
-                        {/each}
-                        <tr class="tw:font-bold">
-                            <td>JUMLAH</td>
-                            <td class="tw:text-end">
-                                {formatRupiah(draft.reduce((s, r) => s + Number(r.peredaranBruto || 0), 0))}
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-            <footer>
-                <Button type="button" onclick={() => (modalTerbuka = false)}>Tutup</Button>
-                <Button type="button" onclick={simpanModal} color="var(--color-secondary)">
-                    <span class="tw:text-white">Simpan</span>
-                </Button>
-            </footer>
+<div class="modal fade" id="modalOpL3BC" tabindex="-1" aria-labelledby="modalOpL3BCLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="modalOpL3BCLabel" style="font-weight: bold; text-transform: uppercase;">
+          Pengguna Norma Penghitungan Penghasilan Neto - {namaTku}
+        </h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+      </div>
+      <div class="modal-body">
+        <div style="display: flex; align-items: center; margin-bottom: 12px;">
+          <label for="l3bc-jenis" style="width: 220px;">Jenis Usaha/Pekerjaan Bebas</label>
+          <input type="text" id="l3bc-jenis" bind:value={draftJenisUsaha} style="flex: 1;" />
         </div>
+        <table class="tw:w-full tw:text-sm modal-bulanan-table">
+          <thead>
+            <tr>
+              <th>Bulan</th>
+              <th>Peredaran Bruto (Rp)</th>
+            </tr>
+          </thead>
+          <tbody>
+            {#each draft as item, index}
+              <tr>
+                <td>{bulanNames[index]}</td>
+                <td>
+                  <input
+                    type="text"
+                    inputmode="numeric"
+                    value={formatRupiah(item.peredaranBruto)}
+                    oninput={(e) => (draft[index].peredaranBruto = applyRupiahInput(e))}
+                    class="tw:w-full tw:text-right"
+                  />
+                </td>
+              </tr>
+            {/each}
+            <tr class="tw:font-bold">
+              <td>JUMLAH</td>
+              <td class="tw:text-end">
+                {formatRupiah(draft.reduce((s, r) => s + Number(r.peredaranBruto || 0), 0))}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="modal-footer" style="justify-content: flex-end;">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+        <button type="button" class="btn btn-primary" style="background-color: #1c398e; color: white;" onclick={simpanModal}>Simpan</button>
+      </div>
     </div>
-{/if}
+  </div>
+</div>
 
 <style>
     th {
@@ -178,33 +175,12 @@
     	background-color: var(--color-primary);
     	border: 1px solid white;
     }
-
-    .overlay {
-        position: fixed;
-        inset: 0;
-        background: rgba(0, 0, 0, 0.4);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 50;
+    .modal-bulanan-table th, .modal-bulanan-table td {
+        border: 1px solid #A9A9A9;
+        padding: .4rem .6rem;
     }
-    .modal {
-        background: white;
-        width: min(32rem, 92vw);
-        max-height: 88vh;
-        display: flex;
-        flex-direction: column;
-        border-radius: 0.25rem;
+    .modal-bulanan-table th {
+        background-color: var(--color-primary);
+        font-weight: bold;
     }
-    header, footer {
-        display: flex;
-        align-items: center;
-        padding: 0.75rem 1rem;
-    }
-    header { justify-content: space-between; border-bottom: 1px solid #ddd; }
-    header button { font-size: 1.5rem; line-height: 1; background: none; border: none; cursor: pointer; }
-    footer { justify-content: flex-end; gap: 0.5rem; border-top: 1px solid #ddd; }
-    .body { overflow-y: auto; padding: 1rem; }
-    .body table th, .body table td { padding: .3rem .4rem; }
-    .field { display: grid; gap: 0.25rem; }
 </style>

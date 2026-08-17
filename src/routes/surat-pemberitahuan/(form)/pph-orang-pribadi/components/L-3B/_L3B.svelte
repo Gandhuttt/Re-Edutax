@@ -1,9 +1,8 @@
 <script lang="ts">
     import Accordion from "$lib/components/AccordionItem.svelte";
     import Button from "$lib/components/Button.svelte";
-    import Input from "$lib/components/Input.svelte";
-    import Label from "$lib/components/Label.svelte";
     import Table from "$lib/components/Table.svelte";
+    import { closeBsModal } from "$lib/helpers/bsModal";
     import A from "./A.svelte";
     import B from "./B.svelte";
     import C from "./C.svelte";
@@ -53,130 +52,138 @@
 
     let idTku = $derived(`${npwp}000000`);
 
-    let modalTerbuka = $state(false);
     let draft = $state<TkuL3B>({ ...tku });
 
     function bukaUbah() {
         draft = { ...tku };
-        modalTerbuka = true;
     }
 
     function simpanModal() {
         tku = { ...draft };
-        modalTerbuka = false;
+        closeBsModal('modalOpL3BTku');
     }
 </script>
 
 <div class="{currentTab === 'L-3B' ? '' : 'tw:hidden'}">
     <div class="accordion">
         <Accordion item={"DAFTAR TEMPAT KEGIATAN USAHA (TKU)"}>
-            {#if !readonly}
-                <div class="tw:mb-2 tw:flex tw:justify-end">
-                    <Button type="button" onclick={bukaUbah}>Ubah</Button>
+            <div class="tw:p-5">
+                {#if !readonly}
+                    <div class="tw:mb-2 tw:flex tw:justify-end">
+                        <Button type="button" onclick={bukaUbah} data-bs-toggle="modal" data-bs-target="#modalOpL3BTku">Ubah</Button>
+                    </div>
+                {/if}
+                <div class="tw:overflow-x-auto">
+                    <Table class="tw:min-w-full">
+                        {#snippet head()}
+                            <tr>
+                                <th>ID TKU</th>
+                                <th>NAMA</th>
+                                <th>ALAMAT</th>
+                                <th>KELURAHAN/DESA</th>
+                                <th>KECAMATAN</th>
+                                <th>KOTA/KABUPATEN</th>
+                                <th>PROVINSI</th>
+                            </tr>
+                        {/snippet}
+                        {#snippet body()}
+                            <tr>
+                                <td>{idTku}</td>
+                                <td>{tku.nama}</td>
+                                <td>{tku.alamat}</td>
+                                <td>{tku.kelurahan}</td>
+                                <td>{tku.kecamatan}</td>
+                                <td>{tku.kabupaten}</td>
+                                <td>{tku.provinsi}</td>
+                            </tr>
+                        {/snippet}
+                    </Table>
                 </div>
-            {/if}
-            <div class="tw:overflow-x-auto">
-                <Table class="tw:min-w-full">
-                    {#snippet head()}
-                        <tr>
-                            <th>ID TKU</th>
-                            <th>NAMA</th>
-                            <th>ALAMAT</th>
-                            <th>KELURAHAN/DESA</th>
-                            <th>KECAMATAN</th>
-                            <th>KOTA/KABUPATEN</th>
-                            <th>PROVINSI</th>
-                        </tr>
-                    {/snippet}
-                    {#snippet body()}
-                        <tr>
-                            <td>{idTku}</td>
-                            <td>{tku.nama}</td>
-                            <td>{tku.alamat}</td>
-                            <td>{tku.kelurahan}</td>
-                            <td>{tku.kecamatan}</td>
-                            <td>{tku.kabupaten}</td>
-                            <td>{tku.provinsi}</td>
-                        </tr>
-                    {/snippet}
-                </Table>
             </div>
         </Accordion>
         <Accordion item={"A. PEREDARAN BRUTO TERTENTU YANG DIKENAKAN PAJAK PENGHASILAN BERSIFAT FINAL"}>
-            <A
-                bind:rows={a}
-                namaTku={tku.nama}
-                dapatDiubah={b1b2Oppt === 'peredaran_bruto_tertentu'}
-                {readonly}
-            />
+            <div class="tw:p-5">
+                <A
+                    bind:rows={a}
+                    namaTku={tku.nama}
+                    dapatDiubah={b1b2Oppt === 'peredaran_bruto_tertentu'}
+                    {readonly}
+                />
+            </div>
         </Accordion>
         <Accordion item={"B. ORANG PRIBADI PENGUSAHA TERTENTU (OPPT)"}>
-            <B
-                bind:rows={b}
-                namaTku={tku.nama}
-                metodePembukuanLabel={metodeLabel[metodePembukuan] ?? metodePembukuan}
-                dapatDiubah={b1b2Oppt === 'pengusaha_tertentu'}
-                {readonly}
-            />
+            <div class="tw:p-5">
+                <B
+                    bind:rows={b}
+                    namaTku={tku.nama}
+                    metodePembukuanLabel={metodeLabel[metodePembukuan] ?? metodePembukuan}
+                    dapatDiubah={b1b2Oppt === 'pengusaha_tertentu'}
+                    {readonly}
+                />
+            </div>
         </Accordion>
         <Accordion item={"C. PENGGUNA NORMA PENGHITUNGAN PENGHASILAN NETO (NPPN)"}>
-            <C
-                bind:rows={c}
-                namaTku={tku.nama}
-                bind:jenisUsahaPekerjaanBebas={tku.jenisUsahaPekerjaanBebas}
-                dapatDiubah={b1b3Norma === 'ya_norma'}
-                {readonly}
-            />
+            <div class="tw:p-5">
+                <C
+                    bind:rows={c}
+                    namaTku={tku.nama}
+                    bind:jenisUsahaPekerjaanBebas={tku.jenisUsahaPekerjaanBebas}
+                    dapatDiubah={b1b3Norma === 'ya_norma'}
+                    {readonly}
+                />
+            </div>
         </Accordion>
     </div>
 </div>
 
-{#if modalTerbuka}
-    <div class="overlay">
-        <div class="modal">
-            <header>
-                <span class="tw:text-lg">TEMPAT KEGIATAN USAHA</span>
-                <button type="button" onclick={() => (modalTerbuka = false)} aria-label="Tutup">&times;</button>
-            </header>
-            <div class="body">
-                <div class="field">
-                    <Label for="l3btku-id"><span>ID TKU (tidak dapat diubah)</span></Label>
-                    <Input id="l3btku-id" type={"text"} value={idTku} disabled />
-                </div>
-                <div class="field">
-                    <Label for="l3btku-nama"><span>Nama</span></Label>
-                    <Input id="l3btku-nama" type={"text"} bind:value={draft.nama} />
-                </div>
-                <div class="field">
-                    <Label for="l3btku-alamat"><span>Alamat</span></Label>
-                    <Input id="l3btku-alamat" type={"text"} bind:value={draft.alamat} />
-                </div>
-                <div class="field">
-                    <Label for="l3btku-kelurahan"><span>Kelurahan/Desa</span></Label>
-                    <Input id="l3btku-kelurahan" type={"text"} bind:value={draft.kelurahan} />
-                </div>
-                <div class="field">
-                    <Label for="l3btku-kecamatan"><span>Kecamatan</span></Label>
-                    <Input id="l3btku-kecamatan" type={"text"} bind:value={draft.kecamatan} />
-                </div>
-                <div class="field">
-                    <Label for="l3btku-kabupaten"><span>Kota/Kabupaten</span></Label>
-                    <Input id="l3btku-kabupaten" type={"text"} bind:value={draft.kabupaten} />
-                </div>
-                <div class="field">
-                    <Label for="l3btku-provinsi"><span>Provinsi</span></Label>
-                    <Input id="l3btku-provinsi" type={"text"} bind:value={draft.provinsi} />
-                </div>
-            </div>
-            <footer>
-                <Button type="button" onclick={() => (modalTerbuka = false)}>Tutup</Button>
-                <Button type="button" onclick={simpanModal} color="var(--color-secondary)">
-                    <span class="tw:text-white">Simpan</span>
-                </Button>
-            </footer>
+<div class="modal fade" id="modalOpL3BTku" tabindex="-1" aria-labelledby="modalOpL3BTkuLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="modalOpL3BTkuLabel" style="font-weight: bold; text-transform: uppercase;">
+          Tempat Kegiatan Usaha
+        </h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+      </div>
+      <div class="modal-body">
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <div style="display: flex; align-items: center;">
+            <label for="l3btku-id" style="width: 220px;">ID TKU (tidak dapat diubah)</label>
+            <input type="text" id="l3btku-id" value={idTku} readonly style="flex: 1; background-color: #e9ecef;" />
+          </div>
+          <div style="display: flex; align-items: center;">
+            <label for="l3btku-nama" style="width: 220px;">Nama</label>
+            <input type="text" id="l3btku-nama" bind:value={draft.nama} style="flex: 1;" />
+          </div>
+          <div style="display: flex; align-items: center;">
+            <label for="l3btku-alamat" style="width: 220px;">Alamat</label>
+            <input type="text" id="l3btku-alamat" bind:value={draft.alamat} style="flex: 1;" />
+          </div>
+          <div style="display: flex; align-items: center;">
+            <label for="l3btku-kelurahan" style="width: 220px;">Kelurahan/Desa</label>
+            <input type="text" id="l3btku-kelurahan" bind:value={draft.kelurahan} style="flex: 1;" />
+          </div>
+          <div style="display: flex; align-items: center;">
+            <label for="l3btku-kecamatan" style="width: 220px;">Kecamatan</label>
+            <input type="text" id="l3btku-kecamatan" bind:value={draft.kecamatan} style="flex: 1;" />
+          </div>
+          <div style="display: flex; align-items: center;">
+            <label for="l3btku-kabupaten" style="width: 220px;">Kota/Kabupaten</label>
+            <input type="text" id="l3btku-kabupaten" bind:value={draft.kabupaten} style="flex: 1;" />
+          </div>
+          <div style="display: flex; align-items: center;">
+            <label for="l3btku-provinsi" style="width: 220px;">Provinsi</label>
+            <input type="text" id="l3btku-provinsi" bind:value={draft.provinsi} style="flex: 1;" />
+          </div>
         </div>
+      </div>
+      <div class="modal-footer" style="justify-content: flex-end;">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+        <button type="button" class="btn btn-primary" style="background-color: #1c398e; color: white;" onclick={simpanModal}>Simpan</button>
+      </div>
     </div>
-{/if}
+  </div>
+</div>
 
 <style>
     th {
@@ -196,32 +203,4 @@
     tr:not(.total):not(.footer):nth-child(odd) {
     	background-color: #F9F6EE;
     }
-
-    .overlay {
-        position: fixed;
-        inset: 0;
-        background: rgba(0, 0, 0, 0.4);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 50;
-    }
-    .modal {
-        background: white;
-        width: min(32rem, 92vw);
-        max-height: 88vh;
-        display: flex;
-        flex-direction: column;
-        border-radius: 0.25rem;
-    }
-    header, footer {
-        display: flex;
-        align-items: center;
-        padding: 0.75rem 1rem;
-    }
-    header { justify-content: space-between; border-bottom: 1px solid #ddd; }
-    header button { font-size: 1.5rem; line-height: 1; background: none; border: none; cursor: pointer; }
-    footer { justify-content: flex-end; gap: 0.5rem; border-top: 1px solid #ddd; }
-    .body { overflow-y: auto; padding: 1rem; display: grid; gap: 0.75rem; }
-    .field { display: grid; gap: 0.25rem; }
 </style>

@@ -1,8 +1,7 @@
 <script lang="ts">
     import Button from "$lib/components/Button.svelte";
-    import Input from "$lib/components/Input.svelte";
-    import Label from "$lib/components/Label.svelte";
     import Table from "$lib/components/Table.svelte";
+    import { closeBsModal } from "$lib/helpers/bsModal";
     import { applyRupiahInput, formatRupiah } from "$lib/helpers/rupiahInput";
     import type { BarisKompensasi } from "./types";
 
@@ -30,7 +29,6 @@
 
     let { rows = $bindable(), tahunPajak, dapatDiubah = true, readonly = false }: Props = $props();
 
-    let modalTerbuka = $state(false);
     let indeksDiubah = $state<number | null>(null);
     let draft = $state<BarisKompensasi>({
         tahunPajak: 0,
@@ -80,13 +78,12 @@
     function bukaUbah(index: number) {
         indeksDiubah = index;
         draft = { ...rows[index] };
-        modalTerbuka = true;
     }
 
     function simpanModal() {
         if (indeksDiubah === null) return;
         rows = rows.map((r, i) => (i === indeksDiubah ? draft : r));
-        modalTerbuka = false;
+        closeBsModal('modalOpL5A');
     }
 </script>
 
@@ -116,7 +113,7 @@
                     <tr>
                         {#if bisaEdit}
                             <td>
-                                <Button type="button" onclick={() => bukaUbah(index)}>Ubah</Button>
+                                <Button type="button" onclick={() => bukaUbah(index)} data-bs-toggle="modal" data-bs-target="#modalOpL5A">Ubah</Button>
                             </td>
                         {/if}
                         <td>{index + 1}</td>
@@ -144,102 +141,110 @@
     </div>
 </div>
 
-{#if modalTerbuka}
-    <div class="overlay">
-        <div class="modal">
-            <header>
-                <span class="tw:text-lg">PENGHITUNGAN KOMPENSASI KERUGIAN FISKAL</span>
-                <button type="button" onclick={() => (modalTerbuka = false)} aria-label="Tutup">&times;</button>
-            </header>
-            <div class="body">
-                <div class="field">
-                    <Label for="l5a-tahun"><span>Tahun Pajak</span></Label>
-                    <Input id="l5a-tahun" type={"text"} value={draft.tahunPajak} disabled />
-                </div>
-                <div class="field">
-                    <!-- The only field on the form confirmed to accept a negative
-                         value, typed with a leading minus. Rupiah formatting
-                         strips non-digits including the sign, so this stays a
-                         plain number input rather than the shared rupiah field. -->
-                    <Label for="l5a-laba"><span>Laba/Rugi Neto Fiskal *</span></Label>
-                    <Input id="l5a-laba" class={"tw:text-end"} type={"number"} bind:value={draft.labaRugiNetoFiskal} />
-                </div>
-                <div class="field">
-                    <Label for="l5a-ymin4"><span>Kompensasi Kerugian Fiskal Tahun {tahunPajak - 4}</span></Label>
-                    <Input
-                        id="l5a-ymin4"
-                        class={"tw:text-end"}
-                        type={"text"}
-                        value={formatRupiah(draft.kompensasiYMin4)}
-                        oninput={(e: Event) => (draft.kompensasiYMin4 = applyRupiahInput(e))}
-                        disabled={draftKolomSendiri === 'kompensasiYMin4'}
-                    />
-                </div>
-                <div class="field">
-                    <Label for="l5a-ymin3"><span>Kompensasi Kerugian Fiskal Tahun {tahunPajak - 3}</span></Label>
-                    <Input
-                        id="l5a-ymin3"
-                        class={"tw:text-end"}
-                        type={"text"}
-                        value={formatRupiah(draft.kompensasiYMin3)}
-                        oninput={(e: Event) => (draft.kompensasiYMin3 = applyRupiahInput(e))}
-                        disabled={draftKolomSendiri === 'kompensasiYMin3'}
-                    />
-                </div>
-                <div class="field">
-                    <Label for="l5a-ymin2"><span>Kompensasi Kerugian Fiskal Tahun {tahunPajak - 2}</span></Label>
-                    <Input
-                        id="l5a-ymin2"
-                        class={"tw:text-end"}
-                        type={"text"}
-                        value={formatRupiah(draft.kompensasiYMin2)}
-                        oninput={(e: Event) => (draft.kompensasiYMin2 = applyRupiahInput(e))}
-                        disabled={draftKolomSendiri === 'kompensasiYMin2'}
-                    />
-                </div>
-                <div class="field">
-                    <Label for="l5a-ymin1"><span>Kompensasi Kerugian Fiskal Tahun {tahunPajak - 1}</span></Label>
-                    <Input
-                        id="l5a-ymin1"
-                        class={"tw:text-end"}
-                        type={"text"}
-                        value={formatRupiah(draft.kompensasiYMin1)}
-                        oninput={(e: Event) => (draft.kompensasiYMin1 = applyRupiahInput(e))}
-                        disabled={draftKolomSendiri === 'kompensasiYMin1'}
-                    />
-                </div>
-                <div class="field">
-                    <Label for="l5a-tahunini"><span>Kompensasi Kerugian Fiskal Tahun {tahunPajak} (Tahun Pajak Ini)</span></Label>
-                    <Input
-                        id="l5a-tahunini"
-                        class={"tw:text-end"}
-                        type={"text"}
-                        value={formatRupiah(draft.kompensasiTahunIni)}
-                        oninput={(e: Event) => (draft.kompensasiTahunIni = applyRupiahInput(e))}
-                        disabled={draftKolomSendiri === 'kompensasiTahunIni'}
-                    />
-                </div>
-                <div class="field">
-                    <Label for="l5a-yplus1"><span>Kompensasi Kerugian Fiskal Tahun {tahunPajak + 1} (Tahun Pajak Berjalan)</span></Label>
-                    <Input
-                        id="l5a-yplus1"
-                        class={"tw:text-end"}
-                        type={"text"}
-                        value={formatRupiah(draft.kompensasiYPlus1)}
-                        oninput={(e: Event) => (draft.kompensasiYPlus1 = applyRupiahInput(e))}
-                        disabled={draftKolomSendiri === 'kompensasiYPlus1'}
-                    />
-                </div>
-            </div>
-            <footer>
-                <Button type="button" onclick={() => (modalTerbuka = false)}>Tutup</Button>
-                <Button type="button" onclick={simpanModal} color="var(--color-secondary)">
-                    <span class="tw:text-white">Simpan</span>
-                </Button>
-            </footer>
+<div class="modal fade" id="modalOpL5A" tabindex="-1" aria-labelledby="modalOpL5ALabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="modalOpL5ALabel" style="font-weight: bold; text-transform: uppercase;">
+          Penghitungan Kompensasi Kerugian Fiskal
+        </h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+      </div>
+      <div class="modal-body">
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <div style="display: flex; align-items: center;">
+            <label for="l5a-tahun" style="width: 260px;">Tahun Pajak</label>
+            <input type="text" id="l5a-tahun" value={draft.tahunPajak} readonly style="flex: 1; background-color: #e9ecef;" />
+          </div>
+          <!-- The only field on the form confirmed to accept a negative value,
+               typed with a leading minus. Rupiah formatting strips non-digits
+               including the sign, so this stays a plain number input rather
+               than the shared rupiah field. -->
+          <div style="display: flex; align-items: center;">
+            <label for="l5a-laba" style="width: 260px;">Laba/Rugi Neto Fiskal *</label>
+            <input type="number" id="l5a-laba" bind:value={draft.labaRugiNetoFiskal} style="flex: 1; text-align: right;" />
+          </div>
+          <div style="display: flex; align-items: center;">
+            <label for="l5a-ymin4" style="width: 260px;">Kompensasi Kerugian Fiskal Tahun {tahunPajak - 4}</label>
+            <input
+              type="text"
+              inputmode="numeric"
+              id="l5a-ymin4"
+              value={formatRupiah(draft.kompensasiYMin4)}
+              oninput={(e: Event) => (draft.kompensasiYMin4 = applyRupiahInput(e))}
+              disabled={draftKolomSendiri === 'kompensasiYMin4'}
+              style="flex: 1; text-align: right;"
+            />
+          </div>
+          <div style="display: flex; align-items: center;">
+            <label for="l5a-ymin3" style="width: 260px;">Kompensasi Kerugian Fiskal Tahun {tahunPajak - 3}</label>
+            <input
+              type="text"
+              inputmode="numeric"
+              id="l5a-ymin3"
+              value={formatRupiah(draft.kompensasiYMin3)}
+              oninput={(e: Event) => (draft.kompensasiYMin3 = applyRupiahInput(e))}
+              disabled={draftKolomSendiri === 'kompensasiYMin3'}
+              style="flex: 1; text-align: right;"
+            />
+          </div>
+          <div style="display: flex; align-items: center;">
+            <label for="l5a-ymin2" style="width: 260px;">Kompensasi Kerugian Fiskal Tahun {tahunPajak - 2}</label>
+            <input
+              type="text"
+              inputmode="numeric"
+              id="l5a-ymin2"
+              value={formatRupiah(draft.kompensasiYMin2)}
+              oninput={(e: Event) => (draft.kompensasiYMin2 = applyRupiahInput(e))}
+              disabled={draftKolomSendiri === 'kompensasiYMin2'}
+              style="flex: 1; text-align: right;"
+            />
+          </div>
+          <div style="display: flex; align-items: center;">
+            <label for="l5a-ymin1" style="width: 260px;">Kompensasi Kerugian Fiskal Tahun {tahunPajak - 1}</label>
+            <input
+              type="text"
+              inputmode="numeric"
+              id="l5a-ymin1"
+              value={formatRupiah(draft.kompensasiYMin1)}
+              oninput={(e: Event) => (draft.kompensasiYMin1 = applyRupiahInput(e))}
+              disabled={draftKolomSendiri === 'kompensasiYMin1'}
+              style="flex: 1; text-align: right;"
+            />
+          </div>
+          <div style="display: flex; align-items: center;">
+            <label for="l5a-tahunini" style="width: 260px;">Kompensasi Kerugian Fiskal Tahun {tahunPajak} (Tahun Pajak Ini)</label>
+            <input
+              type="text"
+              inputmode="numeric"
+              id="l5a-tahunini"
+              value={formatRupiah(draft.kompensasiTahunIni)}
+              oninput={(e: Event) => (draft.kompensasiTahunIni = applyRupiahInput(e))}
+              disabled={draftKolomSendiri === 'kompensasiTahunIni'}
+              style="flex: 1; text-align: right;"
+            />
+          </div>
+          <div style="display: flex; align-items: center;">
+            <label for="l5a-yplus1" style="width: 260px;">Kompensasi Kerugian Fiskal Tahun {tahunPajak + 1} (Tahun Pajak Berjalan)</label>
+            <input
+              type="text"
+              inputmode="numeric"
+              id="l5a-yplus1"
+              value={formatRupiah(draft.kompensasiYPlus1)}
+              oninput={(e: Event) => (draft.kompensasiYPlus1 = applyRupiahInput(e))}
+              disabled={draftKolomSendiri === 'kompensasiYPlus1'}
+              style="flex: 1; text-align: right;"
+            />
+          </div>
         </div>
+      </div>
+      <div class="modal-footer" style="justify-content: flex-end;">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+        <button type="button" class="btn btn-primary" style="background-color: #1c398e; color: white;" onclick={simpanModal}>Simpan</button>
+      </div>
     </div>
-{/if}
+  </div>
+</div>
 
 <style>
     th {
@@ -264,33 +269,4 @@
     	background-color: var(--color-primary);
     	border: 1px solid white;
     }
-
-    .overlay {
-        position: fixed;
-        inset: 0;
-        background: rgba(0, 0, 0, 0.4);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 50;
-    }
-    .modal {
-        background: white;
-        width: min(48rem, 92vw);
-        max-height: 88vh;
-        display: flex;
-        flex-direction: column;
-        border-radius: 0.25rem;
-    }
-    header, footer {
-        display: flex;
-        align-items: center;
-        padding: 0.75rem 1rem;
-    }
-    header { justify-content: space-between; border-bottom: 1px solid #ddd; }
-    header button { font-size: 1.5rem; line-height: 1; background: none; border: none; cursor: pointer; }
-    footer { justify-content: flex-end; gap: 0.5rem; border-top: 1px solid #ddd; }
-    .body { overflow-y: auto; padding: 1rem; display: grid; gap: 0.75rem; }
-    .field { display: grid; gap: 0.25rem; }
-    .field span { font-size: 0.8rem; }
 </style>

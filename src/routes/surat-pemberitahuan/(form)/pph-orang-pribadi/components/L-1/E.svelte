@@ -1,8 +1,6 @@
 <script lang="ts">
     import Button from "$lib/components/Button.svelte";
-    import Input from "$lib/components/Input.svelte";
-    import Label from "$lib/components/Label.svelte";
-    import Select from "$lib/components/Select.svelte";
+    import { closeBsModal } from "$lib/helpers/bsModal";
     import Table from "$lib/components/Table.svelte";
     import { applyRupiahInput, formatRupiah } from "$lib/helpers/rupiahInput";
     import type { BarisBuktiPotong } from "./types";
@@ -34,8 +32,6 @@
         namaPemotong: '', npwpPemotong: '', nomorBukti: '', tanggalBukti: '',
         jenisPajak: '', penghasilanBruto: 0, pphDipotong: 0
     });
-
-    let modalTerbuka = $state(false);
     let indeksDiubah = $state<number | null>(null);
     let draft = $state<BarisBuktiPotong>(kosong());
     let errors = $state<Record<string, string>>({});
@@ -48,14 +44,12 @@
         indeksDiubah = null;
         draft = kosong();
         errors = {};
-        modalTerbuka = true;
     }
 
     function bukaUbah(index: number) {
         indeksDiubah = index;
         draft = { ...rows[index] };
         errors = {};
-        modalTerbuka = true;
     }
 
     function simpanModal() {
@@ -72,7 +66,7 @@
 
         if (indeksDiubah === null) rows = [...rows, draft];
         else rows = rows.map((r, i) => (i === indeksDiubah ? draft : r));
-        modalTerbuka = false;
+        closeBsModal('modalOpL1E');
     }
 
     function hapus(index: number) {
@@ -87,7 +81,7 @@
 <div class="tw:mb-6">
     {#if bisaEdit}
         <div class="tw:mb-2 tw:flex tw:justify-end tw:gap-2">
-            <Button type="button" onclick={bukaTambah}>Tambah</Button>
+            <Button type="button" onclick={bukaTambah} data-bs-toggle="modal" data-bs-target="#modalOpL1E">Tambah</Button>
             <Button type="button" onclick={hapusSemua}>Hapus Semua</Button>
         </div>
     {/if}
@@ -112,7 +106,7 @@
                     <tr>
                         {#if bisaEdit}
                             <td class="tw:flex tw:gap-1">
-                                <Button type="button" onclick={() => bukaUbah(index)}>Ubah</Button>
+                                <Button type="button" onclick={() => bukaUbah(index)} data-bs-toggle="modal" data-bs-target="#modalOpL1E">Ubah</Button>
                                 <Button type="button" color="var(--color-danger)" onclick={() => hapus(index)}>
                                     <span class="tw:text-white">Hapus</span>
                                 </Button>
@@ -147,79 +141,80 @@
     </div>
 </div>
 
-{#if modalTerbuka}
-    <div class="overlay">
-        <div class="modal">
-            <header>
-                <span class="tw:text-lg">Penghasilan Bruto</span>
-                <button type="button" onclick={() => (modalTerbuka = false)} aria-label="Tutup">&times;</button>
-            </header>
-            <div class="body">
-                <div class="field">
-                    <Label for="e-nama"><span>Nama Pemotong/Pemungut PPh *</span></Label>
-                    <Input id="e-nama" type={"text"} bind:value={draft.namaPemotong} />
-                    {#if errors.namaPemotong}<span class="error">{errors.namaPemotong}</span>{/if}
-                </div>
-                <div class="field">
-                    <Label for="e-npwp"><span>NPWP Pemotong/Pemungut PPh *</span></Label>
-                    <Input id="e-npwp" type={"text"} bind:value={draft.npwpPemotong} />
-                    {#if errors.npwpPemotong}<span class="error">{errors.npwpPemotong}</span>{/if}
-                </div>
-                <div class="field">
-                    <Label for="e-bukti"><span>Nomor Bukti Pemotongan/Pemungutan *</span></Label>
-                    <Input id="e-bukti" type={"text"} bind:value={draft.nomorBukti} />
-                    {#if errors.nomorBukti}<span class="error">{errors.nomorBukti}</span>{/if}
-                </div>
-                <div class="field">
-                    <!-- The live form's picker cannot be typed into at all and
-                         applies no tax-year validation; an ordinary date input is
-                         used instead. -->
-                    <Label for="e-tanggal"><span>Tanggal Bukti Pemotongan/Pemungutan *</span></Label>
-                    <Input id="e-tanggal" type={"date"} bind:value={draft.tanggalBukti} />
-                    {#if errors.tanggalBukti}<span class="error">{errors.tanggalBukti}</span>{/if}
-                </div>
-                <div class="field">
-                    <Label for="e-jenis"><span>Jenis Pajak *</span></Label>
-                    <Select id="e-jenis" bind:value={draft.jenisPajak}>
-                        <option class="tw:text-black" value={""}>Silakan pilih</option>
-                        {#each referensi.l1_e_jenis_pajak ?? [] as opsi}
-                            <option class="tw:text-black" value={opsi}>{opsi}</option>
-                        {/each}
-                    </Select>
-                    {#if errors.jenisPajak}<span class="error">{errors.jenisPajak}</span>{/if}
-                </div>
-                <div class="field">
-                    <Label for="e-bruto"><span>Penghasilan Bruto *</span></Label>
-                    <Input
-                        id="e-bruto"
-                        class={"tw:text-end"}
-                        type={"text"}
-                        value={formatRupiah(draft.penghasilanBruto)}
-                        oninput={(e: Event) => (draft.penghasilanBruto = applyRupiahInput(e))}
-                    />
-                    {#if errors.penghasilanBruto}<span class="error">{errors.penghasilanBruto}</span>{/if}
-                </div>
-                <div class="field">
-                    <Label for="e-pph"><span>PPh yang Dipotong/Dipungut *</span></Label>
-                    <Input
-                        id="e-pph"
-                        class={"tw:text-end"}
-                        type={"text"}
-                        value={formatRupiah(draft.pphDipotong)}
-                        oninput={(e: Event) => (draft.pphDipotong = applyRupiahInput(e))}
-                    />
-                    {#if errors.pphDipotong}<span class="error">{errors.pphDipotong}</span>{/if}
-                </div>
-            </div>
-            <footer>
-                <Button type="button" onclick={() => (modalTerbuka = false)}>Tutup</Button>
-                <Button type="button" onclick={simpanModal} color="var(--color-secondary)">
-                    <span class="tw:text-white">Simpan</span>
-                </Button>
-            </footer>
+<div class="modal fade" id="modalOpL1E" tabindex="-1" aria-labelledby="modalOpL1ELabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="modalOpL1ELabel" style="font-weight: bold; text-transform: uppercase;">
+          Penghasilan Bruto
+        </h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+      </div>
+      <div class="modal-body">
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <div style="display: flex; align-items: center;">
+            <label for="e-nama" style="width: 220px;">Nama Pemotong/Pemungut PPh *</label>
+            <input type="text" id="e-nama" bind:value={draft.namaPemotong} style="flex: 1;" />
+          </div>
+          {#if errors.namaPemotong}<span class="error">{errors.namaPemotong}</span>{/if}
+          <div style="display: flex; align-items: center;">
+            <label for="e-npwp" style="width: 220px;">NPWP Pemotong/Pemungut PPh *</label>
+            <input type="text" id="e-npwp" bind:value={draft.npwpPemotong} style="flex: 1;" />
+          </div>
+          {#if errors.npwpPemotong}<span class="error">{errors.npwpPemotong}</span>{/if}
+          <div style="display: flex; align-items: center;">
+            <label for="e-bukti" style="width: 220px;">Nomor Bukti Pemotongan/Pemungutan *</label>
+            <input type="text" id="e-bukti" bind:value={draft.nomorBukti} style="flex: 1;" />
+          </div>
+          {#if errors.nomorBukti}<span class="error">{errors.nomorBukti}</span>{/if}
+          <div style="display: flex; align-items: center;">
+            <label for="e-tanggal" style="width: 220px;">Tanggal Bukti Pemotongan/Pemungutan *</label>
+            <input type="date" id="e-tanggal" bind:value={draft.tanggalBukti} style="flex: 1;" />
+          </div>
+          {#if errors.tanggalBukti}<span class="error">{errors.tanggalBukti}</span>{/if}
+          <div style="display: flex; align-items: center;">
+            <label for="e-jenis" style="width: 220px;">Jenis Pajak *</label>
+            <select id="e-jenis" bind:value={draft.jenisPajak} style="flex: 1;">
+              <option value={""}>Silakan pilih</option>
+              {#each referensi.l1_e_jenis_pajak ?? [] as opsi}
+                <option value={opsi}>{opsi}</option>
+              {/each}
+            </select>
+          </div>
+          {#if errors.jenisPajak}<span class="error">{errors.jenisPajak}</span>{/if}
+          <div style="display: flex; align-items: center;">
+            <label for="e-bruto" style="width: 220px;">Penghasilan Bruto *</label>
+            <input
+              type="text"
+              inputmode="numeric"
+              id="e-bruto"
+              value={formatRupiah(draft.penghasilanBruto)}
+              oninput={(e: Event) => (draft.penghasilanBruto = applyRupiahInput(e))}
+              style="flex: 1; text-align: right;"
+            />
+          </div>
+          {#if errors.penghasilanBruto}<span class="error">{errors.penghasilanBruto}</span>{/if}
+          <div style="display: flex; align-items: center;">
+            <label for="e-pph" style="width: 220px;">PPh yang Dipotong/Dipungut *</label>
+            <input
+              type="text"
+              inputmode="numeric"
+              id="e-pph"
+              value={formatRupiah(draft.pphDipotong)}
+              oninput={(e: Event) => (draft.pphDipotong = applyRupiahInput(e))}
+              style="flex: 1; text-align: right;"
+            />
+          </div>
+          {#if errors.pphDipotong}<span class="error">{errors.pphDipotong}</span>{/if}
         </div>
+      </div>
+      <div class="modal-footer" style="justify-content: flex-end;">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+        <button type="button" class="btn btn-primary" style="background-color: #1c398e; color: white;" onclick={simpanModal}>Simpan</button>
+      </div>
     </div>
-{/if}
+  </div>
+</div>
 
 <style>
     th {
@@ -244,34 +239,5 @@
     	background-color: var(--color-primary);
     	border: 1px solid white;
     }
-
-    .overlay {
-        position: fixed;
-        inset: 0;
-        background: rgba(0, 0, 0, 0.4);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 50;
-    }
-    .modal {
-        background: white;
-        width: min(48rem, 92vw);
-        max-height: 88vh;
-        display: flex;
-        flex-direction: column;
-        border-radius: 0.25rem;
-    }
-    header, footer {
-        display: flex;
-        align-items: center;
-        padding: 0.75rem 1rem;
-    }
-    header { justify-content: space-between; border-bottom: 1px solid #ddd; }
-    header button { font-size: 1.5rem; line-height: 1; background: none; border: none; cursor: pointer; }
-    footer { justify-content: flex-end; gap: 0.5rem; border-top: 1px solid #ddd; }
-    .body { overflow-y: auto; padding: 1rem; display: grid; gap: 0.75rem; }
-    .field { display: grid; gap: 0.25rem; }
-    .field span { font-size: 0.8rem; }
-    .error { background: #fde8e8; color: #b91c1c; font-size: 0.75rem; padding: 0.25rem 0.5rem; }
+    .error { background: #fde8e8; color: #b91c1c; font-size: 0.75rem; padding: 0.25rem 0.5rem; margin-left: 220px; }
 </style>

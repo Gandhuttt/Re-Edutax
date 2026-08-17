@@ -1,8 +1,6 @@
 <script lang="ts">
     import Button from "$lib/components/Button.svelte";
-    import Input from "$lib/components/Input.svelte";
-    import Label from "$lib/components/Label.svelte";
-    import Select from "$lib/components/Select.svelte";
+    import { closeBsModal } from "$lib/helpers/bsModal";
     import Table from "$lib/components/Table.svelte";
     import { applyRupiahInput, formatRupiah } from "$lib/helpers/rupiahInput";
     import type { BarisLuarNegeri } from "./types";
@@ -34,8 +32,6 @@
         kodePenghasilan: '', penghasilanNeto: 0, pajakLuarNegeriAsing: 0,
         mataUang: '', pajakLuarNegeriRupiah: 0, kreditPajakDiperhitungkan: 0
     });
-
-    let modalTerbuka = $state(false);
     let indeksDiubah = $state<number | null>(null);
     let draft = $state<BarisLuarNegeri>(kosong());
     let errors = $state<Record<string, string>>({});
@@ -52,14 +48,12 @@
         indeksDiubah = null;
         draft = kosong();
         errors = {};
-        modalTerbuka = true;
     }
 
     function bukaUbah(index: number) {
         indeksDiubah = index;
         draft = { ...rows[index] };
         errors = {};
-        modalTerbuka = true;
     }
 
     function simpanModal() {
@@ -78,7 +72,7 @@
 
         if (indeksDiubah === null) rows = [...rows, draft];
         else rows = rows.map((r, i) => (i === indeksDiubah ? draft : r));
-        modalTerbuka = false;
+        closeBsModal('modalOpL2C');
     }
 
     function hapus(index: number) {
@@ -93,7 +87,7 @@
 <div class="tw:mb-6">
     {#if bisaEdit}
         <div class="tw:mb-2 tw:flex tw:justify-end tw:gap-2">
-            <Button type="button" onclick={bukaTambah}>Tambah</Button>
+            <Button type="button" onclick={bukaTambah} data-bs-toggle="modal" data-bs-target="#modalOpL2C">Tambah</Button>
             <Button type="button" onclick={hapusSemua}>Hapus Semua</Button>
         </div>
     {/if}
@@ -120,7 +114,7 @@
                     <tr>
                         {#if bisaEdit}
                             <td class="tw:flex tw:gap-1">
-                                <Button type="button" onclick={() => bukaUbah(index)}>Ubah</Button>
+                                <Button type="button" onclick={() => bukaUbah(index)} data-bs-toggle="modal" data-bs-target="#modalOpL2C">Ubah</Button>
                                 <Button type="button" color="var(--color-danger)" onclick={() => hapus(index)}>
                                     <span class="tw:text-white">Hapus</span>
                                 </Button>
@@ -153,119 +147,119 @@
     </div>
 </div>
 
-{#if modalTerbuka}
-    <div class="overlay">
-        <div class="modal">
-            <header>
-                <span class="tw:text-lg">Penghasilan Luar Negeri</span>
-                <button type="button" onclick={() => (modalTerbuka = false)} aria-label="Tutup">&times;</button>
-            </header>
-            <div class="body">
-                <div class="field">
-                    <Label for="l2c-nama"><span>Nama Sumber/Pemberi Penghasilan *</span></Label>
-                    <Input id="l2c-nama" type={"text"} bind:value={draft.namaSumber} />
-                    {#if errors.namaSumber}<span class="error">{errors.namaSumber}</span>{/if}
-                </div>
-                <div class="field">
-                    <Label for="l2c-negara"><span>Negara Sumber/Pemberi Penghasilan *</span></Label>
-                    <Select id="l2c-negara" bind:value={draft.negara}>
-                        <option class="tw:text-black" value={""}>Silakan pilih</option>
-                        {#each referensi.negara ?? [] as opsi}
-                            <option class="tw:text-black" value={opsi}>{opsi}</option>
-                        {/each}
-                    </Select>
-                    {#if errors.negara}<span class="error">{errors.negara}</span>{/if}
-                </div>
-                <div class="field">
-                    <!-- The live form's picker cannot be typed into at all and
-                         applies no tax-year validation; an ordinary date input is
-                         used instead. -->
-                    <Label for="l2c-tanggal"><span>Tanggal Transaksi *</span></Label>
-                    <Input id="l2c-tanggal" type={"date"} bind:value={draft.tanggalTransaksi} />
-                    {#if errors.tanggalTransaksi}<span class="error">{errors.tanggalTransaksi}</span>{/if}
-                </div>
-                <div class="field">
-                    <Label for="l2c-jenis"><span>Jenis Penghasilan *</span></Label>
-                    <Select id="l2c-jenis" bind:value={draft.jenisPenghasilan}>
-                        <option class="tw:text-black" value={""}>Silakan pilih</option>
-                        {#each referensi.l2_c_jenis_penghasilan ?? [] as opsi}
-                            <option class="tw:text-black" value={opsi}>{opsi}</option>
-                        {/each}
-                    </Select>
-                    {#if errors.jenisPenghasilan}<span class="error">{errors.jenisPenghasilan}</span>{/if}
-                </div>
-                <div class="field">
-                    <Label for="l2c-kode"><span>Kode Penghasilan</span></Label>
-                    <Input id="l2c-kode" type={"text"} bind:value={draft.kodePenghasilan} />
-                </div>
-                <div class="field">
-                    <Label for="l2c-neto"><span>Penghasilan Neto *</span></Label>
-                    <Input
-                        id="l2c-neto"
-                        class={"tw:text-end"}
-                        type={"text"}
-                        value={formatRupiah(draft.penghasilanNeto)}
-                        oninput={(e: Event) => (draft.penghasilanNeto = applyRupiahInput(e))}
-                    />
-                    {#if errors.penghasilanNeto}<span class="error">{errors.penghasilanNeto}</span>{/if}
-                </div>
-                <div class="field">
-                    <Label for="l2c-pajak-asing"><span>Pajak yang Dibayar/Dipotong/Terutang di Luar Negeri dalam Mata Uang Asing *</span></Label>
-                    <Input
-                        id="l2c-pajak-asing"
-                        class={"tw:text-end"}
-                        type={"text"}
-                        value={formatRupiah(draft.pajakLuarNegeriAsing)}
-                        oninput={(e: Event) => (draft.pajakLuarNegeriAsing = applyRupiahInput(e))}
-                    />
-                    {#if errors.pajakLuarNegeriAsing}<span class="error">{errors.pajakLuarNegeriAsing}</span>{/if}
-                </div>
-                <div class="field">
-                    <!-- The largest modal in the form, and the only one with a Mata
-                         Uang dropdown. Its 111 entries are named inconsistently in
-                         the source (mostly Indonesian, some English-with-country
-                         like "Yuan Renminbi: CHINA"), transcribed as-is. -->
-                    <Label for="l2c-mata-uang"><span>Mata Uang *</span></Label>
-                    <Select id="l2c-mata-uang" bind:value={draft.mataUang}>
-                        <option class="tw:text-black" value={""}>Silakan pilih</option>
-                        {#each referensi.mata_uang ?? [] as opsi}
-                            <option class="tw:text-black" value={opsi}>{opsi}</option>
-                        {/each}
-                    </Select>
-                    {#if errors.mataUang}<span class="error">{errors.mataUang}</span>{/if}
-                </div>
-                <div class="field">
-                    <Label for="l2c-pajak-rupiah"><span>Pajak yang Dibayar/Dipotong/Terutang di Luar Negeri dalam Rupiah *</span></Label>
-                    <Input
-                        id="l2c-pajak-rupiah"
-                        class={"tw:text-end"}
-                        type={"text"}
-                        value={formatRupiah(draft.pajakLuarNegeriRupiah)}
-                        oninput={(e: Event) => (draft.pajakLuarNegeriRupiah = applyRupiahInput(e))}
-                    />
-                    {#if errors.pajakLuarNegeriRupiah}<span class="error">{errors.pajakLuarNegeriRupiah}</span>{/if}
-                </div>
-                <div class="field">
-                    <Label for="l2c-kredit"><span>Kredit Pajak yang Dapat Diperhitungkan *</span></Label>
-                    <Input
-                        id="l2c-kredit"
-                        class={"tw:text-end"}
-                        type={"text"}
-                        value={formatRupiah(draft.kreditPajakDiperhitungkan)}
-                        oninput={(e: Event) => (draft.kreditPajakDiperhitungkan = applyRupiahInput(e))}
-                    />
-                    {#if errors.kreditPajakDiperhitungkan}<span class="error">{errors.kreditPajakDiperhitungkan}</span>{/if}
-                </div>
-            </div>
-            <footer>
-                <Button type="button" onclick={() => (modalTerbuka = false)}>Tutup</Button>
-                <Button type="button" onclick={simpanModal} color="var(--color-secondary)">
-                    <span class="tw:text-white">Simpan</span>
-                </Button>
-            </footer>
+<div class="modal fade" id="modalOpL2C" tabindex="-1" aria-labelledby="modalOpL2CLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="modalOpL2CLabel" style="font-weight: bold; text-transform: uppercase;">
+          Penghasilan Luar Negeri
+        </h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+      </div>
+      <div class="modal-body">
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <div style="display: flex; align-items: center;">
+            <label for="l2c-nama" style="width: 220px;">Nama Sumber/Pemberi Penghasilan *</label>
+            <input type="text" id="l2c-nama" bind:value={draft.namaSumber} style="flex: 1;" />
+          </div>
+          {#if errors.namaSumber}<span class="error">{errors.namaSumber}</span>{/if}
+          <div style="display: flex; align-items: center;">
+            <label for="l2c-negara" style="width: 220px;">Negara Sumber/Pemberi Penghasilan *</label>
+            <select id="l2c-negara" bind:value={draft.negara} style="flex: 1;">
+              <option value={""}>Silakan pilih</option>
+              {#each referensi.negara ?? [] as opsi}
+                <option value={opsi}>{opsi}</option>
+              {/each}
+            </select>
+          </div>
+          {#if errors.negara}<span class="error">{errors.negara}</span>{/if}
+          <div style="display: flex; align-items: center;">
+            <label for="l2c-tanggal" style="width: 220px;">Tanggal Transaksi *</label>
+            <input type="date" id="l2c-tanggal" bind:value={draft.tanggalTransaksi} style="flex: 1;" />
+          </div>
+          {#if errors.tanggalTransaksi}<span class="error">{errors.tanggalTransaksi}</span>{/if}
+          <div style="display: flex; align-items: center;">
+            <label for="l2c-jenis" style="width: 220px;">Jenis Penghasilan *</label>
+            <select id="l2c-jenis" bind:value={draft.jenisPenghasilan} style="flex: 1;">
+              <option value={""}>Silakan pilih</option>
+              {#each referensi.l2_c_jenis_penghasilan ?? [] as opsi}
+                <option value={opsi}>{opsi}</option>
+              {/each}
+            </select>
+          </div>
+          {#if errors.jenisPenghasilan}<span class="error">{errors.jenisPenghasilan}</span>{/if}
+          <div style="display: flex; align-items: center;">
+            <label for="l2c-kode" style="width: 220px;">Kode Penghasilan</label>
+            <input type="text" id="l2c-kode" bind:value={draft.kodePenghasilan} style="flex: 1;" />
+          </div>
+          {#if errors.kodePenghasilan}<span class="error">{errors.kodePenghasilan}</span>{/if}
+          <div style="display: flex; align-items: center;">
+            <label for="l2c-neto" style="width: 220px;">Penghasilan Neto *</label>
+            <input
+              type="text"
+              inputmode="numeric"
+              id="l2c-neto"
+              value={formatRupiah(draft.penghasilanNeto)}
+              oninput={(e: Event) => (draft.penghasilanNeto = applyRupiahInput(e))}
+              style="flex: 1; text-align: right;"
+            />
+          </div>
+          {#if errors.penghasilanNeto}<span class="error">{errors.penghasilanNeto}</span>{/if}
+          <div style="display: flex; align-items: center;">
+            <label for="l2c-pajak-asing" style="width: 220px;">Pajak yang Dibayar/Dipotong/Terutang di Luar Negeri dalam Mata Uang Asing *</label>
+            <input
+              type="text"
+              inputmode="numeric"
+              id="l2c-pajak-asing"
+              value={formatRupiah(draft.pajakLuarNegeriAsing)}
+              oninput={(e: Event) => (draft.pajakLuarNegeriAsing = applyRupiahInput(e))}
+              style="flex: 1; text-align: right;"
+            />
+          </div>
+          {#if errors.pajakLuarNegeriAsing}<span class="error">{errors.pajakLuarNegeriAsing}</span>{/if}
+          <div style="display: flex; align-items: center;">
+            <label for="l2c-mata-uang" style="width: 220px;">Mata Uang *</label>
+            <select id="l2c-mata-uang" bind:value={draft.mataUang} style="flex: 1;">
+              <option value={""}>Silakan pilih</option>
+              {#each referensi.mata_uang ?? [] as opsi}
+                <option value={opsi}>{opsi}</option>
+              {/each}
+            </select>
+          </div>
+          {#if errors.mataUang}<span class="error">{errors.mataUang}</span>{/if}
+          <div style="display: flex; align-items: center;">
+            <label for="l2c-pajak-rupiah" style="width: 220px;">Pajak yang Dibayar/Dipotong/Terutang di Luar Negeri dalam Rupiah *</label>
+            <input
+              type="text"
+              inputmode="numeric"
+              id="l2c-pajak-rupiah"
+              value={formatRupiah(draft.pajakLuarNegeriRupiah)}
+              oninput={(e: Event) => (draft.pajakLuarNegeriRupiah = applyRupiahInput(e))}
+              style="flex: 1; text-align: right;"
+            />
+          </div>
+          {#if errors.pajakLuarNegeriRupiah}<span class="error">{errors.pajakLuarNegeriRupiah}</span>{/if}
+          <div style="display: flex; align-items: center;">
+            <label for="l2c-kredit" style="width: 220px;">Kredit Pajak yang Dapat Diperhitungkan *</label>
+            <input
+              type="text"
+              inputmode="numeric"
+              id="l2c-kredit"
+              value={formatRupiah(draft.kreditPajakDiperhitungkan)}
+              oninput={(e: Event) => (draft.kreditPajakDiperhitungkan = applyRupiahInput(e))}
+              style="flex: 1; text-align: right;"
+            />
+          </div>
+          {#if errors.kreditPajakDiperhitungkan}<span class="error">{errors.kreditPajakDiperhitungkan}</span>{/if}
         </div>
+      </div>
+      <div class="modal-footer" style="justify-content: flex-end;">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+        <button type="button" class="btn btn-primary" style="background-color: #1c398e; color: white;" onclick={simpanModal}>Simpan</button>
+      </div>
     </div>
-{/if}
+  </div>
+</div>
 
 <style>
     th {
@@ -290,34 +284,5 @@
     	background-color: var(--color-primary);
     	border: 1px solid white;
     }
-
-    .overlay {
-        position: fixed;
-        inset: 0;
-        background: rgba(0, 0, 0, 0.4);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 50;
-    }
-    .modal {
-        background: white;
-        width: min(48rem, 92vw);
-        max-height: 88vh;
-        display: flex;
-        flex-direction: column;
-        border-radius: 0.25rem;
-    }
-    header, footer {
-        display: flex;
-        align-items: center;
-        padding: 0.75rem 1rem;
-    }
-    header { justify-content: space-between; border-bottom: 1px solid #ddd; }
-    header button { font-size: 1.5rem; line-height: 1; background: none; border: none; cursor: pointer; }
-    footer { justify-content: flex-end; gap: 0.5rem; border-top: 1px solid #ddd; }
-    .body { overflow-y: auto; padding: 1rem; display: grid; gap: 0.75rem; }
-    .field { display: grid; gap: 0.25rem; }
-    .field span { font-size: 0.8rem; }
-    .error { background: #fde8e8; color: #b91c1c; font-size: 0.75rem; padding: 0.25rem 0.5rem; }
+    .error { background: #fde8e8; color: #b91c1c; font-size: 0.75rem; padding: 0.25rem 0.5rem; margin-left: 220px; }
 </style>

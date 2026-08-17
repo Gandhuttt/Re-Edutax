@@ -38,13 +38,19 @@
 <div class="{currentTab === 'L-2' ? '' : 'tw:hidden'}">
     <div class="accordion">
         <Accordion item={"A. PENGHASILAN YANG DIKENAKAN PAJAK PENGHASILAN BERSIFAT FINAL"}>
-            <A bind:rows={final} {referensi} dapatDiubah={Boolean(i14cPenghasilanFinal)} {readonly} />
+            <div class="tw:p-5">
+                <A bind:rows={final} {referensi} dapatDiubah={Boolean(i14cPenghasilanFinal)} {readonly} />
+            </div>
         </Accordion>
         <Accordion item={"B. PENGHASILAN YANG TIDAK TERMASUK OBJEK PAJAK"}>
-            <B bind:rows={bukanObjek} {referensi} dapatDiubah={Boolean(i14dBukanObjekPajak)} {readonly} />
+            <div class="tw:p-5">
+                <B bind:rows={bukanObjek} {referensi} dapatDiubah={Boolean(i14dBukanObjekPajak)} {readonly} />
+            </div>
         </Accordion>
         <Accordion item={"C. PENGHASILAN NETO LUAR NEGERI"}>
-            <C bind:rows={luarNegeri} {referensi} dapatDiubah={Boolean(b1dPenghasilanLuarNegeri)} {readonly} />
+            <div class="tw:p-5">
+                <C bind:rows={luarNegeri} {referensi} dapatDiubah={Boolean(b1dPenghasilanLuarNegeri)} {readonly} />
+            </div>
         </Accordion>
     </div>
 </div>

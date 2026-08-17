@@ -1,8 +1,6 @@
 <script lang="ts">
     import Button from "$lib/components/Button.svelte";
-    import Input from "$lib/components/Input.svelte";
-    import Label from "$lib/components/Label.svelte";
-    import Select from "$lib/components/Select.svelte";
+    import { closeBsModal } from "$lib/helpers/bsModal";
     import Table from "$lib/components/Table.svelte";
     import { applyRupiahInput, formatRupiah } from "$lib/helpers/rupiahInput";
     import type { BarisA5 } from "./types";
@@ -21,8 +19,6 @@
         sumberKepemilikan: '', nomorSertifikat: '', tahunPerolehan: 0,
         hargaPerolehan: 0, nilaiSaatIni: 0, keterangan: ''
     });
-
-    let modalTerbuka = $state(false);
     let indeksDiubah = $state<number | null>(null);
     let draft = $state<BarisA5>(kosong());
     let errors = $state<Record<string, string>>({});
@@ -34,14 +30,12 @@
         indeksDiubah = null;
         draft = kosong();
         errors = {};
-        modalTerbuka = true;
     }
 
     function bukaUbah(index: number) {
         indeksDiubah = index;
         draft = { ...rows[index] };
         errors = {};
-        modalTerbuka = true;
     }
 
     function simpanModal() {
@@ -62,7 +56,7 @@
 
         if (indeksDiubah === null) rows = [...rows, draft];
         else rows = rows.map((r, i) => (i === indeksDiubah ? draft : r));
-        modalTerbuka = false;
+        closeBsModal('modalOpL1A5');
     }
 
     function hapus(index: number) {
@@ -78,7 +72,7 @@
     <span class="tw:text-sm tw:font-bold tw:block tw:mb-2">5. HARTA TIDAK BERGERAK (TERMASUK TANAH BANGUNAN)</span>
     {#if bisaEdit}
         <div class="tw:mb-2 tw:flex tw:justify-end tw:gap-2">
-            <Button type="button" onclick={bukaTambah}>Tambah</Button>
+            <Button type="button" onclick={bukaTambah} data-bs-toggle="modal" data-bs-target="#modalOpL1A5">Tambah</Button>
             <Button type="button" onclick={hapusSemua}>Hapus Semua</Button>
         </div>
     {/if}
@@ -107,7 +101,7 @@
                     <tr>
                         {#if bisaEdit}
                             <td class="tw:flex tw:gap-1">
-                                <Button type="button" onclick={() => bukaUbah(index)}>Ubah</Button>
+                                <Button type="button" onclick={() => bukaUbah(index)} data-bs-toggle="modal" data-bs-target="#modalOpL1A5">Ubah</Button>
                                 <Button type="button" color="var(--color-danger)" onclick={() => hapus(index)}>
                                     <span class="tw:text-white">Hapus</span>
                                 </Button>
@@ -139,108 +133,110 @@
     </div>
 </div>
 
-{#if modalTerbuka}
-    <div class="overlay">
-        <div class="modal">
-            <header>
-                <span class="tw:text-lg">HARTA TIDAK BERGERAK</span>
-                <button type="button" onclick={() => (modalTerbuka = false)} aria-label="Tutup">&times;</button>
-            </header>
-            <div class="body">
-                <div class="field">
-                    <Label for="a5-kode"><span>Kode *</span></Label>
-                    <Input id="a5-kode" type={"text"} bind:value={draft.kode} />
-                    {#if errors.kode}<span class="error">{errors.kode}</span>{/if}
-                </div>
-                <div class="field">
-                    <Label for="a5-deskripsi"><span>Deskripsi *</span></Label>
-                    <Select id="a5-deskripsi" bind:value={draft.deskripsi}>
-                        <option class="tw:text-black" value={""}>Silakan pilih</option>
-                        {#each referensi.l1_a5_deskripsi ?? [] as opsi}
-                            <option class="tw:text-black" value={opsi}>{opsi}</option>
-                        {/each}
-                    </Select>
-                    {#if errors.deskripsi}<span class="error">{errors.deskripsi}</span>{/if}
-                </div>
-                <div class="field">
-                    <!-- Plain text here, where A1 and A3 use the negara dropdown
-                         for the same concept: reference-table design is per grid. -->
-                    <Label for="a5-lokasi"><span>Lokasi Harta *</span></Label>
-                    <Input id="a5-lokasi" type={"text"} bind:value={draft.lokasiHarta} />
-                    {#if errors.lokasiHarta}<span class="error">{errors.lokasiHarta}</span>{/if}
-                </div>
-                <div class="field">
-                    <Label for="a5-tanah"><span>Ukuran Properti - Tanah *</span></Label>
-                    <Input id="a5-tanah" type={"text"} bind:value={draft.ukuranTanah} />
-                    {#if errors.ukuranTanah}<span class="error">{errors.ukuranTanah}</span>{/if}
-                </div>
-                <div class="field">
-                    <Label for="a5-bangunan"><span>Ukuran Properti - Bangunan *</span></Label>
-                    <Input id="a5-bangunan" type={"text"} bind:value={draft.ukuranBangunan} />
-                    {#if errors.ukuranBangunan}<span class="error">{errors.ukuranBangunan}</span>{/if}
-                </div>
-                <div class="field">
-                    <Label for="a5-sumber"><span>Sumber Kepemilikan *</span></Label>
-                    <Select id="a5-sumber" bind:value={draft.sumberKepemilikan}>
-                        <option class="tw:text-black" value={""}>Silakan pilih</option>
-                        {#each referensi.l1_a5_sumber_kepemilikan ?? [] as opsi}
-                            <option class="tw:text-black" value={opsi}>{opsi}</option>
-                        {/each}
-                    </Select>
-                    {#if errors.sumberKepemilikan}<span class="error">{errors.sumberKepemilikan}</span>{/if}
-                </div>
-                <div class="field">
-                    <Label for="a5-sertifikat"><span>Nomor Sertifikat *</span></Label>
-                    <Input id="a5-sertifikat" type={"text"} bind:value={draft.nomorSertifikat} />
-                    {#if errors.nomorSertifikat}<span class="error">{errors.nomorSertifikat}</span>{/if}
-                </div>
-                <div class="field">
-                    <Label for="a5-tahun"><span>Tahun Perolehan *</span></Label>
-                    <Input id="a5-tahun" type={"number"} bind:value={draft.tahunPerolehan} />
-                    {#if errors.tahunPerolehan}<span class="error">{errors.tahunPerolehan}</span>{/if}
-                </div>
-                <div class="field">
-                    <Label for="a5-harga"><span>Harga Perolehan *</span></Label>
-                    <Input
-                        id="a5-harga"
-                        class={"tw:text-end"}
-                        type={"text"}
-                        value={formatRupiah(draft.hargaPerolehan)}
-                        oninput={(e: Event) => (draft.hargaPerolehan = applyRupiahInput(e))}
-                    />
-                    {#if errors.hargaPerolehan}<span class="error">{errors.hargaPerolehan}</span>{/if}
-                </div>
-                <div class="field">
-                    <Label for="a5-nilai"><span>Nilai Saat Ini *</span></Label>
-                    <Input
-                        id="a5-nilai"
-                        class={"tw:text-end"}
-                        type={"text"}
-                        value={formatRupiah(draft.nilaiSaatIni)}
-                        oninput={(e: Event) => (draft.nilaiSaatIni = applyRupiahInput(e))}
-                    />
-                    {#if errors.nilaiSaatIni}<span class="error">{errors.nilaiSaatIni}</span>{/if}
-                </div>
-                <div class="field">
-                    <Label for="a5-keterangan"><span>Keterangan</span></Label>
-                    <Select id="a5-keterangan" bind:value={draft.keterangan}>
-                        <option class="tw:text-black" value={""}>Silakan pilih</option>
-                        {#each referensi.keterangan_pps ?? [] as opsi}
-                            <option class="tw:text-black" value={opsi}>{opsi}</option>
-                        {/each}
-                    </Select>
-                    {#if errors.keterangan}<span class="error">{errors.keterangan}</span>{/if}
-                </div>
-            </div>
-            <footer>
-                <Button type="button" onclick={() => (modalTerbuka = false)}>Tutup</Button>
-                <Button type="button" onclick={simpanModal} color="var(--color-secondary)">
-                    <span class="tw:text-white">Simpan</span>
-                </Button>
-            </footer>
+<div class="modal fade" id="modalOpL1A5" tabindex="-1" aria-labelledby="modalOpL1A5Label" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="modalOpL1A5Label" style="font-weight: bold; text-transform: uppercase;">
+          HARTA TIDAK BERGERAK
+        </h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+      </div>
+      <div class="modal-body">
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <div style="display: flex; align-items: center;">
+            <label for="a5-kode" style="width: 220px;">Kode *</label>
+            <input type="text" id="a5-kode" bind:value={draft.kode} style="flex: 1;" />
+          </div>
+          {#if errors.kode}<span class="error">{errors.kode}</span>{/if}
+          <div style="display: flex; align-items: center;">
+            <label for="a5-deskripsi" style="width: 220px;">Deskripsi *</label>
+            <select id="a5-deskripsi" bind:value={draft.deskripsi} style="flex: 1;">
+              <option value={""}>Silakan pilih</option>
+              {#each referensi.l1_a5_deskripsi ?? [] as opsi}
+                <option value={opsi}>{opsi}</option>
+              {/each}
+            </select>
+          </div>
+          {#if errors.deskripsi}<span class="error">{errors.deskripsi}</span>{/if}
+          <div style="display: flex; align-items: center;">
+            <label for="a5-lokasi" style="width: 220px;">Lokasi Harta *</label>
+            <input type="text" id="a5-lokasi" bind:value={draft.lokasiHarta} style="flex: 1;" />
+          </div>
+          {#if errors.lokasiHarta}<span class="error">{errors.lokasiHarta}</span>{/if}
+          <div style="display: flex; align-items: center;">
+            <label for="a5-tanah" style="width: 220px;">Ukuran Properti - Tanah *</label>
+            <input type="text" id="a5-tanah" bind:value={draft.ukuranTanah} style="flex: 1;" />
+          </div>
+          {#if errors.ukuranTanah}<span class="error">{errors.ukuranTanah}</span>{/if}
+          <div style="display: flex; align-items: center;">
+            <label for="a5-bangunan" style="width: 220px;">Ukuran Properti - Bangunan *</label>
+            <input type="text" id="a5-bangunan" bind:value={draft.ukuranBangunan} style="flex: 1;" />
+          </div>
+          {#if errors.ukuranBangunan}<span class="error">{errors.ukuranBangunan}</span>{/if}
+          <div style="display: flex; align-items: center;">
+            <label for="a5-sumber" style="width: 220px;">Sumber Kepemilikan *</label>
+            <select id="a5-sumber" bind:value={draft.sumberKepemilikan} style="flex: 1;">
+              <option value={""}>Silakan pilih</option>
+              {#each referensi.l1_a5_sumber_kepemilikan ?? [] as opsi}
+                <option value={opsi}>{opsi}</option>
+              {/each}
+            </select>
+          </div>
+          {#if errors.sumberKepemilikan}<span class="error">{errors.sumberKepemilikan}</span>{/if}
+          <div style="display: flex; align-items: center;">
+            <label for="a5-sertifikat" style="width: 220px;">Nomor Sertifikat *</label>
+            <input type="text" id="a5-sertifikat" bind:value={draft.nomorSertifikat} style="flex: 1;" />
+          </div>
+          {#if errors.nomorSertifikat}<span class="error">{errors.nomorSertifikat}</span>{/if}
+          <div style="display: flex; align-items: center;">
+            <label for="a5-tahun" style="width: 220px;">Tahun Perolehan *</label>
+            <input type="number" id="a5-tahun" bind:value={draft.tahunPerolehan} style="flex: 1;" />
+          </div>
+          {#if errors.tahunPerolehan}<span class="error">{errors.tahunPerolehan}</span>{/if}
+          <div style="display: flex; align-items: center;">
+            <label for="a5-harga" style="width: 220px;">Harga Perolehan *</label>
+            <input
+              type="text"
+              inputmode="numeric"
+              id="a5-harga"
+              value={formatRupiah(draft.hargaPerolehan)}
+              oninput={(e: Event) => (draft.hargaPerolehan = applyRupiahInput(e))}
+              style="flex: 1; text-align: right;"
+            />
+          </div>
+          {#if errors.hargaPerolehan}<span class="error">{errors.hargaPerolehan}</span>{/if}
+          <div style="display: flex; align-items: center;">
+            <label for="a5-nilai" style="width: 220px;">Nilai Saat Ini *</label>
+            <input
+              type="text"
+              inputmode="numeric"
+              id="a5-nilai"
+              value={formatRupiah(draft.nilaiSaatIni)}
+              oninput={(e: Event) => (draft.nilaiSaatIni = applyRupiahInput(e))}
+              style="flex: 1; text-align: right;"
+            />
+          </div>
+          {#if errors.nilaiSaatIni}<span class="error">{errors.nilaiSaatIni}</span>{/if}
+          <div style="display: flex; align-items: center;">
+            <label for="a5-keterangan" style="width: 220px;">Keterangan</label>
+            <select id="a5-keterangan" bind:value={draft.keterangan} style="flex: 1;">
+              <option value={""}>Silakan pilih</option>
+              {#each referensi.keterangan_pps ?? [] as opsi}
+                <option value={opsi}>{opsi}</option>
+              {/each}
+            </select>
+          </div>
+          {#if errors.keterangan}<span class="error">{errors.keterangan}</span>{/if}
         </div>
+      </div>
+      <div class="modal-footer" style="justify-content: flex-end;">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+        <button type="button" class="btn btn-primary" style="background-color: #1c398e; color: white;" onclick={simpanModal}>Simpan</button>
+      </div>
     </div>
-{/if}
+  </div>
+</div>
 
 <style>
     th {
@@ -265,34 +261,5 @@
     	background-color: var(--color-primary);
     	border: 1px solid white;
     }
-
-    .overlay {
-        position: fixed;
-        inset: 0;
-        background: rgba(0, 0, 0, 0.4);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 50;
-    }
-    .modal {
-        background: white;
-        width: min(48rem, 92vw);
-        max-height: 88vh;
-        display: flex;
-        flex-direction: column;
-        border-radius: 0.25rem;
-    }
-    header, footer {
-        display: flex;
-        align-items: center;
-        padding: 0.75rem 1rem;
-    }
-    header { justify-content: space-between; border-bottom: 1px solid #ddd; }
-    header button { font-size: 1.5rem; line-height: 1; background: none; border: none; cursor: pointer; }
-    footer { justify-content: flex-end; gap: 0.5rem; border-top: 1px solid #ddd; }
-    .body { overflow-y: auto; padding: 1rem; display: grid; gap: 0.75rem; }
-    .field { display: grid; gap: 0.25rem; }
-    .field span { font-size: 0.8rem; }
-    .error { background: #fde8e8; color: #b91c1c; font-size: 0.75rem; padding: 0.25rem 0.5rem; }
+    .error { background: #fde8e8; color: #b91c1c; font-size: 0.75rem; padding: 0.25rem 0.5rem; margin-left: 220px; }
 </style>

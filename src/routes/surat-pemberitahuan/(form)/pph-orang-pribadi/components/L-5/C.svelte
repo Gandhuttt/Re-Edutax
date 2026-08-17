@@ -1,8 +1,6 @@
 <script lang="ts">
     import Button from "$lib/components/Button.svelte";
-    import Input from "$lib/components/Input.svelte";
-    import Label from "$lib/components/Label.svelte";
-    import Select from "$lib/components/Select.svelte";
+    import { closeBsModal } from "$lib/helpers/bsModal";
     import Table from "$lib/components/Table.svelte";
     import { applyRupiahInput, formatRupiah } from "$lib/helpers/rupiahInput";
     import type { BarisPengurang } from "./types";
@@ -22,8 +20,6 @@
     let { rows = $bindable(), referensi, dapatDiubah = true, readonly = false }: Props = $props();
 
     const kosong = (): BarisPengurang => ({ kode: '', jenisPengurang: '', jumlah: 0 });
-
-    let modalTerbuka = $state(false);
     let indeksDiubah = $state<number | null>(null);
     let draft = $state<BarisPengurang>(kosong());
     let errors = $state<Record<string, string>>({});
@@ -35,14 +31,12 @@
         indeksDiubah = null;
         draft = kosong();
         errors = {};
-        modalTerbuka = true;
     }
 
     function bukaUbah(index: number) {
         indeksDiubah = index;
         draft = { ...rows[index] };
         errors = {};
-        modalTerbuka = true;
     }
 
     function simpanModal() {
@@ -54,7 +48,7 @@
 
         if (indeksDiubah === null) rows = [...rows, draft];
         else rows = rows.map((r, i) => (i === indeksDiubah ? draft : r));
-        modalTerbuka = false;
+        closeBsModal('modalOpL5C');
     }
 
     function hapus(index: number) {
@@ -69,7 +63,7 @@
 <div class="tw:mb-6">
     {#if bisaEdit}
         <div class="tw:mb-2 tw:flex tw:justify-end tw:gap-2">
-            <Button type="button" onclick={bukaTambah}>Tambah</Button>
+            <Button type="button" onclick={bukaTambah} data-bs-toggle="modal" data-bs-target="#modalOpL5C">Tambah</Button>
             <Button type="button" onclick={hapusSemua}>Hapus Semua</Button>
         </div>
     {/if}
@@ -90,7 +84,7 @@
                     <tr>
                         {#if bisaEdit}
                             <td class="tw:flex tw:gap-1">
-                                <Button type="button" onclick={() => bukaUbah(index)}>Ubah</Button>
+                                <Button type="button" onclick={() => bukaUbah(index)} data-bs-toggle="modal" data-bs-target="#modalOpL5C">Ubah</Button>
                                 <Button type="button" color="var(--color-danger)" onclick={() => hapus(index)}>
                                     <span class="tw:text-white">Hapus</span>
                                 </Button>
@@ -113,49 +107,53 @@
     </div>
 </div>
 
-{#if modalTerbuka}
-    <div class="overlay">
-        <div class="modal">
-            <header>
-                <span class="tw:text-lg">Pengurang PPh Terutang</span>
-                <button type="button" onclick={() => (modalTerbuka = false)} aria-label="Tutup">&times;</button>
-            </header>
-            <div class="body">
-                <div class="field">
-                    <Label for="l5c-kode"><span>Kode</span></Label>
-                    <Input id="l5c-kode" type={"text"} bind:value={draft.kode} />
-                </div>
-                <div class="field">
-                    <Label for="l5c-jenis"><span>Jenis Pengurang PPh Terutang *</span></Label>
-                    <Select id="l5c-jenis" bind:value={draft.jenisPengurang}>
-                        <option class="tw:text-black" value={""}>Silakan pilih</option>
-                        {#each referensi.l5_c_jenis ?? [] as opsi}
-                            <option class="tw:text-black" value={opsi}>{opsi}</option>
-                        {/each}
-                    </Select>
-                    {#if errors.jenisPengurang}<span class="error">{errors.jenisPengurang}</span>{/if}
-                </div>
-                <div class="field">
-                    <Label for="l5c-jumlah"><span>Jumlah Pengurang PPh Terutang *</span></Label>
-                    <Input
-                        id="l5c-jumlah"
-                        class={"tw:text-end"}
-                        type={"text"}
-                        value={formatRupiah(draft.jumlah)}
-                        oninput={(e: Event) => (draft.jumlah = applyRupiahInput(e))}
-                    />
-                    {#if errors.jumlah}<span class="error">{errors.jumlah}</span>{/if}
-                </div>
-            </div>
-            <footer>
-                <Button type="button" onclick={() => (modalTerbuka = false)}>Tutup</Button>
-                <Button type="button" onclick={simpanModal} color="var(--color-secondary)">
-                    <span class="tw:text-white">Simpan</span>
-                </Button>
-            </footer>
+<div class="modal fade" id="modalOpL5C" tabindex="-1" aria-labelledby="modalOpL5CLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="modalOpL5CLabel" style="font-weight: bold; text-transform: uppercase;">
+          Pengurang PPh Terutang
+        </h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+      </div>
+      <div class="modal-body">
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          <div style="display: flex; align-items: center;">
+            <label for="l5c-kode" style="width: 220px;">Kode</label>
+            <input type="text" id="l5c-kode" bind:value={draft.kode} style="flex: 1;" />
+          </div>
+          {#if errors.kode}<span class="error">{errors.kode}</span>{/if}
+          <div style="display: flex; align-items: center;">
+            <label for="l5c-jenis" style="width: 220px;">Jenis Pengurang PPh Terutang *</label>
+            <select id="l5c-jenis" bind:value={draft.jenisPengurang} style="flex: 1;">
+              <option value={""}>Silakan pilih</option>
+              {#each referensi.l5_c_jenis ?? [] as opsi}
+                <option value={opsi}>{opsi}</option>
+              {/each}
+            </select>
+          </div>
+          {#if errors.jenisPengurang}<span class="error">{errors.jenisPengurang}</span>{/if}
+          <div style="display: flex; align-items: center;">
+            <label for="l5c-jumlah" style="width: 220px;">Jumlah Pengurang PPh Terutang *</label>
+            <input
+              type="text"
+              inputmode="numeric"
+              id="l5c-jumlah"
+              value={formatRupiah(draft.jumlah)}
+              oninput={(e: Event) => (draft.jumlah = applyRupiahInput(e))}
+              style="flex: 1; text-align: right;"
+            />
+          </div>
+          {#if errors.jumlah}<span class="error">{errors.jumlah}</span>{/if}
         </div>
+      </div>
+      <div class="modal-footer" style="justify-content: flex-end;">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+        <button type="button" class="btn btn-primary" style="background-color: #1c398e; color: white;" onclick={simpanModal}>Simpan</button>
+      </div>
     </div>
-{/if}
+  </div>
+</div>
 
 <style>
     th {
@@ -180,34 +178,5 @@
     	background-color: var(--color-primary);
     	border: 1px solid white;
     }
-
-    .overlay {
-        position: fixed;
-        inset: 0;
-        background: rgba(0, 0, 0, 0.4);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 50;
-    }
-    .modal {
-        background: white;
-        width: min(48rem, 92vw);
-        max-height: 88vh;
-        display: flex;
-        flex-direction: column;
-        border-radius: 0.25rem;
-    }
-    header, footer {
-        display: flex;
-        align-items: center;
-        padding: 0.75rem 1rem;
-    }
-    header { justify-content: space-between; border-bottom: 1px solid #ddd; }
-    header button { font-size: 1.5rem; line-height: 1; background: none; border: none; cursor: pointer; }
-    footer { justify-content: flex-end; gap: 0.5rem; border-top: 1px solid #ddd; }
-    .body { overflow-y: auto; padding: 1rem; display: grid; gap: 0.75rem; }
-    .field { display: grid; gap: 0.25rem; }
-    .field span { font-size: 0.8rem; }
-    .error { background: #fde8e8; color: #b91c1c; font-size: 0.75rem; padding: 0.25rem 0.5rem; }
+    .error { background: #fde8e8; color: #b91c1c; font-size: 0.75rem; padding: 0.25rem 0.5rem; margin-left: 220px; }
 </style>

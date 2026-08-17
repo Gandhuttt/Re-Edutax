@@ -50,31 +50,41 @@
 <div class="{currentTab === 'L-1' ? '' : 'tw:hidden'}">
     <div class="accordion">
         <Accordion item={"A. HARTA PADA AKHIR TAHUN PAJAK"}>
-            <A1 bind:rows={harta.a1} {referensi} {readonly} />
-            <A2 bind:rows={harta.a2} {referensi} {readonly} />
-            <A3 bind:rows={harta.a3} {referensi} {readonly} />
-            <A4 bind:rows={harta.a4} {referensi} {readonly} />
-            <A5 bind:rows={harta.a5} {referensi} {readonly} />
-            <A6 bind:rows={harta.a6} {referensi} {readonly} />
-            <A7 {harta} />
+            <div class="tw:p-5">
+                <A1 bind:rows={harta.a1} {referensi} {readonly} />
+                <A2 bind:rows={harta.a2} {referensi} {readonly} />
+                <A3 bind:rows={harta.a3} {referensi} {readonly} />
+                <A4 bind:rows={harta.a4} {referensi} {readonly} />
+                <A5 bind:rows={harta.a5} {referensi} {readonly} />
+                <A6 bind:rows={harta.a6} {referensi} {readonly} />
+                <A7 {harta} />
+            </div>
         </Accordion>
         <Accordion item={"B. UTANG PADA AKHIR TAHUN PAJAK"}>
-            <B bind:rows={utang} {referensi} dapatDiubah={Boolean(i14bMemilikiUtang)} {readonly} />
+            <div class="tw:p-5">
+                <B bind:rows={utang} {referensi} dapatDiubah={Boolean(i14bMemilikiUtang)} {readonly} />
+            </div>
         </Accordion>
         <Accordion item={"C. DAFTAR ANGGOTA KELUARGA YANG MENJADI TANGGUNGAN"}>
-            <C rows={keluarga} />
+            <div class="tw:p-5">
+                <C rows={keluarga} />
+            </div>
         </Accordion>
         <Accordion item={"D. PENGHASILAN NETO DALAM NEGERI DARI PEKERJAAN"}>
-            <D bind:rows={pekerjaan} {referensi} dapatDiubah={Boolean(b1aPenghasilanPekerjaan)} {readonly} />
+            <div class="tw:p-5">
+                <D bind:rows={pekerjaan} {referensi} dapatDiubah={Boolean(b1aPenghasilanPekerjaan)} {readonly} />
+            </div>
         </Accordion>
         <Accordion item={"E. DAFTAR BUKTI PEMOTONGAN/PEMUNGUTAN PPh"}>
-            <E
-                bind:rows={buktiPotong}
-                {referensi}
-                {kreditPajakLuarNegeri}
-                dapatDiubah={Boolean(d10aAdaPphDipotongPihakLain)}
-                {readonly}
-            />
+            <div class="tw:p-5">
+                <E
+                    bind:rows={buktiPotong}
+                    {referensi}
+                    {kreditPajakLuarNegeri}
+                    dapatDiubah={Boolean(d10aAdaPphDipotongPihakLain)}
+                    {readonly}
+                />
+            </div>
         </Accordion>
     </div>
 </div>

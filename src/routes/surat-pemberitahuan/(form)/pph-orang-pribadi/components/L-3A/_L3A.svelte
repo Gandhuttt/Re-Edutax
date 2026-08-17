@@ -46,7 +46,9 @@
         <h3 class="tw:text-lg">REKONSILIASI LAPORAN KEUANGAN ({JUDUL[sektor]})</h3>
         <div class="accordion">
             <Accordion item={"A. PENGHASILAN NETO DARI USAHA DAN/ATAU PEKERJAAN BEBAS BERDASARKAN LAPORAN KEUANGAN"}>
-                <A akun={akunPerSektor[sektor]} bind:labaRugi {kodeKoreksiFiskal} {readonly} />
+                <div class="tw:p-5">
+                    <A akun={akunPerSektor[sektor]} bind:labaRugi {kodeKoreksiFiskal} {readonly} />
+                </div>
             </Accordion>
         </div>
     </div>
