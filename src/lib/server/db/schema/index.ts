@@ -64,3 +64,4 @@ export * from './transactional/surat_pemberitahuan/spt_pph_orang_pribadi/lampira
 export * from './references/spt_pph_orang_pribadi/lampiran_3a_akun';
 export * from './references/spt_pph_orang_pribadi/kode_koreksi_fiskal';
 export * from './transactional/surat_pemberitahuan/spt_pph_orang_pribadi/lampiran_3a';
+export * from './transactional/surat_pemberitahuan/spt_pph_orang_pribadi/lampiran_3b';

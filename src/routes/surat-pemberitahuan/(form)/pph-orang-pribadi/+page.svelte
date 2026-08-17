@@ -10,6 +10,7 @@
 	import L2 from './components/L-2/_L2.svelte';
 	import L3A from './components/L-3A/_L3A.svelte';
 	import L3A4 from './components/L-3A-4/_L3A4.svelte';
+	import L3B from './components/L-3B/_L3B.svelte';
 	import L5 from './components/L-5/_L5.svelte';
 	import { getSptPphOrangPribadi } from './getSptPphOrangPribadi.remote';
 	import { getReferensiLampiran } from './getReferensiLampiran.remote';
@@ -32,6 +33,7 @@
 	import type { BarisBukanObjek, BarisFinal, BarisLuarNegeri } from './components/L-2/types';
 	import type { BarisLabaRugi, KodeKoreksiFiskal, Sektor } from './components/L-3A/types';
 	import type { BarisLainnya } from './components/L-3A-4/types';
+	import type { BarisFinalBulanan, BarisPeredaranBulanan, TkuL3B } from './components/L-3B/types';
 	import type { BarisKompensasi, BarisPengurang } from './components/L-5/types';
 
 	const {
@@ -43,6 +45,7 @@
 		lampiran2,
 		lampiran3a,
 		lampiran3a4,
+		lampiran3b,
 		lampiran5
 	} = await getSptPphOrangPribadi();
 	const referensi = await getReferensiLampiran();
@@ -232,6 +235,11 @@
 
 	let l3a4Lainnya = $state<BarisLainnya[]>(lampiran3a4.lainnya.map((row) => ({ ...row })));
 
+	let l3bTku = $state<TkuL3B>({ ...lampiran3b.tku });
+	let l3bA = $state<BarisFinalBulanan[]>(lampiran3b.a.map((row) => ({ ...row })));
+	let l3bB = $state<BarisPeredaranBulanan[]>(lampiran3b.b.map((row) => ({ ...row })));
+	let l3bC = $state<BarisPeredaranBulanan[]>(lampiran3b.c.map((row) => ({ ...row })));
+
 	let l5Kompensasi = $state<BarisKompensasi[]>(lampiran5.kompensasi.map((row) => ({ ...row })));
 	let l5PengurangNeto = $state<BarisPengurang[]>(lampiran5.pengurangNeto.map((row) => ({ ...row })));
 	let l5PengurangPph = $state<BarisPengurang[]>(lampiran5.pengurangPph.map((row) => ({ ...row })));
@@ -360,7 +368,17 @@
 		{ tab: 'L-3A-2', visibility: b1b4Sektor === 'jasa' },
 		{ tab: 'L-3A-3', visibility: b1b4Sektor === 'industri' },
 		{ tab: 'L-3A-4', visibility: Boolean(b1cPenghasilanDalamNegeriLainnya) },
-		{ tab: 'L-3B', visibility: Boolean(b1b1PenghasilanUsaha && b1b2Oppt) },
+		// Gated on 1.b.2 (either "Ya" option, see L3B.md) OR 1.b.3 = Norma. The live
+		// doc only observed the 1.b.2 gate (Norma is blocked server-side on that
+		// account), but Norma is freely selectable in our training app and needs a
+		// way to reach L-3B Bagian C, so the Norma gate is added here.
+		{
+			tab: 'L-3B',
+			visibility:
+				b1b2Oppt === 'peredaran_bruto_tertentu' ||
+				b1b2Oppt === 'pengusaha_tertentu' ||
+				b1b3Norma === 'ya_norma'
+		},
 		{ tab: 'L-4', visibility: Boolean(h13bPerhitunganTersendiri) },
 		{
 			tab: 'L-5',
@@ -510,6 +528,21 @@
 			<!-- L-3A-4 Bagian B rows. Bagian A (Norma) is not implemented. -->
 			<input type="hidden" name="l3aLabaRugi" value={JSON.stringify(l3aLabaRugi)} />
 			<input type="hidden" name="l3a4Lainnya" value={JSON.stringify(l3a4Lainnya)} />
+			<!-- L-3B rows. The TKU registry is a single scalar record, not an array. -->
+			<input type="hidden" name="l3bTkuNama" value={l3bTku.nama} />
+			<input type="hidden" name="l3bTkuAlamat" value={l3bTku.alamat} />
+			<input type="hidden" name="l3bTkuKelurahan" value={l3bTku.kelurahan} />
+			<input type="hidden" name="l3bTkuKecamatan" value={l3bTku.kecamatan} />
+			<input type="hidden" name="l3bTkuKabupaten" value={l3bTku.kabupaten} />
+			<input type="hidden" name="l3bTkuProvinsi" value={l3bTku.provinsi} />
+			<input
+				type="hidden"
+				name="l3bTkuJenisUsahaPekerjaanBebas"
+				value={l3bTku.jenisUsahaPekerjaanBebas}
+			/>
+			<input type="hidden" name="l3bA" value={JSON.stringify(l3bA)} />
+			<input type="hidden" name="l3bB" value={JSON.stringify(l3bB)} />
+			<input type="hidden" name="l3bC" value={JSON.stringify(l3bC)} />
 			<!-- L-5 rows. Bagian A is the fixed ten-row matrix. -->
 			<input type="hidden" name="l5Kompensasi" value={JSON.stringify(l5Kompensasi)} />
 			<input type="hidden" name="l5PengurangNeto" value={JSON.stringify(l5PengurangNeto)} />
@@ -626,6 +659,19 @@
 				{readonly}
 			/>
 
+			<L3B
+				{currentTab}
+				npwp={spt.npwp}
+				metodePembukuan={metodePembukuan ?? ''}
+				bind:tku={l3bTku}
+				bind:a={l3bA}
+				bind:b={l3bB}
+				bind:c={l3bC}
+				{b1b2Oppt}
+				{b1b3Norma}
+				{readonly}
+			/>
+
 			<L5
 				{currentTab}
 				{referensi}
@@ -639,7 +685,7 @@
 			/>
 
 			<!-- The remaining lampiran tabs are gated above but not built yet. -->
-			{#if currentTab !== 'Induk' && currentTab !== 'L-1' && currentTab !== 'L-2' && currentTab !== 'L-3A-1' && currentTab !== 'L-3A-2' && currentTab !== 'L-3A-3' && currentTab !== 'L-3A-4' && currentTab !== 'L-5'}
+			{#if currentTab !== 'Induk' && currentTab !== 'L-1' && currentTab !== 'L-2' && currentTab !== 'L-3A-1' && currentTab !== 'L-3A-2' && currentTab !== 'L-3A-3' && currentTab !== 'L-3A-4' && currentTab !== 'L-3B' && currentTab !== 'L-5'}
 				<div class="tw:p-5">
 					<Alert bg={'var(--color-primary)'}>
 						{#snippet head()}
