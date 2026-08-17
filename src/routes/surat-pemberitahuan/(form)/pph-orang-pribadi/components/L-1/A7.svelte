@@ -49,7 +49,7 @@
 </script>
 
 <div class="tw:mb-6">
-    <span class="tw:text-sm tw:font-bold">7. IKHTISAR HARTA</span>
+    <span class="tw:text-sm tw:font-bold tw:block tw:mb-2">7. IKHTISAR HARTA</span>
     <div class="tw:overflow-x-auto tw:mt-2">
         <Table class="tw:min-w-full">
             {#snippet head()}

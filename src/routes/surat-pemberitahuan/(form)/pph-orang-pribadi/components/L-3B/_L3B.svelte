@@ -1,4 +1,5 @@
 <script lang="ts">
+    import Accordion from "$lib/components/AccordionItem.svelte";
     import Button from "$lib/components/Button.svelte";
     import Input from "$lib/components/Input.svelte";
     import Label from "$lib/components/Label.svelte";
@@ -67,61 +68,67 @@
 </script>
 
 <div class="{currentTab === 'L-3B' ? '' : 'tw:hidden'}">
-    <div class="tw:mb-6">
-        <div class="tw:mb-2 tw:flex tw:items-center tw:justify-between">
-            <span class="tw:text-sm tw:font-bold">DAFTAR TEMPAT KEGIATAN USAHA (TKU)</span>
+    <div class="accordion">
+        <Accordion item={"DAFTAR TEMPAT KEGIATAN USAHA (TKU)"}>
             {#if !readonly}
-                <Button type="button" onclick={bukaUbah}>Ubah</Button>
+                <div class="tw:mb-2 tw:flex tw:justify-end">
+                    <Button type="button" onclick={bukaUbah}>Ubah</Button>
+                </div>
             {/if}
-        </div>
-        <div class="tw:overflow-x-auto">
-            <Table class="tw:min-w-full">
-                {#snippet head()}
-                    <tr>
-                        <th>ID TKU</th>
-                        <th>NAMA</th>
-                        <th>ALAMAT</th>
-                        <th>KELURAHAN/DESA</th>
-                        <th>KECAMATAN</th>
-                        <th>KOTA/KABUPATEN</th>
-                        <th>PROVINSI</th>
-                    </tr>
-                {/snippet}
-                {#snippet body()}
-                    <tr>
-                        <td>{idTku}</td>
-                        <td>{tku.nama}</td>
-                        <td>{tku.alamat}</td>
-                        <td>{tku.kelurahan}</td>
-                        <td>{tku.kecamatan}</td>
-                        <td>{tku.kabupaten}</td>
-                        <td>{tku.provinsi}</td>
-                    </tr>
-                {/snippet}
-            </Table>
-        </div>
+            <div class="tw:overflow-x-auto">
+                <Table class="tw:min-w-full">
+                    {#snippet head()}
+                        <tr>
+                            <th>ID TKU</th>
+                            <th>NAMA</th>
+                            <th>ALAMAT</th>
+                            <th>KELURAHAN/DESA</th>
+                            <th>KECAMATAN</th>
+                            <th>KOTA/KABUPATEN</th>
+                            <th>PROVINSI</th>
+                        </tr>
+                    {/snippet}
+                    {#snippet body()}
+                        <tr>
+                            <td>{idTku}</td>
+                            <td>{tku.nama}</td>
+                            <td>{tku.alamat}</td>
+                            <td>{tku.kelurahan}</td>
+                            <td>{tku.kecamatan}</td>
+                            <td>{tku.kabupaten}</td>
+                            <td>{tku.provinsi}</td>
+                        </tr>
+                    {/snippet}
+                </Table>
+            </div>
+        </Accordion>
+        <Accordion item={"A. PEREDARAN BRUTO TERTENTU YANG DIKENAKAN PAJAK PENGHASILAN BERSIFAT FINAL"}>
+            <A
+                bind:rows={a}
+                namaTku={tku.nama}
+                dapatDiubah={b1b2Oppt === 'peredaran_bruto_tertentu'}
+                {readonly}
+            />
+        </Accordion>
+        <Accordion item={"B. ORANG PRIBADI PENGUSAHA TERTENTU (OPPT)"}>
+            <B
+                bind:rows={b}
+                namaTku={tku.nama}
+                metodePembukuanLabel={metodeLabel[metodePembukuan] ?? metodePembukuan}
+                dapatDiubah={b1b2Oppt === 'pengusaha_tertentu'}
+                {readonly}
+            />
+        </Accordion>
+        <Accordion item={"C. PENGGUNA NORMA PENGHITUNGAN PENGHASILAN NETO (NPPN)"}>
+            <C
+                bind:rows={c}
+                namaTku={tku.nama}
+                bind:jenisUsahaPekerjaanBebas={tku.jenisUsahaPekerjaanBebas}
+                dapatDiubah={b1b3Norma === 'ya_norma'}
+                {readonly}
+            />
+        </Accordion>
     </div>
-
-    <A
-        bind:rows={a}
-        namaTku={tku.nama}
-        dapatDiubah={b1b2Oppt === 'peredaran_bruto_tertentu'}
-        {readonly}
-    />
-    <B
-        bind:rows={b}
-        namaTku={tku.nama}
-        metodePembukuanLabel={metodeLabel[metodePembukuan] ?? metodePembukuan}
-        dapatDiubah={b1b2Oppt === 'pengusaha_tertentu'}
-        {readonly}
-    />
-    <C
-        bind:rows={c}
-        namaTku={tku.nama}
-        bind:jenisUsahaPekerjaanBebas={tku.jenisUsahaPekerjaanBebas}
-        dapatDiubah={b1b3Norma === 'ya_norma'}
-        {readonly}
-    />
 </div>
 
 {#if modalTerbuka}

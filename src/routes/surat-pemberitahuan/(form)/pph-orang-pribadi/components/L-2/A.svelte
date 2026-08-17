@@ -76,13 +76,12 @@
 </script>
 
 <div class="tw:mb-6">
-    <div class="tw:mb-2 tw:flex tw:items-center tw:justify-between">
-        <span class="tw:text-sm tw:font-bold">PENGHASILAN YANG DIKENAKAN PAJAK PENGHASILAN BERSIFAT FINAL</span>
-        {#if bisaEdit}
+    {#if bisaEdit}
+        <div class="tw:mb-2 tw:flex tw:justify-end tw:gap-2">
             <!-- Tambah only: this grid has no Hapus Semua on the live form. -->
             <Button type="button" onclick={bukaTambah}>Tambah</Button>
-        {/if}
-    </div>
+        </div>
+    {/if}
 
     <div class="tw:overflow-x-auto">
         <Table class="tw:min-w-full">

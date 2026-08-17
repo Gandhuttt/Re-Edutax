@@ -1,4 +1,5 @@
 <script lang="ts">
+    import Accordion from "$lib/components/AccordionItem.svelte";
     import B from "./B.svelte";
     import type { BarisLainnya } from "./types";
 
@@ -20,26 +21,24 @@
 </script>
 
 <div class="{currentTab === 'L-3A-4' ? '' : 'tw:hidden'}">
-    <h3 class="tw:text-lg">A. PENGHASILAN NETO DALAM NEGERI DARI USAHA DAN/ATAU PEKERJAAN BEBAS BERDASARKAN PENCATATAN</h3>
-    <!-- The Norma calculation. Never capturable on the live form (see L3B.md),
-         so it is not implemented: only the instruction line is shown. -->
-    <p class="tw:mb-6 tw:text-sm tw:italic">
-        Wajib Pajak yang menyelenggarakan pencatatan wajib mengisi Lampiran 3B
-        untuk menyampaikan rincian penghasilan bruto. Bagian ini belum
-        diimplementasikan.
-    </p>
-
-    <h3 class="tw:text-lg">B. PENGHASILAN NETO DALAM NEGERI LAINNYA</h3>
-    <B
-        bind:rows={lainnya}
-        {referensi}
-        dapatDiubah={Boolean(b1cPenghasilanDalamNegeriLainnya)}
-        {readonly}
-    />
+    <div class="accordion">
+        <Accordion item={"A. PENGHASILAN NETO DALAM NEGERI DARI USAHA DAN/ATAU PEKERJAAN BEBAS BERDASARKAN PENCATATAN"}>
+            <!-- The Norma calculation. Never capturable on the live form (see
+                 L3B.md), so it is not implemented: only the instruction line
+                 is shown. -->
+            <p class="tw:text-sm tw:italic">
+                Wajib Pajak yang menyelenggarakan pencatatan wajib mengisi Lampiran 3B
+                untuk menyampaikan rincian penghasilan bruto. Bagian ini belum
+                diimplementasikan.
+            </p>
+        </Accordion>
+        <Accordion item={"B. PENGHASILAN NETO DALAM NEGERI LAINNYA"}>
+            <B
+                bind:rows={lainnya}
+                {referensi}
+                dapatDiubah={Boolean(b1cPenghasilanDalamNegeriLainnya)}
+                {readonly}
+            />
+        </Accordion>
+    </div>
 </div>
-
-<style>
-    h3 {
-        margin: 1rem 0 0.5rem;
-    }
-</style>

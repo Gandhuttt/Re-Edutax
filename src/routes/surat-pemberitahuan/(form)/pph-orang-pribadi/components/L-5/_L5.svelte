@@ -1,4 +1,5 @@
 <script lang="ts">
+    import Accordion from "$lib/components/AccordionItem.svelte";
     import A from "./A.svelte";
     import B from "./B.svelte";
     import C from "./C.svelte";
@@ -32,22 +33,30 @@
 </script>
 
 <div class="{currentTab === 'L-5' ? '' : 'tw:hidden'}">
-    <A
-        bind:rows={kompensasi}
-        {tahunPajak}
-        dapatDiubah={Boolean(c3AdaPengurangPenghasilanNeto)}
-        {readonly}
-    />
-    <B
-        bind:rows={pengurangNeto}
-        {referensi}
-        dapatDiubah={Boolean(c3AdaPengurangPenghasilanNeto)}
-        {readonly}
-    />
-    <C
-        bind:rows={pengurangPph}
-        {referensi}
-        dapatDiubah={Boolean(c8AdaPengurangPphTerutang)}
-        {readonly}
-    />
+    <div class="accordion">
+        <Accordion item={"A. PENGHITUNGAN KOMPENSASI KERUGIAN FISKAL"}>
+            <A
+                bind:rows={kompensasi}
+                {tahunPajak}
+                dapatDiubah={Boolean(c3AdaPengurangPenghasilanNeto)}
+                {readonly}
+            />
+        </Accordion>
+        <Accordion item={"B. PENGURANG PENGHASILAN NETO"}>
+            <B
+                bind:rows={pengurangNeto}
+                {referensi}
+                dapatDiubah={Boolean(c3AdaPengurangPenghasilanNeto)}
+                {readonly}
+            />
+        </Accordion>
+        <Accordion item={"C. PENGURANG PPh TERUTANG"}>
+            <C
+                bind:rows={pengurangPph}
+                {referensi}
+                dapatDiubah={Boolean(c8AdaPengurangPphTerutang)}
+                {readonly}
+            />
+        </Accordion>
+    </div>
 </div>

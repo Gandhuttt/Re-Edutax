@@ -43,9 +43,6 @@
 </script>
 
 <div class="tw:mb-6">
-    <div class="tw:mb-2">
-        <span class="tw:text-sm tw:font-bold">B. ORANG PRIBADI PENGUSAHA TERTENTU (OPPT)</span>
-    </div>
     <p class="tw:text-xs tw:mb-2">
         Kotak metode pembukuan diisi dengan angka 1 atau 2 sesuai daftar di bawah ini: METODE
         PEMBUKUAN: 1. PENCATATAN, 2. PEMBUKUAN STELSEL KAS ATAU PEMBUKUAN STELSEL AKRUAL

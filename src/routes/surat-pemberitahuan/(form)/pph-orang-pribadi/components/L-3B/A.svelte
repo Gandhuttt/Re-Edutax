@@ -62,10 +62,6 @@
 </script>
 
 <div class="tw:mb-6">
-    <div class="tw:mb-2">
-        <span class="tw:text-sm tw:font-bold">A. PEREDARAN BRUTO TERTENTU YANG DIKENAKAN PAJAK PENGHASILAN BERSIFAT FINAL</span>
-    </div>
-
     <div class="tw:overflow-x-auto">
         <Table class="tw:min-w-full">
             {#snippet head()}

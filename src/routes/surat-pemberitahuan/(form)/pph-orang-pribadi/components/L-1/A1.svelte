@@ -80,15 +80,13 @@
 </script>
 
 <div class="tw:mb-6">
-    <div class="tw:mb-2 tw:flex tw:items-center tw:justify-between">
-        <span class="tw:text-sm tw:font-bold">1. KAS DAN SETARA KAS</span>
-        {#if bisaEdit}
-            <div class="tw:flex tw:gap-2">
-                <Button type="button" onclick={bukaTambah}>Tambah</Button>
-                <Button type="button" onclick={hapusSemua}>Hapus Semua</Button>
-            </div>
-        {/if}
-    </div>
+    <span class="tw:text-sm tw:font-bold tw:block tw:mb-2">1. KAS DAN SETARA KAS</span>
+    {#if bisaEdit}
+        <div class="tw:mb-2 tw:flex tw:justify-end tw:gap-2">
+            <Button type="button" onclick={bukaTambah}>Tambah</Button>
+            <Button type="button" onclick={hapusSemua}>Hapus Semua</Button>
+        </div>
+    {/if}
 
     <div class="tw:overflow-x-auto">
         <Table class="tw:min-w-full">

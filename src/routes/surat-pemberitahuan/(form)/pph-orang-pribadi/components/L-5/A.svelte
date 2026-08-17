@@ -91,7 +91,6 @@
 </script>
 
 <div class="tw:mb-6">
-    <span class="tw:text-sm tw:font-bold">A. PENGHITUNGAN KOMPENSASI KERUGIAN FISKAL</span>
     <div class="tw:overflow-x-auto tw:mt-2">
         <Table class="tw:min-w-full">
             {#snippet head()}

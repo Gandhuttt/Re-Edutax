@@ -53,10 +53,6 @@
 </script>
 
 <div class="tw:mb-6">
-    <div class="tw:mb-2">
-        <span class="tw:text-sm tw:font-bold">C. PENGGUNA NORMA PENGHITUNGAN PENGHASILAN NETO (NPPN)</span>
-    </div>
-
     <div class="tw:overflow-x-auto">
         <Table class="tw:min-w-full">
             {#snippet head()}

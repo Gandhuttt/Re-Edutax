@@ -1,4 +1,5 @@
 <script lang="ts">
+    import Accordion from "$lib/components/AccordionItem.svelte";
     import A from "./A.svelte";
     import type { BarisLabaRugi, KodeKoreksiFiskal, Sektor } from "./types";
 
@@ -43,13 +44,16 @@
 {#if sektor}
     <div class="{currentTab === tabTerkini ? '' : 'tw:hidden'}">
         <h3 class="tw:text-lg">REKONSILIASI LAPORAN KEUANGAN ({JUDUL[sektor]})</h3>
-        <h4 class="tw:text-base">A. PENGHASILAN NETO DARI USAHA DAN/ATAU PEKERJAAN BEBAS BERDASARKAN LAPORAN KEUANGAN</h4>
-        <A akun={akunPerSektor[sektor]} bind:labaRugi {kodeKoreksiFiskal} {readonly} />
+        <div class="accordion">
+            <Accordion item={"A. PENGHASILAN NETO DARI USAHA DAN/ATAU PEKERJAAN BEBAS BERDASARKAN LAPORAN KEUANGAN"}>
+                <A akun={akunPerSektor[sektor]} bind:labaRugi {kodeKoreksiFiskal} {readonly} />
+            </Accordion>
+        </div>
     </div>
 {/if}
 
 <style>
-    h3, h4 {
+    h3 {
         margin: 1rem 0 0.5rem;
     }
 </style>

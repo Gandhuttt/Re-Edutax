@@ -64,17 +64,12 @@
 </script>
 
 <div class="tw:mb-6">
-    <div class="tw:mb-2 tw:flex tw:items-center tw:justify-between">
-        <!-- Section heading reads PENGURANG; the live modal title reads
-             PENGURANGAN, one letter different. Recorded, not fixed. -->
-        <span class="tw:text-sm tw:font-bold">B. PENGURANG PENGHASILAN NETO</span>
-        {#if bisaEdit}
-            <div class="tw:flex tw:gap-2">
-                <Button type="button" onclick={bukaTambah}>Tambah</Button>
-                <Button type="button" onclick={hapusSemua}>Hapus Semua</Button>
-            </div>
-        {/if}
-    </div>
+    {#if bisaEdit}
+        <div class="tw:mb-2 tw:flex tw:justify-end tw:gap-2">
+            <Button type="button" onclick={bukaTambah}>Tambah</Button>
+            <Button type="button" onclick={hapusSemua}>Hapus Semua</Button>
+        </div>
+    {/if}
 
     <div class="tw:overflow-x-auto">
         <Table class="tw:min-w-full">
