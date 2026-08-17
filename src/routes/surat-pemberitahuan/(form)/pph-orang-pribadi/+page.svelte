@@ -40,7 +40,6 @@
 		readonly,
 		spt,
 		identitas,
-		sumberPenghasilan: sumberAwal,
 		lampiran1,
 		lampiran2,
 		lampiran3a,
@@ -54,7 +53,6 @@
 	let metodePembukuan = $state(spt.metodePembukuan);
 	let periodeBulanMulai = $state(spt.periodeBulanMulai);
 	let periodeBulanSelesai = $state(spt.periodeBulanSelesai);
-	let sumberPenghasilan = $state<string[]>([...sumberAwal]);
 
 	let a7StatusKewajibanSuamiIstri = $state(spt.a7StatusKewajibanSuamiIstri ?? '');
 	let a8NpwpSuamiIstri = $state(spt.a8NpwpSuamiIstri ?? '');
@@ -63,6 +61,19 @@
 	// an unanswered question shows no hint chip at all.
 	let b1aPenghasilanPekerjaan = $state(spt.b1aPenghasilanPekerjaan ?? undefined);
 	let b1b1PenghasilanUsaha = $state(spt.b1b1PenghasilanUsaha ?? undefined);
+
+	// HEADER's Sumber Penghasilan is derived, not an independent input. Verified
+	// live 2026-08-18: with 1.a = Ya and 1.b.1 = Ya, the field reads "Pekerjaan,
+	// Kegiatan Usaha, Pekerjaan Bebas" — the combobox is unresponsive to clicks
+	// (no panel opens), confirming it's read-only. 1.b.1 is one combined
+	// question ("usaha dan/atau pekerjaan bebas"), so a single Ya answer derives
+	// both kegiatan_usaha and pekerjaan_bebas at once, not kegiatan_usaha alone.
+	let sumberPenghasilan = $derived.by(() => {
+		const result: string[] = [];
+		if (b1aPenghasilanPekerjaan) result.push('pekerjaan');
+		if (b1b1PenghasilanUsaha) result.push('kegiatan_usaha', 'pekerjaan_bebas');
+		return result;
+	});
 	let b1b2Oppt = $state(spt.b1b2Oppt ?? '');
 	let b1b3Norma = $state(spt.b1b3Norma ?? '');
 	let b1b4Sektor = $state(spt.b1b4Sektor ?? '');
@@ -561,7 +572,7 @@
 				bind:metodePembukuan
 				bind:periodeBulanMulai
 				bind:periodeBulanSelesai
-				bind:sumberPenghasilan
+				{sumberPenghasilan}
 				bind:a7StatusKewajibanSuamiIstri
 				bind:a8NpwpSuamiIstri
 				bind:b1aPenghasilanPekerjaan

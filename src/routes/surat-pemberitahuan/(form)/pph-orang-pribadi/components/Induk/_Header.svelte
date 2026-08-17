@@ -2,7 +2,6 @@
     import Input from "$lib/components/Input.svelte";
     import Select from "$lib/components/Select.svelte";
     import Table from "$lib/components/Table.svelte";
-    import CheckableSelect from "$lib/components/CheckableSelect.svelte";
 
     interface Props {
         tahunPajak: number;
@@ -20,7 +19,7 @@
         metodePembukuan = $bindable(),
         periodeBulanMulai = $bindable(),
         periodeBulanSelesai = $bindable(),
-        sumberPenghasilan = $bindable(),
+        sumberPenghasilan,
         readonly = false
     }: Props = $props();
 
@@ -32,11 +31,16 @@
         { value: 'pencatatan', label: 'Pencatatan' }
     ];
 
-    const sumberOptions = [
-        { value: 'kegiatan_usaha', label: 'Kegiatan Usaha' },
-        { value: 'pekerjaan', label: 'Pekerjaan' },
-        { value: 'pekerjaan_bebas', label: 'Pekerjaan Bebas' }
-    ];
+    const sumberLabel: Record<string, string> = {
+        kegiatan_usaha: 'Kegiatan Usaha',
+        pekerjaan: 'Pekerjaan',
+        pekerjaan_bebas: 'Pekerjaan Bebas'
+    };
+    let sumberPenghasilanText = $derived(
+        sumberPenghasilan.length > 0
+            ? sumberPenghasilan.map((kode) => sumberLabel[kode] ?? kode).join(', ')
+            : ''
+    );
 </script>
 
 <div class="tw:p-5">
@@ -78,16 +82,12 @@
                 </td>
             </tr>
             <tr>
-                <td><span>Sumber Penghasilan *</span></td>
+                <td><span>Sumber Penghasilan</span></td>
                 <td>
-                    <!-- Multi-select: a taxpayer can hold more than one source at
-                         once. Section B can clear this, see B.svelte. -->
-                    <CheckableSelect
-                        bind:value={sumberPenghasilan}
-                        options={sumberOptions}
-                        placeholder={"Pilih sumber penghasilan"}
-                        disabled={readonly}
-                    />
+                    <!-- Derived, not an input: measured on the live form to
+                         change on its own as 1.a/1.b.1 are answered, see
+                         HEADER-FIELDS.md. -->
+                    <Input type={"text"} value={sumberPenghasilanText} disabled />
                 </td>
             </tr>
         {/snippet}

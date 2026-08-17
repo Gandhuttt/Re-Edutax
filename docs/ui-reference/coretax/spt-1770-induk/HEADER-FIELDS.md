@@ -96,6 +96,18 @@ It changed on its own from `Pekerjaan` to `Pekerjaan, Kegiatan Usaha` when
 `1.b.1` was set to `Ya`. It is a computed summary of the answered income-source
 questions.
 
+Re-verified 2026-08-18 on a draft with `1.a` = Ya, `1.b.1` = Ya, and `1.b.3` =
+"Ya, saya berhak menggunakan Norma...": the field read `Pekerjaan, Kegiatan
+Usaha, Pekerjaan Bebas` — three items, not two. Confirmed non-interactive: a
+click on the combobox does not open a selection panel (no `.p-multiselect-panel`
+appears in the DOM), despite the widget carrying no `p-disabled` class.
+
+Not disambiguated: whether `Pekerjaan Bebas` derives from `1.b.1` alone
+(app's current assumption — its question text is literally "usaha dan/atau
+pekerjaan bebas", so one Ya could mean both) or additionally requires `1.b.3`
+answered. The original two-item capture may have been an intermediate state
+before `1.b.3` was reached, not a contradiction.
+
 ## `Posting SPT` — do not press
 
 Found on the **Induk** tab only, in `HEADER` under `Periode Pembukuan`. It does

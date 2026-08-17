@@ -14,7 +14,6 @@
         b1b4Sektor: string;
         b1cPenghasilanDalamNegeriLainnya: boolean | undefined;
         b1dPenghasilanLuarNegeri: boolean | undefined;
-        sumberPenghasilan: string[];
         // Rows 1a to 1d are fed from the lampiran, so they arrive as computed
         // figures rather than being typed here.
         n1a: number;
@@ -32,7 +31,6 @@
         b1b4Sektor = $bindable(),
         b1cPenghasilanDalamNegeriLainnya = $bindable(),
         b1dPenghasilanLuarNegeri = $bindable(),
-        sumberPenghasilan = $bindable(),
         n1a,
         n1b,
         n1c,
@@ -74,17 +72,6 @@
         { value: 'jasa', label: 'Jasa' },
         { value: 'industri', label: 'Industri' }
     ];
-
-    // Section B writes back into the HEADER. With neither pekerjaan nor usaha
-    // income declared, a previously selected Sumber Penghasilan is no longer
-    // valid and the real form clears it (and then flags it as required). The
-    // coupling is bidirectional, so treating the header as settings entered once
-    // up front would get this wrong.
-    $effect(() => {
-        if (b1aPenghasilanPekerjaan === false && b1b1PenghasilanUsaha === false) {
-            if (sumberPenghasilan.length > 0) sumberPenghasilan = [];
-        }
-    });
 
     // 1.b.4 only exists while 1.b.3 is "Tidak, saya menyelenggarakan
     // pembukuan.". Answers collapse whole rows on this form rather than
