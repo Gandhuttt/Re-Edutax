@@ -7,18 +7,33 @@
 	import Navbar from '../Navbar.svelte';
 	import Induk from './components/Induk/_Induk.svelte';
 	import L1 from './components/L-1/_L1.svelte';
+	import L2 from './components/L-2/_L2.svelte';
 	import { getSptPphOrangPribadi } from './getSptPphOrangPribadi.remote';
 	import { getReferensiLampiran } from './getReferensiLampiran.remote';
 	import { saveSptPphOrangPribadi } from './saveSptPphOrangPribadi.remote';
 	import { hitungInduk, type PtkpStatus } from './components/Induk/hitungPphOrangPribadi';
-	import type { LampiranRow } from './components/lampiran/types';
+	import type {
+		BarisA1,
+		BarisA2,
+		BarisA3,
+		BarisA4,
+		BarisA5,
+		BarisA6,
+		BarisBuktiPotong,
+		BarisKeluarga,
+		BarisPekerjaan,
+		BarisUtang,
+		Harta
+	} from './components/L-1/types';
+	import type { BarisBukanObjek, BarisFinal, BarisLuarNegeri } from './components/L-2/types';
 
 	const {
 		readonly,
 		spt,
 		identitas,
 		sumberPenghasilan: sumberAwal,
-		lampiran1
+		lampiran1,
+		lampiran2
 	} = await getSptPphOrangPribadi();
 	const referensi = await getReferensiLampiran();
 	const saveForm = saveSptPphOrangPribadi.for(spt.id);
@@ -98,47 +113,137 @@
 	//   10a  <- L-1 E  JUMLAH BAGIAN E (which itself imports from L-2 C)
 	//   14a  <- L-1 A7 rollup
 	//
-	// L-1 is built, so 1.a, 10a, 14a and 14b are live and derived below from its
-	// rows. The rest stay 0 until their lampiran land.
-	let l1Harta = $state<Record<'a1' | 'a2' | 'a3' | 'a4' | 'a5' | 'a6', LampiranRow[]>>({
-		a1: lampiran1.harta.a1.map((row) => ({ ...row }) as LampiranRow),
-		a2: lampiran1.harta.a2.map((row) => ({ ...row }) as LampiranRow),
-		a3: lampiran1.harta.a3.map((row) => ({ ...row }) as LampiranRow),
-		a4: lampiran1.harta.a4.map((row) => ({ ...row }) as LampiranRow),
-		a5: lampiran1.harta.a5.map((row) => ({ ...row }) as LampiranRow),
-		a6: lampiran1.harta.a6.map((row) => ({ ...row }) as LampiranRow)
+	// L-1 and L-2 are built, so 1.a, 1.d, 10a, 14a, 14b, 14c and 14d are live and
+	// derived below from their rows. Rows 1.b, 1.c, 3 and 8 stay 0 until L-3A,
+	// L-3A-4 and L-5 land.
+	// DB columns for the fields that only some harta sub-tables use are nullable
+	// (which fields a sub-table shows is a property of its modal, not of the
+	// storage), so loading coerces null to the same empty value a fresh row
+	// starts with.
+	let l1Harta = $state<Harta>({
+		a1: lampiran1.harta.a1.map(
+			(row): BarisA1 => ({
+				kode: row.kode,
+				deskripsi: row.deskripsi,
+				nomorAkun: row.nomorAkun ?? '',
+				atasNama: row.atasNama ?? '',
+				namaBankInstitusi: row.namaBankInstitusi ?? '',
+				lokasiHarta: row.lokasiHarta ?? '',
+				tahunPerolehan: row.tahunPerolehan ?? 0,
+				nilaiSaatIni: row.nilaiSaatIni,
+				keterangan: row.keterangan
+			})
+		),
+		a2: lampiran1.harta.a2.map(
+			(row): BarisA2 => ({
+				kode: row.kode,
+				deskripsi: row.deskripsi,
+				lokasiHarta: row.lokasiHarta ?? '',
+				nomorIdentitasPenerima: row.nomorIdentitasPenerima ?? '',
+				namaPenerimaPinjaman: row.namaPenerimaPinjaman ?? '',
+				nilaiPiutang: row.nilaiPiutang ?? 0,
+				tahunDimulai: row.tahunDimulai ?? 0,
+				nilaiSaatIni: row.nilaiSaatIni,
+				keterangan: row.keterangan
+			})
+		),
+		a3: lampiran1.harta.a3.map(
+			(row): BarisA3 => ({
+				kode: row.kode,
+				deskripsi: row.deskripsi,
+				lokasiHarta: row.lokasiHarta ?? '',
+				nomorIdentitasPenerima: row.nomorIdentitasPenerima ?? '',
+				namaBankInstitusi: row.namaBankInstitusi ?? '',
+				nomorAkun: row.nomorAkun ?? '',
+				hargaPerolehan: row.hargaPerolehan,
+				tahunPerolehan: row.tahunPerolehan ?? 0,
+				nilaiSaatIni: row.nilaiSaatIni,
+				keterangan: row.keterangan
+			})
+		),
+		a4: lampiran1.harta.a4.map(
+			(row): BarisA4 => ({
+				kode: row.kode,
+				deskripsi: row.deskripsi,
+				merkModel: row.merkModel ?? '',
+				nomorPolisiRegistrasi: row.nomorPolisiRegistrasi ?? '',
+				kepemilikan: row.kepemilikan ?? '',
+				nomorIdentitasPemilik: row.nomorIdentitasPemilik ?? '',
+				namaPemilik: row.namaPemilik ?? '',
+				tahunPerolehan: row.tahunPerolehan ?? 0,
+				hargaPerolehan: row.hargaPerolehan,
+				nilaiSaatIni: row.nilaiSaatIni,
+				keterangan: row.keterangan
+			})
+		),
+		a5: lampiran1.harta.a5.map(
+			(row): BarisA5 => ({
+				kode: row.kode,
+				deskripsi: row.deskripsi,
+				lokasiHarta: row.lokasiHarta ?? '',
+				ukuranTanah: row.ukuranTanah ?? '',
+				ukuranBangunan: row.ukuranBangunan ?? '',
+				sumberKepemilikan: row.sumberKepemilikan ?? '',
+				nomorSertifikat: row.nomorSertifikat ?? '',
+				tahunPerolehan: row.tahunPerolehan ?? 0,
+				hargaPerolehan: row.hargaPerolehan,
+				nilaiSaatIni: row.nilaiSaatIni,
+				keterangan: row.keterangan
+			})
+		),
+		a6: lampiran1.harta.a6.map(
+			(row): BarisA6 => ({
+				kode: row.kode,
+				deskripsi: row.deskripsi,
+				tahunPerolehan: row.tahunPerolehan ?? 0,
+				hargaPerolehan: row.hargaPerolehan,
+				nilaiSaatIni: row.nilaiSaatIni,
+				buktiKepemilikan: row.buktiKepemilikan ?? '',
+				informasiTambahan: row.informasiTambahan ?? '',
+				keterangan: row.keterangan
+			})
+		)
 	});
-	let l1Utang = $state<LampiranRow[]>(lampiran1.utang.map((row) => ({ ...row }) as LampiranRow));
-	let l1Keluarga = $state<LampiranRow[]>(
-		lampiran1.keluarga.map((row) => ({ ...row }) as LampiranRow)
+	let l1Utang = $state<BarisUtang[]>(
+		lampiran1.utang.map((row) => ({ ...row, tahunPeminjaman: row.tahunPeminjaman ?? 0 }))
 	);
-	let l1Pekerjaan = $state<LampiranRow[]>(
-		lampiran1.pekerjaan.map((row) => ({ ...row }) as LampiranRow)
-	);
-	let l1BuktiPotong = $state<LampiranRow[]>(
-		lampiran1.buktiPotong.map((row) => ({ ...row }) as LampiranRow)
-	);
+	let l1Keluarga = $state<BarisKeluarga[]>(lampiran1.keluarga.map((row) => ({ ...row })));
+	let l1Pekerjaan = $state<BarisPekerjaan[]>(lampiran1.pekerjaan.map((row) => ({ ...row })));
+	let l1BuktiPotong = $state<BarisBuktiPotong[]>(lampiran1.buktiPotong.map((row) => ({ ...row })));
 
-	const jumlah = (rows: LampiranRow[], key: string) =>
-		rows.reduce((sum, row) => sum + Number(row[key] || 0), 0);
+	function jumlah<T>(rows: T[], key: keyof T): number {
+		return rows.reduce((sum, row) => sum + Number(row[key] || 0), 0);
+	}
+
+	let l2Final = $state<BarisFinal[]>(lampiran2.final.map((row) => ({ ...row })));
+	let l2BukanObjek = $state<BarisBukanObjek[]>(lampiran2.bukanObjek.map((row) => ({ ...row })));
+	let l2LuarNegeri = $state<BarisLuarNegeri[]>(lampiran2.luarNegeri.map((row) => ({ ...row })));
 
 	// 1.a takes the JUMLAH BAGIAN D footer, which totals the neto, not the bruto.
 	let n1a = $derived(jumlah(l1Pekerjaan, 'penghasilanNeto'));
-	// 10a will also need L-2 C's kredit pajak luar negeri once L-2 exists: the
-	// JUMLAH BAGIAN E footer is this grid's own total plus that imported row.
-	let n10a = $derived(jumlah(l1BuktiPotong, 'pphDipotong'));
+	// 10a is the JUMLAH BAGIAN E footer, which is L-1 E's own total plus the
+	// KREDIT PAJAK ATAS PENGHASILAN LUAR NEGERI row imported from L-2 C. Two
+	// lampiran feed one Induk row, so the graph has lampiran-to-lampiran edges.
+	let n10a = $derived(
+		jumlah(l1BuktiPotong, 'pphDipotong') + jumlah(l2LuarNegeri, 'kreditPajakDiperhitungkan')
+	);
+	let n1d = $derived(jumlah(l2LuarNegeri, 'penghasilanNeto'));
+	// 14c takes the DPP, not the PPh Terutang.
+	let n14c = $derived(jumlah(l2Final, 'dasarPengenaanPajak'));
+	let n14d = $derived(jumlah(l2BukanObjek, 'penghasilanBruto'));
 	let n14a = $derived(
-		(['a1', 'a2', 'a3', 'a4', 'a5', 'a6'] as const).reduce(
-			(sum, key) => sum + jumlah(l1Harta[key], 'nilaiSaatIni'),
-			0
-		)
+		jumlah(l1Harta.a1, 'nilaiSaatIni') +
+			jumlah(l1Harta.a2, 'nilaiSaatIni') +
+			jumlah(l1Harta.a3, 'nilaiSaatIni') +
+			jumlah(l1Harta.a4, 'nilaiSaatIni') +
+			jumlah(l1Harta.a5, 'nilaiSaatIni') +
+			jumlah(l1Harta.a6, 'nilaiSaatIni')
 	);
 	// 14b takes the L-1 Bagian B utang total.
 	let n14b = $derived(jumlah(l1Utang, 'saldo'));
 
 	let n1b = $state(0);
 	let n1c = $state(0);
-	let n1d = $state(0);
 	let n3 = $state(0);
 	let n8 = $state(0);
 
@@ -332,12 +437,16 @@
 			<input type="hidden" name="l1Utang" value={JSON.stringify(l1Utang)} />
 			<input type="hidden" name="l1Pekerjaan" value={JSON.stringify(l1Pekerjaan)} />
 			<input type="hidden" name="l1BuktiPotong" value={JSON.stringify(l1BuktiPotong)} />
-			<!-- Figures from lampiran that do not exist yet. 1.a, 10a and 14a are
-			     absent because L-1 supplies them and the server recomputes them
-			     from the rows above rather than trusting a submitted total. -->
+			<!-- L-2 rows, same unconditional-block rule as above. -->
+			<input type="hidden" name="l2Final" value={JSON.stringify(l2Final)} />
+			<input type="hidden" name="l2BukanObjek" value={JSON.stringify(l2BukanObjek)} />
+			<input type="hidden" name="l2LuarNegeri" value={JSON.stringify(l2LuarNegeri)} />
+			<!-- Figures from lampiran that do not exist yet. Rows 1.a, 1.d, 10a,
+			     14a to 14d are absent because L-1 and L-2 supply them and the
+			     server recomputes them from the rows above rather than trusting a
+			     submitted total. -->
 			<input type="hidden" name="n1b" value={n1b} />
 			<input type="hidden" name="n1c" value={n1c} />
-			<input type="hidden" name="n1d" value={n1d} />
 			<input type="hidden" name="n3" value={n3} />
 			<input type="hidden" name="n8" value={n8} />
 
@@ -401,6 +510,8 @@
 				{n10a}
 				{n14a}
 				{n14b}
+				{n14c}
+				{n14d}
 			/>
 
 			<L1
@@ -411,14 +522,27 @@
 				keluarga={l1Keluarga}
 				bind:pekerjaan={l1Pekerjaan}
 				bind:buktiPotong={l1BuktiPotong}
+				kreditPajakLuarNegeri={jumlah(l2LuarNegeri, 'kreditPajakDiperhitungkan')}
 				{i14bMemilikiUtang}
 				{b1aPenghasilanPekerjaan}
 				{d10aAdaPphDipotongPihakLain}
 				{readonly}
 			/>
 
+			<L2
+				{currentTab}
+				{referensi}
+				bind:final={l2Final}
+				bind:bukanObjek={l2BukanObjek}
+				bind:luarNegeri={l2LuarNegeri}
+				{i14cPenghasilanFinal}
+				{i14dBukanObjekPajak}
+				{b1dPenghasilanLuarNegeri}
+				{readonly}
+			/>
+
 			<!-- The remaining lampiran tabs are gated above but not built yet. -->
-			{#if currentTab !== 'Induk' && currentTab !== 'L-1'}
+			{#if currentTab !== 'Induk' && currentTab !== 'L-1' && currentTab !== 'L-2'}
 				<div class="tw:p-5">
 					<Alert bg={'var(--color-primary)'}>
 						{#snippet head()}

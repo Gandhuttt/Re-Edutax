@@ -89,6 +89,8 @@
         n10a: number;
         n14a: number;
         n14b: number;
+        n14c: number;
+        n14d: number;
     }
 
     let {
@@ -148,7 +150,9 @@
         n1d,
         n10a,
         n14a,
-        n14b
+        n14b,
+        n14c,
+        n14d
     }: Props = $props();
 
     // Section F applies only to a pembetulan, section G only when the return is
@@ -246,6 +250,8 @@
             <I
                 {n14a}
                 {n14b}
+                {n14c}
+                {n14d}
                 bind:i14bMemilikiUtang
                 bind:i14cPenghasilanFinal
                 bind:i14dBukanObjekPajak

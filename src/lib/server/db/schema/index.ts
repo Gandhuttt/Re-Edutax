@@ -58,3 +58,4 @@ export * from './transactional/surat_pemberitahuan/spt_pph_orang_pribadi/sumber_
 export * from './references/spt_pph_orang_pribadi/referensi_lampiran';
 export * from './transactional/surat_pemberitahuan/spt_pph_orang_pribadi/lampiran_1_harta';
 export * from './transactional/surat_pemberitahuan/spt_pph_orang_pribadi/lampiran_1_lainnya';
+export * from './transactional/surat_pemberitahuan/spt_pph_orang_pribadi/lampiran_2';

@@ -1,0 +1,84 @@
+<script lang="ts">
+    import Table from "$lib/components/Table.svelte";
+    import { formatRupiah } from "$lib/helpers/rupiahInput";
+    import type { Harta } from "./types";
+
+    // A7. IKHTISAR HARTA
+    //
+    // A rollup of tables 1 to 6, read-only in every captured answer state, so it
+    // is genuinely not user-editable rather than merely gated. No TINDAKAN or NO.
+    // columns and no row editor.
+    //
+    // It has two columns where A1 has only a single SALDO. On the live form that
+    // one A1 value populated both, so the harga side falls back to nilaiSaatIni
+    // when a row has no separate harga perolehan.
+    //
+    // The JUMLAH row feeds Induk 14a, whose own label names this as its source.
+    interface Props {
+        harta: Harta;
+    }
+
+    let { harta }: Props = $props();
+
+    const judul = {
+        a1: '1. KAS DAN SETARA KAS',
+        a2: '2. PIUTANG',
+        a3: '3. INVESTASI/SEKURITAS',
+        a4: '4. HARTA BERGERAK',
+        a5: '5. HARTA TIDAK BERGERAK (TERMASUK TANAH BANGUNAN)',
+        a6: '6. HARTA LAINNYA'
+    } as const;
+
+    let baris = $derived(
+        (['a1', 'a2', 'a3', 'a4', 'a5', 'a6'] as const).map((key) => ({
+            deskripsi: judul[key],
+            // A1 has no hargaPerolehan field of its own (see the type note above),
+            // so the fallback to nilaiSaatIni is a real branch, not defensive
+            // padding.
+            hargaPerolehan: harta[key].reduce(
+                (sum, row) =>
+                    sum + Number(('hargaPerolehan' in row ? row.hargaPerolehan : row.nilaiSaatIni) || 0),
+                0
+            ),
+            nilaiSaatIni: harta[key].reduce((sum, row) => sum + Number(row.nilaiSaatIni || 0), 0)
+        }))
+    );
+
+    let totalHarga = $derived(baris.reduce((sum, row) => sum + row.hargaPerolehan, 0));
+    let totalNilai = $derived(baris.reduce((sum, row) => sum + row.nilaiSaatIni, 0));
+</script>
+
+<div class="tw:mb-6">
+    <span class="tw:text-sm tw:font-bold">7. IKHTISAR HARTA</span>
+    <div class="tw:overflow-x-auto tw:mt-2">
+        <Table class="tw:min-w-full">
+            {#snippet head()}
+                <tr>
+                    <th>DESKRIPSI</th>
+                    <th class="tw:text-end">HARGA PEROLEHAN</th>
+                    <th class="tw:text-end">NILAI SAAT INI</th>
+                </tr>
+            {/snippet}
+            {#snippet body()}
+                {#each baris as row}
+                    <tr>
+                        <td>{row.deskripsi}</td>
+                        <td class="tw:text-end">{formatRupiah(row.hargaPerolehan)}</td>
+                        <td class="tw:text-end">{formatRupiah(row.nilaiSaatIni)}</td>
+                    </tr>
+                {/each}
+                <tr class="total">
+                    <td>JUMLAH HARTA PADA AKHIR TAHUN PAJAK</td>
+                    <td class="tw:text-end">{formatRupiah(totalHarga)}</td>
+                    <td class="tw:text-end">{formatRupiah(totalNilai)}</td>
+                </tr>
+            {/snippet}
+        </Table>
+    </div>
+</div>
+
+<style>
+    th { font-size: .7rem; text-align: left; padding: .4rem .5rem; white-space: nowrap; }
+    td { font-size: .8rem; padding: .25rem .5rem; }
+    tr.total td { font-weight: bold; background-color: #F9F6EE; }
+</style>

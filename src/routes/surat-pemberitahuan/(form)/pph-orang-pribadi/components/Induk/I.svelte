@@ -11,6 +11,9 @@
         n14a: number;
         // Fed from L-1 Bagian B.
         n14b: number;
+        // Fed from L-2 Bagian A (the DPP) and Bagian B.
+        n14c: number;
+        n14d: number;
         i14bMemilikiUtang: boolean | undefined;
         i14cPenghasilanFinal: boolean | undefined;
         i14dBukanObjekPajak: boolean | undefined;
@@ -24,6 +27,8 @@
     let {
         n14a,
         n14b,
+        n14c,
+        n14d,
         i14bMemilikiUtang = $bindable(),
         i14cPenghasilanFinal = $bindable(),
         i14dBukanObjekPajak = $bindable(),
@@ -62,6 +67,8 @@
                 name={"I14c"}
                 bind:answer={i14cPenghasilanFinal}
                 hint={HINTS.i14c}
+                amount={"derived"}
+                amountValue={n14c}
                 {readonly}
             />
             <RowTanya
@@ -70,6 +77,8 @@
                 name={"I14d"}
                 bind:answer={i14dBukanObjekPajak}
                 hint={HINTS.i14d}
+                amount={"derived"}
+                amountValue={n14d}
                 {readonly}
             />
             <!-- 14e and 14f render disabled. What gates them was never isolated:
