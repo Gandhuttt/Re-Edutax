@@ -90,11 +90,21 @@ change at a time. Candidates still open:
 - having saved any L-3A row at all, regardless of the current sektor
 - something set earlier in the session and never reverted
 
-## `Sumber Penghasilan` is derived, not an input
+## `Sumber Penghasilan` — correction, it IS a real editable multi-select
 
-It changed on its own from `Pekerjaan` to `Pekerjaan, Kegiatan Usaha` when
-`1.b.1` was set to `Ya`. It is a computed summary of the answered income-source
-questions.
+An earlier note here claimed this field was fully derived/read-only, based on
+a click that failed to open its panel. **Wrong** — re-verified 2026-08-18 by
+clicking directly on the widget: a real checkbox panel opens with `Kegiatan
+Usaha` / `Pekerjaan` / `Pekerjaan Bebas`, freely toggleable, independent of
+`1.a`/`1.b.1`.
+
+It also changed on its own from `Pekerjaan` to `Pekerjaan, Kegiatan Usaha`
+when `1.b.1` was set to `Ya` in an earlier session — so both things are true:
+the live form auto-adds/removes options as a convenience when the related
+Ya/Tidak questions change, AND the user can freely check/uncheck options by
+hand on top of that. Model it as: editable multi-select, with the
+answered-question coupling as a bidirectional convenience, not as a pure
+computed/disabled display.
 
 ## `Posting SPT` — do not press
 

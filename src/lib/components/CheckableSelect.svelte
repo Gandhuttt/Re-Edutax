@@ -42,7 +42,7 @@
 			? placeholder
 			: options
 					.filter((option) => value.includes(option.value))
-					.map((option) => option.value)
+					.map((option) => option.label)
 					.join(', ')
 	);
 
