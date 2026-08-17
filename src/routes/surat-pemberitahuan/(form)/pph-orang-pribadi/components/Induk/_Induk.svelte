@@ -103,7 +103,7 @@
         metodePembukuan = $bindable(),
         periodeBulanMulai = $bindable(),
         periodeBulanSelesai = $bindable(),
-        sumberPenghasilan,
+        sumberPenghasilan = $bindable(),
         a7StatusKewajibanSuamiIstri = $bindable(),
         a8NpwpSuamiIstri = $bindable(),
         b1aPenghasilanPekerjaan = $bindable(),
@@ -183,7 +183,7 @@
                 bind:metodePembukuan
                 bind:periodeBulanMulai
                 bind:periodeBulanSelesai
-                {sumberPenghasilan}
+                bind:sumberPenghasilan
                 {readonly}
             />
         </Accordion>
@@ -199,6 +199,7 @@
                 bind:b1b4Sektor
                 bind:b1cPenghasilanDalamNegeriLainnya
                 bind:b1dPenghasilanLuarNegeri
+                bind:sumberPenghasilan
                 {n1a}
                 {n1b}
                 {n1c}
