@@ -117,9 +117,8 @@
         <div style="display: flex; flex-direction: column; gap: 10px;">
           <div style="display: flex; align-items: center;">
             <label for="l5b-kode" style="width: 220px;">Kode</label>
-            <input type="text" id="l5b-kode" bind:value={draft.kode} style="flex: 1;" />
+            <input type="text" id="l5b-kode" value="" readonly style="flex: 1; background-color: #e9ecef;" />
           </div>
-          {#if errors.kode}<span class="error">{errors.kode}</span>{/if}
           <div style="display: flex; align-items: center;">
             <label for="l5b-jenis" style="width: 220px;">Jenis Pengurang Penghasilan Neto *</label>
             <select id="l5b-jenis" bind:value={draft.jenisPengurang} style="flex: 1;">

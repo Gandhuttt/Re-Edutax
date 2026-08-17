@@ -43,7 +43,6 @@
 
     function simpanModal() {
         const next: Record<string, string> = {};
-        if (!draft.kode) next.kode = 'Kolom ini wajib diisi!';
         if (!draft.deskripsi) next.deskripsi = 'Kolom ini wajib diisi!';
         if (!draft.tahunPerolehan) next.tahunPerolehan = 'Kolom ini wajib diisi!';
         if (!draft.hargaPerolehan) next.hargaPerolehan = 'Kolom ini wajib diisi!';
@@ -139,10 +138,9 @@
       <div class="modal-body">
         <div style="display: flex; flex-direction: column; gap: 10px;">
           <div style="display: flex; align-items: center;">
-            <label for="a6-kode" style="width: 220px;">Kode *</label>
-            <input type="text" id="a6-kode" bind:value={draft.kode} style="flex: 1;" />
+            <label for="a6-kode" style="width: 220px;">Kode</label>
+            <input type="text" id="a6-kode" value="" readonly style="flex: 1; background-color: #e9ecef;" />
           </div>
-          {#if errors.kode}<span class="error">{errors.kode}</span>{/if}
           <div style="display: flex; align-items: center;">
             <label for="a6-deskripsi" style="width: 220px;">Deskripsi *</label>
             <select id="a6-deskripsi" bind:value={draft.deskripsi} style="flex: 1;">

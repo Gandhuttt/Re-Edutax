@@ -190,9 +190,8 @@
           {#if errors.jenisPenghasilan}<span class="error">{errors.jenisPenghasilan}</span>{/if}
           <div style="display: flex; align-items: center;">
             <label for="l2c-kode" style="width: 220px;">Kode Penghasilan</label>
-            <input type="text" id="l2c-kode" bind:value={draft.kodePenghasilan} style="flex: 1;" />
+            <input type="text" id="l2c-kode" value="" readonly style="flex: 1; background-color: #e9ecef;" />
           </div>
-          {#if errors.kodePenghasilan}<span class="error">{errors.kodePenghasilan}</span>{/if}
           <div style="display: flex; align-items: center;">
             <label for="l2c-neto" style="width: 220px;">Penghasilan Neto *</label>
             <input

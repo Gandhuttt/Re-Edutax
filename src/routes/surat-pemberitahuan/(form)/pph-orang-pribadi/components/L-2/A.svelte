@@ -146,9 +146,8 @@
           {#if errors.namaPemotong}<span class="error">{errors.namaPemotong}</span>{/if}
           <div style="display: flex; align-items: center;">
             <label for="l2a-kode" style="width: 220px;">Kode Objek Pajak</label>
-            <input type="text" id="l2a-kode" bind:value={draft.kodeObjekPajak} style="flex: 1;" />
+            <input type="text" id="l2a-kode" value="" readonly style="flex: 1; background-color: #e9ecef;" />
           </div>
-          {#if errors.kodeObjekPajak}<span class="error">{errors.kodeObjekPajak}</span>{/if}
           <div style="display: flex; align-items: center;">
             <label for="l2a-jenis" style="width: 220px;">Jenis Penghasilan *</label>
             <select id="l2a-jenis" bind:value={draft.jenisPenghasilan} style="flex: 1;">
