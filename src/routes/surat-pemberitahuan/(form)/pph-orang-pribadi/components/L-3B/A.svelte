@@ -212,9 +212,29 @@
 {/if}
 
 <style>
-    th { font-size: .7rem; text-align: left; padding: .4rem .5rem; white-space: nowrap; }
-    td { font-size: .75rem; padding: .3rem .4rem; white-space: nowrap; }
-    tr.footer td { font-weight: bold; background-color: #F9F6EE; }
+    th {
+    	font-size: .7rem;
+    	font-weight: bold;
+    	text-align: center;
+    	padding: .4rem .5rem;
+    	white-space: nowrap;
+    	background-color: var(--color-primary);
+    	border: 1px solid white;
+    }
+    td {
+    	font-size: .75rem;
+    	padding: .3rem .4rem;
+    	white-space: nowrap;
+    	border: 1px solid white;
+    }
+    tr:not(.total):not(.footer):nth-child(odd) {
+    	background-color: #F9F6EE;
+    }
+    tr.footer td {
+    	font-weight: bold;
+    	background-color: var(--color-primary);
+    	border: 1px solid white;
+    }
 
     .overlay {
         position: fixed;
