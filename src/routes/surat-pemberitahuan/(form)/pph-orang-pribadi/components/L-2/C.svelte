@@ -42,6 +42,10 @@
 
     let bisaEdit = $derived(dapatDiubah && !readonly);
     let totalNeto = $derived(rows.reduce((s, r) => s + Number(r.penghasilanNeto || 0), 0));
+    // The live form totals three columns in this footer, not two: the foreign
+    // currency amount is left untotaled (mixed currencies), but its Rupiah
+    // conversion is, alongside the neto and the kredit.
+    let totalPajakRupiah = $derived(rows.reduce((s, r) => s + Number(r.pajakLuarNegeriRupiah || 0), 0));
     let totalKredit = $derived(rows.reduce((s, r) => s + Number(r.kreditPajakDiperhitungkan || 0), 0));
 
     function bukaTambah() {
@@ -143,7 +147,8 @@
                 <tr class="total">
                     <td colspan={bisaEdit ? 6 : 5}>JUMLAH PENGHASILAN NETO</td>
                     <td class="tw:text-end">{formatRupiah(totalNeto)}</td>
-                    <td colspan="3"></td>
+                    <td colspan="2"></td>
+                    <td class="tw:text-end">{formatRupiah(totalPajakRupiah)}</td>
                     <td class="tw:text-end">{formatRupiah(totalKredit)}</td>
                 </tr>
             {/snippet}

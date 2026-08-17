@@ -115,7 +115,7 @@
                     <tr><td colspan={bisaEdit ? 7 : 6} class="tw:text-center">Tidak ada data yang ditemukan.</td></tr>
                 {/each}
                 <tr class="total">
-                    <td colspan={bisaEdit ? 5 : 4}>JUMLAH BAGIAN B</td>
+                    <td colspan={bisaEdit ? 5 : 4}>JUMLAH TABEL B</td>
                     <td class="tw:text-end">{formatRupiah(total)}</td>
                     <td></td>
                 </tr>
