@@ -8,12 +8,14 @@
 	import Induk from './components/Induk/_Induk.svelte';
 	import L1 from './components/L-1/_L1.svelte';
 	import L2 from './components/L-2/_L2.svelte';
+	import L3A from './components/L-3A/_L3A.svelte';
 	import L3A4 from './components/L-3A-4/_L3A4.svelte';
 	import L5 from './components/L-5/_L5.svelte';
 	import { getSptPphOrangPribadi } from './getSptPphOrangPribadi.remote';
 	import { getReferensiLampiran } from './getReferensiLampiran.remote';
 	import { saveSptPphOrangPribadi } from './saveSptPphOrangPribadi.remote';
 	import { hitungInduk, type PtkpStatus } from './components/Induk/hitungPphOrangPribadi';
+	import { computeLabaRugiRows } from '../pph-badan/components/L1/labaRugiRollup';
 	import type {
 		BarisA1,
 		BarisA2,
@@ -28,6 +30,7 @@
 		Harta
 	} from './components/L-1/types';
 	import type { BarisBukanObjek, BarisFinal, BarisLuarNegeri } from './components/L-2/types';
+	import type { BarisLabaRugi, KodeKoreksiFiskal, Sektor } from './components/L-3A/types';
 	import type { BarisLainnya } from './components/L-3A-4/types';
 	import type { BarisKompensasi, BarisPengurang } from './components/L-5/types';
 
@@ -38,6 +41,7 @@
 		sumberPenghasilan: sumberAwal,
 		lampiran1,
 		lampiran2,
+		lampiran3a,
 		lampiran3a4,
 		lampiran5
 	} = await getSptPphOrangPribadi();
@@ -58,6 +62,7 @@
 	let b1b1PenghasilanUsaha = $state(spt.b1b1PenghasilanUsaha ?? undefined);
 	let b1b2Oppt = $state(spt.b1b2Oppt ?? '');
 	let b1b3Norma = $state(spt.b1b3Norma ?? '');
+	let b1b4Sektor = $state(spt.b1b4Sektor ?? '');
 	let b1cPenghasilanDalamNegeriLainnya = $state(spt.b1cPenghasilanDalamNegeriLainnya ?? undefined);
 	let b1dPenghasilanLuarNegeri = $state(spt.b1dPenghasilanLuarNegeri ?? undefined);
 
@@ -119,10 +124,9 @@
 	//   10a  <- L-1 E  JUMLAH BAGIAN E (which itself imports from L-2 C)
 	//   14a  <- L-1 A7 rollup
 	//
-	// L-1, L-2, L-3A-4 and L-5 are built, so every row above except 1.b is live
-	// and derived below from lampiran rows. 1.b awaits L-3A, the sektor-gated
-	// 4xxx/5xxx fiscal grid reusing the SPT Badan L1 shape, a separate and much
-	// larger build.
+	// Every lampiran above is now built, including L-3A (the sektor-gated
+	// 4xxx/5xxx fiscal grid for 1.b, reusing the SPT Badan L1 rollup as-is).
+	// Every Induk row that BEHAVIOR.md documents a feed for is live below.
 	// DB columns for the fields that only some harta sub-tables use are nullable
 	// (which fields a sub-table shows is a property of its modal, not of the
 	// storage), so loading coerces null to the same empty value a fresh row
@@ -265,9 +269,44 @@
 	// Row 8 is L-5 C in full.
 	let n8 = $derived(jumlah(l5PengurangPph, 'jumlah'));
 
-	// 1.b awaits L-3A, the sektor-gated 4xxx/5xxx fiscal grid, a separate and
-	// much larger build reusing the SPT Badan L1 shape.
-	let n1b = $state(0);
+	// L-3A. All three sektor templates are loaded regardless of which one is
+	// currently selected (see getLampiranL3A.server.ts), so switching Induk
+	// 1.b.4 needs no extra round trip.
+	const l3aAkunPerSektor = lampiran3a.akunPerSektor;
+	const l3aKodeKoreksiFiskal: KodeKoreksiFiskal[] = lampiran3a.kodeKoreksiFiskal;
+	let l3aLabaRugi = $state<BarisLabaRugi[]>(
+		lampiran3a.labaRugi.map((row) => ({
+			akunId: row.akunId,
+			nilaiKomersial: row.nilaiKomersial,
+			nonObjekPajak: row.nonObjekPajak,
+			dikenakanPphFinal: row.dikenakanPphFinal,
+			penyesuaianFiskalPositif: row.penyesuaianFiskalPositif,
+			penyesuaianFiskalNegatif: row.penyesuaianFiskalNegatif,
+			kodePenyesuaianFiskal: [...row.kodePenyesuaianFiskal]
+		}))
+	);
+
+	// 1.b.5 reads L-3A's 4800 NILAI FISKAL directly. Computed the same way as
+	// the server (computeLabaRugiRows is pure logic, reused as-is), scoped to
+	// whichever sektor is currently selected; rows left over from an abandoned
+	// sektor are harmless here for the same reason they are on save, see
+	// BarisLabaRugi's own note.
+	let n1b = $derived.by(() => {
+		if (!b1b4Sektor) return 0;
+		const akun = l3aAkunPerSektor[b1b4Sektor as Sektor] ?? [];
+		const template = akun.map((row, index) => ({
+			id: row.id,
+			nomorUrut: index + 1,
+			kode: row.kode,
+			namaAkun: row.namaAkun,
+			rowType: row.rowType,
+			classification: row.classification,
+			parentKode: row.parentKode,
+			sign: row.sign
+		}));
+		const computed = computeLabaRugiRows(template, l3aLabaRugi);
+		return computed.find((row) => row.kode === '4800')?.nilaiFiskal ?? 0;
+	});
 
 	let f12a = $derived(spt.pembetulanKe > 0 ? (spt.previousPphKurangLebihBayar ?? 0) : 0);
 
@@ -313,9 +352,13 @@
 			tab: 'L-2',
 			visibility: Boolean(i14cPenghasilanFinal || i14dBukanObjekPajak || b1dPenghasilanLuarNegeri)
 		},
-		// L-3A-1/2/3 are the sektor variants reached from the 1.b family; only one
-		// can exist at a time. L-3A-4 is gated on 1.c and coexists with them.
-		{ tab: 'L-3A-1', visibility: Boolean(b1b1PenghasilanUsaha) },
+		// L-3A-1/2/3 are the sektor variants reached from Induk 1.b.4: exactly one
+		// exists at a time, tracking the selected sektor directly rather than the
+		// usual OR-of-gates rule (changing 1.b.4 replaces the tab, see L3A.md).
+		// L-3A-4 is gated on 1.c and coexists with whichever of these is showing.
+		{ tab: 'L-3A-1', visibility: b1b4Sektor === 'dagang' },
+		{ tab: 'L-3A-2', visibility: b1b4Sektor === 'jasa' },
+		{ tab: 'L-3A-3', visibility: b1b4Sektor === 'industri' },
 		{ tab: 'L-3A-4', visibility: Boolean(b1cPenghasilanDalamNegeriLainnya) },
 		{ tab: 'L-3B', visibility: Boolean(b1b1PenghasilanUsaha && b1b2Oppt) },
 		{ tab: 'L-4', visibility: Boolean(h13bPerhitunganTersendiri) },
@@ -389,6 +432,7 @@
 			<input type="hidden" name="b1b1PenghasilanUsaha" value={b1b1PenghasilanUsaha} />
 			<input type="hidden" name="b1b2Oppt" value={b1b2Oppt} />
 			<input type="hidden" name="b1b3Norma" value={b1b3Norma} />
+			<input type="hidden" name="b1b4Sektor" value={b1b4Sektor} />
 			<input
 				type="hidden"
 				name="b1cPenghasilanDalamNegeriLainnya"
@@ -464,6 +508,7 @@
 			<input type="hidden" name="l2BukanObjek" value={JSON.stringify(l2BukanObjek)} />
 			<input type="hidden" name="l2LuarNegeri" value={JSON.stringify(l2LuarNegeri)} />
 			<!-- L-3A-4 Bagian B rows. Bagian A (Norma) is not implemented. -->
+			<input type="hidden" name="l3aLabaRugi" value={JSON.stringify(l3aLabaRugi)} />
 			<input type="hidden" name="l3a4Lainnya" value={JSON.stringify(l3a4Lainnya)} />
 			<!-- L-5 rows. Bagian A is the fixed ten-row matrix. -->
 			<input type="hidden" name="l5Kompensasi" value={JSON.stringify(l5Kompensasi)} />
@@ -490,6 +535,7 @@
 				bind:b1b1PenghasilanUsaha
 				bind:b1b2Oppt
 				bind:b1b3Norma
+				bind:b1b4Sektor
 				bind:b1cPenghasilanDalamNegeriLainnya
 				bind:b1dPenghasilanLuarNegeri
 				bind:c3AdaPengurangPenghasilanNeto
@@ -563,6 +609,15 @@
 				{readonly}
 			/>
 
+			<L3A
+				{currentTab}
+				sektor={b1b4Sektor ? (b1b4Sektor as Sektor) : null}
+				akunPerSektor={l3aAkunPerSektor}
+				bind:labaRugi={l3aLabaRugi}
+				kodeKoreksiFiskal={l3aKodeKoreksiFiskal}
+				{readonly}
+			/>
+
 			<L3A4
 				{currentTab}
 				{referensi}
@@ -584,7 +639,7 @@
 			/>
 
 			<!-- The remaining lampiran tabs are gated above but not built yet. -->
-			{#if currentTab !== 'Induk' && currentTab !== 'L-1' && currentTab !== 'L-2' && currentTab !== 'L-3A-4' && currentTab !== 'L-5'}
+			{#if currentTab !== 'Induk' && currentTab !== 'L-1' && currentTab !== 'L-2' && currentTab !== 'L-3A-1' && currentTab !== 'L-3A-2' && currentTab !== 'L-3A-3' && currentTab !== 'L-3A-4' && currentTab !== 'L-5'}
 				<div class="tw:p-5">
 					<Alert bg={'var(--color-primary)'}>
 						{#snippet head()}

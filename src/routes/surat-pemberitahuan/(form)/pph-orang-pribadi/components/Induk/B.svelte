@@ -11,6 +11,7 @@
         b1b1PenghasilanUsaha: boolean | undefined;
         b1b2Oppt: string;
         b1b3Norma: string;
+        b1b4Sektor: string;
         b1cPenghasilanDalamNegeriLainnya: boolean | undefined;
         b1dPenghasilanLuarNegeri: boolean | undefined;
         sumberPenghasilan: string[];
@@ -28,6 +29,7 @@
         b1b1PenghasilanUsaha = $bindable(),
         b1b2Oppt = $bindable(),
         b1b3Norma = $bindable(),
+        b1b4Sektor = $bindable(),
         b1cPenghasilanDalamNegeriLainnya = $bindable(),
         b1dPenghasilanLuarNegeri = $bindable(),
         sumberPenghasilan = $bindable(),
@@ -62,6 +64,17 @@
         { value: 'ya_norma', label: 'Ya, saya berhak menggunakan Norma Penghitungan Penghasilan Neto.' }
     ];
 
+    // 1.b.4 appears only when 1.b.3 = "Tidak, saya menyelenggarakan pembukuan.".
+    // Only one sektor can be selected at a time; changing it replaces the
+    // lampiran tab rather than adding another, unlike every other gate on this
+    // form. See L3A.md.
+    const sektorOptions = [
+        { value: '', label: '' },
+        { value: 'dagang', label: 'Dagang' },
+        { value: 'jasa', label: 'Jasa' },
+        { value: 'industri', label: 'Industri' }
+    ];
+
     // Section B writes back into the HEADER. With neither pekerjaan nor usaha
     // income declared, a previously selected Sumber Penghasilan is no longer
     // valid and the real form clears it (and then flags it as required). The
@@ -70,6 +83,16 @@
     $effect(() => {
         if (b1aPenghasilanPekerjaan === false && b1b1PenghasilanUsaha === false) {
             if (sumberPenghasilan.length > 0) sumberPenghasilan = [];
+        }
+    });
+
+    // 1.b.4 only exists while 1.b.3 is "Tidak, saya menyelenggarakan
+    // pembukuan.". Answers collapse whole rows on this form rather than
+    // merely hiding them (see the 1.b.1 note above), so the sektor answer is
+    // cleared along with the row.
+    $effect(() => {
+        if (b1b3Norma !== 'tidak_pembukuan' && b1b4Sektor) {
+            b1b4Sektor = '';
         }
     });
 </script>
@@ -126,6 +149,19 @@
                         </Select>
                     </td>
                 </tr>
+                {#if b1b3Norma === 'tidak_pembukuan'}
+                    <tr>
+                        <td><span>1.b.4</span></td>
+                        <td><span>Anda menyelenggarakan pembukuan. Sebutkan sektor usaha yang Anda lakukan?</span></td>
+                        <td colspan="3">
+                            <Select bind:value={b1b4Sektor} disabled={readonly}>
+                                {#each sektorOptions as option}
+                                    <option class="tw:text-black" value={option.value}>{option.label}</option>
+                                {/each}
+                            </Select>
+                        </td>
+                    </tr>
+                {/if}
                 <RowNilai
                     nomor={"1.b.5"}
                     label={"Penghasilan neto dari usaha dan/atau pekerjaan bebas"}

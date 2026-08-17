@@ -17,6 +17,8 @@ import * as kodeKoreksiFiskal from './batches/013-kode-koreksi-fiskal';
 import * as adminUser from './batches/014-admin-user';
 import * as batchPeserta from './batches/015-batch-peserta';
 import * as pphOpLampiranReferensi from './batches/016-pph-op-lampiran-referensi';
+import * as pphOpKodeKoreksiFiskal from './batches/017-pph-op-kode-koreksi-fiskal';
+import * as pphOpLampiran3aAkun from './batches/018-pph-op-lampiran-3a-akun';
 
 const batches = [
 	initialUsers,
@@ -35,6 +37,8 @@ const batches = [
 	adminUser,
 	batchPeserta,
 	pphOpLampiranReferensi,
+	pphOpKodeKoreksiFiskal,
+	pphOpLampiran3aAkun,
 	fakturDemo
 ];
 

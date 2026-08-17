@@ -61,6 +61,11 @@ export const spt_pph_orang_pribadi = sqliteTable(
 		b1b3Norma: text('b1b3_norma', {
 			enum: ['tidak_pembukuan', 'tidak_final_tanpa_pembukuan', 'ya_norma']
 		}),
+		// 1.b.4 appears only once 1.b.3 is "Tidak, saya menyelenggarakan pembukuan.".
+		// Its three options each route to a different, mutually exclusive lampiran
+		// tab (L-3A-1/2/3); only one exists at a time, unlike the usual OR-of-gates
+		// tab rule. See L3A.md.
+		b1b4Sektor: text('b1b4_sektor', { enum: ['dagang', 'jasa', 'industri'] }),
 		b1cPenghasilanDalamNegeriLainnya: integer('b1c_penghasilan_dalam_negeri_lainnya', {
 			mode: 'boolean'
 		}),

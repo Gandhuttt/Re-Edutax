@@ -36,6 +36,7 @@
         b1b1PenghasilanUsaha: boolean | undefined;
         b1b2Oppt: string;
         b1b3Norma: string;
+        b1b4Sektor: string;
         b1cPenghasilanDalamNegeriLainnya: boolean | undefined;
         b1dPenghasilanLuarNegeri: boolean | undefined;
 
@@ -109,6 +110,7 @@
         b1b1PenghasilanUsaha = $bindable(),
         b1b2Oppt = $bindable(),
         b1b3Norma = $bindable(),
+        b1b4Sektor = $bindable(),
         b1cPenghasilanDalamNegeriLainnya = $bindable(),
         b1dPenghasilanLuarNegeri = $bindable(),
         c3AdaPengurangPenghasilanNeto = $bindable(),
@@ -194,6 +196,7 @@
                 bind:b1b1PenghasilanUsaha
                 bind:b1b2Oppt
                 bind:b1b3Norma
+                bind:b1b4Sektor
                 bind:b1cPenghasilanDalamNegeriLainnya
                 bind:b1dPenghasilanLuarNegeri
                 bind:sumberPenghasilan

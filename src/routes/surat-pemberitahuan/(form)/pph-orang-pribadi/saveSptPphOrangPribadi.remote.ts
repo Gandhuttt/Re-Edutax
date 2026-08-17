@@ -11,6 +11,7 @@ import * as v from 'valibot';
 import { hitungInduk, type PtkpStatus } from './components/Induk/hitungPphOrangPribadi';
 import { L1Schema, saveLampiranL1 } from './components/L-1/saveLampiranL1.server';
 import { L2Schema, saveLampiranL2 } from './components/L-2/saveLampiranL2.server';
+import { L3ASchema, saveLampiranL3A } from './components/L-3A/saveLampiranL3A.server';
 import { L3A4Schema, saveLampiranL3A4 } from './components/L-3A-4/saveLampiranL3A4.server';
 import { L5Schema, saveLampiranL5 } from './components/L-5/saveLampiranL5.server';
 
@@ -44,6 +45,7 @@ const SaveSptPphOrangPribadiSchema = v.object({
 	b1b1PenghasilanUsaha: booleanRadio(false),
 	b1b2Oppt: optionalPicklist(['tidak', 'peredaran_bruto_tertentu', 'pengusaha_tertentu']),
 	b1b3Norma: optionalPicklist(['tidak_pembukuan', 'tidak_final_tanpa_pembukuan', 'ya_norma']),
+	b1b4Sektor: optionalPicklist(['dagang', 'jasa', 'industri']),
 	b1cPenghasilanDalamNegeriLainnya: booleanRadio(false),
 	b1dPenghasilanLuarNegeri: booleanRadio(false),
 
@@ -103,13 +105,9 @@ const SaveSptPphOrangPribadiSchema = v.object({
 
 	...L1Schema.entries,
 	...L2Schema.entries,
+	...L3ASchema.entries,
 	...L3A4Schema.entries,
-	...L5Schema.entries,
-
-	// The only amount still fed by a lampiran that does not exist yet. 1.b
-	// awaits L-3A (the sektor-gated 4xxx/5xxx fiscal grid, a separate and much
-	// larger build reusing the SPT Badan L1 shape).
-	n1b: v.optional(decimalInput('Penghasilan neto dari usaha'), 0)
+	...L5Schema.entries
 });
 
 export const saveSptPphOrangPribadi = form(SaveSptPphOrangPribadiSchema, async (input) => {
@@ -164,6 +162,13 @@ export const saveSptPphOrangPribadi = form(SaveSptPphOrangPribadiSchema, async (
 	// upward, all derived from the rows about to be written.
 	const lampiran1 = saveLampiranL1(input.id, input);
 	const lampiran2 = saveLampiranL2(input.id, input);
+	// The only one of these that queries the DB itself (to resolve the
+	// currently selected sektor's chart of accounts before computing 4800).
+	const lampiran3a = await saveLampiranL3A(
+		input.id,
+		(input.b1b4Sektor || null) as 'dagang' | 'jasa' | 'industri' | null,
+		input
+	);
 	const lampiran3a4 = saveLampiranL3A4(input.id, input);
 	const lampiran5 = saveLampiranL5(input.id, input);
 
@@ -175,7 +180,7 @@ export const saveSptPphOrangPribadi = form(SaveSptPphOrangPribadiSchema, async (
 
 	const computed = hitungInduk({
 		n1a: lampiran1.n1a,
-		n1b: Number(input.n1b),
+		n1b: lampiran3a.n1b,
 		n1c: lampiran3a4.n1c,
 		n1d: lampiran2.n1d,
 		c3AdaPengurangPenghasilanNeto: input.c3AdaPengurangPenghasilanNeto,
@@ -222,6 +227,12 @@ export const saveSptPphOrangPribadi = form(SaveSptPphOrangPribadiSchema, async (
 				// is Tidak, so their answers are cleared rather than kept.
 				b1b2Oppt: input.b1b1PenghasilanUsaha ? input.b1b2Oppt || null : null,
 				b1b3Norma: input.b1b1PenghasilanUsaha ? input.b1b3Norma || null : null,
+				// 1.b.4 exists only while 1.b.3 is "Tidak, saya menyelenggarakan
+				// pembukuan.", one further level of the same collapse rule.
+				b1b4Sektor:
+					input.b1b1PenghasilanUsaha && input.b1b3Norma === 'tidak_pembukuan'
+						? input.b1b4Sektor || null
+						: null,
 				b1cPenghasilanDalamNegeriLainnya: input.b1cPenghasilanDalamNegeriLainnya,
 				b1dPenghasilanLuarNegeri: input.b1dPenghasilanLuarNegeri,
 				c3AdaPengurangPenghasilanNeto: input.c3AdaPengurangPenghasilanNeto,
@@ -273,6 +284,7 @@ export const saveSptPphOrangPribadi = form(SaveSptPphOrangPribadiSchema, async (
 		),
 		...lampiran1.statements,
 		...lampiran2.statements,
+		...lampiran3a.statements,
 		...lampiran3a4.statements,
 		...lampiran5.statements
 	];
