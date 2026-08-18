@@ -217,6 +217,7 @@
                 bind:c3AdaPengurangPenghasilanNeto
                 bind:c5PtkpStatus
                 bind:c8AdaPengurangPphTerutang
+                phMt={a7StatusKewajibanSuamiIstri === 'ph' || a7StatusKewajibanSuamiIstri === 'mt'}
                 {readonly}
             />
         </Accordion>
@@ -271,6 +272,8 @@
                 bind:i14ePenyusutanAmortisasiFiskal
                 bind:i14fBiayaEntertainment
                 bind:i14gDividenLuarNegeri
+                {b1b3Norma}
+                {b1b1PenghasilanUsaha}
                 bind:i14hKelebihanPphFinal
                 {readonly}
             />

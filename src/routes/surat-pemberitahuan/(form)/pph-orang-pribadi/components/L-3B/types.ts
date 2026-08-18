@@ -6,6 +6,8 @@ export interface TkuL3B {
 	kabupaten: string;
 	provinsi: string;
 	jenisUsahaPekerjaanBebas: string;
+	// NORMA (%) for L-3A-4 Bagian A; see the schema note on why it lives here.
+	normaPersen: number;
 }
 
 // Section A, fixed 12-row monthly matrix (PP 55/2022 final).

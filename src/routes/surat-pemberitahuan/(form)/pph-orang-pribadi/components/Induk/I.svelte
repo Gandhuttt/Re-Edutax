@@ -21,6 +21,22 @@
         i14fBiayaEntertainment: boolean | undefined;
         i14gDividenLuarNegeri: boolean | undefined;
         i14hKelebihanPphFinal: number;
+        // 14.e and 14.f are the gates for L-3C and L-3D (Coretax chkI5 / chkI6).
+        // Both start disabled in Coretax's form group and are enabled by a
+        // specific earlier answer, which is why they read as permanently greyed
+        // unless that answer is given:
+        //
+        //   emittedEventB1B3:  t.value === No ? chkI5.enable() : chkI5.disable()
+        //   filledDisableSubForm(t) -> updateChkI6(t):
+        //     0 == t ? (patchValue({chkI6: 0}), chkI6.disable()) : chkI6.enable()
+        //
+        // So 14.e is enabled when 1.b.3 = Tidak (menyelenggarakan pembukuan) —
+        // fiscal depreciation only applies to a bookkeeper, not a Norma user —
+        // and 14.f is enabled when 1.b.1 = Ya. An earlier note here recorded
+        // both as permanently disabled for undetermined reasons; see
+        // docs/bundle-diff-1770.md B9.
+        b1b3Norma: string;
+        b1b1PenghasilanUsaha: boolean | undefined;
         readonly?: boolean;
     }
 
@@ -36,6 +52,8 @@
         i14fBiayaEntertainment = $bindable(),
         i14gDividenLuarNegeri = $bindable(),
         i14hKelebihanPphFinal = $bindable(),
+        b1b3Norma,
+        b1b1PenghasilanUsaha,
         readonly = false
     }: Props = $props();
 </script>
@@ -90,7 +108,7 @@
                 label={"Apakah Anda melaporkan biaya penyusutan dan/atau amortisasi fiskal?"}
                 name={"I14e"}
                 bind:answer={i14ePenyusutanAmortisasiFiskal}
-                disabled
+                disabled={b1b3Norma !== 'tidak_pembukuan'}
                 disabledHint={HINTS_DISABLED.i14e}
                 {readonly}
             />
@@ -99,7 +117,7 @@
                 label={"Apakah Anda melaporkan biaya entertainment, promosi, penggantian atau imbalan dalam bentuk natura dan/atau kenikmatan, serta piutang yang nyata-nyata tidak dapat ditagih?"}
                 name={"I14f"}
                 bind:answer={i14fBiayaEntertainment}
-                disabled
+                disabled={!b1b1PenghasilanUsaha}
                 disabledHint={HINTS_DISABLED.i14f}
                 {readonly}
             />

@@ -1,0 +1,1 @@
+ALTER TABLE `spt_pph_orang_pribadi_lampiran_3b_tku` ADD `norma_persen` integer DEFAULT 0 NOT NULL;

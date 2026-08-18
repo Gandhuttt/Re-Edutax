@@ -30,9 +30,14 @@ export const spt_pph_orang_pribadi_lampiran_3b_tku = sqliteTable(
 		kecamatan: text('kecamatan').notNull().default(''),
 		kabupaten: text('kabupaten').notNull().default(''),
 		provinsi: text('provinsi').notNull().default(''),
-		// Section C only: the norma classification, since we have no reference
-		// table for norma percentages/categories to derive it from.
-		jenisUsahaPekerjaanBebas: text('jenis_usaha_pekerjaan_bebas').notNull().default('')
+		// Section C only: the norma classification.
+		jenisUsahaPekerjaanBebas: text('jenis_usaha_pekerjaan_bebas').notNull().default(''),
+		// NORMA (%), edited in L-3A-4 Bagian A but persisted here because that
+		// section is generated from this registry row and Coretax likewise re-keys
+		// its Norm by the row identity on every regeneration
+		// (addDataL3bTableCToL3A4TableA). No NPPN reference table is involved: the
+		// percentage is typed by the taxpayer, validated > 0 and <= 100.
+		normaPersen: integer('norma_persen').notNull().default(0)
 	}
 );
 

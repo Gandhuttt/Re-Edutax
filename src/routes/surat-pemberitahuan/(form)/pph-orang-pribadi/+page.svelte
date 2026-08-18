@@ -18,6 +18,7 @@
 	import { saveSptPphOrangPribadi } from './saveSptPphOrangPribadi.remote';
 	import {
 		hitungInduk,
+		hitungLampiranL3A4BagianA,
 		hitungLampiranL4,
 		hitungLampiranL4SectionB,
 		type PtkpStatus
@@ -255,7 +256,14 @@
 	let l5PengurangPph = $state<BarisPengurang[]>(lampiran5.pengurangPph.map((row) => ({ ...row })));
 
 	// 1.a takes the JUMLAH BAGIAN D footer, which totals the neto, not the bruto.
-	let n1a = $derived(jumlah(l1Pekerjaan, 'penghasilanNeto'));
+	// Gated on the 1.a answer: Coretax has an explicit else-zero here
+	// (chkB1A ? valueB1A = L1Form.SumOfNetIncome : valueB1A = 0), and because we
+	// keep lampiran rows when a gate closes, without this the L-1 D total would
+	// keep feeding row 2 after the taxpayer answers Tidak. Rows 1c/1d have no
+	// such else-zero in Coretax (they go stale instead), so they stay ungated.
+	let n1a = $derived(
+		b1aPenghasilanPekerjaan ? jumlah(l1Pekerjaan, 'penghasilanNeto') : 0
+	);
 	// 10a is the JUMLAH BAGIAN E footer, which is L-1 E's own total plus the
 	// KREDIT PAJAK ATAS PENGHASILAN LUAR NEGERI row imported from L-2 C. Two
 	// lampiran feed one Induk row, so the graph has lampiran-to-lampiran edges.
@@ -304,12 +312,32 @@
 		}))
 	);
 
+	// L-3A-4 Bagian A (Norma). Coretax regenerates its rows from L-3B Bagian C,
+	// summing the twelve monthly peredaran bruto per TKU; with a single TKU that
+	// is one row. The norma percentage itself is typed by the taxpayer and lives
+	// on the L-3B registry row.
+	let peredaranBrutoNorma = $derived(jumlah(l3bC, 'peredaranBruto'));
+	let normaBagianA = $derived(
+		hitungLampiranL3A4BagianA([
+			{
+				namaUsaha: l3bTku.nama,
+				jenisUsahaPekerjaanBebas: l3bTku.jenisUsahaPekerjaanBebas,
+				peredaranBruto: Number(peredaranBrutoNorma),
+				normaPersen: Number(l3bTku.normaPersen)
+			}
+		])
+	);
+
 	// 1.b.5 reads L-3A's 4800 NILAI FISKAL directly. Computed the same way as
 	// the server (computeLabaRugiRows is pure logic, reused as-is), scoped to
 	// whichever sektor is currently selected; rows left over from an abandoned
 	// sektor are harmless here for the same reason they are on save, see
 	// BarisLabaRugi's own note.
 	let n1b = $derived.by(() => {
+		// Coretax sources row 1.b.1 from L-3A-4's TotalNetIncome when 1.b.3 = Norma
+		// (selectB1B3 === Yes), and from the selected sektor's L-3A tree total
+		// otherwise. Before this branch existed, choosing Norma left the row at 0.
+		if (b1b3Norma === 'ya_norma') return normaBagianA.totalPenghasilanNeto;
 		if (!b1b4Sektor) return 0;
 		const akun = l3aAkunPerSektor[b1b4Sektor as Sektor] ?? [];
 		const template = akun.map((row, index) => ({
@@ -349,7 +377,10 @@
 		d10dJumlah: Number(d10dJumlah),
 		e11bAdaSkPengangsuranPenundaan: Boolean(e11bAdaSkPengangsuranPenundaan),
 		e11bJumlah: Number(e11bJumlah),
-		f12a
+		f12a,
+		// Coretax's angsuran divisor is the accounting-period length, not 12.
+		bulanMulai: Number(periodeBulanMulai),
+		bulanSelesai: Number(periodeBulanSelesai)
 	});
 
 	// Base pass: row 4 (penghasilan neto after pengurang) is computed before
@@ -367,7 +398,8 @@
 			? hitungLampiranL4SectionB({
 					netoWp: computedBase.n4,
 					setelahDikurangiSuamiIstri: Number(l4.setelahDikurangiSuamiIstri),
-					ptkpGabunganStatus: (l4.ptkpGabunganStatus || null) as PtkpStatus | null
+					ptkpGabunganStatus: (l4.ptkpGabunganStatus || null) as PtkpStatus | null,
+					tahunPajak: Number(spt.tahunPajak)
 				})
 			: null
 	);
@@ -391,7 +423,11 @@
 			zakatSumbangan: Number(l4.zakatSumbangan),
 			ptkpStatus: (l4.ptkpStatus || null) as PtkpStatus | null,
 			pengurangPphTerutang: Number(l4.pengurangPphTerutang),
-			kreditPajak: Number(l4.kreditPajak)
+			kreditPajak: Number(l4.kreditPajak),
+			tahunPajak: Number(spt.tahunPajak),
+			// Bagian A's PTKP is locked to 0 on PH/MT, so this mirror of its
+			// angsuran must be computed the same way the section displays it.
+			phMt: isPhMt
 		})
 	);
 
@@ -421,7 +457,12 @@
 		{ tab: 'L-3A-1', visibility: b1b4Sektor === 'dagang' },
 		{ tab: 'L-3A-2', visibility: b1b4Sektor === 'jasa' },
 		{ tab: 'L-3A-3', visibility: b1b4Sektor === 'industri' },
-		{ tab: 'L-3A-4', visibility: Boolean(b1cPenghasilanDalamNegeriLainnya) },
+		// ShowPitrL3A4Form = selectB1B3 === Yes || chkB1C: Norma reaches this
+		// lampiran through Bagian A, independently of 1.c's Bagian B.
+		{
+			tab: 'L-3A-4',
+			visibility: Boolean(b1cPenghasilanDalamNegeriLainnya) || b1b3Norma === 'ya_norma'
+		},
 		// Gated on 1.b.2 (either "Ya" option, see L3B.md) OR 1.b.3 = Norma. The live
 		// doc only observed the 1.b.2 gate (Norma is blocked server-side on that
 		// account), but Norma is freely selectable in our training app and needs a
@@ -440,6 +481,15 @@
 			tab: 'L-4',
 			visibility: Boolean(h13bPerhitunganTersendiri) || isPhMt
 		},
+		// L-3C (DAFTAR PENYUSUTAN DAN AMORTISASI FISKAL) and L-3D (daftar nominatif
+		// biaya entertainment/promosi/piutang) are gated on 14.e and 14.f, which are
+		// themselves only answerable under the conditions documented in I.svelte.
+		// Neither feeds any Induk figure — Coretax only persists and validates
+		// L3CForm/L3DForm, never patching a valueXX from them — so their absence
+		// does not affect any computed row. Grids not built yet; the tab shows the
+		// not-yet-implemented notice.
+		{ tab: 'L-3C', visibility: Boolean(i14ePenyusutanAmortisasiFiskal) },
+		{ tab: 'L-3D', visibility: Boolean(i14fBiayaEntertainment) },
 		{
 			tab: 'L-5',
 			visibility: Boolean(c3AdaPengurangPenghasilanNeto || c8AdaPengurangPphTerutang)
@@ -600,6 +650,7 @@
 				name="l3bTkuJenisUsahaPekerjaanBebas"
 				value={l3bTku.jenisUsahaPekerjaanBebas}
 			/>
+			<input type="hidden" name="l3bTkuNormaPersen" value={l3bTku.normaPersen} />
 			<input type="hidden" name="l3bA" value={JSON.stringify(l3bA)} />
 			<input type="hidden" name="l3bB" value={JSON.stringify(l3bB)} />
 			<input type="hidden" name="l3bC" value={JSON.stringify(l3bC)} />
@@ -742,6 +793,11 @@
 				{referensi}
 				bind:lainnya={l3a4Lainnya}
 				{b1cPenghasilanDalamNegeriLainnya}
+				normaAktif={b1b3Norma === 'ya_norma'}
+				namaUsaha={l3bTku.nama}
+				jenisUsahaPekerjaanBebas={l3bTku.jenisUsahaPekerjaanBebas}
+				{peredaranBrutoNorma}
+				bind:normaPersen={l3bTku.normaPersen}
 				{readonly}
 			/>
 
@@ -762,6 +818,9 @@
 				{currentTab}
 				bind:data={l4}
 				n4={computed.n4}
+				n2={computed.n2}
+				tahunPajak={spt.tahunPajak}
+				bagianAGated={Boolean(h13bPerhitunganTersendiri)}
 				statusKewajibanSuamiIstri={a7StatusKewajibanSuamiIstri}
 				{identitas}
 				npwpSuamiIstri={a8NpwpSuamiIstri}

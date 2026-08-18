@@ -13,6 +13,12 @@
         c3AdaPengurangPenghasilanNeto: boolean | undefined;
         c5PtkpStatus: string;
         c8AdaPengurangPphTerutang: boolean | undefined;
+        // Row 7 = PH/MT. Coretax's calculateTaxExemption sets
+        // disableTaxExemptionDropdown and forces valueC4 (row 5) to 0 in that
+        // case, because the PTKP is claimed jointly in L-4 Bagian B instead.
+        // Verified live 2026-08-19: the row 5 dropdown renders greyed at "-/-"
+        // with 0, and row 6 reads 0, on a Pisah Harta return.
+        phMt?: boolean;
         readonly?: boolean;
     }
 
@@ -21,6 +27,7 @@
         c3AdaPengurangPenghasilanNeto = $bindable(),
         c5PtkpStatus = $bindable(),
         c8AdaPengurangPphTerutang = $bindable(),
+        phMt = false,
         readonly = false
     }: Props = $props();
 </script>
@@ -47,7 +54,7 @@
                 <td class="tw:w-10"><span>5.</span></td>
                 <td class="tw:w-[40rem]"><span>Penghasilan Tidak Kena Pajak *</span></td>
                 <td class="tw:w-[10rem]">
-                    <Select bind:value={c5PtkpStatus} disabled={readonly}>
+                    <Select bind:value={c5PtkpStatus} disabled={readonly || phMt}>
                         <option class="tw:text-black" value={""}></option>
                         {#each PTKP_OPTIONS as ptkp}
                             <option class="tw:text-black" value={ptkp.value}>{ptkp.label}</option>

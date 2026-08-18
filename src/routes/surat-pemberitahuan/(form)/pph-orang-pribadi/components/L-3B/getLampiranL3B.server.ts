@@ -52,7 +52,8 @@ export async function getLampiranL3B(sptId: string) {
 			kecamatan: tku?.kecamatan ?? '',
 			kabupaten: tku?.kabupaten ?? '',
 			provinsi: tku?.provinsi ?? '',
-			jenisUsahaPekerjaanBebas: tku?.jenisUsahaPekerjaanBebas ?? ''
+			jenisUsahaPekerjaanBebas: tku?.jenisUsahaPekerjaanBebas ?? '',
+			normaPersen: tku?.normaPersen ?? 0
 		},
 		a,
 		b: monthlyOnly('B'),

@@ -15,6 +15,7 @@ export const L3BSchema = v.object({
 	l3bTkuKabupaten: v.optional(v.string(), ''),
 	l3bTkuProvinsi: v.optional(v.string(), ''),
 	l3bTkuJenisUsahaPekerjaanBebas: v.optional(v.string(), ''),
+	l3bTkuNormaPersen: v.optional(decimalInput('Norma'), 0),
 
 	l3bA: jsonRows(
 		v.object({
@@ -64,7 +65,8 @@ export function saveLampiranL3B(sptId: string, input: L3BInput) {
 			kecamatan: input.l3bTkuKecamatan,
 			kabupaten: input.l3bTkuKabupaten,
 			provinsi: input.l3bTkuProvinsi,
-			jenisUsahaPekerjaanBebas: input.l3bTkuJenisUsahaPekerjaanBebas
+			jenisUsahaPekerjaanBebas: input.l3bTkuJenisUsahaPekerjaanBebas,
+			normaPersen: Math.round(Number(input.l3bTkuNormaPersen))
 		})
 	);
 

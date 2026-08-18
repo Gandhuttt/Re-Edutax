@@ -1,10 +1,16 @@
-// Induk computation chain for SPT 1770.
+// Induk + L-4 computation chains for SPT 1770.
 //
-// Every rule and every number here was read off the live Coretax form rather
-// than derived from regulation, and the measurements are recorded in
-// docs/ui-reference/coretax/spt-1770-induk/COMPUTATION.md. Two of them are easy
-// to get wrong and are called out at their implementation below: the round-down
-// at row 6, and the floor at row 6.
+// Provenance: the rules below are transcribed from the deployed Coretax
+// production bundle (chunk 827.1117977ff84ffcd9.js, read 2026-08-19), which is
+// the behaviour actually running in the live form. The field-by-field diff that
+// produced the current shape of this file is docs/bundle-diff-1770.md; the
+// earlier UI measurements in docs/ui-reference/coretax/ agree with it but could
+// not distinguish several edge cases, so where the two disagree the bundle wins.
+//
+// Coretax's own internal field names are quoted in comments so this file can be
+// re-checked against a future build: valueC1 = row 2, valueC2 = row 3,
+// valueC3 = row 4, valueC5 = row 6, valueC7 = row 7, valueC8 = row 8,
+// valueC6 = row 9, valueD1 = row 10a, valueE1 = row 11a, valueH1 = angsuran.
 
 export type PtkpStatus =
 	| 'tk_0'
@@ -21,11 +27,9 @@ export type PtkpStatus =
 	| 'k_i_3'
 	| 'tidak_berlaku';
 
-// Read by selecting each of the 13 options and reading the row 5 amount.
-// Structure is base 54.000.000, +4.500.000 per tanggungan, +4.500.000 for kawin;
-// the K/I series (penghasilan istri digabung) starts at 54.000.000 x 2 +
-// 4.500.000. Listed as measured rather than computed from that structure, since
-// the structure is an observation about the table and not its definition.
+// Coretax's calculateTaxExemption / onChangeTaxExemption switch, verbatim. The
+// bundle's table also carries HB0-HB3 (same amounts as TK0-TK3) but filters any
+// code containing "HB" out of the dropdown, so they are unreachable and omitted.
 export const PTKP: Record<PtkpStatus, number> = {
 	tk_0: 54_000_000,
 	tk_1: 58_500_000,
@@ -61,38 +65,105 @@ export const PTKP_OPTIONS: { value: PtkpStatus; label: string }[] = [
 	{ value: 'tidak_berlaku', label: '-/-' }
 ];
 
-// UU HPP progressive brackets. All five confirmed to the rupiah against the live
-// form at three different PKP values, including the 35% band.
-const BRACKETS: { batas: number; tarif: number }[] = [
-	{ batas: 60_000_000, tarif: 0.05 },
-	{ batas: 250_000_000, tarif: 0.15 },
-	{ batas: 500_000_000, tarif: 0.25 },
-	{ batas: 5_000_000_000, tarif: 0.3 },
-	{ batas: Infinity, tarif: 0.35 }
+// Coretax applies the schedule as a single "tarif x PKP - pengurang" per band
+// rather than accumulating marginal bands. The two are mathematically identical
+// (the ladder is continuous at every boundary), but not bit-identical in
+// floating point: at PKP 5.446.000.000 this form yields 1.600.099.999,9999998
+// where marginal accumulation yields exactly 1.600.100.000. Coretax leaves that
+// value unrounded in row 7, so the band form is used here to keep our numbers
+// equal to theirs. formatRupiah's toLocaleString renders both as the same digits.
+//
+// Because the ladder is continuous, a wrong `<` vs `<=` on any band edge is
+// invisible in output — do not expect live comparison to validate the bounds.
+interface Band {
+	batasAtas: number;
+	tarif: number;
+	pengurang: number;
+}
+
+// UU HPP, tahun pajak 2022 and later.
+const BANDS_HPP: Band[] = [
+	{ batasAtas: 60_000_000, tarif: 0.05, pengurang: 0 },
+	{ batasAtas: 250_000_000, tarif: 0.15, pengurang: 6_000_000 },
+	{ batasAtas: 500_000_000, tarif: 0.25, pengurang: 31_000_000 },
+	{ batasAtas: 5_000_000_000, tarif: 0.3, pengurang: 56_000_000 },
+	{ batasAtas: Infinity, tarif: 0.35, pengurang: 306_000_000 }
 ];
+
+// Pre-UU HPP, carried by Coretax for older tahun pajak. Four bands, no 35%.
+const BANDS_PRA_HPP: Band[] = [
+	{ batasAtas: 50_000_000, tarif: 0.05, pengurang: 0 },
+	{ batasAtas: 250_000_000, tarif: 0.15, pengurang: 5_000_000 },
+	{ batasAtas: 500_000_000, tarif: 0.25, pengurang: 30_000_000 },
+	{ batasAtas: Infinity, tarif: 0.3, pengurang: 55_000_000 }
+];
+
+function terapkanTarif(penghasilanKenaPajak: number, bands: Band[]) {
+	if (penghasilanKenaPajak < 0) return 0;
+	for (const { batasAtas, tarif, pengurang } of bands) {
+		if (penghasilanKenaPajak <= batasAtas) return tarif * penghasilanKenaPajak - pengurang;
+	}
+	return 0;
+}
 
 export function hitungPtkp(status: PtkpStatus | null | undefined) {
 	return status ? PTKP[status] : 0;
 }
 
+// Induk row 7 (valueC7). Coretax does NOT round here — it rounds at row 9 — so
+// neither do we; see hitungInduk's n9.
+//
+// Caveat recorded in docs/bundle-diff-1770.md: on the live form the Induk tariff
+// is not hardcoded at all. getIncomeTaxPayable fetches reference data
+// PIT_TAX_RATE, selects the row whose ValidFrom/ValidTo bracket the end of month
+// (TaxYear, AccountingPeriodEnd - 1), and reads Rate/Minus from
+// ParameterData.ItemList[0].Rates, falling back to rate 1% / minus 0 when
+// nothing matches. That data has never been observed, so the UU HPP schedule is
+// hardcoded here as the best available stand-in.
 export function hitungPphTerutang(penghasilanKenaPajak: number) {
-	let sisa = Math.max(0, penghasilanKenaPajak);
-	let batasBawah = 0;
-	let pph = 0;
+	return terapkanTarif(penghasilanKenaPajak, BANDS_HPP);
+}
 
-	for (const { batas, tarif } of BRACKETS) {
-		if (sisa <= 0) break;
-		const kena = Math.min(sisa, batas - batasBawah);
-		pph += kena * tarif;
-		sisa -= kena;
-		batasBawah = batas;
-	}
+// Coretax carries two thousand-roundings that behave differently, and uses each
+// in a different place. Both are reproduced rather than unified.
 
-	return Math.round(pph);
+// roundingThousand(), used by L-4 Bagian A row 6 and Bagian B's PKP gabungan:
+//   t.toString().length >= 4 && t % 1000 != 0 ? t - t % 1000 : t
+// Note the string-length test rather than a magnitude test, which means values
+// of 1..999 are returned UNCHANGED instead of being rounded down to 0.
+export function pembulatanRibuanL4(nilai: number) {
+	return String(nilai).length >= 4 && nilai % 1000 !== 0 ? nilai - (nilai % 1000) : nilai;
+}
+
+// getTaxableIncome()'s inline variant, used by Induk row 6:
+//   o > 1000 ? o -= o % 1000 : o = 0
+// Differs from the above at exactly 1000, which this collapses to 0.
+function pembulatanRibuanInduk(nilai: number) {
+	return nilai > 1000 ? nilai - (nilai % 1000) : 0;
+}
+
+// getIncomeTaxPayableAfterIncomeTaxDeduction()'s rounding:
+//   Math.floor(o) + (o % 1 >= .5 ? 1 : 0)
+// Half-up on positives. Kept as written rather than swapped for Math.round,
+// which differs on negatives — the input is clamped at 0 first, so in practice
+// they agree, but the clamp is the reason, not the rounding.
+function pembulatanSetengahKeAtas(nilai: number) {
+	return Math.floor(nilai) + (nilai % 1 >= 0.5 ? 1 : 0);
+}
+
+// get numberOfMonth(): the accounting period length, wrapping across a year end.
+//   s <= e ? e - s + 1 : 12 - s + (e - 1) + 2
+export function hitungJumlahBulan(bulanMulai: number, bulanSelesai: number) {
+	const s = Number(bulanMulai);
+	const e = Number(bulanSelesai);
+	if (!s || !e) return 12;
+	return s <= e ? e - s + 1 : 12 - s + (e - 1) + 2;
 }
 
 export interface HitungIndukInput {
 	// Rows 1a to 1d, each fed from a lampiran. Zero until that lampiran exists.
+	// Each arrives already gated on its own Ya/Tidak answer where Coretax gates
+	// it — see +page.svelte, which mirrors chkB1A's explicit else-zero.
 	n1a: number;
 	n1b: number;
 	n1c: number;
@@ -123,17 +194,20 @@ export interface HitungIndukInput {
 	// Row 12a, carried from the SPT being amended. 0 on a normal return.
 	f12a: number;
 
+	// Periode pembukuan, driving the angsuran divisor. Coretax divides by the
+	// period length, not by a fixed 12; the 13a hint text on the live form is
+	// literally built as "Angsuran PPh Pasal 25 adalah 1/" + numberOfMonth +
+	// " x ((9) - (10)(a))". Defaults to a full year when unset.
+	bulanMulai?: number;
+	bulanSelesai?: number;
+
 	// When set, this SPT is PH/MT (row 7's a7StatusKewajibanSuamiIstri is 'ph'
 	// or 'mt') and L-4 Section B's WP-share PPh Terutang overrides the normal
-	// bracket calculation for rows 6/7: row 6 goes to 0 and row 7 takes this
-	// value directly, instead of hitungPphTerutang(n6). Measured on the live
-	// form, see docs/ui-reference/coretax/spt-1770-lampiran/L4.md's "Section B
-	// feeds back into Induk's PPh Terutang chain". Confirmed on exactly two
-	// cases (PTKP gabungan unset, then K/I/0) with the WP-share value from
-	// hitungLampiranL4SectionB matching row 7 to the rupiah both times, and
-	// propagating correctly through row 9/11a; not exhaustively fuzzed, but
-	// the mechanism (row 6 bypassed to 0, row 7 sourced from Section B) is
-	// solid.
+	// bracket calculation: row 6 goes to 0 and row 7 takes this value directly.
+	// Coretax: valueC5 = 0 plus a locked PTKP dropdown in getTaxableIncome, and
+	// valueC7 = L4Form.IncomeTaxPaybleHusband in getIncomeTaxPayable. Verified
+	// live 2026-08-19 — row 7 read 0 while Bagian B's gabungan and spouse shares
+	// both read 22.950.000, which rules out those two as the source.
 	phMtOverride?: { pphDitanggungWp: number };
 }
 
@@ -143,21 +217,25 @@ export function hitungInduk(input: HitungIndukInput) {
 	const n3 = input.c3AdaPengurangPenghasilanNeto ? input.n3 : 0;
 	const n4 = n2 - n3;
 
-	const n5 = hitungPtkp(input.c5PtkpStatus);
+	// PH/MT lock the PTKP dropdown and force row 5 to 0, so a stale selection
+	// cannot leak into the calculation.
+	const n5 = input.phMtOverride ? 0 : hitungPtkp(input.c5PtkpStatus);
 
-	// Row 6 rounds DOWN to the nearest 1.000 (pembulatan ke bawah ribuan penuh)
-	// and floors at 0. Both confirmed by measurement: 601.527.777 - 63.000.000
-	// displays as 538.527.000, and an income below PTKP displays 0 rather than a
-	// negative. Getting either wrong makes every downstream figure drift.
-	// PH/MT override: row 6 is bypassed to 0 and row 7 is sourced directly from
-	// L-4 Section B's WP-share PPh Terutang instead of the normal bracket
-	// formula. See phMtOverride's doc comment on HitungIndukInput above.
-	const n6 = input.phMtOverride ? 0 : Math.max(0, Math.floor((n4 - n5) / 1000) * 1000);
+	// Row 6 floors at 0 and rounds down to the nearest 1.000, with Coretax's own
+	// edge case at exactly 1.000 (see pembulatanRibuanInduk). PH/MT bypasses the
+	// row entirely.
+	const n6 = input.phMtOverride ? 0 : pembulatanRibuanInduk(Math.max(0, n4 - n5));
 
-	const n7 = input.phMtOverride ? input.phMtOverride.pphDitanggungWp : hitungPphTerutang(n6);
+	const n7Awal = input.phMtOverride
+		? input.phMtOverride.pphDitanggungWp
+		: hitungPphTerutang(n6);
 
 	const n8 = input.c8AdaPengurangPphTerutang ? input.n8 : 0;
-	const n9 = n7 - n8;
+
+	// Row 9 clamps at 0 before rounding — row 8 exceeding row 7 yields 0, not a
+	// negative. Coretax then back-writes row 7 to 0 whenever row 9 lands on 0.
+	const n9 = pembulatanSetengahKeAtas(Math.max(0, n7Awal - n8));
+	const n7 = n9 === 0 ? 0 : n7Awal;
 
 	const n10a = input.d10aAdaPphDipotongPihakLain ? input.n10a : 0;
 	const n10d = input.d10dAdaPengembalianKreditLuarNegeri ? input.d10dJumlah : 0;
@@ -175,8 +253,10 @@ export function hitungInduk(input: HitungIndukInput) {
 	const statusSpt: 'nihil' | 'kurang_bayar' | 'lebih_bayar' =
 		n11a === 0 ? 'nihil' : n11a > 0 ? 'kurang_bayar' : 'lebih_bayar';
 
-	// 13a's hint states the formula outright: 1/12 x ((9) - (10)(a)).
-	const angsuranPph25TahunDepan = Math.round((n9 - n10a) / 12);
+	// valueH1 = Math.round(1 / numberOfMonth * (C6 < D1 ? 0 : C6 - D1)). Numerator
+	// clamped at 0, divisor is the period length rather than a fixed 12.
+	const jumlahBulan = hitungJumlahBulan(input.bulanMulai ?? 1, input.bulanSelesai ?? 12);
+	const angsuranPph25TahunDepan = Math.round(Math.max(0, n9 - n10a) / jumlahBulan);
 
 	return {
 		n2,
@@ -194,15 +274,70 @@ export function hitungInduk(input: HitungIndukInput) {
 		n11c,
 		n12b,
 		statusSpt,
+		jumlahBulan,
 		angsuranPph25TahunDepan
 	};
 }
 
+// L-3A-4 Bagian A: PENGHASILAN NETO DALAM NEGERI DARI USAHA DAN/ATAU PEKERJAAN
+// BEBAS BERDASARKAN PENCATATAN (Norma / NPPN). Feeds Induk row 1.b.1 when 1.b.3
+// = Norma, via TotalNetIncome.
+//
+// This was long assumed unimplementable for want of an NPPN percentage table.
+// The bundle shows there is no such table: NORMA (%) is the one ENABLED field in
+// the row dialog (`Norm`, required, > 0, <= 100) and the taxpayer types it. The
+// other four columns are disabled and generated from L-3B Bagian C:
+//
+//   addDataL3bTableCToL3A4TableA(rows) {
+//     const existingNorm = new Map(grid1.map(r => [r.NameOfBusinessType, r.Norm]));
+//     rows.forEach(T => {
+//       const bruto = T.January + T.February + ... + T.December;
+//       const norm  = existingNorm.get(T.Address) ?? 0;
+//       push({ NameOfBusinessType: T.Address, BusinessProfessionType: T.BusinessProfessionType,
+//              GrossIncome: bruto, Norm: norm,
+//              NetIncome: norm !== 0 ? bruto * (norm / 100) : 0 });
+//     });
+//   }
+//
+// Note the Norm is re-keyed by name on every regeneration, so editing L-3B C
+// does not lose it. Rounding: setGrid1DataMap stores Math.round(NetIncome), and
+// setGridValue then patches TotalNetIncome as Math.round(Grid1TotalNetIncome).
+//
+// One structural difference: Coretax carries one row per registered TKU, keyed on
+// the L-3B row's `Address`. We model a single TKU (see the note on
+// spt_pph_orang_pribadi_lampiran_3b_tku), so the key is 1:1 and the norma is held
+// on that registry row. Written row-wise anyway so multiple TKUs need no rewrite.
+export interface BarisNormaL3A4 {
+	namaUsaha: string;
+	jenisUsahaPekerjaanBebas: string;
+	peredaranBruto: number;
+	normaPersen: number;
+}
+
+export function hitungLampiranL3A4BagianA(baris: BarisNormaL3A4[]) {
+	const rows = baris.map((row) => {
+		const bruto = Number(row.peredaranBruto) || 0;
+		const norma = Number(row.normaPersen) || 0;
+		return {
+			namaUsaha: row.namaUsaha,
+			jenisUsahaPekerjaanBebas: row.jenisUsahaPekerjaanBebas,
+			peredaranBruto: bruto,
+			normaPersen: norma,
+			// `norm !== 0 ? bruto * (norm / 100) : 0`, rounded as setGrid1DataMap does.
+			penghasilanNeto: norma !== 0 ? Math.round(bruto * (norma / 100)) : 0
+		};
+	});
+
+	return {
+		rows,
+		totalPeredaranBruto: rows.reduce((s, r) => s + r.peredaranBruto, 0),
+		totalPenghasilanNeto: Math.round(rows.reduce((s, r) => s + r.penghasilanNeto, 0))
+	};
+}
+
 // L-4 Bagian A: PENGHITUNGAN ANGSURAN PPh PASAL 25 TAHUN PAJAK BERIKUTNYA.
-// Measured against two real cases on the live form (see
-// docs/ui-reference/coretax/spt-1770-lampiran/L4.md) — a separate, smaller
-// computation chain from hitungInduk above, but reusing the same PTKP table
-// and bracket function since both ultimately apply the UU HPP schedule.
+// Gated on Induk 13b (chkH2). A separate, smaller chain from hitungInduk, with
+// its own PTKP selection and its own thousand-rounding.
 export interface HitungLampiranL4Input {
 	penghasilanNeto: number;
 	kompensasiKerugian: number;
@@ -210,33 +345,53 @@ export interface HitungLampiranL4Input {
 	ptkpStatus: PtkpStatus | null | undefined;
 	pengurangPphTerutang: number;
 	kreditPajak: number;
+	// Tahun pajak, selecting the bracket schedule. See the note in the body:
+	// Coretax's predicate here is deliberately different from Bagian B's.
+	tahunPajak?: number;
+	// PH/MT disables this section's PTKP dropdown outright
+	// (isTaxExemptionDisabled), leaving row 5 at 0 — the joint PTKP is claimed in
+	// Bagian B instead.
+	phMt?: boolean;
 }
 
 export function hitungLampiranL4(input: HitungLampiranL4Input) {
-	const jumlahPenghasilanNeto =
-		input.penghasilanNeto - input.kompensasiKerugian - input.zakatSumbangan;
+	// Coretax clamps this at 0 (calculateL4A4: t >= 0 ? t : 0).
+	const jumlahPenghasilanNeto = Math.max(
+		0,
+		input.penghasilanNeto - input.kompensasiKerugian - input.zakatSumbangan
+	);
 
-	const ptkpNilai = hitungPtkp(input.ptkpStatus);
+	const ptkpNilai = input.phMt ? 0 : hitungPtkp(input.ptkpStatus);
 
-	// Mirrors Induk row 6's floor-to-nearest-1.000 (see hitungInduk's n6 comment
-	// above). Both measured L-4 cases happened to already be exact multiples of
-	// 1.000, so this floor is unconfirmed for L-4 specifically — applied here
-	// for consistency with Induk, pending a future capture with a non-round PKP.
-	const penghasilanKenaPajak = Math.max(0, Math.floor((jumlahPenghasilanNeto - ptkpNilai) / 1000) * 1000);
+	const penghasilanKenaPajak = pembulatanRibuanL4(Math.max(0, jumlahPenghasilanNeto - ptkpNilai));
 
-	const pajakTerutang = hitungPphTerutang(penghasilanKenaPajak);
+	// Bagian A's own year predicate is `parseInt(PeriodYear) + 1 < 2022`, whereas
+	// Bagian B's is `PeriodYear < 2022`. The two therefore disagree for tahun
+	// pajak 2021: Bagian A applies the UU HPP schedule while Bagian B applies the
+	// older one. Reproduced rather than reconciled, since matching Coretax is the
+	// point; untested against a real 2021 return.
+	const tahunPajak = input.tahunPajak ?? new Date().getFullYear();
+	const bands = tahunPajak + 1 < 2022 ? BANDS_PRA_HPP : BANDS_HPP;
 
-	const pphYangHarusDibayar = pajakTerutang - input.pengurangPphTerutang - input.kreditPajak;
+	// Unrounded, like Induk row 7 and unlike Bagian B's row 20.
+	const pajakTerutang = terapkanTarif(penghasilanKenaPajak, bands);
 
-	// Induk's own angsuranPph25TahunDepan uses Math.round, not truncation. The
-	// one measured L-4 value (118.870.833 from 118.870.833,33) is consistent
-	// with either Math.round or Math.floor since the fractional part was .33;
-	// Math.round is chosen to match Induk's own convention, unconfirmed for a
-	// case where the two would actually differ.
+	// calculateL4A9: max(0, V7 - V23 - V8). Kredit pajak exceeding the tax due
+	// yields 0, not a negative.
+	const pphYangHarusDibayar = Math.max(
+		0,
+		pajakTerutang - input.pengurangPphTerutang - input.kreditPajak
+	);
+
+	// calculateL4A10 is Math.round(V9 * 0.08333333333333333). That literal is the
+	// double nearest 1/12, so it is equivalent to / 12 (checked over 400k random
+	// values); unlike Induk's angsuran this one is always a twelfth, never the
+	// accounting-period length.
 	const angsuranPph25 = Math.round(pphYangHarusDibayar / 12);
 
 	return {
 		jumlahPenghasilanNeto,
+		ptkpNilai,
 		penghasilanKenaPajak,
 		pajakTerutang,
 		pphYangHarusDibayar,
@@ -244,23 +399,21 @@ export function hitungLampiranL4(input: HitungLampiranL4Input) {
 	};
 }
 
-// L-4 Bagian B: PENGHITUNGAN PPh TERUTANG WAJIB PAJAK DAN SUAMI/ISTRI. Gated
-// on Induk row 7 (a7StatusKewajibanSuamiIstri) being 'ph' or 'mt', a
-// different gate from Bagian A's (Induk 13b). Measured against two real
-// cases on the live form (see docs/ui-reference/coretax/spt-1770-lampiran/
-// L4.md's "Section B fields, in order" and "Measured test cases").
+// L-4 Bagian B: PENGHITUNGAN PPh TERUTANG WAJIB PAJAK DAN SUAMI/ISTRI. Gated on
+// Induk row 7 (a7StatusKewajibanSuamiIstri) being 'ph' or 'mt'
+// (IsL4SectionBRequired), a different gate from Bagian A's.
 export interface HitungLampiranL4SectionBInput {
-	// WP's "Penghasilan Neto" and "...setelah dikurangi..." cells both mirror
-	// Induk row 4 (n4 from hitungInduk above) — WP has no zakat/kompensasi
-	// inputs of its own in this section to subtract, so the same value feeds
-	// both. Threaded in as a prop rather than re-derived here.
+	// Coretax patches Value15 from netIncomeSummary, which is Induk row 4
+	// (valueC3). The WP's plain "Penghasilan Neto" cell above it is Value13 from
+	// annualNetIncome = Induk row 2 (valueC1) — a different row, and one no
+	// formula reads; see netoWpTampilan in _L4.svelte.
 	netoWp: number;
 	// Suami/Istri's "...setelah dikurangi zakat/sumbangan keagamaan wajib dan
-	// kompensasi kerugian" cell. This is the field that actually feeds the
-	// gabungan sum, NOT the plain "Penghasilan Neto (Suami/Istri)" cell above
-	// it (that one is captured but never referenced by any formula here).
+	// kompensasi kerugian" cell (Value16). This is the field that feeds the
+	// gabungan sum, NOT the plain "Penghasilan Neto (Suami/Istri)" cell above it.
 	setelahDikurangiSuamiIstri: number;
 	ptkpGabunganStatus: PtkpStatus | null | undefined;
+	tahunPajak?: number;
 }
 
 export function hitungLampiranL4SectionB(input: HitungLampiranL4SectionBInput) {
@@ -268,22 +421,44 @@ export function hitungLampiranL4SectionB(input: HitungLampiranL4SectionBInput) {
 
 	const ptkpGabunganNilai = hitungPtkp(input.ptkpGabunganStatus);
 
-	// Confirmed exact on the live form's two test cases with no floor/rounding
-	// applied (800.000.000 - 112.500.000 = 687.500.000 to the rupiah), unlike
-	// Induk row 6 and L-4 Bagian A's penghasilanKenaPajak which both floor to
-	// the nearest 1.000. Both measured cases here also happened to already be
-	// round millions, so a hidden floor can't be ruled out either way; kept
-	// unfloored since that is what the doc's formula literally states.
-	const penghasilanKenaPajakGabungan = Math.max(0, netoGabungan - ptkpGabunganNilai);
+	// calculateL4B6 rounds down to the nearest 1.000 exactly as Bagian A does.
+	// The older note here claimed the live form applied no rounding; both cases
+	// it was based on were round millions and could not tell the two apart, and
+	// the bundle settles it.
+	const penghasilanKenaPajakGabungan = pembulatanRibuanL4(
+		Math.max(0, netoGabungan - ptkpGabunganNilai)
+	);
 
-	const pphTerutangGabungan = hitungPphTerutang(penghasilanKenaPajakGabungan);
+	// Bagian B's predicate is PeriodYear < 2022, one year off Bagian A's. See the
+	// note in hitungLampiranL4.
+	const tahunPajak = input.tahunPajak ?? new Date().getFullYear();
+	const bands = tahunPajak < 2022 ? BANDS_PRA_HPP : BANDS_HPP;
 
-	// Proportional split by each spouse's share of neto gabungan. Confirmed
-	// exact on both measured cases (75%/25% split in both). Guards against a
-	// zero neto gabungan (e.g. before any input is filled) to avoid NaN.
-	const wpShare = netoGabungan > 0 ? input.netoWp / netoGabungan : 0;
-	const pphDitanggungWp = Math.round(pphTerutangGabungan * wpShare);
-	const pphDitanggungSuamiIstri = pphTerutangGabungan - pphDitanggungWp;
+	// calculationIncomeTaxPaybleL4B rounds each band and clamps at 0, unlike
+	// Bagian A's unrounded equivalent.
+	const pphTerutangGabungan = Math.max(
+		0,
+		Math.round(terapkanTarif(penghasilanKenaPajakGabungan, bands))
+	);
+
+	// calculateL4B8 / calculateL4B9. Three branches beyond the plain
+	// proportional split:
+	//   - spouse neto <= 0  -> the whole PPh gabungan falls on the WP, no ratio
+	//   - WP neto < 0       -> WP share is 0
+	//   - spouse neto < 0   -> spouse share is 0, NOT gabungan minus WP share
+	// Without them, a negative spouse neto makes the ratio exceed 1, pushing the
+	// WP share above the PPh gabungan and the spouse share negative.
+	let pphDitanggungWp = 0;
+	if (input.netoWp >= 0) {
+		if (input.setelahDikurangiSuamiIstri > 0 && netoGabungan !== 0) {
+			pphDitanggungWp = Math.round((input.netoWp / netoGabungan) * pphTerutangGabungan);
+		} else if (input.setelahDikurangiSuamiIstri <= 0) {
+			pphDitanggungWp = pphTerutangGabungan;
+		}
+	}
+
+	const pphDitanggungSuamiIstri =
+		input.setelahDikurangiSuamiIstri >= 0 ? pphTerutangGabungan - pphDitanggungWp : 0;
 
 	return {
 		netoGabungan,

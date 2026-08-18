@@ -23,28 +23,29 @@
         readonly = false
     }: Props = $props();
 
-    // 13a, 13b and 13c are alternative Pasal 25 regimes, so answering one Ya
-    // voids the others: on the real form setting 13a = Ya cleared 13b back to
-    // unanswered. This is not expressible as three independent booleans, so the
-    // exclusivity is enforced here rather than in the schema.
+    // Coretax has exactly ONE interlock here, 13a over 13b:
     //
-    // Clearing to undefined (unanswered) rather than to false is deliberate: it
-    // matches what the form does, and a false would assert an answer the taxpayer
-    // never gave.
-    function pilih(row: 'a' | 'b' | 'c') {
-        if (row !== 'a' && h13aAngsuranTeratur) h13aAngsuranTeratur = undefined;
-        if (row !== 'b' && h13bPerhitunganTersendiri) h13bPerhitunganTersendiri = undefined;
-        if (row !== 'c' && h13cAngsuranOppt) h13cAngsuranOppt = undefined;
-    }
+    //   checkedChkH1(t){ 0 == t ? (patchValue({valueH1:0, chkH1:false}), chkH2.enable())
+    //                           : (patchValue({chkH1:true}), chkH2.disable(),
+    //                              chkH2.setValue("0"), patchValue({valueH2:0, chkH2:false})) }
+    //   disableChkH2(){ chkH1 ? (chkH2.disable(), ...) : chkH2.enable() }
+    //   checkedChkH3(t){ patchValue(0 == t ? {chkH3:false} : {chkH3:true}) }
+    //
+    // 13a = Ya disables 13b outright and clears it; 13a = Tidak re-enables it.
+    // 13c writes only its own value and clears nothing. An earlier three-way
+    // exclusivity here also had 13c voiding 13a and 13b, which the live form does
+    // not do — see docs/bundle-diff-1770.md B6.
+    //
+    // Clearing to undefined (unanswered) rather than to false is deliberate: a
+    // false would assert an answer the taxpayer never gave. Coretax does write a
+    // false, but it also disables the control, so the value is unreachable either
+    // way.
+    let b13bTerkunci = $derived(h13aAngsuranTeratur === true);
 
     $effect(() => {
-        if (h13aAngsuranTeratur) pilih('a');
-    });
-    $effect(() => {
-        if (h13bPerhitunganTersendiri) pilih('b');
-    });
-    $effect(() => {
-        if (h13cAngsuranOppt) pilih('c');
+        if (h13aAngsuranTeratur === true && h13bPerhitunganTersendiri !== undefined) {
+            h13bPerhitunganTersendiri = undefined;
+        }
     });
 </script>
 
@@ -71,6 +72,7 @@
                 amount={"derived"}
                 amountWhen={true}
                 amountValue={l4AngsuranPph25}
+                disabled={b13bTerkunci}
                 {readonly}
             />
             <RowTanya

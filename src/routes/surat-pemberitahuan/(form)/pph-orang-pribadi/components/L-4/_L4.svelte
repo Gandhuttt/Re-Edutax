@@ -34,6 +34,16 @@
         // "Penghasilan neto" field above is a separate, independently typed
         // value — do not conflate the two.
         n4: number;
+        // Induk row 2 (Penghasilan neto setahun). Bagian B's WP "Penghasilan
+        // Neto" cell mirrors this row, NOT row 4 — Coretax patches Value13 from
+        // annualNetIncome (valueC1) and Value15 from netIncomeSummary
+        // (valueC3). It feeds no formula, so this is display fidelity only.
+        n2: number;
+        tahunPajak: number;
+        // Induk 13b (chkH2). Bagian A is gated on it independently of this
+        // tab's own visibility: on a PH/MT return with 13b = Tidak the tab is
+        // present for Bagian B alone and Coretax hides Bagian A entirely.
+        bagianAGated: boolean;
         statusKewajibanSuamiIstri: string;
         identitas: { npwp: string; nama: string } | null;
         npwpSuamiIstri: string;
@@ -44,6 +54,9 @@
         currentTab,
         data = $bindable(),
         n4,
+        n2,
+        tahunPajak,
+        bagianAGated,
         statusKewajibanSuamiIstri,
         identitas,
         npwpSuamiIstri,
@@ -74,7 +87,11 @@
             zakatSumbangan: Number(data.zakatSumbangan),
             ptkpStatus: (data.ptkpStatus || null) as PtkpStatus | null,
             pengurangPphTerutang: Number(data.pengurangPphTerutang),
-            kreditPajak: Number(data.kreditPajak)
+            kreditPajak: Number(data.kreditPajak),
+            tahunPajak: Number(tahunPajak),
+            // PH/MT locks this section's PTKP to 0; the joint PTKP is claimed
+            // in Bagian B instead.
+            phMt: sectionBGated
         })
     );
 
@@ -82,13 +99,15 @@
         hitungLampiranL4SectionB({
             netoWp: Number(n4),
             setelahDikurangiSuamiIstri: Number(data.setelahDikurangiSuamiIstri),
-            ptkpGabunganStatus: (data.ptkpGabunganStatus || null) as PtkpStatus | null
+            ptkpGabunganStatus: (data.ptkpGabunganStatus || null) as PtkpStatus | null,
+            tahunPajak: Number(tahunPajak)
         })
     );
 </script>
 
 <div class="{currentTab === 'L-4' ? '' : 'tw:hidden'}">
     <div class="accordion">
+        {#if bagianAGated}
         <Accordion item={"A. PENGHITUNGAN ANGSURAN PPh PASAL 25 TAHUN PAJAK BERIKUTNYA"}>
             <div class="tw:p-5">
                 <Table class="tw:min-w-full">
@@ -126,7 +145,16 @@
                         <tr>
                             <td>Penghasilan tidak kena pajak *</td>
                             <td>
-                                <Select bind:value={data.ptkpStatus} disabled={readonly}>
+                                <!-- Disabled on PH/MT (isTaxExemptionDisabled):
+                                     row 5 stays 0 there. Deliberate deviation:
+                                     Coretax sets the code to "-/-" via patchValue,
+                                     which does not fire its change handler, so a
+                                     previously chosen amount survives in a field
+                                     the user can no longer correct. We zero it. -->
+                                <Select
+                                    bind:value={data.ptkpStatus}
+                                    disabled={readonly || sectionBGated}
+                                >
                                     <option class="tw:text-black" value={""}></option>
                                     {#each PTKP_OPTIONS as ptkp}
                                         <option class="tw:text-black" value={ptkp.value}>{ptkp.label}</option>
@@ -195,6 +223,7 @@
                 </Table>
             </div>
         </Accordion>
+        {/if}
         {#if sectionBGated}
         <Accordion item={"B. PENGHITUNGAN PPh TERUTANG WAJIB PAJAK DAN SUAMI/ISTRI"}>
             <div class="tw:p-5">
@@ -229,7 +258,7 @@
                         <tr>
                             <td>Penghasilan Neto</td>
                             <td>
-                                <Input class={"tw:text-end"} type={"rupiah"} value={n4} disabled />
+                                <Input class={"tw:text-end"} type={"rupiah"} value={n2} disabled />
                             </td>
                             <td>
                                 <Input

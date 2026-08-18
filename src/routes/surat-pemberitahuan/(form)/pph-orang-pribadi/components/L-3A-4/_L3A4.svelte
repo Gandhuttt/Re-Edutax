@@ -1,5 +1,6 @@
 <script lang="ts">
     import Accordion from "$lib/components/AccordionItem.svelte";
+    import A from "./A.svelte";
     import B from "./B.svelte";
     import type { BarisLainnya } from "./types";
 
@@ -8,6 +9,14 @@
         referensi: Record<string, string[]>;
         lainnya: BarisLainnya[];
         b1cPenghasilanDalamNegeriLainnya: boolean | undefined;
+        // Bagian A (Norma). Nama/jenis/bruto are derived from L-3B Bagian C;
+        // only normaPersen is typed, and it persists on the L-3B TKU registry
+        // row. Gated on 1.b.3 = Norma, independently of 1.c above.
+        normaAktif: boolean;
+        namaUsaha: string;
+        jenisUsahaPekerjaanBebas: string;
+        peredaranBrutoNorma: number;
+        normaPersen: number;
         readonly?: boolean;
     }
 
@@ -16,6 +25,11 @@
         referensi,
         lainnya = $bindable(),
         b1cPenghasilanDalamNegeriLainnya,
+        normaAktif,
+        namaUsaha,
+        jenisUsahaPekerjaanBebas,
+        peredaranBrutoNorma,
+        normaPersen = $bindable(),
         readonly = false
     }: Props = $props();
 </script>
@@ -24,14 +38,14 @@
     <div class="accordion">
         <Accordion item={"A. PENGHASILAN NETO DALAM NEGERI DARI USAHA DAN/ATAU PEKERJAAN BEBAS BERDASARKAN PENCATATAN"}>
             <div class="tw:p-5">
-                <!-- The Norma calculation. Never capturable on the live form
-                     (see L3B.md), so it is not implemented: only the
-                     instruction line is shown. -->
-                <p class="tw:text-sm tw:italic">
-                    Wajib Pajak yang menyelenggarakan pencatatan wajib mengisi Lampiran 3B
-                    untuk menyampaikan rincian penghasilan bruto. Bagian ini belum
-                    diimplementasikan.
-                </p>
+                <A
+                    {namaUsaha}
+                    {jenisUsahaPekerjaanBebas}
+                    peredaranBruto={peredaranBrutoNorma}
+                    bind:normaPersen
+                    dapatDiubah={normaAktif}
+                    {readonly}
+                />
             </div>
         </Accordion>
         <Accordion item={"B. PENGHASILAN NETO DALAM NEGERI LAINNYA"}>
