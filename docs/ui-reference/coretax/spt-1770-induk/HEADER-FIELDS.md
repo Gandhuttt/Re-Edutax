@@ -83,7 +83,21 @@ enabled after switching `1.b.4` back to `Industri`, which swaps in a completely
 empty L-3A-3.
 
 So the enable is **sticky and its cause is not isolated**. Do not assume a
-gating rule for `14f` from this data. Isolating it needs a fresh draft and one
+gating rule for `14f` from this data.
+
+> **[bundle-confirmed] 2026-08-19 — isolated, and the stickiness is explained.**
+> `14f` is `chkI6`, enabled by `updateChkI6` from the **1.b.1** handler
+> (`filledDisableSubForm`): `0 == t ? disable : enable`. Between the two
+> measurements `1.b.4` was changed, which requires 1.b.1 = Ya — so 1.b.1 was set to
+> Ya, and stayed Ya, which is exactly why the enable looked sticky and uncaused.
+> The L-3A hypothesis was correctly rejected.
+>
+> `14e` is `chkI5`, enabled from the **1.b.3** handler when the answer is Tidak
+> (menyelenggarakan pembukuan) — consistent with the table above, where 1.b.3 was
+> already Tidak in both measured states, so Metode Pembukuan changed nothing.
+>
+> Both gate a lampiran: `14e` → **L-3C**, `14f` → **L-3D**. See
+> `docs/bundle-diff-1770.md` B9. Isolating it needs a fresh draft and one
 change at a time. Candidates still open:
 
 - any penyesuaian fiskal existing anywhere in the return, persisted server-side

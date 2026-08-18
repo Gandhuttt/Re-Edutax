@@ -233,9 +233,26 @@ This is an eligibility check, not a bug and not a UI glitch:
 
 Using Norma requires a *pemberitahuan penggunaan NPPN* registered with DJP for
 the fiscal year. This taxpayer has none, so Coretax refuses the answer. **The
-Norma branch cannot be captured from this account at all**, regardless of how
-much more probing is done. Capturing it needs an account with an NPPN
+Norma branch cannot be *observed* from this account at all**, regardless of how
+much more probing is done. Observing it needs an account with an NPPN
 registration on file.
+
+> **[bundle-explained]** 2026-08-19. The inference above was right, and the
+> mechanism is confirmed. In `emittedEventB1B3`:
+>
+> ```js
+> t.value === Yes.code && checkFacilityRegisterByFiscalYear(taxpayer, AS04, AS0401, PeriodCode)
+>   .subscribe(o => { if (!o.IsSuccessful || !o.Payload) {
+>       showUserFriendlyError("Anda tidak berhak menggunakan Norma Penghitungan Penghasilan Neto untuk menghitung penghasilan neto Anda");
+>       selectB1B3.patchValue(null); } })
+> ```
+>
+> Note what this cost: "cannot be captured" was read as "cannot be implemented",
+> and L-3A-4 Bagian A went unbuilt for that reason. The bundle specifies it fully.
+> See `L3A.md` and `docs/bundle-diff-1770.md` B5.
+>
+> The same handler also enables Induk **14.e**: `t.value === No.code ?
+> chkI5.enable() : chkI5.disable()`.
 
 For our implementation this is worth mirroring in spirit but not in mechanism:
 peserta are training users with no DJP facility register, so Norma should be a

@@ -10,9 +10,15 @@ nodes rather than native `<select>` options.
 
 ## HEADER, Status
 
-**Not capturable.** The control does not open on an existing draft, so it is
-read-only once a returnsheet exists. Values are presumably Normal and
-Pembetulan, but this is unverified.
+**Not observed.** The control does not open on an existing draft, so it is
+read-only once a returnsheet exists.
+
+> **[bundle-explained]** 2026-08-19, partially. The bundle compares
+> `returnSheetModel` against the literal string `"NORMAL"`, and gates row 12a /
+> section F on `"NORMAL" !== returnSheetModel`, so a Normal/amendment distinction
+> is confirmed to exist and to drive the amendment rows. The amendment code's own
+> literal lives in a shared enum outside the fetched chunk and is still
+> unconfirmed — do not assume the string `"PEMBETULAN"`.
 
 ## HEADER, Metode Pembukuan/Pencatatan
 

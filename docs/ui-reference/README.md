@@ -1,5 +1,37 @@
 # UI Reference
 
+## How to read these notes (added 2026-08-19)
+
+Everything here is **UI observation from a single test account**. That makes it
+authoritative about appearance — layout, field order, labels, which cells render
+grey — and unreliable about logic.
+
+Three claims in this corpus were confidently wrong, and all three were of one
+kind: a negative conclusion drawn from what the account happened to show
+(L-3A-4 Bagian A "not capturable", 14e/14f "permanently disabled", L-4 Section B
+"confirmed exact, no rounding"). None was a wrong measurement. All were wrong
+*therefores*.
+
+So, when reading or adding to these files:
+
+- **Separate the observation from the inference.** "Row 6 displayed 538.527.000"
+  is evidence. "Therefore there is no rounding" is a hypothesis, and needs the
+  alternatives it rules out spelled out, or it should not be written.
+- **Negative claims are the dangerous ones.** A wrong measurement fails a check
+  the moment code touches it. A wrong "this cannot be done" stops the work that
+  would have tested it, so it never fails — it just quietly costs a feature.
+  Prefer "not observed on this account" over "not possible".
+- **For anything behavioural, the bundle beats this corpus.** The deployed
+  Coretax JavaScript is the logic actually running; see
+  `docs/bundle-diff-1770.md` for how to fetch it and what it can and cannot
+  settle. Where the two disagree, the bundle wins.
+- **Absence of evidence is usually an unexercised gate**, not an absent feature.
+  Every "no entry path" puzzle in these notes turned out to be a gate that had
+  never been answered.
+
+Claims below that have since been checked against the bundle are marked
+**[bundle-confirmed]**, **[bundle-corrected]** or **[bundle-explained]**.
+
 Captured states of the real DJP tax forms, kept as reference while building the
 equivalent screens in this app. Nothing here is used at runtime, it is
 documentation only.

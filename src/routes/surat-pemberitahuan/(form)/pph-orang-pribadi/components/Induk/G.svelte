@@ -5,10 +5,17 @@
 
     // Only applies when the return is in a refund position (lebih bayar).
     //
-    // This section was never capturable on the live form, since the captured
-    // draft was never in a refund position and the bank-account picker could not
-    // be opened. It is modelled on the equivalent SPT Badan section rather than
-    // guessed at, which was a deliberate decision recorded in OPTIONS.md.
+    // This section was never OBSERVED on the live form, since the captured draft
+    // was never in a refund position and the bank-account picker could not be
+    // opened. It was modelled on the equivalent SPT Badan section rather than
+    // guessed at, a deliberate decision recorded in OPTIONS.md.
+    //
+    // Partly verified against the bundle 2026-08-19: Coretax's form group holds
+    // RefundStatus, BankAccountNo, BankName, BankCode and AccountName (all
+    // disabled) plus BankAccount, the enabled picker. Four of those map to the
+    // four fields here; BankCode has no equivalent, and the picker needs a DJP
+    // bank registry we have no counterpart for. Whether BankCode should surface is
+    // an open question, not a settled omission.
     interface Props {
         gMetodePengembalian: string;
         gNomorRekening: string;

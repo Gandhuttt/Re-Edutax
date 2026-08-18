@@ -55,6 +55,16 @@ yields 0, so it is "not applicable" rather than a status.
 
 ## Tariff, progressive, confirmed exactly
 
+> **[bundle-confirmed, with two caveats]** 2026-08-19. Every measured value below
+> still holds. But (a) Coretax applies the schedule as `tarif × PKP − pengurang`
+> per band, not by accumulating marginal bands, and the ladder is *continuous* at
+> every boundary — so a wrong `<` vs `<=` on any band edge produces identical
+> output and **cannot be detected by comparing against the live form**; and (b) the
+> Induk tariff is not hardcoded in Coretax at all. It comes from reference data
+> `PIT_TAX_RATE`, matched on `Min <= PKP && Max >= PKP`, with a `rate = 1%`
+> fallback. The UU HPP numbers below are what that data contained for the years
+> observed, not the rule itself. See `docs/bundle-diff-1770.md` A7/A8.
+
 Row 6 of 538.527.000 produced row 7 of **105.558.100**. That matches the UU HPP
 brackets to the rupiah:
 

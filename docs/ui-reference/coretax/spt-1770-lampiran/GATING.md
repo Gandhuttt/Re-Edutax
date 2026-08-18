@@ -134,6 +134,24 @@ and `Pembukuan stelsel akrual` with everything else held constant: identical. By
 enabled for reasons that could not be isolated. Full write-up in
 `../spt-1770-induk/HEADER-FIELDS.md`. Do not rely on the Metode hypothesis.
 
+> **[bundle-confirmed] 2026-08-19 — the gates are 1.b.3 and 1.b.1.** Both controls
+> are declared `disabled` in Coretax's form group and enabled only by an earlier
+> answer:
+>
+> ```js
+> // 14e -> chkI5 -> lampiran L-3C, in emittedEventB1B3 (the 1.b.3 handler)
+> t.value === No.code ? chkI5.enable() : chkI5.disable()
+>
+> // 14f -> chkI6 -> lampiran L-3D, in filledDisableSubForm (the 1.b.1 handler)
+> updateChkI6(t) { 0 == t ? (patchValue({chkI6: 0}), chkI6.disable()) : chkI6.enable() }
+> ```
+>
+> So `14e` needs **1.b.3 = Tidak** (a bookkeeper reports fiscal depreciation; a
+> Norma user does not) and `14f` needs **1.b.1 = Ya**. That also explains the
+> "sticky" enable: 1.b.1 was answered Ya in order to reach 1.b.4, and it stayed Ya.
+> The Metode Pembukuan hypothesis was one field away — right instinct, wrong
+> control.
+
 ~~Lampiran 3B ... has no tab in any state reached so far~~
 
 **Lampiran 3B is reachable.** It is gated on Induk **`1.b.2`**, which had never

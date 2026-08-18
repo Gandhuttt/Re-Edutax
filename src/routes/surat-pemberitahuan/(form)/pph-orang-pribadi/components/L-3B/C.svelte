@@ -7,9 +7,12 @@
 
     // C. PENGGUNA NORMA PENGHITUNGAN PENGHASILAN NETO (NPPN).
     //
-    // JUMLAH PPh is always 0: the norma percentage/classification reference
-    // table isn't available to us, see L3B.md's "Not captured" list, so the
-    // neto derivation from JENIS USAHA/PEKERJAAN BEBAS cannot be modeled.
+    // JUMLAH PPh is always 0 here, matching the live form: section C carries no
+    // tax of its own. The neto derivation is NOT out of reach, contrary to an
+    // earlier note here — it lives in L-3A-4 Bagian A, which sums this section's
+    // twelve monthly bruto and multiplies by a norma percentage the taxpayer
+    // types (Coretax validates it > 0 and <= 100; there is no NPPN reference
+    // table involved). See hitungLampiranL3A4BagianA.
     const bulanNames = [
         "JANUARI", "FEBRUARI", "MARET", "APRIL", "MEI", "JUNI",
         "JULI", "AGUSTUS", "SEPTEMBER", "OKTOBER", "NOVEMBER", "DESEMBER"

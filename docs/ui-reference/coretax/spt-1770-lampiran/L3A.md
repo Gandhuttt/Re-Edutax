@@ -33,12 +33,28 @@ separate gates:
 
 | Section | Gate | Status |
 |---------|------|--------|
-| **A** | the Norma path | **not capturable**, see `L3B.md` |
+| **A** | Induk **`1.b.3` = Ya** (Norma) | **[bundle-corrected]** not observable from this account (see `L3B.md`), but fully specified and now implemented — see below |
 | **B** | Induk **`1.c`** (`penghasilan dalam negeri lainnya`) | **already captured**, hint `Ya, silahkan mengisi lampiran 3A-4 Bagian B`, feed measured at 111.111 in `BEHAVIOR.md` |
 
 So the *tab* L-3A-4 is perfectly reachable, and section B was captured on
 2026-08-16. Only section A, the norma calculation, is blocked. Do not read the
 `L3B.md` note as "L-3A-4 is unreachable".
+
+> **[bundle-corrected]** 2026-08-19. "Blocked" was true of *observation* and false
+> of *implementation*, and this file's own column table in
+> `NOTES.md` had it right all along (NAMA TKU, JENIS USAHA/PEKERJAAN BEBAS,
+> PEREDARAN BRUTO, NORMA (%), PENGHASILAN NETO).
+>
+> There is no NPPN percentage table in play. `Norm` is the one **enabled** control
+> in the row dialog (required, `> 0`, `<= 100`) — the taxpayer types it. The other
+> four columns are disabled and regenerated from L-3B Bagian C by
+> `addDataL3bTableCToL3A4TableA`, which sums that section's twelve monthly bruto
+> per TKU and re-keys the previously entered `Norm` by row identity so editing
+> L-3B does not lose it. `NetIncome = norm !== 0 ? bruto × (norm/100) : 0`, rounded
+> per row; `TotalNetIncome = Math.round(Grid1TotalNetIncome)`, which sums the
+> already-rounded rows. That total feeds Induk row **1.b.1** when 1.b.3 = Ya.
+>
+> Implemented 2026-08-19 as `hitungLampiranL3A4BagianA` + `L-3A-4/A.svelte`.
 
 Each mapping above was verified by selecting the option and reading the tab
 list, not derived from the numbering. (The SPT Badan L1 sektor mapping is a

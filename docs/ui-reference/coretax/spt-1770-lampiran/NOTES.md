@@ -168,14 +168,30 @@ typed**, and our training app has to seed that instead.
 
 Two open puzzles:
 
-- **L-5 B has no way to add a row**, yet Induk row 3 = Ya routes the user to
-  "lampiran 5 Bagian A dan/atau B". Either entry is gated on something not yet
-  set, or B is derived from elsewhere.
-- **L-2 C likewise has no entry path**, despite Induk 1.d = Ya routing to
-  "lampiran 2 Bagian C".
+- ~~**L-5 B has no way to add a row**~~ and ~~**L-2 C likewise has no entry
+  path**~~ — **[bundle-confirmed] 2026-08-19, both were unexercised gates.** Each
+  grid's add/edit column is a one-line derivation of an Induk answer:
 
-Both need a differently-configured draft to resolve. Do not assume every
-lampiran a hint routes to is fillable in the state we captured.
+  | Grid | Coretax | Induk answer |
+  |------|---------|--------------|
+  | L-5 A | no action column at all | — (fixed ten-row matrix) |
+  | L-5 B | `IsShowActionColumn = !isStatusSubmitted && chkC2` | row **3** = Ya |
+  | L-5 C | `IsShowActionColumn = !isStatusSubmitted && chkC5` | row **8** = Ya |
+  | L-2 C | `IsShowActionColumn = !isStatusSubmitted && chkB1D` | **1.d** = Ya |
+
+  The captured draft had 1.d = Tidak, which is the whole explanation for L-2 C.
+  `GATING.md`'s guess for L-5 B was right.
+
+The general form of this instruction still holds, and is worth stating more
+strongly: **"no entry path" has meant "gate not answered" every single time it has
+been investigated.** Do not assume every lampiran a hint routes to is fillable in
+the state we captured, and do not conclude a feature is absent from it.
+
+Also resolved while checking the above: the **Bukti Zakat** attachment question in
+section J is gated on L-5 B containing a Zakat or ReligiousDonation code, or L-5 C
+containing a Zakat code, *and* the L-5 tab being shown —
+`(_ > -1 || o > -1) && ShowPitrL5Form`, which then patches
+`ProofZakatAttachmentAnswer`.
 
 > **RESOLVED 2026-08-16, see `GATING.md`.** Both were state artifacts: a grid is
 > editable only when the Induk question routing to it is answered Ya. L-5 B was
@@ -216,10 +232,12 @@ Genuinely outstanding (revised 2026-08-17):
 - ~~**Lampiran 3B**, referenced by L-3A-4 Section A but with no tab in any
   answer state~~ — **resolved.** Gated on Induk `1.b.2`, which had never been
   answered. Fully captured, see `L3B.md`.
-- ~~`14e` / `14f` ... likely gated on Metode Pembukuan~~ — **disproved.** Metode
-  makes no difference; measured under both Pencatatan and Pembukuan akrual.
-  `14e` is enabled; `14f`'s gate remains unidentified. See
-  `../spt-1770-induk/HEADER-FIELDS.md`.
+- ~~`14e` / `14f` ... likely gated on Metode Pembukuan~~ — **[bundle-confirmed]
+  2026-08-19, both gates now identified.** Metode Pembukuan really does not gate
+  them, as measured. The actual gates: `14e` is enabled when **1.b.3 = Tidak**
+  (menyelenggarakan pembukuan) and `14f` when **1.b.1 = Ya**. They gate lampiran
+  **L-3C** and **L-3D**, two whole lampiran this corpus never saw. See
+  `../spt-1770-induk/HEADER-FIELDS.md` and `docs/bundle-diff-1770.md` B9.
 - ~~Behaviour beyond the insert path: editing, `Hapus` on a populated row~~ —
   **done.** Edit, single delete and `Hapus Semua` all captured with their API
   calls, see `GRID-ROW-ACTIONS.md`.

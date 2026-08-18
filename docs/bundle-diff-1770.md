@@ -481,3 +481,41 @@ t.value === Yes.code && checkFacilityRegisterByFiscalYear(taxpayer, AS04, AS0401
 The test account has no NPPN facility registered, so Norma reset itself every
 time it was selected. No amount of UI probing on that account could have revealed
 Bagian A — which is the general lesson for this whole document.
+
+---
+
+## docs/ui-reference audit (2026-08-19)
+
+Prompted by three wrong conclusions in that corpus. Every absolute or negative
+claim in the 19 notes was re-checked against the bundle; the measurements were all
+accurate, and what needed correcting were the inferences drawn from them.
+
+**Corrected — the claim was wrong:**
+
+| Where | Was | Now |
+|---|---|---|
+| `L4.md` | PKP gabungan "confirmed exact", no rounding; plain proportional split | floored to 1.000; split has three extra branches |
+| `L3A.md` | Bagian A "not capturable" | gate is 1.b.3 = Ya; fully specified; implemented |
+| `NOTES.md`, `GATING.md`, `HEADER-FIELDS.md` | 14e/14f gates "unidentified", 14f enable "sticky and uncaused" | 14e ← 1.b.3 = Tidak, 14f ← 1.b.1 = Ya; each gates a lampiran |
+
+**Resolved — the claim was right but incomplete:**
+
+| Where | Open question | Answer |
+|---|---|---|
+| `NOTES.md` | L-5 B has no way to add a row | `IsShowActionColumn = !isStatusSubmitted && chkC2` (row 3 = Ya) |
+| `NOTES.md` | L-2 C has no entry path | same shape on `chkB1D` (1.d = Ya); captured draft had 1.d = Tidak |
+| `L3B.md` | why Norma was refused | `checkFacilityRegisterByFiscalYear(…, AS04, AS0401, …)` rejects it and nulls the answer |
+| `OPTIONS.md` | HEADER Status values | Normal/amendment distinction confirmed (`returnSheetModel !== "NORMAL"` drives section F); amendment literal still unknown |
+| `COMPUTATION.md` | tariff "confirmed exactly" | still true, but band edges are untestable and the Induk rate is reference-data driven |
+| `Induk/G.svelte` | section G modelled on Badan, unverified | 4 of Coretax's 6 controls match; `BankCode` has no equivalent here |
+
+**Kept as-is** — accurate, and about appearance or about our own deliberate
+choices rather than about Coretax's behaviour: the modal field inventories, the
+grid column tables (`NOTES.md`'s L-3A-4 Bagian A columns were right all along),
+the positional-Kode correction in `BEHAVIOR.md`, the spousal-NPWP lookup note, and
+the `Kode`-as-plain-text decision.
+
+`docs/ui-reference/README.md` now opens with the reading rules this exercise
+produced: separate observation from inference, treat negative claims as the
+dangerous class, prefer the bundle for logic and this corpus for appearance, and
+read "no entry path" as "gate not answered" — which it has been every time.

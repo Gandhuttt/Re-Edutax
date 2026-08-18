@@ -6,7 +6,11 @@ import { spt_pph_orang_pribadi } from './spt_pph_orang_pribadi';
 // self-contained final-tax computation, verified NOT to feed the Induk chain
 // (1.b.5 and row 2 are unaffected). Sections B (OPPT) and C (Norma) are plain
 // monthly totals with JUMLAH PPh always 0, their real tax effect lives
-// elsewhere (Induk 13c for OPPT; Norma's neto calc is out of reach entirely).
+// elsewhere: Induk 13c for OPPT, and for Norma, L-3A-4 Bagian A, which is
+// generated from section C's twelve monthly bruto plus the norma percentage held
+// on the TKU row below. (That derivation was once recorded as out of reach for
+// want of an NPPN percentage table; there is no such table — the percentage is
+// typed. See docs/bundle-diff-1770.md B5.)
 //
 // On the live form every section is seeded from a read-only DAFTAR TEMPAT
 // KEGIATAN USAHA registry pre-filled by DJP, one row per registered TKU, never
