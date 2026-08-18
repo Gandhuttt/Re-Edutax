@@ -24,10 +24,8 @@
     // B. PENGHITUNGAN PPh TERUTANG WAJIB PAJAK DAN SUAMI/ISTRI. Gated on
     // Induk row 7 (statusKewajibanSuamiIstri) being 'ph' or 'mt' — a
     // DIFFERENT gate from this tab's own 13b visibility, and from Bagian A's
-    // gate. Follows L-3B's present-but-disabled convention (see
-    // no_shared_grid_modal_component / the L-3B Bagian A/B/C accordions):
-    // the accordion always renders, but its inputs are only enabled while
-    // the row 7 gate is open.
+    // gate. Confirmed 2026-08-18 against the live form: the accordion is
+    // fully absent (not just disabled) while row 7 is unset.
     interface Props {
         currentTab: string;
         data: LampiranL4;
@@ -55,7 +53,6 @@
     let sectionBGated = $derived(
         statusKewajibanSuamiIstri === 'ph' || statusKewajibanSuamiIstri === 'mt'
     );
-    let sectionBEditable = $derived(sectionBGated && !readonly);
 
     type ManualField = Exclude<keyof LampiranL4, 'ptkpStatus'>;
 
@@ -198,14 +195,9 @@
                 </Table>
             </div>
         </Accordion>
+        {#if sectionBGated}
         <Accordion item={"B. PENGHITUNGAN PPh TERUTANG WAJIB PAJAK DAN SUAMI/ISTRI"}>
             <div class="tw:p-5">
-                {#if !sectionBGated}
-                    <p class="tw:mb-3 tw:text-sm">
-                        Bagian ini hanya berlaku jika Induk butir 7 (Status Kewajiban Perpajakan
-                        Suami dan Istri) diisi PH atau MT.
-                    </p>
-                {/if}
                 <Table class="tw:min-w-full">
                     {#snippet head()}
                         <tr>
@@ -222,7 +214,7 @@
                                     class={"tw:text-end"}
                                     type={"rupiah"}
                                     bind:value={data.brutoWp}
-                                    disabled={!sectionBEditable}
+                                    disabled={readonly}
                                 />
                             </td>
                             <td>
@@ -230,7 +222,7 @@
                                     class={"tw:text-end"}
                                     type={"rupiah"}
                                     bind:value={data.brutoSuamiIstri}
-                                    disabled={!sectionBEditable}
+                                    disabled={readonly}
                                 />
                             </td>
                         </tr>
@@ -244,7 +236,7 @@
                                     class={"tw:text-end"}
                                     type={"rupiah"}
                                     bind:value={data.netoSuamiIstri}
-                                    disabled={!sectionBEditable}
+                                    disabled={readonly}
                                 />
                             </td>
                         </tr>
@@ -261,7 +253,7 @@
                                     class={"tw:text-end"}
                                     type={"rupiah"}
                                     bind:value={data.setelahDikurangiSuamiIstri}
-                                    disabled={!sectionBEditable}
+                                    disabled={readonly}
                                 />
                             </td>
                         </tr>
@@ -282,7 +274,7 @@
                         <tr>
                             <td>Penghasilan tidak kena pajak gabungan</td>
                             <td colspan="2">
-                                <Select bind:value={data.ptkpGabunganStatus} disabled={!sectionBEditable}>
+                                <Select bind:value={data.ptkpGabunganStatus} disabled={readonly}>
                                     <option class="tw:text-black" value={""}></option>
                                     {#each PTKP_OPTIONS as ptkp}
                                         <option class="tw:text-black" value={ptkp.value}>{ptkp.label}</option>
@@ -371,7 +363,7 @@
                                 <Input
                                     type={"text"}
                                     bind:value={data.namaSuamiIstri}
-                                    disabled={!sectionBEditable}
+                                    disabled={readonly}
                                 />
                             </td>
                         </tr>
@@ -379,6 +371,7 @@
                 </Table>
             </div>
         </Accordion>
+        {/if}
     </div>
 </div>
 

@@ -78,12 +78,9 @@
                 <td><span>8.</span></td>
                 <td><span>NIK/NPWP Suami/Istri</span></td>
                 <td>
-                    <!-- Enabled only once row 7 is set. -->
-                    <Input
-                        type={"text"}
-                        bind:value={a8NpwpSuamiIstri}
-                        disabled={readonly || !a7StatusKewajibanSuamiIstri}
-                    />
+                    <!-- Coretax derives this from linked family-member data and never
+                         lets it be typed in, even once row 7 is set. -->
+                    <Input type={"text"} bind:value={a8NpwpSuamiIstri} disabled />
                 </td>
             </tr>
         {/snippet}

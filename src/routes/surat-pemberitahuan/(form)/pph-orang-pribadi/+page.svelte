@@ -433,7 +433,13 @@
 				b1b2Oppt === 'pengusaha_tertentu' ||
 				b1b3Norma === 'ya_norma'
 		},
-		{ tab: 'L-4', visibility: Boolean(h13bPerhitunganTersendiri) },
+		// Gated on 13b (Bagian A) OR Induk row 7 being PH/MT (Bagian B) — confirmed
+		// 2026-08-18 against the live form: the tab reappears for PH/MT alone even
+		// with 13b = Tidak.
+		{
+			tab: 'L-4',
+			visibility: Boolean(h13bPerhitunganTersendiri) || isPhMt
+		},
 		{
 			tab: 'L-5',
 			visibility: Boolean(c3AdaPengurangPenghasilanNeto || c8AdaPengurangPphTerutang)

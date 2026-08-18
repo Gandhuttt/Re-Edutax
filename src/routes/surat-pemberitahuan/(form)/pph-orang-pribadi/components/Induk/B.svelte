@@ -86,6 +86,21 @@
         }
     });
 
+    // Confirmed 2026-08-18 against the live form: answering 1.b.1 Ya AND 1.b.2
+    // with either "Ya" branch (OPPT) auto-checks Kegiatan Usaha in the header;
+    // reverting 1.b.2 to Tidak auto-unchecks it again. 1.b.1 Ya alone does
+    // neither.
+    $effect(() => {
+        const oppt = b1b1PenghasilanUsaha === true &&
+            (b1b2Oppt === 'peredaran_bruto_tertentu' || b1b2Oppt === 'pengusaha_tertentu');
+        const has = sumberPenghasilan.includes('kegiatan_usaha');
+        if (oppt && !has) {
+            sumberPenghasilan = [...sumberPenghasilan, 'kegiatan_usaha'];
+        } else if (!oppt && has) {
+            sumberPenghasilan = sumberPenghasilan.filter((s) => s !== 'kegiatan_usaha');
+        }
+    });
+
     // 1.b.4 only exists while 1.b.3 is "Tidak, saya menyelenggarakan
     // pembukuan.". Answers collapse whole rows on this form rather than
     // merely hiding them (see the 1.b.1 note above), so the sektor answer is
