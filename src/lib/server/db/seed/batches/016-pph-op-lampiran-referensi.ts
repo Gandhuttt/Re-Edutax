@@ -34,6 +34,13 @@ export const name = '016 SPT PPh Orang Pribadi lampiran reference lists';
 //
 // All 20 lists in the source file: L-1 (13), L-2 (4: L-2 A/B/C + shared Mata
 // Uang), L-3A-4 B, and L-5 B/C.
+//
+// The eight l3c_*/l3d_* lists were added later, when those lampiran were built.
+// They come straight from the reference endpoint and were never captured from
+// the UI, because neither lampiran was reachable on the captured account. Their
+// DISPLAY order is therefore unknown -- the order here is the endpoint's own,
+// which for every list we could check is NOT the order Coretax renders. Treat
+// the ordering of these eight as unverified; their contents and codes are exact.
 type Opsi = string | readonly [kode: string, deskripsi: string];
 
 const daftar: Record<string, readonly Opsi[]> = {
@@ -706,6 +713,79 @@ const daftar: Record<string, readonly Opsi[]> = {
 	l5_c_jenis: [
 		['601', 'Fasilitas pembebasan atau pengurangan PPh (Tax holiday)'],
 		['603', 'Pengurang PPh Lainnya']
+	],
+	l3c_harta_berwujud: [
+		['0410', 'Mesin'],
+		['0412', 'Kapal Pesiar'],
+		['0405', 'Kendaraan Angkutan'],
+		['0403', 'Mobil Penumpang'],
+		['0709', 'Rumah Tangga/Furnitur'],
+		['0413', 'Peralatan'],
+		['0707', 'Peralatan Olahraga Khusus'],
+		['0406', 'Kendaraan Khusus'],
+		['0407', 'Kereta'],
+		['0408', 'Pesawat Terbang'],
+		['0411', 'Gerobak/Troli'],
+		['0402', 'Motor'],
+		['0499', 'Aset Bergerak Lainnya'],
+		['0710', 'Peralatan Lainnya'],
+		['0708', 'Peralatan Elektronik'],
+		['0401', 'Sepeda'],
+		['0409', 'Kapal Laut'],
+		['0404', 'Bus'],
+		['0711', 'Jet Ski'],
+		['0799', 'Aset Lainnya']
+	],
+	l3c_bangunan: [
+		['0502', 'Bangunan untuk tempat tinggal'],
+		['0505', 'Apartemen'],
+		['0503', 'Bangunan untuk usaha (toko, pabrik, kantor, gudang, dan sejenisnya)'],
+		['0599', 'Aset tidak Bergerak Lainnya'],
+		['0504', 'Bangunan yang disewakan']
+	],
+	l3c_harta_tidak_berwujud: [
+		['0610', 'Hak Eksploitasi Sumber Daya Alam dan Hasil Alam Lainnya'],
+		['0609', 'Hak di Lapangan Minyak dan Gas'],
+		['0603', 'Merek dagang'],
+		['0607', 'Goodwill'],
+		['0601', 'Paten'],
+		['0699', 'Harta Tidak Berwujud Lainnya'],
+		['0602', 'Royalti'],
+		['0608', 'Hak Pengusahaan Hutan'],
+		['0604', 'Hak Guna Bangunan'],
+		['0605', 'Hak Guna Usaha'],
+		['0606', 'Hak Pakai']
+	],
+	l3c_metode_komersial: [
+		['ML', 'Metode Lainnya'],
+		['JSP', 'Jumlah Satuan Produksi'],
+		['SMG', 'Saldo Menurun Ganda'],
+		['JJJ', 'Jumlah Jam Jasa'],
+		['JAT', 'Jumlah Angka Tahun'],
+		['SM', 'Saldo Menurun'],
+		['GL', 'Garis Lurus']
+	],
+	l3c_metode_fiskal: [
+		['GL', 'Garis Lurus'],
+		['SM', 'Saldo Menurun'],
+		['JSP', 'Jumlah Satuan Produksi']
+	],
+	l3d_metode_pembebanan: [
+		['01', 'Beban Langsung'],
+		['02', 'Beban Cadangan']
+	],
+	l3d_jenis_dokumen: [
+		['02', 'Perjanjian Tertulis'],
+		['01', 'Penyerahan Perkara'],
+		['03', 'Publikasi Penerbitan'],
+		['04', 'Pengakuan Debitur']
+	],
+	l3d_jenis_biaya_promosi: [
+		['EXHIBITION', 'Biaya pameran produk'],
+		['INTRODUCTION', 'Biaya pengenalan produk baru'],
+		['BENEFIT', 'Penggantian atau imbalan yang diberikan dalam bentuk natura atau kenikmatan'],
+		['ADVERTISING', 'Biaya periklanan di media elektronik, media cetak, dan/atau media lainnya'],
+		['SPONSORSHIP', 'Biaya sponsorship yang berkaitan dengan promosi produk']
 	],
 };
 

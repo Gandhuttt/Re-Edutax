@@ -12,6 +12,8 @@
 	import L3A4 from './components/L-3A-4/_L3A4.svelte';
 	import L3B from './components/L-3B/_L3B.svelte';
 	import L4 from './components/L-4/_L4.svelte';
+	import L3C from './components/L-3C/_L3C.svelte';
+	import L3D from './components/L-3D/_L3D.svelte';
 	import L5 from './components/L-5/_L5.svelte';
 	import { getSptPphOrangPribadi } from './getSptPphOrangPribadi.remote';
 	import { getReferensiLampiran } from './getReferensiLampiran.remote';
@@ -42,6 +44,13 @@
 	import type { BarisLainnya } from './components/L-3A-4/types';
 	import type { BarisFinalBulanan, BarisPeredaranBulanan, TkuL3B } from './components/L-3B/types';
 	import type { LampiranL4 } from './components/L-4/types';
+	import { ratakanPerTabel } from './components/L-3C/perTabel';
+	import type { BarisPerTabel } from './components/L-3C/types';
+	import type {
+		BarisEntertainment,
+		BarisPiutang,
+		BarisPromosi
+	} from './components/L-3D/types';
 	import type { BarisKompensasi, BarisPengurang } from './components/L-5/types';
 
 	const {
@@ -55,6 +64,8 @@
 		lampiran3a4,
 		lampiran3b,
 		lampiran4,
+		lampiran3c,
+		lampiran3d,
 		lampiran5
 	} = await getSptPphOrangPribadi();
 	const { daftar: referensi, kode: kodeReferensi } = await getReferensiLampiran();
@@ -250,6 +261,28 @@
 	let l3bC = $state<BarisPeredaranBulanan[]>(lampiran3b.c.map((row) => ({ ...row })));
 
 	let l4 = $state<LampiranL4>({ ...lampiran4 });
+
+	// L-3C's twelve sub-grids are cloned per tableIndex so each grid binds its own
+	// array. Coretax keys them the same way, by TableIndex within one GridId.
+	let l3cPerTabel = $state<BarisPerTabel>(
+		Object.fromEntries(
+			Object.entries(lampiran3c.perTabel).map(([indeks, baris]) => [
+				Number(indeks),
+				baris.map((row) => ({ ...row }))
+			])
+		)
+	);
+	let l3cTotalPenyusutanKomersial = $state(lampiran3c.totalPenyusutanKomersial);
+	let l3cTotalAmortisasiKomersial = $state(lampiran3c.totalAmortisasiKomersial);
+
+	// Flattened for submission: one row per entry, tagged with its grid.
+	let l3cBarisSemua = $derived(ratakanPerTabel(l3cPerTabel));
+
+	let l3dEntertainment = $state<BarisEntertainment[]>(
+		lampiran3d.entertainment.map((row) => ({ ...row }))
+	);
+	let l3dPromosi = $state<BarisPromosi[]>(lampiran3d.promosi.map((row) => ({ ...row })));
+	let l3dPiutang = $state<BarisPiutang[]>(lampiran3d.piutang.map((row) => ({ ...row })));
 
 	let l5Kompensasi = $state<BarisKompensasi[]>(lampiran5.kompensasi.map((row) => ({ ...row })));
 	let l5PengurangNeto = $state<BarisPengurang[]>(lampiran5.pengurangNeto.map((row) => ({ ...row })));
@@ -486,8 +519,7 @@
 		// themselves only answerable under the conditions documented in I.svelte.
 		// Neither feeds any Induk figure — Coretax only persists and validates
 		// L3CForm/L3DForm, never patching a valueXX from them — so their absence
-		// does not affect any computed row. Grids not built yet; the tab shows the
-		// not-yet-implemented notice.
+		// does not affect any computed row.
 		{ tab: 'L-3C', visibility: Boolean(i14ePenyusutanAmortisasiFiskal) },
 		{ tab: 'L-3D', visibility: Boolean(i14fBiayaEntertainment) },
 		{
@@ -679,6 +711,20 @@
 			/>
 			<input type="hidden" name="l4PtkpGabunganStatus" value={l4.ptkpGabunganStatus} />
 			<input type="hidden" name="l4NamaSuamiIstri" value={l4.namaSuamiIstri} />
+			<!-- L-3C's twelve grids serialise as one array; each row carries the
+			     tableIndex of the grid it belongs to, which is how Coretax
+			     distinguishes them too. -->
+			<input type="hidden" name="l3cBaris" value={JSON.stringify(l3cBarisSemua)} />
+			<input
+				type="hidden"
+				name="l3cTotalPenyusutanKomersial"
+				value={l3cTotalPenyusutanKomersial}
+			/>
+			<input type="hidden" name="l3cTotalAmortisasiKomersial" value={l3cTotalAmortisasiKomersial} />
+			<input type="hidden" name="l3dEntertainment" value={JSON.stringify(l3dEntertainment)} />
+			<input type="hidden" name="l3dPromosi" value={JSON.stringify(l3dPromosi)} />
+			<input type="hidden" name="l3dPiutang" value={JSON.stringify(l3dPiutang)} />
+
 			<!-- L-5 rows. Bagian A is the fixed ten-row matrix. -->
 			<input type="hidden" name="l5Kompensasi" value={JSON.stringify(l5Kompensasi)} />
 			<input type="hidden" name="l5PengurangNeto" value={JSON.stringify(l5PengurangNeto)} />
@@ -830,6 +876,27 @@
 				{readonly}
 			/>
 
+			<L3C
+				{currentTab}
+				{referensi}
+				{kodeReferensi}
+				tahunPajak={spt.tahunPajak}
+				bind:perTabel={l3cPerTabel}
+				bind:totalPenyusutanKomersial={l3cTotalPenyusutanKomersial}
+				bind:totalAmortisasiKomersial={l3cTotalAmortisasiKomersial}
+				{readonly}
+			/>
+
+			<L3D
+				{currentTab}
+				{referensi}
+				{kodeReferensi}
+				bind:entertainment={l3dEntertainment}
+				bind:promosi={l3dPromosi}
+				bind:piutang={l3dPiutang}
+				{readonly}
+			/>
+
 			<L5
 				{currentTab}
 				{referensi}
@@ -844,7 +911,7 @@
 			/>
 
 			<!-- The remaining lampiran tabs are gated above but not built yet. -->
-			{#if currentTab !== 'Induk' && currentTab !== 'L-1' && currentTab !== 'L-2' && currentTab !== 'L-3A-1' && currentTab !== 'L-3A-2' && currentTab !== 'L-3A-3' && currentTab !== 'L-3A-4' && currentTab !== 'L-3B' && currentTab !== 'L-4' && currentTab !== 'L-5'}
+			{#if currentTab !== 'Induk' && currentTab !== 'L-1' && currentTab !== 'L-2' && currentTab !== 'L-3A-1' && currentTab !== 'L-3A-2' && currentTab !== 'L-3A-3' && currentTab !== 'L-3A-4' && currentTab !== 'L-3B' && currentTab !== 'L-3C' && currentTab !== 'L-3D' && currentTab !== 'L-4' && currentTab !== 'L-5'}
 				<div class="tw:p-5">
 					<Alert bg={'var(--color-primary)'}>
 						{#snippet head()}

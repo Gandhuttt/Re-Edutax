@@ -66,3 +66,5 @@ export * from './references/spt_pph_orang_pribadi/kode_koreksi_fiskal';
 export * from './transactional/surat_pemberitahuan/spt_pph_orang_pribadi/lampiran_3a';
 export * from './transactional/surat_pemberitahuan/spt_pph_orang_pribadi/lampiran_3b';
 export * from './transactional/surat_pemberitahuan/spt_pph_orang_pribadi/lampiran_4';
+export * from './transactional/surat_pemberitahuan/spt_pph_orang_pribadi/lampiran_3c';
+export * from './transactional/surat_pemberitahuan/spt_pph_orang_pribadi/lampiran_3d';
