@@ -1,0 +1,722 @@
+{
+ "ASSET_CASH": [
+  {
+   "Code": "0106",
+   "CodeName": "0106",
+   "CodeDescription": "Cek"
+  },
+  {
+   "Code": "0102",
+   "CodeName": "0102",
+   "CodeDescription": "Tabungan (Bank/Lembaga Keuangan)"
+  },
+  {
+   "Code": "0107",
+   "CodeName": "0107",
+   "CodeDescription": "Wessel"
+  },
+  {
+   "Code": "0103",
+   "CodeName": "0103",
+   "CodeDescription": "Giro"
+  },
+  {
+   "Code": "0108",
+   "CodeName": "0108",
+   "CodeDescription": "Commercial Paper"
+  },
+  {
+   "Code": "0104",
+   "CodeName": "0104",
+   "CodeDescription": "Deposito"
+  },
+  {
+   "Code": "0101",
+   "CodeName": "0101",
+   "CodeDescription": "Uang Tunai/Bank Note/Koin"
+  },
+  {
+   "Code": "0105",
+   "CodeName": "0105",
+   "CodeDescription": "Uang elektronik"
+  },
+  {
+   "Code": "0109",
+   "CodeName": "0109",
+   "CodeDescription": "Setara Kas Lainnya"
+  }
+ ],
+ "ASSET_RECEIVEABLE": [
+  {
+   "Code": "0209",
+   "CodeName": "0209",
+   "CodeDescription": "Piutang lainnya"
+  },
+  {
+   "Code": "0202",
+   "CodeName": "0202",
+   "CodeDescription": "Piutang Afiliasi"
+  },
+  {
+   "Code": "0201",
+   "CodeName": "0201",
+   "CodeDescription": "Piutang Usaha"
+  }
+ ],
+ "ASSET_INVESTMENTS": [
+  {
+   "Code": "0399",
+   "CodeName": "0399",
+   "CodeDescription": "Investasi lainnya (termasuk Cryptocurrency, Trust Fund dan Investasi lainnya)"
+  },
+  {
+   "Code": "0310",
+   "CodeName": "0310",
+   "CodeDescription": "Asuransi"
+  },
+  {
+   "Code": "0303",
+   "CodeName": "0303",
+   "CodeDescription": "Saham bursa"
+  },
+  {
+   "Code": "0306",
+   "CodeName": "0306",
+   "CodeDescription": "Surat Utang lainnya"
+  },
+  {
+   "Code": "0308",
+   "CodeName": "0308",
+   "CodeDescription": "Instrumen derivatif (right, warran, kontrak berjangka, opsi, dll)"
+  },
+  {
+   "Code": "0311",
+   "CodeName": "0311",
+   "CodeDescription": "Unit Link di Asuransi"
+  },
+  {
+   "Code": "0302",
+   "CodeName": "0302",
+   "CodeDescription": "Saham non bursa"
+  },
+  {
+   "Code": "0305",
+   "CodeName": "0305",
+   "CodeDescription": "Obligasi pemerintah Indonesia (Obligasi Ritel Indonesia, Surat Berharga Syariah Negara, dll)"
+  },
+  {
+   "Code": "0304",
+   "CodeName": "0304",
+   "CodeDescription": "Obligasi perusahaan"
+  },
+  {
+   "Code": "0309",
+   "CodeName": "0309",
+   "CodeDescription": "Penyertaan modal dalam perusahaan lain yang bukan atas saham meliputi penyertaan modal pada CV, Firma, dan sejenisnya"
+  },
+  {
+   "Code": "0301",
+   "CodeName": "0301",
+   "CodeDescription": "Saham yang dibeli untuk dijual kembali"
+  },
+  {
+   "Code": "0307",
+   "CodeName": "0307",
+   "CodeDescription": "Kontrak Investasi Kolektif (KIK) termasuk Reksadana, dan investasi yang dikonversikan ke unit penyertaan"
+  }
+ ],
+ "ASSET_MOVEABLE": [
+  {
+   "Code": "0499",
+   "CodeName": "0499",
+   "CodeDescription": "Harta bergerak lainnya"
+  },
+  {
+   "Code": "0406",
+   "CodeName": "0406",
+   "CodeDescription": "Kendaraan Tujuan Khusus"
+  },
+  {
+   "Code": "0401",
+   "CodeName": "0401",
+   "CodeDescription": "Sepeda"
+  },
+  {
+   "Code": "0409",
+   "CodeName": "0409",
+   "CodeDescription": "Kapal"
+  },
+  {
+   "Code": "0407",
+   "CodeName": "0407",
+   "CodeDescription": "Kereta"
+  },
+  {
+   "Code": "0405",
+   "CodeName": "0405",
+   "CodeDescription": "Kendaraan Angkutan Jalan"
+  },
+  {
+   "Code": "0412",
+   "CodeName": "0412",
+   "CodeDescription": "Kapal Pesiar"
+  },
+  {
+   "Code": "0403",
+   "CodeName": "0403",
+   "CodeDescription": "Mobil Penumpang"
+  },
+  {
+   "Code": "0408",
+   "CodeName": "0408",
+   "CodeDescription": "Pesawat Terbang"
+  },
+  {
+   "Code": "0404",
+   "CodeName": "0404",
+   "CodeDescription": "Bis"
+  },
+  {
+   "Code": "0411",
+   "CodeName": "0411",
+   "CodeDescription": "Gerobak"
+  },
+  {
+   "Code": "0410",
+   "CodeName": "0410",
+   "CodeDescription": "Mesin"
+  },
+  {
+   "Code": "0402",
+   "CodeName": "0402",
+   "CodeDescription": "Sepeda Motor"
+  }
+ ],
+ "ASSET_NONMOVEABLE": [
+  {
+   "Code": "0505",
+   "CodeName": "0505",
+   "CodeDescription": "Tanah atau Lahan untuk Usaha (seperti lahan pertanian, perkebunan, perikanan darat, dan sejenisnya)"
+  },
+  {
+   "Code": "0504",
+   "CodeName": "0504",
+   "CodeDescription": "Kapal"
+  },
+  {
+   "Code": "0503",
+   "CodeName": "0503",
+   "CodeDescription": "Apartemen"
+  },
+  {
+   "Code": "0501",
+   "CodeName": "0501",
+   "CodeDescription": "Tanah Kosong"
+  },
+  {
+   "Code": "0509",
+   "CodeName": "0509",
+   "CodeDescription": "Harta Tidak Bergerak Lainnya"
+  },
+  {
+   "Code": "0502",
+   "CodeName": "0502",
+   "CodeDescription": "Tanah dan/atau Bangunan untuk Tempat Tinggal"
+  },
+  {
+   "Code": "0506",
+   "CodeName": "0506",
+   "CodeDescription": "Tanah dan/atau Bangunan untuk Usaha (toko, pabrik, gudang, dan sejenisnya)"
+  },
+  {
+   "Code": "0507",
+   "CodeName": "0507",
+   "CodeDescription": "Tanah dan/atau Bangunan yang Disewakan"
+  }
+ ],
+ "ASSET_OTHER": [
+  {
+   "Code": "0602",
+   "CodeName": "0602",
+   "CodeDescription": "Royalti"
+  },
+  {
+   "Code": "0704",
+   "CodeName": "0704",
+   "CodeDescription": "Perhiasan Non-Emas"
+  },
+  {
+   "Code": "0703",
+   "CodeName": "0703",
+   "CodeDescription": "Batangan Non-Emas"
+  },
+  {
+   "Code": "0701",
+   "CodeName": "0701",
+   "CodeDescription": "Emas Batangan"
+  },
+  {
+   "Code": "0699",
+   "CodeName": "0699",
+   "CodeDescription": "Harta Tidak Berwujud Lainnya"
+  },
+  {
+   "Code": "0707",
+   "CodeName": "0707",
+   "CodeDescription": "Peralatan olahraga khusus"
+  },
+  {
+   "Code": "0603",
+   "CodeName": "0603",
+   "CodeDescription": "Merek dagang"
+  },
+  {
+   "Code": "0710",
+   "CodeName": "0710",
+   "CodeDescription": "Peralatan Kantor"
+  },
+  {
+   "Code": "0708",
+   "CodeName": "0708",
+   "CodeDescription": "Peralatan elektronik"
+  },
+  {
+   "Code": "0712",
+   "CodeName": "0712",
+   "CodeDescription": "Persediaan usaha"
+  },
+  {
+   "Code": "0711",
+   "CodeName": "0711",
+   "CodeDescription": "Jet Ski"
+  },
+  {
+   "Code": "0702",
+   "CodeName": "0702",
+   "CodeDescription": "Emas Perhiasan"
+  },
+  {
+   "Code": "0709",
+   "CodeName": "0709",
+   "CodeDescription": "Perabot Rumah Tangga"
+  },
+  {
+   "Code": "0705",
+   "CodeName": "0705",
+   "CodeDescription": "Permata (intan,berlian,batu mulia lainnya)"
+  },
+  {
+   "Code": "0799",
+   "CodeName": "0799",
+   "CodeDescription": "Harta lainnya"
+  },
+  {
+   "Code": "0706",
+   "CodeName": "0706",
+   "CodeDescription": "Barang-barang seni dan antik (barang-barang seni, barang-barang antik)"
+  },
+  {
+   "Code": "0601",
+   "CodeName": "0601",
+   "CodeDescription": "Paten"
+  }
+ ],
+ "DOMESTIC_INCOME": [
+  {
+   "Code": "402",
+   "CodeName": "402",
+   "CodeDescription": "Hibah"
+  },
+  {
+   "Code": "314",
+   "CodeName": "314",
+   "CodeDescription": "Imbalan Bunga"
+  },
+  {
+   "Code": "403",
+   "CodeName": "403",
+   "CodeDescription": "Bantuan/Sumbangan"
+  },
+  {
+   "Code": "401",
+   "CodeName": "401",
+   "CodeDescription": "Pembebasan Utang"
+  },
+  {
+   "Code": "408",
+   "CodeName": "408",
+   "CodeDescription": "Beasiswa"
+  },
+  {
+   "Code": "306",
+   "CodeName": "306",
+   "CodeDescription": "Royalti"
+  },
+  {
+   "Code": "302",
+   "CodeName": "302",
+   "CodeDescription": "Sewa harta selain tanah dan/atau bangunan"
+  },
+  {
+   "Code": "407",
+   "CodeName": "407",
+   "CodeDescription": "Klaim Asuransi"
+  },
+  {
+   "Code": "399",
+   "CodeName": "399",
+   "CodeDescription": "Penghasilan Lain dari Modal atau Aset"
+  },
+  {
+   "Code": "304",
+   "CodeName": "304",
+   "CodeDescription": "Bunga"
+  },
+  {
+   "Code": "207",
+   "CodeName": "207 (ID)",
+   "CodeDescription": "Penggantian atau imbalan yang diberikan dalam bentuk natura atau kenikmatan"
+  },
+  {
+   "Code": "307",
+   "CodeName": "307 (ID)",
+   "CodeDescription": "Keuntungan karena Penjualan atau karena Pengalihan Harta"
+  },
+  {
+   "Code": "319",
+   "CodeName": "319 (ID)",
+   "CodeDescription": "Keuntungan Seilisih Kurs Mata Uang Asing"
+  },
+  {
+   "Code": "409",
+   "CodeName": "409 (ID)",
+   "CodeDescription": "Hadiah"
+  },
+  {
+   "Code": "412",
+   "CodeName": "412 (ID)",
+   "CodeDescription": "Penghasilan Dalam Negeri Lainnya"
+  }
+ ],
+ "TANGIBLE_ASSET": [
+  {
+   "Code": "0410",
+   "CodeName": "0410",
+   "CodeDescription": "Mesin",
+   "ParameterData": "{\"IsMoveableAsset\":true,\"IsOtherAsset\":false}"
+  },
+  {
+   "Code": "0412",
+   "CodeName": "0412",
+   "CodeDescription": "Kapal Pesiar",
+   "ParameterData": "{\"IsMoveableAsset\":true,\"IsOtherAsset\":false}"
+  },
+  {
+   "Code": "0405",
+   "CodeName": "0405",
+   "CodeDescription": "Kendaraan Angkutan",
+   "ParameterData": "{\"IsMoveableAsset\":true,\"IsOtherAsset\":false}"
+  },
+  {
+   "Code": "0403",
+   "CodeName": "0403",
+   "CodeDescription": "Mobil Penumpang",
+   "ParameterData": "{\"IsMoveableAsset\":true,\"IsOtherAsset\":false}"
+  },
+  {
+   "Code": "0709",
+   "CodeName": "0709",
+   "CodeDescription": "Rumah Tangga/Furnitur",
+   "ParameterData": "{\"IsMoveableAsset\":false,\"IsOtherAsset\":true}"
+  },
+  {
+   "Code": "0413",
+   "CodeName": "0413",
+   "CodeDescription": "Peralatan",
+   "ParameterData": "{\"IsMoveableAsset\":true,\"IsOtherAsset\":false}"
+  },
+  {
+   "Code": "0707",
+   "CodeName": "0707",
+   "CodeDescription": "Peralatan Olahraga Khusus",
+   "ParameterData": "{\"IsMoveableAsset\":false,\"IsOtherAsset\":true}"
+  },
+  {
+   "Code": "0406",
+   "CodeName": "0406",
+   "CodeDescription": "Kendaraan Khusus",
+   "ParameterData": "{\"IsMoveableAsset\":true,\"IsOtherAsset\":false}"
+  },
+  {
+   "Code": "0407",
+   "CodeName": "0407",
+   "CodeDescription": "Kereta",
+   "ParameterData": "{\"IsMoveableAsset\":true,\"IsOtherAsset\":false}"
+  },
+  {
+   "Code": "0408",
+   "CodeName": "0408",
+   "CodeDescription": "Pesawat Terbang",
+   "ParameterData": "{\"IsMoveableAsset\":true,\"IsOtherAsset\":false}"
+  },
+  {
+   "Code": "0411",
+   "CodeName": "0411",
+   "CodeDescription": "Gerobak/Troli",
+   "ParameterData": "{\"IsMoveableAsset\":true,\"IsOtherAsset\":false}"
+  },
+  {
+   "Code": "0402",
+   "CodeName": "0402",
+   "CodeDescription": "Motor",
+   "ParameterData": "{\"IsMoveableAsset\":true,\"IsOtherAsset\":false}"
+  },
+  {
+   "Code": "0499",
+   "CodeName": "0499",
+   "CodeDescription": "Aset Bergerak Lainnya",
+   "ParameterData": "{\"IsMoveableAsset\":true,\"IsOtherAsset\":false}"
+  },
+  {
+   "Code": "0710",
+   "CodeName": "0710",
+   "CodeDescription": "Peralatan Lainnya",
+   "ParameterData": "{\"IsMoveableAsset\":false,\"IsOtherAsset\":true}"
+  },
+  {
+   "Code": "0708",
+   "CodeName": "0708",
+   "CodeDescription": "Peralatan Elektronik",
+   "ParameterData": "{\"IsMoveableAsset\":false,\"IsOtherAsset\":true}"
+  },
+  {
+   "Code": "0401",
+   "CodeName": "0401",
+   "CodeDescription": "Sepeda",
+   "ParameterData": "{\"IsMoveableAsset\":true,\"IsOtherAsset\":false}"
+  },
+  {
+   "Code": "0409",
+   "CodeName": "0409",
+   "CodeDescription": "Kapal Laut",
+   "ParameterData": "{\"IsMoveableAsset\":true,\"IsOtherAsset\":false}"
+  },
+  {
+   "Code": "0404",
+   "CodeName": "0404",
+   "CodeDescription": "Bus",
+   "ParameterData": "{\"IsMoveableAsset\":true,\"IsOtherAsset\":false}"
+  },
+  {
+   "Code": "0711",
+   "CodeName": "0711",
+   "CodeDescription": "Jet Ski",
+   "ParameterData": "{\"IsMoveableAsset\":false,\"IsOtherAsset\":true}"
+  },
+  {
+   "Code": "0799",
+   "CodeName": "0799",
+   "CodeDescription": "Aset Lainnya",
+   "ParameterData": "{\"IsMoveableAsset\":false,\"IsOtherAsset\":true}"
+  }
+ ],
+ "GROUP_OF_BUILDINGS": [
+  {
+   "Code": "0502",
+   "CodeName": "Bangunan untuk tempat tinggal",
+   "CodeDescription": "Bangunan untuk tempat tinggal"
+  },
+  {
+   "Code": "0505",
+   "CodeName": "Apartemen",
+   "CodeDescription": "Apartemen"
+  },
+  {
+   "Code": "0503",
+   "CodeName": "Bangunan untuk usaha (toko, pabrik, kantor, gudang, dan sejenisnya)",
+   "CodeDescription": "Bangunan untuk usaha (toko, pabrik, kantor, gudang, dan sejenisnya)"
+  },
+  {
+   "Code": "0599",
+   "CodeName": "Aset tidak Bergerak Lainnya",
+   "CodeDescription": "Aset tidak Bergerak Lainnya"
+  },
+  {
+   "Code": "0504",
+   "CodeName": "Bangunan yang disewakan",
+   "CodeDescription": "Bangunan yang disewakan"
+  }
+ ],
+ "INTANGIBLE_ASSET": [
+  {
+   "Code": "0610",
+   "CodeName": "0610 (ID)",
+   "CodeDescription": "Hak Eksploitasi Sumber Daya Alam dan Hasil Alam Lainnya"
+  },
+  {
+   "Code": "0609",
+   "CodeName": "0609 (ID)",
+   "CodeDescription": "Hak di Lapangan Minyak dan Gas"
+  },
+  {
+   "Code": "0603",
+   "CodeName": "0603 (ID)",
+   "CodeDescription": "Merek dagang"
+  },
+  {
+   "Code": "0607",
+   "CodeName": "0607 (ID)",
+   "CodeDescription": "Goodwill"
+  },
+  {
+   "Code": "0601",
+   "CodeName": "0601 (ID)",
+   "CodeDescription": "Paten"
+  },
+  {
+   "Code": "0699",
+   "CodeName": "0699 (ID)",
+   "CodeDescription": "Harta Tidak Berwujud Lainnya"
+  },
+  {
+   "Code": "0602",
+   "CodeName": "0602 (ID)",
+   "CodeDescription": "Royalti"
+  },
+  {
+   "Code": "0608",
+   "CodeName": "0608 (ID)",
+   "CodeDescription": "Hak Pengusahaan Hutan"
+  },
+  {
+   "Code": "0604",
+   "CodeName": "0604 (ID)",
+   "CodeDescription": "Hak Guna Bangunan"
+  },
+  {
+   "Code": "0605",
+   "CodeName": "0605 (ID)",
+   "CodeDescription": "Hak Guna Usaha"
+  },
+  {
+   "Code": "0606",
+   "CodeName": "0606 (ID)",
+   "CodeDescription": "Hak Pakai"
+  }
+ ],
+ "COMMERCIAL_METHOD": [
+  {
+   "Code": "ML",
+   "CodeName": "ML",
+   "CodeDescription": "Metode Lainnya"
+  },
+  {
+   "Code": "JSP",
+   "CodeName": "JSP",
+   "CodeDescription": "Jumlah Satuan Produksi"
+  },
+  {
+   "Code": "SMG",
+   "CodeName": "SMG",
+   "CodeDescription": "Saldo Menurun Ganda"
+  },
+  {
+   "Code": "JJJ",
+   "CodeName": "JJJ",
+   "CodeDescription": "Jumlah Jam Jasa"
+  },
+  {
+   "Code": "JAT",
+   "CodeName": "JAT",
+   "CodeDescription": "Jumlah Angka Tahun"
+  },
+  {
+   "Code": "SM",
+   "CodeName": "SM",
+   "CodeDescription": "Saldo Menurun"
+  },
+  {
+   "Code": "GL",
+   "CodeName": "GL",
+   "CodeDescription": "Garis Lurus"
+  }
+ ],
+ "FISCAL_METHOD": [
+  {
+   "Code": "GL",
+   "CodeName": "GL",
+   "CodeDescription": "Garis Lurus"
+  },
+  {
+   "Code": "SM",
+   "CodeName": "SM",
+   "CodeDescription": "Saldo Menurun"
+  },
+  {
+   "Code": "JSP",
+   "CodeName": "JSP",
+   "CodeDescription": "Jumlah Satuan Produksi"
+  }
+ ],
+ "DEDUCTION_METHOD": [
+  {
+   "Code": "01",
+   "CodeName": "Beban Langsung",
+   "CodeDescription": "Beban Langsung"
+  },
+  {
+   "Code": "02",
+   "CodeName": "Beban Cadangan",
+   "CodeDescription": "Beban Cadangan"
+  }
+ ],
+ "TYPE_OF_FULFILLMENT": [
+  {
+   "Code": "02",
+   "CodeName": "Perjanjian Tertulis",
+   "CodeDescription": "Perjanjian Tertulis"
+  },
+  {
+   "Code": "01",
+   "CodeName": "Penyerahan Perkara",
+   "CodeDescription": "Penyerahan Perkara"
+  },
+  {
+   "Code": "03",
+   "CodeName": "Publikasi Penerbitan",
+   "CodeDescription": "Publikasi Penerbitan"
+  },
+  {
+   "Code": "04",
+   "CodeName": "Pengakuan Debitur",
+   "CodeDescription": "Pengakuan Debitur"
+  }
+ ],
+ "TYPE_OF_PROMOTION_COST": [
+  {
+   "Code": "EXHIBITION",
+   "CodeName": "EXHIBITION",
+   "CodeDescription": "Biaya pameran produk"
+  },
+  {
+   "Code": "INTRODUCTION",
+   "CodeName": "INTRODUCTION",
+   "CodeDescription": "Biaya pengenalan produk baru"
+  },
+  {
+   "Code": "BENEFIT",
+   "CodeName": "BENEFIT (ID)",
+   "CodeDescription": "Penggantian atau imbalan yang diberikan dalam bentuk natura atau kenikmatan"
+  },
+  {
+   "Code": "ADVERTISING",
+   "CodeName": "ADVERTISING",
+   "CodeDescription": "Biaya periklanan di media elektronik, media cetak, dan/atau media lainnya"
+  },
+  {
+   "Code": "SPONSORSHIP",
+   "CodeName": "SPONSORSHIP",
+   "CodeDescription": "Biaya sponsorship yang berkaitan dengan promosi produk"
+  }
+ ]
+}
