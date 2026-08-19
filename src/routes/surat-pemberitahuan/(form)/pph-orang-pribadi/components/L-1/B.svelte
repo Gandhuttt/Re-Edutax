@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { kodeUntuk, type DaftarReferensi, type KodeReferensi } from "../referensi";
     import Button from "$lib/components/Button.svelte";
     import { closeBsModal } from "$lib/helpers/bsModal";
     import Table from "$lib/components/Table.svelte";
@@ -11,12 +12,13 @@
     // renders its rows, it just offers no way to add or remove them.
     interface Props {
         rows: BarisUtang[];
-        referensi: Record<string, string[]>;
+        referensi: DaftarReferensi;
+        kodeReferensi: KodeReferensi;
         dapatDiubah?: boolean;
         readonly?: boolean;
     }
 
-    let { rows = $bindable(), referensi, dapatDiubah = true, readonly = false }: Props = $props();
+    let { rows = $bindable(), referensi, kodeReferensi, dapatDiubah = true, readonly = false }: Props = $props();
 
     const kosong = (): BarisUtang => ({
         kode: '', deskripsi: '', nikNpwpKreditur: '', namaKreditur: '',
@@ -24,6 +26,9 @@
     });
     let indeksDiubah = $state<number | null>(null);
     let draft = $state<BarisUtang>(kosong());
+
+    // Coretax derives the disabled KODE cell from the chosen description.
+    let kode = $derived(kodeUntuk(kodeReferensi, 'l1_b_deskripsi', draft.deskripsi));
     let errors = $state<Record<string, string>>({});
 
     let bisaEdit = $derived(dapatDiubah && !readonly);
@@ -52,6 +57,8 @@
         if (!draft.keterangan) next.keterangan = 'Kolom ini wajib diisi!';
         errors = next;
         if (Object.keys(next).length > 0) return;
+
+        draft.kode = kode;
 
         if (indeksDiubah === null) rows = [...rows, draft];
         else rows = rows.map((r, i) => (i === indeksDiubah ? draft : r));
@@ -138,7 +145,7 @@
         <div style="display: flex; flex-direction: column; gap: 10px;">
           <div style="display: flex; align-items: center;">
             <label for="b-kode" style="width: 220px;">Kode</label>
-            <input type="text" id="b-kode" value="" readonly style="flex: 1; background-color: #e9ecef;" />
+            <input type="text" id="b-kode" value={kode} readonly style="flex: 1; background-color: #e9ecef;" />
           </div>
           <div style="display: flex; align-items: center;">
             <label for="b-deskripsi" style="width: 220px;">Deskripsi *</label>

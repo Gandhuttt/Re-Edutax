@@ -165,9 +165,11 @@ Title says PENGURANG**AN**, the section heading says PENGURANG.
 - A generic "row editor from column list" component will **not** work. Field
   count ranges 3 to 10, some fields are absent from the grid, some grid columns
   are absent from the modal, and disabled/derived behaviour differs per grid.
-- Since we deliberately keep `Kode` as a plain text input (see
-  `pph-op-kode-plain-text-input`), every `[dis]*Kode` above becomes an ordinary
-  input for us, and the Deskripsi-to-Kode derivation is not implemented.
+- `[dis]*Kode` now means what it says: as of 2026-08-19 we derive Kode from the
+  Deskripsi selection and render it disabled, as Coretax does. (This reverses the
+  earlier plain-text-input decision, which existed only because the codes had no
+  source; see `MODALS.md`.) The exception is L-2 C, whose list matches no
+  reference type, so its Kode renders blank.
 - `Penghasilan Neto` in L-1 D is genuine arithmetic and should stay derived.
 - All dropdown contents are now captured in `REFERENCE-LISTS.txt`: 29 dropdowns,
   **20 distinct lists, 630 options**. Three are shared rather than per-grid:

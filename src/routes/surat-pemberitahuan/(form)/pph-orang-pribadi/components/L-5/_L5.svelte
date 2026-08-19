@@ -1,4 +1,5 @@
 <script lang="ts">
+    import type { DaftarReferensi, KodeReferensi } from "../referensi";
     import Accordion from "$lib/components/AccordionItem.svelte";
     import A from "./A.svelte";
     import B from "./B.svelte";
@@ -7,7 +8,8 @@
 
     interface Props {
         currentTab: string;
-        referensi: Record<string, string[]>;
+        referensi: DaftarReferensi;
+        kodeReferensi: KodeReferensi;
         tahunPajak: number;
         kompensasi: BarisKompensasi[];
         pengurangNeto: BarisPengurang[];
@@ -22,6 +24,7 @@
     let {
         currentTab,
         referensi,
+        kodeReferensi,
         tahunPajak,
         kompensasi = $bindable(),
         pengurangNeto = $bindable(),
@@ -49,6 +52,7 @@
                 <B
                     bind:rows={pengurangNeto}
                     {referensi}
+                    {kodeReferensi}
                     dapatDiubah={Boolean(c3AdaPengurangPenghasilanNeto)}
                     {readonly}
                 />
@@ -59,6 +63,7 @@
                 <C
                     bind:rows={pengurangPph}
                     {referensi}
+                    {kodeReferensi}
                     dapatDiubah={Boolean(c8AdaPengurangPphTerutang)}
                     {readonly}
                 />

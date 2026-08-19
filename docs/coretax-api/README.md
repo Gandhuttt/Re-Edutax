@@ -59,7 +59,7 @@ so nothing here touches a taxpayer account. Response shape:
 Use `./fetch-reference-data.mjs`:
 
 ```sh
-node docs/coretax-api/fetch-reference-data.mjs               # the 14 lists SPT 1770 needs
+node docs/coretax-api/fetch-reference-data.mjs               # the 27 lists SPT 1770 needs
 node docs/coretax-api/fetch-reference-data.mjs --all         # all 425 known types
 node docs/coretax-api/fetch-reference-data.mjs --types PIT_TAX_RATE --out /tmp/rates.json
 ```
@@ -71,8 +71,27 @@ how `../ui-reference/coretax/spt-1770-lampiran/REFERENCE-LISTS.txt` was built, a
 20 lists over one session. More importantly it yields the **Code alongside the
 CodeDescription**, which the UI never shows: Coretax fills the disabled `Kode`
 cells by deriving them from the selected description. That mapping is what
-`MODAL-FIELDS.md` records as unavailable, and the reason `Kode` is currently a
-plain text input in this app.
+`MODAL-FIELDS.md` recorded as unavailable, and having it retired the
+plain-text-`Kode` workaround — seed batch 016 now stores code/description pairs
+for 19 of the 20 lampiran lists and the app derives `Kode` as Coretax does.
+
+Reconciling the hand-captured lists against the endpoint also **repaired 78
+descriptions** that had been transcribed from a clipped option panel and stored
+truncated mid-word. Match options by description, case-insensitively and
+tolerating a truncated prefix; never match by position, because the endpoint
+returns each list in its own order, unrelated to display order.
+
+Two cautions this produced:
+
+- `COUNTRY_CODE` contains **genuine duplicate descriptions** — "Angola" appears
+  as both `AGO` and `AIA` (which is really Anguilla), "Jersey" as `JEY` and
+  `JE`. This is DJP's own data error, faithfully reflected in the UI capture. A
+  description→code map necessarily collapses these; it does not matter today
+  because no `Kode` cell derives from the negara list, but do not "clean it up".
+- L-2 C's 29-option list (penghasilan luar negeri) **matches no reference type**.
+  A sweep of all 416 populated types found nothing that covers it and nothing
+  even close to its size, so this is a checked negative, not an unfinished
+  search.
 
 `PIT_TAX_RATE` is fetchable this way too. Its `ParameterData` carries the Induk
 income-tax bands (`Min`, `Max`, `Rate`, `Minus`) that `../bundle-diff-1770.md`
@@ -110,4 +129,4 @@ is two lists the app itself excludes from its cache — `BLACKLIST_EMAIL_DOMAIN`
 |---|---|
 | `fetch-reference-data.mjs` | the fetcher, no dependencies, plain `node` |
 | `reference-type-names.txt` | 425 type names extracted from `main.js` |
-| `reference-data-1770.json` | the 14 lists SPT 1770 uses, 119 options, checked in |
+| `reference-data-1770.json` | the 27 lists SPT 1770 uses, 658 options, checked in |

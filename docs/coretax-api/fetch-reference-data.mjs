@@ -26,17 +26,33 @@ const HERE = dirname(fileURLToPath(import.meta.url));
 const BASE = 'https://coretaxdjp.pajak.go.id/referencedata/api/currentreferencedata';
 
 // Types the SPT 1770 forms actually use. Everything else is available via --all.
+//
+// Each entry is matched to one of the seed's `daftar` lists by CONTENTS, not by
+// name -- see the alias pitfall in README.md. The one list with no reference type
+// is L-2 C (penghasilan luar negeri, 29 options): a full --all sweep of all 416
+// populated types found no list that covers it, and none is even close to its
+// size, so its KODE stays blank.
 const SUBSET_1770 = [
 	// L-1 harta / utang
 	'ASSET_CASH', 'ASSET_RECEIVEABLE', 'ASSET_INVESTMENTS', 'ASSET_MOVEABLE',
 	'ASSET_NONMOVEABLE', 'ASSET_OTHER',
+	'OWNERSHIP_MOVEABLE_ASSET', 'SOURCE_OF_OWNERSHIP',
+	'PIT_L1A_REMARK', 'PIT_L1_B_REMARK', 'LIST_OF_DEBT',
+	// L-1 E kredit pajak
+	'TAX_TYPE_BY_OTHER_PARTIES',
+	// L-2 A final, L-2 B bukan objek (L-2 C has no reference type)
+	'TAX_CODE', 'INCOME_EXCLUDED_FROM_TAX_FOR_PIT',
+	// shared across lampiran
+	'COUNTRY_CODE', 'CURRENCY',
 	// L-3A-4 Bagian B
 	'DOMESTIC_INCOME',
 	// L-3C penyusutan / amortisasi fiskal
 	'TANGIBLE_ASSET', 'GROUP_OF_BUILDINGS', 'INTANGIBLE_ASSET',
 	'COMMERCIAL_METHOD', 'FISCAL_METHOD',
 	// L-3D daftar nominatif
-	'DEDUCTION_METHOD', 'TYPE_OF_FULFILLMENT', 'TYPE_OF_PROMOTION_COST'
+	'DEDUCTION_METHOD', 'TYPE_OF_FULFILLMENT', 'TYPE_OF_PROMOTION_COST',
+	// L-5 B/C pengurang
+	'TAX_NET_INCOME_DEDUCTION', 'TAX_INCOME_DEDUCTION'
 ];
 
 const argv = process.argv.slice(2);

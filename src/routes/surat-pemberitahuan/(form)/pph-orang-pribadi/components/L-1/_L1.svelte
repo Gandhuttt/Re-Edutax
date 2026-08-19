@@ -12,10 +12,12 @@
     import D from "./D.svelte";
     import E from "./E.svelte";
     import type { BarisBuktiPotong, BarisKeluarga, BarisPekerjaan, BarisUtang, Harta } from "./types";
+    import type { DaftarReferensi, KodeReferensi } from "../referensi";
 
     interface Props {
         currentTab: string;
-        referensi: Record<string, string[]>;
+        referensi: DaftarReferensi;
+        kodeReferensi: KodeReferensi;
         harta: Harta;
         utang: BarisUtang[];
         keluarga: BarisKeluarga[];
@@ -34,6 +36,7 @@
     let {
         currentTab,
         referensi,
+        kodeReferensi,
         harta = $bindable(),
         utang = $bindable(),
         keluarga,
@@ -51,18 +54,18 @@
     <div class="accordion">
         <Accordion item={"A. HARTA PADA AKHIR TAHUN PAJAK"}>
             <div class="tw:p-5">
-                <A1 bind:rows={harta.a1} {referensi} {readonly} />
-                <A2 bind:rows={harta.a2} {referensi} {readonly} />
-                <A3 bind:rows={harta.a3} {referensi} {readonly} />
-                <A4 bind:rows={harta.a4} {referensi} {readonly} />
-                <A5 bind:rows={harta.a5} {referensi} {readonly} />
-                <A6 bind:rows={harta.a6} {referensi} {readonly} />
+                <A1 bind:rows={harta.a1} {referensi} {kodeReferensi} {readonly} />
+                <A2 bind:rows={harta.a2} {referensi} {kodeReferensi} {readonly} />
+                <A3 bind:rows={harta.a3} {referensi} {kodeReferensi} {readonly} />
+                <A4 bind:rows={harta.a4} {referensi} {kodeReferensi} {readonly} />
+                <A5 bind:rows={harta.a5} {referensi} {kodeReferensi} {readonly} />
+                <A6 bind:rows={harta.a6} {referensi} {kodeReferensi} {readonly} />
                 <A7 {harta} />
             </div>
         </Accordion>
         <Accordion item={"B. UTANG PADA AKHIR TAHUN PAJAK"}>
             <div class="tw:p-5">
-                <B bind:rows={utang} {referensi} dapatDiubah={Boolean(i14bMemilikiUtang)} {readonly} />
+                <B bind:rows={utang} {referensi} {kodeReferensi} dapatDiubah={Boolean(i14bMemilikiUtang)} {readonly} />
             </div>
         </Accordion>
         <Accordion item={"C. DAFTAR ANGGOTA KELUARGA YANG MENJADI TANGGUNGAN"}>

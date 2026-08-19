@@ -3,10 +3,12 @@
     import A from "./A.svelte";
     import B from "./B.svelte";
     import type { BarisLainnya } from "./types";
+    import type { DaftarReferensi, KodeReferensi } from "../referensi";
 
     interface Props {
         currentTab: string;
-        referensi: Record<string, string[]>;
+        referensi: DaftarReferensi;
+        kodeReferensi: KodeReferensi;
         lainnya: BarisLainnya[];
         b1cPenghasilanDalamNegeriLainnya: boolean | undefined;
         // Bagian A (Norma). Nama/jenis/bruto are derived from L-3B Bagian C;
@@ -23,6 +25,7 @@
     let {
         currentTab,
         referensi,
+        kodeReferensi,
         lainnya = $bindable(),
         b1cPenghasilanDalamNegeriLainnya,
         normaAktif,
@@ -53,6 +56,7 @@
                 <B
                     bind:rows={lainnya}
                     {referensi}
+                    {kodeReferensi}
                     dapatDiubah={Boolean(b1cPenghasilanDalamNegeriLainnya)}
                     {readonly}
                 />

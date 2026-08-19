@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { kodeUntuk, type DaftarReferensi, type KodeReferensi } from "../referensi";
     import Button from "$lib/components/Button.svelte";
     import Table from "$lib/components/Table.svelte";
     import { closeBsModal } from "$lib/helpers/bsModal";
@@ -12,11 +13,12 @@
     // what rolls into A7.
     interface Props {
         rows: BarisA2[];
-        referensi: Record<string, string[]>;
+        referensi: DaftarReferensi;
+        kodeReferensi: KodeReferensi;
         readonly?: boolean;
     }
 
-    let { rows = $bindable(), referensi, readonly = false }: Props = $props();
+    let { rows = $bindable(), referensi, kodeReferensi, readonly = false }: Props = $props();
 
     const kosong = (): BarisA2 => ({
         kode: '', deskripsi: '', lokasiHarta: '', nomorIdentitasPenerima: '',
@@ -25,6 +27,9 @@
 
     let indeksDiubah = $state<number | null>(null);
     let draft = $state<BarisA2>(kosong());
+
+    // Coretax derives the disabled KODE cell from the chosen description.
+    let kode = $derived(kodeUntuk(kodeReferensi, 'l1_a2_deskripsi', draft.deskripsi));
     let errors = $state<Record<string, string>>({});
 
     let bisaEdit = $derived(!readonly);
@@ -57,6 +62,8 @@
         if (!draft.keterangan) next.keterangan = 'Kolom ini wajib diisi!';
         errors = next;
         if (Object.keys(next).length > 0) return;
+
+        draft.kode = kode;
 
         if (indeksDiubah === null) rows = [...rows, draft];
         else rows = rows.map((r, i) => (i === indeksDiubah ? draft : r));
@@ -146,7 +153,7 @@
         <div style="display: flex; flex-direction: column; gap: 10px;">
           <div style="display: flex; align-items: center;">
             <label for="a2-kode" style="width: 220px;">Kode</label>
-            <input type="text" id="a2-kode" value="" readonly style="flex: 1; background-color: #e9ecef;" />
+            <input type="text" id="a2-kode" value={kode} readonly style="flex: 1; background-color: #e9ecef;" />
           </div>
           <div style="display: flex; align-items: center;">
             <label for="a2-deskripsi" style="width: 220px;">Deskripsi *</label>

@@ -49,14 +49,16 @@ The Kode field is disabled while every other field is editable. The grid shows
 KODE as its own column, so the code is system-assigned from the Deskripsi
 selection.
 
-**We are deliberately not copying this.** Decision 2026-08-15: Kode is a plain
-text input in our implementation, typed by the peserta. No derivation from
-Deskripsi, no disabled state. This is a known, intentional divergence from
-Coretax, not an oversight, so do not "fix" it later.
+~~We are deliberately not copying this.~~ **The 2026-08-15 decision was reversed
+on 2026-08-19.** It was made because we had no source for the codes -- the UI
+never shows them. The reference-data endpoint does, so we now copy Coretax's
+behaviour: Kode is disabled and derived from the Deskripsi selection.
 
-Consequence: our reference lists do not need to carry codes paired to
-descriptions, and L-1 A4 (Harta bergerak, the one grid with a KODE but no
-Deskripsi dropdown) stops being a special case worth investigating.
+Consequence: our reference lists **do** carry codes paired to descriptions (seed
+016, 601 of 630 options). L-1 A4 is no longer a special case either -- its list
+is `ASSET_MOVEABLE` and its Kode derives from the Tipe selection like the rest.
+The one grid still showing a blank Kode is L-2 C, whose list matches no reference
+type.
 
 ### Validation fires on blur, per field
 

@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { kodeUntuk, type DaftarReferensi, type KodeReferensi } from "../referensi";
     import Button from "$lib/components/Button.svelte";
     import { closeBsModal } from "$lib/helpers/bsModal";
     import Table from "$lib/components/Table.svelte";
@@ -20,12 +21,13 @@
     // because every grid was populated at once.
     interface Props {
         rows: BarisLuarNegeri[];
-        referensi: Record<string, string[]>;
+        referensi: DaftarReferensi;
+        kodeReferensi: KodeReferensi;
         dapatDiubah?: boolean;
         readonly?: boolean;
     }
 
-    let { rows = $bindable(), referensi, dapatDiubah = true, readonly = false }: Props = $props();
+    let { rows = $bindable(), referensi, kodeReferensi, dapatDiubah = true, readonly = false }: Props = $props();
 
     const kosong = (): BarisLuarNegeri => ({
         namaSumber: '', negara: '', tanggalTransaksi: '', jenisPenghasilan: '',
@@ -34,6 +36,11 @@
     });
     let indeksDiubah = $state<number | null>(null);
     let draft = $state<BarisLuarNegeri>(kosong());
+
+    // Coretax derives the disabled KODE cell from the chosen description. This
+    // list has no reference type, so the lookup yields '' and the cell stays
+    // blank -- wired anyway so it fills in if a source is ever found.
+    let kode = $derived(kodeUntuk(kodeReferensi, 'l2_c_jenis_penghasilan', draft.jenisPenghasilan));
     let errors = $state<Record<string, string>>({});
 
     let bisaEdit = $derived(dapatDiubah && !readonly);
@@ -69,6 +76,8 @@
         if (!draft.kreditPajakDiperhitungkan) next.kreditPajakDiperhitungkan = 'Kolom ini wajib diisi!';
         errors = next;
         if (Object.keys(next).length > 0) return;
+
+        draft.kodePenghasilan = kode;
 
         if (indeksDiubah === null) rows = [...rows, draft];
         else rows = rows.map((r, i) => (i === indeksDiubah ? draft : r));
@@ -190,7 +199,7 @@
           {#if errors.jenisPenghasilan}<span class="error">{errors.jenisPenghasilan}</span>{/if}
           <div style="display: flex; align-items: center;">
             <label for="l2c-kode" style="width: 220px;">Kode Penghasilan</label>
-            <input type="text" id="l2c-kode" value="" readonly style="flex: 1; background-color: #e9ecef;" />
+            <input type="text" id="l2c-kode" value={kode} readonly style="flex: 1; background-color: #e9ecef;" />
           </div>
           <div style="display: flex; align-items: center;">
             <label for="l2c-neto" style="width: 220px;">Penghasilan Neto *</label>

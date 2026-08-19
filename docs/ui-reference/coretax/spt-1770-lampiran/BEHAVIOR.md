@@ -62,9 +62,13 @@ the harta grids' 4-digit one.
 Any mirror of these lists must carry the code alongside the label; deriving it
 from row order would be wrong for at least four grids.
 
-We **deliberately do not implement this derivation at all** (see
-`pph-op-kode-plain-text-input`): our Kode stays a plain typed field. Recorded
-only so the real codes are interpretable if we ever need to interoperate.
+~~We deliberately do not implement this derivation at all.~~ **Superseded
+2026-08-19.** That decision rested on not having the codes; the reference-data
+endpoint supplies them, so we now derive Kode from Deskripsi exactly as Coretax
+does. 19 of the 20 lists carry codes in seed 016; L-2 C is the exception and its
+Kode stays blank. The observation above -- that Kode is a stored attribute of the
+option, not a positional index -- is what makes the derivation correct, and it
+still holds.
 
 ## 3. Input coercion, silent in both directions
 

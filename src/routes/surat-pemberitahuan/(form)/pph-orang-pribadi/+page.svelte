@@ -57,7 +57,7 @@
 		lampiran4,
 		lampiran5
 	} = await getSptPphOrangPribadi();
-	const referensi = await getReferensiLampiran();
+	const { daftar: referensi, kode: kodeReferensi } = await getReferensiLampiran();
 	const saveForm = saveSptPphOrangPribadi.for(spt.id);
 
 	let metodePembukuan = $state(spt.metodePembukuan);
@@ -755,6 +755,7 @@
 			<L1
 				{currentTab}
 				{referensi}
+				{kodeReferensi}
 				bind:harta={l1Harta}
 				bind:utang={l1Utang}
 				keluarga={l1Keluarga}
@@ -770,6 +771,7 @@
 			<L2
 				{currentTab}
 				{referensi}
+				{kodeReferensi}
 				bind:final={l2Final}
 				bind:bukanObjek={l2BukanObjek}
 				bind:luarNegeri={l2LuarNegeri}
@@ -791,6 +793,7 @@
 			<L3A4
 				{currentTab}
 				{referensi}
+				{kodeReferensi}
 				bind:lainnya={l3a4Lainnya}
 				{b1cPenghasilanDalamNegeriLainnya}
 				normaAktif={b1b3Norma === 'ya_norma'}
@@ -830,6 +833,7 @@
 			<L5
 				{currentTab}
 				{referensi}
+				{kodeReferensi}
 				tahunPajak={spt.tahunPajak}
 				bind:kompensasi={l5Kompensasi}
 				bind:pengurangNeto={l5PengurangNeto}

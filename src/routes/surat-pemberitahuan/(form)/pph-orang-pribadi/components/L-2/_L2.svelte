@@ -1,4 +1,5 @@
 <script lang="ts">
+    import type { DaftarReferensi, KodeReferensi } from "../referensi";
     import Accordion from "$lib/components/AccordionItem.svelte";
     import A from "./A.svelte";
     import B from "./B.svelte";
@@ -10,7 +11,8 @@
     // currency and a different empty-state string.
     interface Props {
         currentTab: string;
-        referensi: Record<string, string[]>;
+        referensi: DaftarReferensi;
+        kodeReferensi: KodeReferensi;
         final: BarisFinal[];
         bukanObjek: BarisBukanObjek[];
         luarNegeri: BarisLuarNegeri[];
@@ -25,6 +27,7 @@
     let {
         currentTab,
         referensi,
+        kodeReferensi,
         final = $bindable(),
         bukanObjek = $bindable(),
         luarNegeri = $bindable(),
@@ -39,17 +42,17 @@
     <div class="accordion">
         <Accordion item={"A. PENGHASILAN YANG DIKENAKAN PAJAK PENGHASILAN BERSIFAT FINAL"}>
             <div class="tw:p-5">
-                <A bind:rows={final} {referensi} dapatDiubah={Boolean(i14cPenghasilanFinal)} {readonly} />
+                <A bind:rows={final} {referensi} {kodeReferensi} dapatDiubah={Boolean(i14cPenghasilanFinal)} {readonly} />
             </div>
         </Accordion>
         <Accordion item={"B. PENGHASILAN YANG TIDAK TERMASUK OBJEK PAJAK"}>
             <div class="tw:p-5">
-                <B bind:rows={bukanObjek} {referensi} dapatDiubah={Boolean(i14dBukanObjekPajak)} {readonly} />
+                <B bind:rows={bukanObjek} {referensi} {kodeReferensi} dapatDiubah={Boolean(i14dBukanObjekPajak)} {readonly} />
             </div>
         </Accordion>
         <Accordion item={"C. PENGHASILAN NETO LUAR NEGERI"}>
             <div class="tw:p-5">
-                <C bind:rows={luarNegeri} {referensi} dapatDiubah={Boolean(b1dPenghasilanLuarNegeri)} {readonly} />
+                <C bind:rows={luarNegeri} {referensi} {kodeReferensi} dapatDiubah={Boolean(b1dPenghasilanLuarNegeri)} {readonly} />
             </div>
         </Accordion>
     </div>

@@ -512,8 +512,13 @@ accurate, and what needed correcting were the inferences drawn from them.
 **Kept as-is** — accurate, and about appearance or about our own deliberate
 choices rather than about Coretax's behaviour: the modal field inventories, the
 grid column tables (`NOTES.md`'s L-3A-4 Bagian A columns were right all along),
-the positional-Kode correction in `BEHAVIOR.md`, the spousal-NPWP lookup note, and
-the `Kode`-as-plain-text decision.
+the positional-Kode correction in `BEHAVIOR.md`, and the spousal-NPWP lookup note.
+
+The `Kode`-as-plain-text decision was in this list when it was written, on the
+grounds that it was our own deliberate choice rather than a misreading of
+Coretax. That no longer holds: the choice was forced by not having the codes, and
+the reference-data endpoint has them. It was reversed on 2026-08-19 and Kode is
+now derived from Deskripsi in every lampiran but L-2 C. See `MODALS.md`.
 
 `docs/ui-reference/README.md` now opens with the reading rules this exercise
 produced: separate observation from inference, treat negative claims as the

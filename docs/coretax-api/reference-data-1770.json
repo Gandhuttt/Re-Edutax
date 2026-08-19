@@ -321,6 +321,2884 @@
    "CodeDescription": "Paten"
   }
  ],
+ "OWNERSHIP_MOVEABLE_ASSET": [
+  {
+   "Code": "OTHER",
+   "CodeName": "Atas nama pihak lain",
+   "CodeDescription": "Atas nama pihak lain"
+  },
+  {
+   "Code": "TAXPAYER",
+   "CodeName": "Atas nama sendiri",
+   "CodeDescription": "Atas nama sendiri"
+  }
+ ],
+ "SOURCE_OF_OWNERSHIP": [
+  {
+   "Code": "GIFT",
+   "CodeName": "Hadiah",
+   "CodeDescription": "Hadiah"
+  },
+  {
+   "Code": "OWN",
+   "CodeName": "Hasil Sendiri",
+   "CodeDescription": "Hasil Sendiri"
+  },
+  {
+   "Code": "GRANT",
+   "CodeName": "Hibah",
+   "CodeDescription": "Hibah"
+  },
+  {
+   "Code": "INHERITANCE",
+   "CodeName": "Warisan",
+   "CodeDescription": "Warisan"
+  },
+  {
+   "Code": "DEBT",
+   "CodeName": "Utang",
+   "CodeDescription": "Utang"
+  },
+  {
+   "Code": "OTHERSOURCES",
+   "CodeName": "Sumber lainnya",
+   "CodeDescription": "Sumber lainnya"
+  }
+ ],
+ "PIT_L1A_REMARK": [
+  {
+   "Code": "01",
+   "CodeName": "01 (ID)",
+   "CodeDescription": "Harta PPS"
+  },
+  {
+   "Code": "02",
+   "CodeName": "02 (ID)",
+   "CodeDescription": "Harta Investasi PPS"
+  }
+ ],
+ "PIT_L1_B_REMARK": [
+  {
+   "Code": "1",
+   "CodeName": "1 (ID)",
+   "CodeDescription": "Debt in relation to Voluntary Disclosure Program Assets/Utang terkait PPS"
+  }
+ ],
+ "LIST_OF_DEBT": [
+  {
+   "Code": "101",
+   "CodeName": "Utang Bank / Lembaga Keuangan Bukan Bank (KPR, Leasing Kendaraan Bermotor, dan sejenisnya)",
+   "CodeDescription": "Utang Bank / Lembaga Keuangan Bukan Bank (KPR, Leasing Kendaraan Bermotor, dan sejenisnya)"
+  },
+  {
+   "Code": "103",
+   "CodeName": "Utang Afiliasi (Pinjaman dari pihak yang memiliki hubungan istimewa sebagaimana dimaksud dalam Pasal 18 ayat (4) Undang-Undang PPh)",
+   "CodeDescription": "Utang Afiliasi (Pinjaman dari pihak yang memiliki hubungan istimewa sebagaimana dimaksud dalam Pasal 18 ayat (4) Undang-Undang PPh)"
+  },
+  {
+   "Code": "109",
+   "CodeName": "Utang Lainnya",
+   "CodeDescription": "Utang Lainnya"
+  },
+  {
+   "Code": "102",
+   "CodeName": "Kartu Kredit",
+   "CodeDescription": "Kartu Kredit"
+  }
+ ],
+ "TAX_TYPE_BY_OTHER_PARTIES": [
+  {
+   "Code": "EXCESSOVERPAYMENT",
+   "CodeName": "EXCESSOVERPAYMENT (ID)",
+   "CodeDescription": "Nilai LB dalam SPT yang dianggap bukan merupakan lebih bayar",
+   "ParameterData": "{\"PIT\":true,\"CIT\":true}"
+  },
+  {
+   "Code": "ARTICLE15",
+   "CodeName": "ARTICLE15 (ID)",
+   "CodeDescription": "PPh Pasal 15",
+   "ParameterData": "{\"PIT\":true,\"CIT\":true}"
+  },
+  {
+   "Code": "ARTICLE21",
+   "CodeName": "ARTICLE21 (ID)",
+   "CodeDescription": "PPh Pasal 21",
+   "ParameterData": "{\"PIT\":true,\"CIT\":false}"
+  },
+  {
+   "Code": "ARTICLE22",
+   "CodeName": "ARTICLE22 (ID)",
+   "CodeDescription": "PPh Pasal 22",
+   "ParameterData": "{\"PIT\":true,\"CIT\":true}"
+  },
+  {
+   "Code": "ARTICLE23",
+   "CodeName": "ARTICLE23 (ID)",
+   "CodeDescription": "PPh Pasal 23",
+   "ParameterData": "{\"PIT\":true,\"CIT\":true}"
+  },
+  {
+   "Code": "ARTICLE26",
+   "CodeName": "ARTICLE26 (ID)",
+   "CodeDescription": "PPh Pasal 26",
+   "ParameterData": "{\"PIT\":true,\"CIT\":true}"
+  },
+  {
+   "Code": "BORNEBYGOVERNMENT",
+   "CodeName": "BORNEBYGOVERNMENT (ID)",
+   "CodeDescription": "PPh Ditanggung Pemerintah",
+   "ParameterData": "{\"PIT\":true,\"CIT\":true}"
+  },
+  {
+   "Code": "BORNEBYGOVERNMENTFOREIGNAID",
+   "CodeName": "BORNEBYGOVERNMENTFOREIGNAID (ID)",
+   "CodeDescription": "PPh Ditanggung Pemerintah(Proyek Bantuan Luar Negeri)",
+   "ParameterData": "{\"PIT\":true,\"CIT\":true}"
+  }
+ ],
+ "TAX_CODE": [
+  {
+   "Code": "21-100-29",
+   "CodeName": "21-100-29 (ID)",
+   "CodeDescription": "Upah Pegawai Tidak Tetap yang Dibayarkan secara Harian, Mingguan, Satuan dan Borongan dengan Penghasilan Bruto sampai dengan Rp2.500.000 Sehari yang Mendapat Fasilitas di Daerah Tertentu"
+  },
+  {
+   "Code": "21-100-31",
+   "CodeName": "21-100-31 (ID)",
+   "CodeDescription": "Upah Pegawai Tidak Tetap yang Dibayarkan secara Harian, Mingguan, Satuan dan Borongan dengan Penghasilan Bruto lebih dari Rp2.500.000 Sehari yang Mendapat Fasilitas di Daerah Tertentu"
+  },
+  {
+   "Code": "21-100-32",
+   "CodeName": "21-100-32 (ID)",
+   "CodeDescription": "Penghasilan yang Diterima atau Diperoleh Pegawai Tetap yang Menerima Fasilitas di Daerah Tertentu"
+  },
+  {
+   "Code": "21-401-01",
+   "CodeName": "21-401-01 (ID)",
+   "CodeDescription": "Uang Pesangon yang Dibayarkan Sekaligus"
+  },
+  {
+   "Code": "21-401-02",
+   "CodeName": "21-401-02 (ID)",
+   "CodeDescription": "Uang Manfaat Pensiun, Tunjangan Hari Tua atau Jaminan Hari Tua dan Pembayaran Sejenis yang Dibayarkan Sekaligus"
+  },
+  {
+   "Code": "21-402-01",
+   "CodeName": "21-402-01 (ID)",
+   "CodeDescription": "Honor dan Imbalan Lain yang Dibebankan Dibebankan kepada APBN atau APBD yang Diterima oleh PNS, Anggota TNI/POLRI, Pejabat Negara dan Pensiunannya (LAMA)"
+  },
+  {
+   "Code": "21-402-02",
+   "CodeName": "21-402-02 (ID)",
+   "CodeDescription": "Honor atau Imbalan Lain yang Dibebankan kepada APBN atau APBD yang Diterima oleh PNS Golongan III, Anggota TNI dan Anggota POLRI Golongan Pangkat Perwira Pertama, dan pensiunannya"
+  },
+  {
+   "Code": "21-402-03",
+   "CodeName": "21-402-03 (ID)",
+   "CodeDescription": "Honor atau Imbalan Lain yang Dibebankan kepada APBN atau APBD yang Diterima oleh Pejabat Negara, PNS Golongan IV, Anggota TNI dan Anggota POLRI Golongan Pangkat Perwira Menengah dan Perwira Tinggi, dan Pensiunannya"
+  },
+  {
+   "Code": "21-402-04",
+   "CodeName": "21-402-04 (ID)",
+   "CodeDescription": "Honor atau Imbalan Lain yang Dibebankan kepada APBN atau APBD yang Diterima oleh PNS Golongan I dan Golongan II, Anggota TNI dan Anggota POLRI Golongan Pangkat Tamtama dan Bintara, dan Pensiunannya"
+  },
+  {
+   "Code": "21-499-99",
+   "CodeName": "21-499-99 (ID)",
+   "CodeDescription": "Objek PPh Pasal 21 yang Bersifat Final Lainnya"
+  },
+  {
+   "Code": "22-101-02",
+   "CodeName": "22-101-02 (ID)",
+   "CodeDescription": "Penghasilan Sehubungan dengan Transaksi Penjualan Barang, Penyerahan Jasa, dan/atau Persewaan serta Penghasilan Lain Sehubungan dengan Penggunaan Harta yang Dilakukan Melalui Pihak Lain dalam Sistem Informasi Pengadaan Pemerintah (Final)"
+  },
+  {
+   "Code": "22-102-02",
+   "CodeName": "22-102-02 (ID)",
+   "CodeDescription": "Penghasilan yang Diterima atau Diperoleh Pedagang Dalam Negeri Penjualan Barang, Penyerahan Jasa, dan/atau Persewaan serta Penghasilan Lain Sehubungan dengan Penggunaan Harta yang Dilakukan Melalui Perdagangan Melalui Sistem Elektronik (Final)"
+  },
+  {
+   "Code": "22-401-01",
+   "CodeName": "22-401-01 (ID)",
+   "CodeDescription": "Penjualan BBM oleh Pertamina atau Anak Perusahaan Pertamina Kepada SPBU (Final)"
+  },
+  {
+   "Code": "22-401-02",
+   "CodeName": "22-401-02 (ID)",
+   "CodeDescription": "Penjualan BBM oleh Badan Usaha Selain Pertamina atau Anak Perusahaan Pertamina Kepada SPBU/Agen/Penyalur  (Final)"
+  },
+  {
+   "Code": "22-401-03",
+   "CodeName": "22-401-03 (ID)",
+   "CodeDescription": "Penjualan BBG oleh produsen/importir Kepada SPBU/Agen/Penyalur (Final)"
+  },
+  {
+   "Code": "22-401-04",
+   "CodeName": "22-401-04 (ID)",
+   "CodeDescription": "Penjualan BBM oleh Pertamina atau Anak Perusahaan Pertamina kepada Agen/Penyalur selain SPBU (Final)"
+  },
+  {
+   "Code": "22-405-01",
+   "CodeName": "22-405-01 (ID)",
+   "CodeDescription": "Penghasilan Sehubungan dengan Aset Kripto yang dipungut oleh Penyelenggara Perdagangan Melalui Sistem Elektronik yang Merupakan Pedagang Fisik Aset Kripto"
+  },
+  {
+   "Code": "22-405-02",
+   "CodeName": "22-405-02 (ID)",
+   "CodeDescription": "Penghasilan Sehubungan dengan Aset Kripto yang dipungut oleh Penyelenggara Perdagangan Melalui Sistem Elektronik yang Bukan Merupakan Pedagang Fisik Aset Kripto"
+  },
+  {
+   "Code": "22-405-03",
+   "CodeName": "22-405-03 (ID)",
+   "CodeDescription": "Penghasilan Sehubungan dengan Aset Kripto (Setor Sendiri)"
+  },
+  {
+   "Code": "28-401-01",
+   "CodeName": "28-401-01 (ID)",
+   "CodeDescription": "Bunga Obligasi, Surat Utang Negara, atau Obligasi Daerah yang Diterima Wajib Pajak Dalam Negeri dan Bentuk Usaha Tetap."
+  },
+  {
+   "Code": "28-401-03",
+   "CodeName": "28-401-03 (ID)",
+   "CodeDescription": "Bunga Obligasi yang Diterima Wajib Pajak Dalam Negeri dan Bentuk Usaha Tetap yang diadministrasikan oleh BI"
+  },
+  {
+   "Code": "28-401-04",
+   "CodeName": "28-401-04 (ID)",
+   "CodeDescription": "Diskonto Surat Perbendaharaan Negara yang Diterima Wajib Pajak Dalam Negeri dan Bentuk Usaha Tetap"
+  },
+  {
+   "Code": "28-401-05",
+   "CodeName": "28-401-05 (ID)",
+   "CodeDescription": "Diskonto Surat Perbendaharaan Negara yang Diterima Wajib Pajak Penduduk/Berkedudukan di Luar Negeri"
+  },
+  {
+   "Code": "28-401-06",
+   "CodeName": "28-401-06 (ID)",
+   "CodeDescription": "Bunga Obligasi yang Diterima Wajib Pajak Dalam Negeri dan Bentuk Usaha Tetap"
+  },
+  {
+   "Code": "28-402-01",
+   "CodeName": "28-402-01 (ID)",
+   "CodeDescription": "Pengalihan Hak atas Tanah dan/atau Bangunan"
+  },
+  {
+   "Code": "28-402-02",
+   "CodeName": "28-402-02 (ID)",
+   "CodeDescription": "Pengalihan Rumah Sederhana dan Rumah Susun Sederhana yang Dilakukan oleh WP yang Usaha Pokoknya Mengalihkan Hak atas Tanah dan/atau Bangunan"
+  },
+  {
+   "Code": "28-402-03",
+   "CodeName": "28-402-03 (ID)",
+   "CodeDescription": "Pengalihan Hak atas Tanah dan/atau Bangunan kepada Pemerintah, BUMN yang Mendapat Penugasan Khusus dari Pemerintah, atau BUMD yang Mendapat Penugasan Khusus dari Kepala Daerah, sesuai UU mengenai Pengadaan Tanah bagi Pembangunan untuk Kepentingan Umum"
+  },
+  {
+   "Code": "28-403-02",
+   "CodeName": "28-403-02 (ID)",
+   "CodeDescription": "Persewaan Tanah dan/atau Bangunan"
+  },
+  {
+   "Code": "28-404-01",
+   "CodeName": "28-404-01 (ID)",
+   "CodeDescription": "Bunga Tabungan dan Bunga Deposito yang Ditempatkan di Dalam Negeri yang Dananya Bersumber Selain dari Devisa Hasil Ekspor (DHE)"
+  },
+  {
+   "Code": "28-404-02",
+   "CodeName": "28-404-02 (ID)",
+   "CodeDescription": "Bunga Deposito yang Ditempatkan di Dalam Negeri (mata uang IDR bersumber dari DHE tenor 1 bulan)"
+  },
+  {
+   "Code": "28-404-03",
+   "CodeName": "28-404-03 (ID)",
+   "CodeDescription": "Bunga Deposito yang Ditempatkan di Dalam Negeri (mata uang IDR bersumber dari DHE tenor 3 bulan)"
+  },
+  {
+   "Code": "28-404-04",
+   "CodeName": "28-404-04 (ID)",
+   "CodeDescription": "Bunga Deposito yang Ditempatkan di Dalam Negeri (mata uang IDR bersumber dari DHE tenor 6 bulan atau lebih)"
+  },
+  {
+   "Code": "28-404-05",
+   "CodeName": "28-404-05 (ID)",
+   "CodeDescription": "Bunga Deposito yang Ditempatkan di Dalam Negeri (mata uang USD bersumber dari DHE tenor 1 bulan)"
+  },
+  {
+   "Code": "28-404-06",
+   "CodeName": "28-404-06 (ID)",
+   "CodeDescription": "Bunga Deposito yang Ditempatkan di Dalam Negeri (mata uang USD bersumber dari DHE tenor 3 bulan)"
+  },
+  {
+   "Code": "28-404-07",
+   "CodeName": "28-404-07 (ID)",
+   "CodeDescription": "Bunga Deposito yang Ditempatkan di Dalam Negeri (mata uang USD bersumber dari DHE tenor 6 bulan)"
+  },
+  {
+   "Code": "28-404-08",
+   "CodeName": "28-404-08 (ID)",
+   "CodeDescription": "Bunga Deposito yang Ditempatkan di Dalam Negeri (mata uang USD bersumber dari DHE tenor lebih 6 bulan)"
+  },
+  {
+   "Code": "28-404-09",
+   "CodeName": "28-404-09 (ID)",
+   "CodeDescription": "Bunga Deposito/Tabungan yang Ditempatkan di Luar Negeri Melalui Bank yang Didirikan atau Bertempat Kedudukan di Indonesia atau Cabang Bank Luar Negeri di Indonesia"
+  },
+  {
+   "Code": "28-404-10",
+   "CodeName": "28-404-10 (ID)",
+   "CodeDescription": "Diskonto Sertifikat Bank Indonesia"
+  },
+  {
+   "Code": "28-404-11",
+   "CodeName": "28-404-11 (ID)",
+   "CodeDescription": "Jasa Giro"
+  },
+  {
+   "Code": "28-405-01",
+   "CodeName": "28-405-01 (ID)",
+   "CodeDescription": "Hadiah Undian"
+  },
+  {
+   "Code": "28-406-01",
+   "CodeName": "28-406-01 (ID)",
+   "CodeDescription": "Transaksi Penjualan Saham di Bursa Efek (Bukan Saham Pendiri)"
+  },
+  {
+   "Code": "28-407-01",
+   "CodeName": "28-407-01 (ID)",
+   "CodeDescription": "Transaksi Penjualan Saham di Bursa Efek (Saham Pendiri)"
+  },
+  {
+   "Code": "28-408-01",
+   "CodeName": "28-408-01 (ID)",
+   "CodeDescription": "Transaksi Penjualan Saham Milik Perusahaan Modal Ventura Tidak di Bursa Efek"
+  },
+  {
+   "Code": "28-409-08",
+   "CodeName": "28-409-08 (ID)",
+   "CodeDescription": "Jasa Konstruksi Berupa Jasa Perencanaan Konstruksi (Dengan Kualifikasi Usaha) yang Disetor Sendiri"
+  },
+  {
+   "Code": "28-409-09",
+   "CodeName": "28-409-09 (ID)",
+   "CodeDescription": "Jasa Konstruksi Berupa Jasa Perencanaan Konstruksi (Tanpa Kualifikasi Usaha)"
+  },
+  {
+   "Code": "28-409-10",
+   "CodeName": "28-409-10 (ID)",
+   "CodeDescription": "Jasa Konstruksi Berupa Jasa Pelaksanaan Konstruksi (Kualifikasi Usaha Kecil)"
+  },
+  {
+   "Code": "28-409-11",
+   "CodeName": "28-409-11 (ID)",
+   "CodeDescription": "Jasa Konstruksi Berupa Jasa Pelaksanaan Konstruksi (Kualifikasi Usaha Menengah dan Besar)"
+  },
+  {
+   "Code": "28-409-12",
+   "CodeName": "28-409-12 (ID)",
+   "CodeDescription": "Jasa Konstruksi Berupa Jasa Pelaksanaan Konstruksi (Tanpa Kualifikasi Usaha)"
+  },
+  {
+   "Code": "28-409-13",
+   "CodeName": "28-409-13 (ID)",
+   "CodeDescription": "Jasa Konstruksi Berupa Jasa Pengawasan Konstruksi (Dengan Kualifikasi Usaha)"
+  },
+  {
+   "Code": "28-409-14",
+   "CodeName": "28-409-14 (ID)",
+   "CodeDescription": "Jasa Konstruksi Berupa Jasa Pengawasan Konstruksi (Tanpa Kualifikasi Usaha)"
+  },
+  {
+   "Code": "28-409-23",
+   "CodeName": "28-409-23 (ID)",
+   "CodeDescription": "Pekerjaan Konstruksi yang Dilakukan oleh Penyedia Jasa yang Tidak Memiliki Sertifikat Badan Usaha Atau Sertifikat Kompetensi Kerja untuk Usaha Orang Perseorangan"
+  },
+  {
+   "Code": "28-409-24",
+   "CodeName": "28-409-24 (ID)",
+   "CodeDescription": "Pekerjaan Konstruksi yang Dilakukan oleh Penyedia Jasa yang Memiliki Sertifikat Selain Sertifikat Badan Usaha Kualifikasi Kecil atau Sertifikat Kompetensi Kerja untuk Usaha Orang Perseorangan"
+  },
+  {
+   "Code": "28-409-25",
+   "CodeName": "28-409-25 (ID)",
+   "CodeDescription": "Pekerjaan Konstruksi Terintegrasi yang Dilakukan oleh Penyedia Jasa yang Memiliki Sertifikat Badan Usaha"
+  },
+  {
+   "Code": "28-409-26",
+   "CodeName": "28-409-26 (ID)",
+   "CodeDescription": "Pekerjaan Konstruksi Terintegrasi yang Dilakukan oleh Penyedia Jasa yang Tidak Memiliki Sertifikat Badan Usaha"
+  },
+  {
+   "Code": "28-409-27",
+   "CodeName": "28-409-27 (ID)",
+   "CodeDescription": "Jasa Konsultansi Konstruksi yang Dilakukan oleh Penyedia Jasa yang Memiliki Sertifikat Badan Usaha atau Sertifikat Kompetensi Kerja untuk Usaha Orang Perseorangan"
+  },
+  {
+   "Code": "28-409-28",
+   "CodeName": "28-409-28 (ID)",
+   "CodeDescription": "Jasa Konsultansi Konstruksi yang Dilakukan oleh Penyedia Jasa yang Tidak Memiliki Sertifikat Badan Usaha atau Sertifikat Kompetensi Kerja untuk Usaha Orang Perseorangan"
+  },
+  {
+   "Code": "28-410-01",
+   "CodeName": "28-410-01 (ID)",
+   "CodeDescription": "Imbalan yang Diterima/Diperoleh Sehubungan dengan Pengangkutan Orang dan/atau Barang Termasuk Penyewaan Kapal Laut Oleh Perusahaan Pelayaran Dalam Negeri"
+  },
+  {
+   "Code": "28-410-02",
+   "CodeName": "28-410-02 (ID)",
+   "CodeDescription": "Imbalan yang Dibayarkan/Terutang kepada Perusahaan Pelayaran Dalam Negeri"
+  },
+  {
+   "Code": "28-411-01",
+   "CodeName": "28-411-01 (ID)",
+   "CodeDescription": "Imbalan yang Dibayarkan/Terutang kepada Perusahaan Pelayaran dan/atau Penerbangan Luar Negeri Sehubungan dengan Pengangkutan Orang dan/atau Barang (Selain Berdasarkan Perjanjian Charter)"
+  },
+  {
+   "Code": "28-411-02",
+   "CodeName": "28-411-02 (ID)",
+   "CodeDescription": "Imbalan Charter Kapal Laut dan/atau Pesawat Udara yang Dibayarkan/ Terutang kepada Perusahaan Pelayaran dan/atau Penerbangan Luar Negeri  melalui BUT di Indonesia"
+  },
+  {
+   "Code": "28-413-01",
+   "CodeName": "28-413-01 (ID)",
+   "CodeDescription": "Penghasilan Wajib Pajak Luar Negeri yang Mempunyai Kantor Perwakilan Dagang di Indonesia"
+  },
+  {
+   "Code": "28-416-01",
+   "CodeName": "28-416-01 (ID)",
+   "CodeDescription": "Revaluasi atau penilaian kembali aset tetap"
+  },
+  {
+   "Code": "28-417-01",
+   "CodeName": "28-417-01 (ID)",
+   "CodeDescription": "Bunga Simpanan yang Dibayarkan oleh Koperasi kepada Anggota Wajib Pajak Orang Pribadi (bunga sampai dengan Rp240.000,00)"
+  },
+  {
+   "Code": "28-417-02",
+   "CodeName": "28-417-02 (ID)",
+   "CodeDescription": "Bunga Simpanan yang Dibayarkan oleh Koperasi kepada Anggota Wajib Pajak Orang Pribadi (bunga di atas Rp240.000,00)"
+  },
+  {
+   "Code": "28-419-01",
+   "CodeName": "28-419-01 (ID)",
+   "CodeDescription": "Dividen yang Diterima/Diperoleh Wajib Pajak Orang Pribadi Dalam Negeri"
+  },
+  {
+   "Code": "28-421-01",
+   "CodeName": "28-421-01 (ID)",
+   "CodeDescription": "Uplift Hulu Migas"
+  },
+  {
+   "Code": "28-421-02",
+   "CodeName": "28-421-02 (ID)",
+   "CodeDescription": "Participating Interest Eksplorasi Hulu Migas"
+  },
+  {
+   "Code": "28-421-03",
+   "CodeName": "28-421-03 (ID)",
+   "CodeDescription": "Participating Interest Eksploitasi Hulu Migas"
+  },
+  {
+   "Code": "28-423-01",
+   "CodeName": "28-423-01 (ID)",
+   "CodeDescription": "Pemotongan atau pemungutan PPh atas penjualan barang atau penyerahan jasa yang dilakukan oleh Wajib Pajak dengan peredaran bruto tertentu sesuai dengan Peraturan Pemerintah Nomor 23 Tahun 2018 atau Peraturan Pemerintah Nomor 55 Tahun 2022."
+  },
+  {
+   "Code": "28-423-02",
+   "CodeName": "28-423-02 (ID)",
+   "CodeDescription": "Pemotongan atau pemungutan PPh atas transaksi pembelian yang dilakukan oleh Wajib Pajak dengan peredaran bruto tertentu sesuai dengan Peraturan Pemerintah Nomor 55 Tahun 2022."
+  },
+  {
+   "Code": "28-423-99",
+   "CodeName": "28-423-99 (ID)",
+   "CodeDescription": "Penghasilan yang dikenakan pajak bersifat final sesuai Peraturan Pemerintah Nomor 23/55  (Disetor Sendiri)"
+  },
+  {
+   "Code": "28-432-01",
+   "CodeName": "28-432-01 (ID)",
+   "CodeDescription": "Perjanjian Pengikatan Jual Beli"
+  },
+  {
+   "Code": "28-499-01",
+   "CodeName": "28-499-01 (ID)",
+   "CodeDescription": "Penghasilan Wajib Pajak yang Melakukan Kegiatan Usaha Jasa Maklon (Contract Manufacturing) Internasional di Bidang Produksi Mainan Anak-Anak"
+  },
+  {
+   "Code": "28-499-02",
+   "CodeName": "28-499-02 (ID)",
+   "CodeDescription": "Penghasilan yang Diterima atau Diperoleh Sehubungan dengan Kerja Sama dengan Lembaga Pengelola Investasi (LPI)"
+  },
+  {
+   "Code": "28-499-99",
+   "CodeName": "28-499-99 (ID)",
+   "CodeDescription": "Penghasilan istri dari satu pemberi kerja"
+  },
+  {
+   "Code": "28-999-99",
+   "CodeName": "28-999-99 (ID)",
+   "CodeDescription": "Penghasilan Final Lainnya"
+  },
+  {
+   "Code": "28-409-22",
+   "CodeName": "28-409-22 (ID)",
+   "CodeDescription": "Pekerjaan Konstruksi yang Dilakukan oleh Penyedia Jasa yang Memiliki Sertifikat Badan Usaha Kualifikasi Kecil atau Sertifikat Kompetensi Kerja untuk Usaha Orang Perseorangan"
+  },
+  {
+   "Code": "21-100-27",
+   "CodeName": "21-100-27 (ID)",
+   "CodeDescription": "Upah Pegawai Tidak Tetap yang Dibayarkan secara Bulanan yang Mendapat Fasilitas di Daerah Tertentu"
+  },
+  {
+   "Code": "21-100-28",
+   "CodeName": "21-100-28 (ID)",
+   "CodeDescription": "Imbalan kepada Bukan Pegawai Lainnya yang mendapat fasilitas di daerah tertentu"
+  },
+  {
+   "Code": "28-403-03",
+   "CodeName": "28-403-03 (ID)",
+   "CodeDescription": "Kekurangan penyetoran PPh final dari pemungutan Pihak Lain (SIPP)-Persewaan Tanah dan/atau Bangunan"
+  },
+  {
+   "Code": "28-409-29",
+   "CodeName": "28-409-29 (ID)",
+   "CodeDescription": "Kekurangan penyetoran PPh final dari pemungutan Pihak Lain (SIPP)-Pekerjaan Konstruksi yang Dilakukan oleh Penyedia Jasa yang Memiliki Sertifikat Badan Usaha Kualifikasi Kecil atau Sertifikat Kompetensi Kerja untuk Usaha Orang Perseorangan (Disetor Sendiri)"
+  },
+  {
+   "Code": "28-409-30",
+   "CodeName": "28-409-30 (ID)",
+   "CodeDescription": "Kekurangan penyetoran PPh final dari pemungutan Pihak Lain (SIPP)-Pekerjaan Konstruksi yang Dilakukan oleh Penyedia Jasa yang Tidak Memiliki Sertifikat Badan Usaha Atau Sertifikat Kompetensi Kerja untuk Usaha Orang Perseorangan (Disetor Sendiri)"
+  },
+  {
+   "Code": "28-409-31",
+   "CodeName": "28-409-31 (ID)",
+   "CodeDescription": "Kekurangan penyetoran PPh final dari pemungutan Pihak Lain (SIPP)-Pekerjaan Konstruksi yang Dilakukan oleh Penyedia Jasa yang Memiliki Sertifikat Selain Sertifikat Badan Usaha Kualifikasi Kecil atau Sertifikat Kompetensi Kerja untuk Usaha Orang Perseorangan (Disetor Sendiri)"
+  },
+  {
+   "Code": "28-409-32",
+   "CodeName": "28-409-32 (ID)",
+   "CodeDescription": "Kekurangan penyetoran PPh final dari pemungutan Pihak Lain (SIPP)-Pekerjaan Konstruksi Terintegrasi yang Dilakukan oleh Penyedia Jasa yang Memiliki Sertifikat Badan Usaha (Disetor Sendiri)"
+  },
+  {
+   "Code": "28-409-33",
+   "CodeName": "28-409-33 (ID)",
+   "CodeDescription": "Kekurangan penyetoran PPh final dari pemungutan Pihak Lain (SIPP)-Pekerjaan Konstruksi Terintegrasi yang Dilakukan oleh Penyedia Jasa yang Tidak Memiliki Sertifikat Badan Usaha (Disetor Sendiri)"
+  },
+  {
+   "Code": "28-409-34",
+   "CodeName": "28-409-34 (ID)",
+   "CodeDescription": "Kekurangan penyetoran PPh final dari pemungutan Pihak Lain (SIPP)-Jasa Konsultansi Konstruksi yang Dilakukan oleh Penyedia Jasa yang Memiliki Sertifikat Badan Usaha atau Sertifikat Kompetensi Kerja untuk Usaha Orang Perseorangan (Disetor Sendiri)"
+  },
+  {
+   "Code": "28-409-35",
+   "CodeName": "28-409-35 (ID)",
+   "CodeDescription": "Kekurangan penyetoran PPh final dari pemungutan Pihak Lain (SIPP)-Jasa Konsultansi Konstruksi yang Dilakukan oleh Penyedia Jasa yang Tidak Memiliki Sertifikat Badan Usaha atau Sertifikat Kompetensi Kerja untuk Usaha Orang Perseorangan (Disetor Sendiri)"
+  },
+  {
+   "Code": "28-409-36",
+   "CodeName": "28-409-36 (ID)",
+   "CodeDescription": "Kekurangan penyetoran PPh final dari pemungutan Pihak Lain (SIPP)-Jasa Konstruksi Berupa Jasa Perencanaan Konstruksi (Dengan Kualifikasi Usaha) yang Disetor Sendiri"
+  },
+  {
+   "Code": "28-409-37",
+   "CodeName": "28-409-37 (ID)",
+   "CodeDescription": "Kekurangan penyetoran PPh final dari pemungutan Pihak Lain (SIPP)-Jasa Konstruksi Berupa Jasa Perencanaan Konstruksi (Tanpa Kualifikasi Usaha) yang Disetor Sendiri"
+  },
+  {
+   "Code": "28-409-38",
+   "CodeName": "28-409-38 (ID)",
+   "CodeDescription": "Kekurangan penyetoran PPh final dari pemungutan Pihak Lain (SIPP)-Jasa Konstruksi Berupa Jasa Pelaksanaan Konstruksi (Kualifikasi Usaha Kecil) yang Disetor Sendiri"
+  },
+  {
+   "Code": "28-409-39",
+   "CodeName": "28-409-39 (ID)",
+   "CodeDescription": "Kekurangan penyetoran PPh final dari pemungutan Pihak Lain (SIPP)-Jasa Konstruksi Berupa Jasa Pelaksanaan Konstruksi (Kualifikasi Usaha Menengah dan Besar) yang Disetor Sendiri"
+  },
+  {
+   "Code": "28-409-40",
+   "CodeName": "28-409-40 (ID)",
+   "CodeDescription": "Kekurangan penyetoran PPh final dari pemungutan Pihak Lain (SIPP)-Jasa Konstruksi Berupa Jasa Pelaksanaan Konstruksi (Tanpa Kualifikasi Usaha) yang Disetor Sendiri"
+  },
+  {
+   "Code": "28-409-41",
+   "CodeName": "28-409-41 (ID)",
+   "CodeDescription": "Kekurangan penyetoran PPh final dari pemungutan Pihak Lain (SIPP)-Jasa Konstruksi Berupa Jasa Pengawasan Konstruksi (Dengan Kualifikasi Usaha) yang Disetor Sendiri"
+  },
+  {
+   "Code": "28-409-42",
+   "CodeName": "28-409-42 (ID)",
+   "CodeDescription": "Kekurangan penyetoran PPh final dari pemungutan Pihak Lain (SIPP)-Jasa Konstruksi Berupa Jasa Pengawasan Konstruksi (Tanpa Kualifikasi Usaha) yang Disetor Sendiri"
+  },
+  {
+   "Code": "28-410-03",
+   "CodeName": "28-410-03 (ID)",
+   "CodeDescription": "Kekurangan penyetoran PPh final dari pemungutan Pihak Lain (SIPP)-Imbalan yang Dibayarkan/Terutang kepada Perusahaan Pelayaran Dalam Negeri"
+  },
+  {
+   "Code": "28-410-04",
+   "CodeName": "28-410-04 (ID)",
+   "CodeDescription": "Kekurangan penyetoran PPh final dari pemungutan Pihak Lain (SIPP)-Imbalan yang Diterima/Diperoleh Sehubungan dengan Pengangkutan Orang dan/atau Barang Termasuk Penyewaan Kapal Laut Oleh Perusahaan Pelayaran Dalam Negeri"
+  },
+  {
+   "Code": "28-411-03",
+   "CodeName": "28-411-03 (ID)",
+   "CodeDescription": "Kekurangan penyetoran PPh final dari pemungutan Pihak Lain (SIPP)-Imbalan Charter Kapal Laut dan/atau Pesawat Udara yang Dibayarkan/ Terutang kepada Perusahaan Pelayaran dan/atau Penerbangan Luar Negeri melalui BUT di Indonesia"
+  },
+  {
+   "Code": "28-423-03",
+   "CodeName": "28-423-03 (ID)",
+   "CodeDescription": "Pemotongan atau Pemungutan PPh atas transaksi penjualan barang atau penyerahan jasa yang dilakukan oleh Wajib Pajak orang pribadi yang memiliki peredaran bruto tertentu sesuai dengan PP 55 Tahun 2022 dengan peredaran usaha s.d Rp500.000.000,00"
+  },
+  {
+   "Code": "28-423-12",
+   "CodeName": "28-423-12 (ID)",
+   "CodeDescription": "Pemotongan atau Pemungutan PPh atas transaksi penjualan barang atau penyerahan jasa yang dilakukan oleh Wajib Pajak yang memenuhi persyaratan tertentu untuk dikenai PPh yang bersifat final dengan tarif 0% di IKN (PPh UMKM di IKN)."
+  },
+  {
+   "Code": "28-423-13",
+   "CodeName": "28-423-13 (ID)",
+   "CodeDescription": "Pemotongan atau pemungutan PPh atas transaksi pembelian yang dilakukan oleh Wajib Pajak yang memanfaatkan fasilitas PPh final dengan tarif 0% di IKN (PPh UMKM di IKN)."
+  },
+  {
+   "Code": "22-405-06",
+   "CodeName": "22-405-06 (ID)",
+   "CodeDescription": "Penghasilan Sehubungan dengan Transaksi Aset Kripto di Penyelenggara Perdagangan Melalui Sistem Elektronik Dalam Negeri (Setor Sendiri) "
+  },
+  {
+   "Code": "22-405-07",
+   "CodeName": "22-405-07 (ID)",
+   "CodeDescription": "Penghasilan Sehubungan dengan Transaksi Aset Kripto di Penyelenggara Perdagangan Melalui Sistem Elektronik Luar Negeri (Setor Sendiri) "
+  },
+  {
+   "Code": "22-405-04",
+   "CodeName": "22-405-04 (ID)",
+   "CodeDescription": "Penghasilan Sehubungan dengan Aset Kripto yang dipungut oleh Penyelenggara Perdagangan Melalui Sistem Elektronik Dalam Negeri yang Merupakan Pedagang Aset Keuangan Digital"
+  },
+  {
+   "Code": "22-405-05",
+   "CodeName": "22-405-05 (ID)",
+   "CodeDescription": "Penghasilan Sehubungan dengan Aset Kripto yang dipungut oleh Penyelenggara Perdagangan Melalui Sistem Elektronik Luar Negeri yang Merupakan Pemungut Pajak Penghasilan"
+  }
+ ],
+ "INCOME_EXCLUDED_FROM_TAX_FOR_PIT": [
+  {
+   "Code": "403",
+   "CodeName": "403",
+   "CodeDescription": "Bantuan/Sumbangan"
+  },
+  {
+   "Code": "404",
+   "CodeName": "404",
+   "CodeDescription": "Warisan"
+  },
+  {
+   "Code": "402",
+   "CodeName": "402",
+   "CodeDescription": "Hibah"
+  },
+  {
+   "Code": "408",
+   "CodeName": "408",
+   "CodeDescription": "Beasiswa"
+  },
+  {
+   "Code": "401",
+   "CodeName": "401",
+   "CodeDescription": "Pembebasan utang"
+  },
+  {
+   "Code": "406",
+   "CodeName": "406",
+   "CodeDescription": "Bagian Laba Anggota Perseroan Komanditer Tidak Atas Saham, Persekutuan, Perkumpulan, Firma, Kongsi"
+  },
+  {
+   "Code": "303",
+   "CodeName": "303",
+   "CodeDescription": "Dividen atau bagian laba"
+  },
+  {
+   "Code": "425",
+   "CodeName": "425",
+   "CodeDescription": "SHU dari koperasi"
+  },
+  {
+   "Code": "498",
+   "CodeName": "498",
+   "CodeDescription": "Penghasilan lain yang tidak termasuk objek pajak"
+  },
+  {
+   "Code": "424",
+   "CodeName": "424",
+   "CodeDescription": "Natura dan kenikmatan yang dikecualikan dari objek pajak"
+  },
+  {
+   "Code": "405",
+   "CodeName": "405",
+   "CodeDescription": "Penerimaan Zakat dan Sumbangan Keagamaan yang sifatnya wajib"
+  },
+  {
+   "Code": "407",
+   "CodeName": "407",
+   "CodeDescription": "Klaim asuransi kesehatan, kecelakaan, jiwa, dwiguna, beasiswa"
+  },
+  {
+   "Code": "409",
+   "CodeName": "409",
+   "CodeDescription": "Hadiah langsung yang diberikan kepada semua pembeli/konsumen akhir tanpa diundi"
+  },
+  {
+   "Code": "423",
+   "CodeName": "423",
+   "CodeDescription": "Objek PPh tertentu bagi TKA yang memiliki keahlian tertentu (expatriate regime)"
+  }
+ ],
+ "COUNTRY_CODE": [
+  {
+   "Code": "ARM",
+   "CodeName": "Armenia",
+   "CodeDescription": "Armenia",
+   "ParameterData": "{\"RecipientCountry\":true,\"TreatyPartner\":true,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":\"Chairman of SRC\",\"EOI_CA_ADDRESS\":\"3, 7 M. Khorenatsi St., Yerevan, 0015, Armenia\",\"EOI_CA_EMAIL\":[\"secretariat@taxservice.am\",\"secretariat@petekamutner.am\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "ZWE",
+   "CodeName": "Zimbabwe",
+   "CodeDescription": "Zimbabwe",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "GUY",
+   "CodeName": "Guyana",
+   "CodeDescription": "Guyana",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "NAM",
+   "CodeName": "Namibia",
+   "CodeDescription": "Namibia",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":\"Minister of Finance\",\"EOI_CA_ADDRESS\":\"Moltke Street, Private Bag 13295, Windhoek, Namibia\",\"EOI_CA_EMAIL\":[\"pro@mof.gov.na\",\"Andreas.Ileka@mof.gov.na\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "HUN",
+   "CodeName": "Hongaria",
+   "CodeDescription": "Hongaria",
+   "ParameterData": "{\"RecipientCountry\":true,\"TreatyPartner\":true,\"EOI_PARTNER_TYPE\":\"CBCR\",\"EOI_CA_NAME\":\"Head of CLO\",\"EOI_CA_ADDRESS\":\"1054 Budapest, Sz?chenyi u. 2.\",\"EOI_CA_EMAIL\":[\"clo@nav.gov.hu\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "ATA",
+   "CodeName": "Antartika",
+   "CodeDescription": "Antartika",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "BFA",
+   "CodeName": "Burkina Faso",
+   "CodeDescription": "Burkina Faso",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":\"Directeur G?n?ral des Imp?ts (DGI)\",\"EOI_CA_ADDRESS\":\"01 BP 119 Ouagadougou 01, BURKINA FASO\",\"EOI_CA_EMAIL\":[\"adama.badolo@finances.gov.bf\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "REU",
+   "CodeName": "Reuni",
+   "CodeDescription": "Reuni",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "BLZ",
+   "CodeName": "Belize",
+   "CodeDescription": "Belize",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"CBCR\",\"EOI_CA_NAME\":\"Director General, Financial Services  Commission\",\"EOI_CA_ADDRESS\":\"The Gian C. Gandhi Building  P.O. Box 455  6130 Iguana Avenue,  Mountain View Area,  City of Belmopan, Belize, C. A.\",\"EOI_CA_EMAIL\":[\"eoir@belizefsc.org.bz\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "PSE",
+   "CodeName": "PALESTINE",
+   "CodeDescription": "PALESTINE",
+   "ParameterData": "{\"IsoCode\":null,\"LastForeignId\":null,\"RegisteredByTaxAdministration\":null}"
+  },
+  {
+   "Code": "DMA",
+   "CodeName": "Dominika",
+   "CodeDescription": "Dominika",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":\"Controller of Inland Revenue\",\"EOI_CA_ADDRESS\":\"High Street, Roseau, Dominica\",\"EOI_CA_EMAIL\":[\"williamsi@dominica.gov.dm\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "KEN",
+   "CodeName": "Kenya",
+   "CodeDescription": "Kenya",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":\"Commissioner General ? Authorised Competent Authority Representative\",\"EOI_CA_ADDRESS\":\"Box 48240-00100 NAIROBI\",\"EOI_CA_EMAIL\":[\"KenyaCompetentAuthority@kra.go.ke\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "VEN",
+   "CodeName": "Venezuela (Republik Bolivarian)",
+   "CodeDescription": "Venezuela (Republik Bolivarian)",
+   "ParameterData": "{\"RecipientCountry\":true,\"TreatyPartner\":true,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":\"Director of Integrated National Service of Tax Administration\",\"EOI_CA_ADDRESS\":\"Plaza Venezuela, Avenida Quito, Caracas 1052, Distrito Capital, Venezuela\",\"EOI_CA_EMAIL\":[\"info@seniat.gob.ve\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "ECU",
+   "CodeName": "Ekuador",
+   "CodeDescription": "Ekuador",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":\"Head Of Mutual Assistance And  International Taxation\",\"EOI_CA_ADDRESS\":\"Plataforma Gubernamental de Gesti?n Financiera,  Avenida Amazonas, entre Juan Jos? Villalengua y  Uni?n Nacional de Periodistas, Bloque 6N (verde),  Segundo Piso, Quito - Ecuador\",\"EOI_CA_EMAIL\":[\"jitroya@sri.gob.ec\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "BEL",
+   "CodeName": "Belgia",
+   "CodeDescription": "Belgia",
+   "ParameterData": "{\"RecipientCountry\":true,\"TreatyPartner\":true,\"EOI_PARTNER_TYPE\":\"CBCR\",\"EOI_CA_NAME\":\"Administrateur g?n?ral de la Fiscalit?\",\"EOI_CA_ADDRESS\":\"North Galaxy- Tour A24  Bd. du Roi Albert II, 33 bte 515 (NEW PO BOX)  1030 BRUXELLES\",\"EOI_CA_EMAIL\":[\"directtaxeca@minfin.fed.be\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "VGB",
+   "CodeName": "Kepulauan Virgin (Inggris)",
+   "CodeDescription": "Kepulauan Virgin (Inggris)",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":\"Director of International Tax Authority\",\"EOI_CA_ADDRESS\":\"Peace House, Pickering  Drive, Road Town, Tortola VG1110  British Virgin Islands\",\"EOI_CA_EMAIL\":[\"info@bviita.vg\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "ESP",
+   "CodeName": "Spanyol",
+   "CodeDescription": "Spanyol",
+   "ParameterData": "{\"RecipientCountry\":true,\"TreatyPartner\":true,\"EOI_PARTNER_TYPE\":\"CBCR\",\"EOI_CA_NAME\":\"Inspector Central Information Team Spanish Tax Agency (AEAT)\",\"EOI_CA_ADDRESS\":\"Paseo Castellana 147, Madrid\",\"EOI_CA_EMAIL\":[\"eci-internacional@correo.aeat.es\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "TKL",
+   "CodeName": "Tokelau",
+   "CodeDescription": "Tokelau",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "PRI",
+   "CodeName": "Puerto Riko",
+   "CodeDescription": "Puerto Riko",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "UZB",
+   "CodeName": "Uzbekistan",
+   "CodeDescription": "Uzbekistan",
+   "ParameterData": "{\"RecipientCountry\":true,\"TreatyPartner\":true,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":\"Director of the State Tax Committee\",\"EOI_CA_ADDRESS\":\"A. Kadiri Street, 13 A, Tashkent, 700195, Republic of Uzbekistan\",\"EOI_CA_EMAIL\":[\"int@soliq.uz\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "PRK",
+   "CodeName": "Republik Rakyat Demokratik Korea",
+   "CodeDescription": "Republik Rakyat Demokratik Korea",
+   "ParameterData": "{\"RecipientCountry\":true,\"TreatyPartner\":true,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "IDN",
+   "CodeName": "Indonesia",
+   "CodeDescription": "Indonesia",
+   "ParameterData": "{\"IsoCode\":\"IDN\",\"LastForeignId\":\"IDN\",\"RegisteredByTaxAdministration\":null,\"RecipientCountry\":true,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"CBCR\",\"EOI_CA_NAME\":\"Dwi Astuti - Director of International Taxation\",\"EOI_CA_ADDRESS\":\"Lt.26 Gedung Mar'ie Muhammad, Jl. Jenderal Gatot Subroto No. 40-42, Jakarta 12910\",\"EOI_CA_EMAIL\":[\"eoi@pajak.go.id\"],\"WEB\":\"www.pajak.go.id\"}"
+  },
+  {
+   "Code": "IM",
+   "CodeName": "Pulau Man",
+   "CodeDescription": "Pulau Man",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "PAN",
+   "CodeName": "Panama",
+   "CodeDescription": "Panama",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"CBCR\",\"EOI_CA_NAME\":\"Director General, General Directorate of Revenues\",\"EOI_CA_ADDRESS\":\"Balboa Avenue and East 41st Street,  PH Torre Mundial, 2nd Floor, P.O. Box 0816-02886, Ciudad de Panam? Rep?blica de Panam?\",\"EOI_CA_EMAIL\":[\"dgi-eoirrequests@mef.gob.pa\",\"pcortes@mef.gob.pa\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "CPV",
+   "CodeName": "Cabo Verde",
+   "CodeDescription": "Cabo Verde",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":\"Diretora Nacional de Receitas do  Estado\",\"EOI_CA_ADDRESS\":\"Av. Am?lcar Cabral Nº 63, CP 563  Cidade da Praia  Rep?blica de Cabo Verde\",\"EOI_CA_EMAIL\":[\"Liza.Vaz@mf.gov.cv\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "MNE",
+   "CodeName": "Montenegro",
+   "CodeDescription": "Montenegro",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":\"Director of Revenue and Customs Administration\",\"EOI_CA_ADDRESS\":\"Bulevar ?arla de Gola 2, 81 000 Podgorica, Montenegro\",\"EOI_CA_EMAIL\":[\"upravaprihoda@tax.gov.me\",\"direktor.upc@tax.gov.me\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "GIB",
+   "CodeName": "Gibraltar",
+   "CodeDescription": "Gibraltar",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"CBCR\",\"EOI_CA_NAME\":\"Commissioner of Income Tax\",\"EOI_CA_ADDRESS\":\"St Jago’s Stone Block, 331 Main Street, Gibraltar GX11 1AA\",\"EOI_CA_EMAIL\":[\"competentauthority@gibraltar.gov.gi\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "VUT",
+   "CodeName": "Vanuatu",
+   "CodeDescription": "Vanuatu",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":\"Minister of Finance and Economic Management\",\"EOI_CA_ADDRESS\":\"Department of Finance and Treasury (DoFT), PMB 9031, Port Villa, Vanuatu, South West Pacific\",\"EOI_CA_EMAIL\":[\"fmis@vanuatu.gov.vu\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "FRA",
+   "CodeName": "Prancis",
+   "CodeDescription": "Prancis",
+   "ParameterData": "{\"RecipientCountry\":true,\"TreatyPartner\":true,\"EOI_PARTNER_TYPE\":\"CBCR\",\"EOI_CA_NAME\":\"Head of International tax Unit\",\"EOI_CA_ADDRESS\":\"86/92, All?e de Bercy  B?timent Turgot ? T?l?doc 933  75574 Cedex 12\",\"EOI_CA_EMAIL\":[\"bureau.sjcf4a-aai-id@dgfip.finances.gouv.fr\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "LSO",
+   "CodeName": "Lesotho",
+   "CodeDescription": "Lesoto",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":\"Chairman of the Board, Lesotho Revenue Authority\",\"EOI_CA_ADDRESS\":\"PO BOX 1085 Maseru 100 Lesotho\",\"EOI_CA_EMAIL\":[\"info@lra.org.ls\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "GBR",
+   "CodeName": "Britania Raya",
+   "CodeDescription": "Britania Raya",
+   "ParameterData": "{\"IsoCode\":\"GBR\",\"LastForeignId\":null,\"RegisteredByTaxAdministration\":null,\"RecipientCountry\":true,\"TreatyPartner\":true,\"EOI_PARTNER_TYPE\":\"CBCR\",\"EOI_CA_NAME\":\"The Commissioners for HM Revenue and Customs\",\"EOI_CA_ADDRESS\":\"1 Ruskin Rd, Croydon CR0 1XJ, United Kingdom\",\"EOI_CA_EMAIL\":\"ukcompetentauthority@hmrc.gov.uk\",\"WEB\":\"-\"}"
+  },
+  {
+   "Code": "GHA",
+   "CodeName": "Ghana",
+   "CodeDescription": "Ghana",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":\"Head of Legal\",\"EOI_CA_ADDRESS\":\"Off Starlets 91 Road near Accra Stadium, Accra, Ghana\",\"EOI_CA_EMAIL\":[\"philip.mensah@gra.gov.gh\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "SXM",
+   "CodeName": "Sint Maarten (bagian Belanda)",
+   "CodeDescription": "Sint Maarten (bagian Belanda)",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":\"Head of Tax Administration\",\"EOI_CA_ADDRESS\":\"Vineyard Building, W.G. Buncamper Road 33, Philipsburg, Sint Maarten\",\"EOI_CA_EMAIL\":[\"TaxInfo@sintmaartengov.org\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "JEY",
+   "CodeName": "Jersey",
+   "CodeDescription": "Jersey",
+   "ParameterData": "{\"IsoCode\":\"JEY\",\"LastForeignId\":null,\"RegisteredByTaxAdministration\":null,\"RecipientCountry\":true,\"TreatyPartner\":true,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":\"Assistant Comptroller of Revenue – International\",\"EOI_CA_ADDRESS\":\"19-21 Broad Street, St Helier, Jersey, JE2 3RR\",\"EOI_CA_EMAIL\":\"jerseycompetentauthority@gov.je\",\"WEB\":\"-\"}"
+  },
+  {
+   "Code": "SVK",
+   "CodeName": "Slovakia",
+   "CodeDescription": "Slowakia",
+   "ParameterData": "{\"RecipientCountry\":true,\"TreatyPartner\":true,\"EOI_PARTNER_TYPE\":\"CBCR\",\"EOI_CA_NAME\":\"Director General of Tax and Customs Section, Ministry of Finance of the Slovak Republic\",\"EOI_CA_ADDRESS\":\"Ministerstvo financi? SR ?tefanovi?ova 5, 872 82 Bratislava\",\"EOI_CA_EMAIL\":[\"podatelna@mfsr.sk\",\"Adrian.belanik@mfsr.sk\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "BVT",
+   "CodeName": "Pulau Bouvet",
+   "CodeDescription": "Pulau Bouvet",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "POL",
+   "CodeName": "Polandia",
+   "CodeDescription": "Polandia",
+   "ParameterData": "{\"RecipientCountry\":true,\"TreatyPartner\":true,\"EOI_PARTNER_TYPE\":\"CBCR\",\"EOI_CA_NAME\":\"Head of Second Tax Information Exchange Unit, Tax Information Exchange Office\",\"EOI_CA_ADDRESS\":\"46 Pozna?ska Street, 62-510 Konin, POLAND\",\"EOI_CA_EMAIL\":[\"wymiana.pb@mf.gov.pl\",\"bwip.ias.poznan@mf.gov.pl\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "SMR",
+   "CodeName": "San Marino",
+   "CodeDescription": "San Marino",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"CBCR\",\"EOI_CA_NAME\":\"Segreteria di Stato per le Finanze e il Bilancio (Ministry of Finance and Budget)\",\"EOI_CA_ADDRESS\":\"Contrada Omerelli, 31 47890 ? San Marino Repubblica di San Marino\",\"EOI_CA_EMAIL\":[\"info.finanze@gov.sm\",\"clo.sanmarino@pa.sm\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "DOM",
+   "CodeName": "Republik Dominika",
+   "CodeDescription": "Republik Dominika",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":\"Deputy Director of Compliance Management\",\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "GUF",
+   "CodeName": "Guyana Prancis",
+   "CodeDescription": "Guyana Prancis",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "LBY",
+   "CodeName": "Libya",
+   "CodeDescription": "Libya",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "NOR",
+   "CodeName": "Norwegia",
+   "CodeDescription": "Norwegia",
+   "ParameterData": "{\"RecipientCountry\":true,\"TreatyPartner\":true,\"EOI_PARTNER_TYPE\":\"CBCR\",\"EOI_CA_NAME\":\"Senior Adviser of Directorate of Taxes (Skattedirektoratet)\",\"EOI_CA_ADDRESS\":\"P.O. Box 9200 Grønland NO - 0134 OSLO\",\"EOI_CA_EMAIL\":[\"exchangeofinformation@skatteetaten.no\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "SEN",
+   "CodeName": "Senegal",
+   "CodeDescription": "Senegal",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":\"Directeur g?n?ral des Imp?ts et des Domaines\",\"EOI_CA_ADDRESS\":\"31 Rue de Thiong x Vincens ? 1561 Dakar\",\"EOI_CA_EMAIL\":[],\"WEB\":[\"http://www.impotsetdomaines.gouv.sn/\"]}"
+  },
+  {
+   "Code": "SLV",
+   "CodeName": "El Salvador",
+   "CodeDescription": "El Salvador",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":\"Director General of Internal Taxes / Competent  Authority\",\"EOI_CA_ADDRESS\":\"Urbanizaci?n Buenos Aires, Avenida Alvarado y  Diagonal Centroam?rica, Condominio Tres Torres,  Torre dos, nivel siete, Ala B, San Salvador.\",\"EOI_CA_EMAIL\":[\"marlon.vasquez@mh.gob.sv\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "CMR",
+   "CodeName": "Kamerun",
+   "CodeDescription": "Kamerun",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":\"Chef de division\",\"EOI_CA_ADDRESS\":\"2 rue Narvick  Yaound?, Cameroun\",\"EOI_CA_EMAIL\":[\"atanga60@hotmail.com\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "SVN",
+   "CodeName": "Slovenia",
+   "CodeDescription": "Slovenia",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"CBCR\",\"EOI_CA_NAME\":\"Director-General of the Financial Administration\",\"EOI_CA_ADDRESS\":\"Smartinska cesta 55, SI-1000 Ljubljana\",\"EOI_CA_EMAIL\":[\"gfu.fu@gov.si\",\"gp.mf@gov.si\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "KOR",
+   "CodeName": "Korea (Republik)",
+   "CodeDescription": "Korea (Republik)",
+   "ParameterData": "{\"RecipientCountry\":true,\"TreatyPartner\":true,\"EOI_PARTNER_TYPE\":\"CBCR\",\"EOI_CA_NAME\":\"Assistant Commissioner\",\"EOI_CA_ADDRESS\":\"8-14, Guksecheong-ro,Sejong-si, Republic of Korea\",\"EOI_CA_EMAIL\":[\"eoikorea@nts.go.kr\",\"aeoi.nts@korea.kr\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "MAC",
+   "CodeName": "Makao",
+   "CodeDescription": "Makao",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"CBCR\",\"EOI_CA_NAME\":\"Director, Financial Services Bureau\",\"EOI_CA_ADDRESS\":\"Av. da Praia Grande, Nº 575, 579 e 585, Macau\",\"EOI_CA_EMAIL\":[\"angelac@dsf.gov.mo\",\"stepheni@dsf.gov.mo\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "GGY",
+   "CodeName": "Guernsey",
+   "CodeDescription": "Guernsey",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"CBCR\",\"EOI_CA_NAME\":\"Director of the Revenue Service\",\"EOI_CA_ADDRESS\":\"International Team  PO Box 37  St Peter Port  Guernsey  GY1 3AZ\",\"EOI_CA_EMAIL\":[\"eoi@gov.gg\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "SWZ",
+   "CodeName": "Eswatini",
+   "CodeDescription": "Eswatini",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "SB",
+   "CodeName": "Pulau Solomon",
+   "CodeDescription": "Pulau Solomon",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "UGA",
+   "CodeName": "Uganda",
+   "CodeDescription": "Uganda",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":\"Commissioner General of Uganda Revenue Authority\",\"EOI_CA_ADDRESS\":\"Plot M193/M194, Nakawa Industrial Area, P. O. Box 7279, KAMPALA\",\"EOI_CA_EMAIL\":[\"jmusinguzi@ura.go.ug\",\"EOI_GP@ura.go.ug\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "KI",
+   "CodeName": "Kiribati",
+   "CodeDescription": "Kiribati",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "CCK",
+   "CodeName": "Kepulauan Cocos (Keeling)",
+   "CodeDescription": "Kepulauan Cocos (Keeling)",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "SAU",
+   "CodeName": "Arab Saudi",
+   "CodeDescription": "Arab Saudi",
+   "ParameterData": "{\"RecipientCountry\":true,\"TreatyPartner\":true,\"EOI_PARTNER_TYPE\":\"CBCR\",\"EOI_CA_NAME\":\"Director General of Zakat, Tax and Customs Authority\",\"EOI_CA_ADDRESS\":\"Headquarters Prince Abdulrahman bin Abdul Aziz Street - Al Murabba City: Riyadh P.O.Box : 6898 Postal Code : 11187\",\"EOI_CA_EMAIL\":[\"info@zatca.gov.sa\",\"qahtanynh1@zatca.gov.sa\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "BOL",
+   "CodeName": "Negara Majemuk Bolivia",
+   "CodeDescription": "Negara Majemuk Bolivia",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "AZE",
+   "CodeName": "Azerbaijan",
+   "CodeDescription": "Azerbaijan",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"CBCR\",\"EOI_CA_NAME\":\"Head of International Exchange of Information and Tax Monitoring Division\",\"EOI_CA_ADDRESS\":\"AZ1073, 16, Landau Str., Baku, Azerbaijan Republic\",\"EOI_CA_EMAIL\":[\"int.taxation@taxes.gov.az\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "PRT",
+   "CodeName": "Portugal",
+   "CodeDescription": "Portugal",
+   "ParameterData": "{\"RecipientCountry\":true,\"TreatyPartner\":true,\"EOI_PARTNER_TYPE\":\"CBCR\",\"EOI_CA_NAME\":\"Dire??o de Servi?os de Rela??es Internacionais (DSRI), Diretora Geral da Autoridade Tribut?ria e Aduaneira\",\"EOI_CA_ADDRESS\":\"Av. Eng. Duarte Pacheco, nº 28- 4º andar, 1099-013 Lisboa\",\"EOI_CA_EMAIL\":[\"dsri@at.gov.pt\",\"dg-at@at.gov.pt\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "CUW",
+   "CodeName": "Curacao",
+   "CodeDescription": "Curacao",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"CBCR\",\"EOI_CA_NAME\":\"Director Fiscal Affairs\",\"EOI_CA_ADDRESS\":\"Pietermaai 4-4a\",\"EOI_CA_EMAIL\":[\"internationaltax@gobiernu.cw\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "LIE",
+   "CodeName": "Liechtenstein",
+   "CodeDescription": "Liechtenstein",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"CBCR\",\"EOI_CA_NAME\":\"Head of International Division of Fiscal Authority\",\"EOI_CA_ADDRESS\":\"Aeulestrasse 38 PO Box 684 9490 Vaduz\",\"EOI_CA_EMAIL\":[\"Bernhard.Canete@llv.li\",\"info.stv@llv.li\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "FRO",
+   "CodeName": "Kepulauan Faroe",
+   "CodeDescription": "Kepulauan Faroe",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":\"Director, Head of Division\",\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "CHL",
+   "CodeName": "Cile",
+   "CodeDescription": "Cile",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"CBCR\",\"EOI_CA_NAME\":\"Coordinator Exchange of Information\",\"EOI_CA_ADDRESS\":\"Audit and Compliance Directorate   Teatinos 120, piso 3, Oficina 308, Santiago, Chile\",\"EOI_CA_EMAIL\":[\"chile.competentauthority@sii.cl\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "PRY",
+   "CodeName": "Paraguay",
+   "CodeDescription": "Paraguay",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":\"Director General de Grandes Contribuyentes\",\"EOI_CA_ADDRESS\":\"Edif. de Grandes Contribuyentes y Abogac?a del Tesoro, Independencia Nacional 103, Asunci?n 1209, Paraguay\",\"EOI_CA_EMAIL\":[\"info@set.gov.py\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "NFK",
+   "CodeName": "Pulau Norfolk",
+   "CodeDescription": "Pulau Norfolk",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "ASM",
+   "CodeName": "Samoa Amerika",
+   "CodeDescription": "Samoa Amerika",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":\"Chief Executive Officer/Commissioner Ministry for Revenue\",\"EOI_CA_ADDRESS\":\"Level 4, DBS Building Apia SAMOA\",\"EOI_CA_EMAIL\":[\"aviali@revenue.gov.ws\",\"nfo_services@revenue.gov.ws\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "RFG",
+   "CodeName": "Pengungsi (Konvensi Pasal 1, 1951)",
+   "CodeDescription": "Pengungsi (Konvensi Pasal 1, 1951)",
+   "ParameterData": "{\"IsoCode\":null,\"LastForeignId\":null,\"RegisteredByTaxAdministration\":null}"
+  },
+  {
+   "Code": "KR",
+   "CodeName": "Kosovo",
+   "CodeDescription": "Kosovo",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "SDN",
+   "CodeName": "Sudan",
+   "CodeDescription": "Sudan",
+   "ParameterData": "{\"RecipientCountry\":true,\"TreatyPartner\":true,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":\"Secretary General of Taxation Chamber, Ministry of Finance and Economic Planning\",\"EOI_CA_ADDRESS\":\"P.O. Box 2488 Khartoum Al-Gomhouria Street, Sudan\",\"EOI_CA_EMAIL\":[\"Relationshipshq@tax.gov.sd\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "URY",
+   "CodeName": "Uruguay",
+   "CodeDescription": "Uruguay",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"CBCR\",\"EOI_CA_NAME\":\"Head of International Tax Department, Divisi?n Grandes Contribuyentes, Direcci?n General Impositiva\",\"EOI_CA_ADDRESS\":\"Av. Daniel Fern?ndez Crespo 1534, 11200 Montevideo\",\"EOI_CA_EMAIL\":[\"mgrostein@dgi.gub.uy\",\"d3750@dgi.gub.uy\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "THA",
+   "CodeName": "Thailand",
+   "CodeDescription": "Thailand",
+   "ParameterData": "{\"RecipientCountry\":true,\"TreatyPartner\":true,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":\"Director-General of Thailand Revenue Department\",\"EOI_CA_ADDRESS\":\"The Revenue Department, 90 Soi Phaholyothin 7, Samsen Nai, Phayathai, Bangkok 10400\",\"EOI_CA_EMAIL\":[\"eoithailand@rd.go.th\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "HKG",
+   "CodeName": "Hongkong",
+   "CodeDescription": "Hongkong",
+   "ParameterData": "{\"RecipientCountry\":true,\"TreatyPartner\":true,\"EOI_PARTNER_TYPE\":\"CBCR\",\"EOI_CA_NAME\":\"The Competent Authority of the Hong Kong Special Administrative Region\",\"EOI_CA_ADDRESS\":\"36/F, Revenue Tower  5 Gloucester Road, Wan Chai  Hong Kong  [Attn: Chief Assessor (Tax Treaty)]\",\"EOI_CA_EMAIL\":[\"taxtt@ird.gov.hk\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "IRQ",
+   "CodeName": "Irak",
+   "CodeDescription": "Irak",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "NER",
+   "CodeName": "Niger",
+   "CodeDescription": "Niger",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "JPN",
+   "CodeName": "Jepang",
+   "CodeDescription": "Jepang",
+   "ParameterData": "{\"RecipientCountry\":true,\"TreatyPartner\":true,\"EOI_PARTNER_TYPE\":\"CBCR\",\"EOI_CA_NAME\":\"Deputy Commissioner (International Affairs)\",\"EOI_CA_ADDRESS\":\"National Tax Agency  International Operations Division  3-1-1, Kasumigaseki, Chiyoda-ku,  Tokyo, 100-8978  Japan\",\"EOI_CA_EMAIL\":[\"ntaeoi@nta.go.jp\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "JE",
+   "CodeName": "Jersey",
+   "CodeDescription": "Jersey",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "NLD",
+   "CodeName": "Belanda",
+   "CodeDescription": "Belanda",
+   "ParameterData": "{\"RecipientCountry\":true,\"TreatyPartner\":true,\"EOI_PARTNER_TYPE\":\"CBCR\",\"EOI_CA_NAME\":\"Procesco?rdinator WB directe belastingen, Senior Officer of the Mutual Assistance Unit Direct Taxes\",\"EOI_CA_ADDRESS\":\"Belastingdienst, Central Liaison Office, Stationsstraat 5 7607 GX Almelo, Postbus 378 7600 AJ Almelo\",\"EOI_CA_EMAIL\":[\"CLO.Directe.Belastingen@belastingdienst.nl\",\"jj.roelofs@belastingdienst.nl\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "SSD",
+   "CodeName": "Sudan Selatan",
+   "CodeDescription": "Sudan Selatan",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "MNP",
+   "CodeName": "Kepulauan Mariana Utara",
+   "CodeDescription": "Kepulauan Mariana Utara",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "SPM",
+   "CodeName": "Saint Pierre dan Miquelon",
+   "CodeDescription": "Saint Pierre dan Miquelon",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "BRB",
+   "CodeName": "Barbados",
+   "CodeDescription": "Barbados",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":\"Revenue Commissioner\",\"EOI_CA_ADDRESS\":\"Barbados Revenue Authority  4th Floor, Weymouth Corporate Centre   Roebuck Street, Bridgetown  St. Michael  Barbados BB11129\",\"EOI_CA_EMAIL\":[\"louisa.lewis-ward@bra.gov.bb\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "BHR",
+   "CodeName": "Bahrain",
+   "CodeDescription": "Bahrain",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"CBCR\",\"EOI_CA_NAME\":\"Acting Director of Foreign Tax Relations Directorate; Competent Authority ? Exchange of Information for Tax Purposes\",\"EOI_CA_ADDRESS\":\"National Bureau for Revenue, Bahrain World Trade Centre, South Tower, P.O Box 17555, Manama, Kingdom of Bahrain\",\"EOI_CA_EMAIL\":[\"competent.authority@nbr.gov.bh\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "JOR",
+   "CodeName": "Yordania",
+   "CodeDescription": "Yordania",
+   "ParameterData": "{\"RecipientCountry\":true,\"TreatyPartner\":true,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":\"Director/Researcher of Planning and international  cooperation\",\"EOI_CA_ADDRESS\":\"Alburj Complex-Jabal  Amman-Amman-Jordan  P.O box 840818 Amman 11184 Jordan\",\"EOI_CA_EMAIL\":[\"Info@ISTD.gov.jo\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "DZA",
+   "CodeName": "Aljazair",
+   "CodeDescription": "Aljazair",
+   "ParameterData": "{\"RecipientCountry\":true,\"TreatyPartner\":true,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":\"Chef de la Division du Contr?le et des Enqu?tes Fiscales\",\"EOI_CA_ADDRESS\":\"Immeuble Ahmed Fran?is,  Cit? Malki, Ben Aknoun, Alger.\",\"EOI_CA_EMAIL\":[\"djamel.henniche@mf.gov.dz\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "AGO",
+   "CodeName": "Angola",
+   "CodeDescription": "Angola",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "VNM",
+   "CodeName": "Vietnam",
+   "CodeDescription": "Vietnam",
+   "ParameterData": "{\"RecipientCountry\":true,\"TreatyPartner\":true,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":\"Director General, Department of Taxation of Viet Nam\",\"EOI_CA_ADDRESS\":\"123 Lo Duc, Hai Ba Trung, Ha Noi, Viet Nam\",\"EOI_CA_EMAIL\":[\"vchung@gdt.gov.vn\",\"tttbinh@gdt.gov.vn\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "TWN",
+   "CodeName": "Taiwan",
+   "CodeDescription": "Taiwan",
+   "ParameterData": "{\"IsoCode\":\"TWN\",\"LastForeignId\":\"TWN\",\"RegisteredByTaxAdministration\":true,\"RecipientCountry\":true,\"TreatyPartner\":true,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":\"Senior Executive Officer, Department of International Fiscal Affairs\",\"EOI_CA_ADDRESS\":\"2 Aiguo West Road, Taipei, 1006, Taiwan\",\"EOI_CA_EMAIL\":\"twmofca@mail.mof.gov.tw\",\"WEB\":\"-\"}"
+  },
+  {
+   "Code": "TCA",
+   "CodeName": "Kepulauan Turks dan Caicos",
+   "CodeDescription": "Kepulauan Turks dan Caicos",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"CBCR\",\"EOI_CA_NAME\":\"Director of Financial Transactions Information Exchange\",\"EOI_CA_ADDRESS\":\"Hon. N.J.S. Francis Building, Pond St. Grand Turk, Turks and Caicos Islands (the)\",\"EOI_CA_EMAIL\":[\"HSaunders@gov.tc\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "MSR",
+   "CodeName": "Montserrat",
+   "CodeDescription": "Montserrat",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":\"Comptroller of Inland Revenue, Tax Information Exchange\",\"EOI_CA_ADDRESS\":\"PO Box 99 Brades Montserrat\",\"EOI_CA_EMAIL\":[\"mnieoi@gov.ms\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "VIR",
+   "CodeName": "Kepulauan Virgin (Amerika Serikat)",
+   "CodeDescription": "Kepulauan Virgin (Amerika Serikat)",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "TTO",
+   "CodeName": "Trinidad dan Tobago",
+   "CodeDescription": "Trinidad dan Tobago",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "MWI",
+   "CodeName": "Malawi",
+   "CodeDescription": "Malawi",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "AIA",
+   "CodeName": "Anguilla",
+   "CodeDescription": "Angola",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"CBCR\",\"EOI_CA_NAME\":\"Permanent Secretary, Finance\",\"EOI_CA_ADDRESS\":\"Ministry of Finance   Government of Anguilla  P. O Box 60, The Valley,  Anguilla\",\"EOI_CA_EMAIL\":[\"Anguilla.EOI@gov.ai\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "YEM",
+   "CodeName": "Yaman",
+   "CodeDescription": "Yaman",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "BRA",
+   "CodeName": "Brasil",
+   "CodeDescription": "Brasil",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"CBCR\",\"EOI_CA_NAME\":\"Chefe da Assessoria de Rela??es Internacionais (Head of the International Relations Office)\",\"EOI_CA_ADDRESS\":\"Bloco O ? Anexo 2, Esplanada dos Minist?rios, Sala 413 ? Asa Norte, Bras?lia, DF. CEP: 70052-900.\",\"EOI_CA_EMAIL\":[\"eoi.tax@rfb.gov.br\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "IRN",
+   "CodeName": "Republik Islam Iran",
+   "CodeDescription": "Republik Islam Iran",
+   "ParameterData": "{\"RecipientCountry\":true,\"TreatyPartner\":true,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "TON",
+   "CodeName": "Tonga",
+   "CodeDescription": "Tonga",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "ISR",
+   "CodeName": "Israel",
+   "CodeDescription": "Israel",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "YT",
+   "CodeName": "Mayotte",
+   "CodeDescription": "Mayotte",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "AUT",
+   "CodeName": "Austria",
+   "CodeDescription": "Austria",
+   "ParameterData": "{\"RecipientCountry\":true,\"TreatyPartner\":true,\"EOI_PARTNER_TYPE\":\"CBCR\",\"EOI_CA_NAME\":\"Head of Office\",\"EOI_CA_ADDRESS\":\"Brehmstrasse 14  A-1110 Vienna\",\"EOI_CA_EMAIL\":[\"post.abb-ziz-amtshilfe@bmf.gv.at\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "RWA",
+   "CodeName": "Rwanda",
+   "CodeDescription": "Rwanda",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "MRT",
+   "CodeName": "Mauritania",
+   "CodeDescription": "Mauritania",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":\"Minister of Finance\",\"EOI_CA_ADDRESS\":\"4262+47J, Nouakchott, Mauritania\",\"EOI_CA_EMAIL\":[\"mmconseiller@gmail.com\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "CAF",
+   "CodeName": "Republik Afrika Tengah",
+   "CodeDescription": "Republik Afrika Tengah",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "WS",
+   "CodeName": "Samoa",
+   "CodeDescription": "Samoa",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "UMI",
+   "CodeName": "Kepulauan Terpencil Kecil Amerika Serikat",
+   "CodeDescription": "Kepulauan Terpencil Kecil Amerika Serikat",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "ISL",
+   "CodeName": "Islandia",
+   "CodeDescription": "Islandia",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"CBCR\",\"EOI_CA_NAME\":\"Director General\",\"EOI_CA_ADDRESS\":\"Ministry of Finance and Economic Affairs  Arnarhvoli  IS-150 Reykjav?k  ICELAND\",\"EOI_CA_EMAIL\":[\"helga.jonsdottir@fjr.is\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "ALB",
+   "CodeName": "Albania",
+   "CodeDescription": "Albania",
+   "ParameterData": "{\"IsoCode\":\"ALB\",\"LastForeignId\":null,\"RegisteredByTaxAdministration\":null,\"RecipientCountry\":true,\"TreatyPartner\":true,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":\"Competent Authority / Legal & Technical Directorate\",\"EOI_CA_ADDRESS\":\"St. Gjin Bue Shpata, no 28, Tirana, ALBANIA\",\"EOI_CA_EMAIL\":\"Eoi.Albania@tatime.gov.al\",\"WEB\":\"-\"}"
+  },
+  {
+   "Code": "HTI",
+   "CodeName": "Haiti",
+   "CodeDescription": "Haiti",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "GQ",
+   "CodeName": "Guinea Ekuator",
+   "CodeDescription": "Ekuator Guinea",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "AFG",
+   "CodeName": "Afganistan",
+   "CodeDescription": "Afganistan",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "COK",
+   "CodeName": "Kepulauan Cook",
+   "CodeDescription": "Kepulauan Cook",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":\"Treasurer\",\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "TZ",
+   "CodeName": "Tanzania, Republik Bersatu",
+   "CodeDescription": "Tanzania, Republik Bersatu",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "SYC",
+   "CodeName": "Seychelles",
+   "CodeDescription": "Seychelles",
+   "ParameterData": "{\"RecipientCountry\":true,\"TreatyPartner\":true,\"EOI_PARTNER_TYPE\":\"CBCR\",\"EOI_CA_NAME\":\"Seychelles Revenue Commissioner\",\"EOI_CA_ADDRESS\":\"P.O.Box 50 Orion Mall, Victoria, Mahe, Seychelles\",\"EOI_CA_EMAIL\":[\"georgette.capricieuse@src.gov.sc\",\"commissioner@src.gov.sc\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "VAT",
+   "CodeName": "Tahta Suci (Negara Kota Vatikan)",
+   "CodeDescription": "Tahta Suci (Negara Kota Vatikan)",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "BGD",
+   "CodeName": "Bangladesh",
+   "CodeDescription": "Bangladesh",
+   "ParameterData": "{\"IsoCode\":\"BGD\",\"LastForeignId\":null,\"RegisteredByTaxAdministration\":null,\"RecipientCountry\":true,\"TreatyPartner\":true,\"EOI_PARTNER_TYPE\":\"CBCR\",\"EOI_CA_NAME\":\"First Secretary, International Agreement & Opinion, National Board of Revenue (NBR)\",\"EOI_CA_ADDRESS\":\"Rajswa Bhaban, Segunbagicha, Dhaka-1000, Bangladesh\",\"EOI_CA_EMAIL\":\"louisa.lewis-ward@bra.gov.bb\",\"WEB\":\"-\"}"
+  },
+  {
+   "Code": "MUS",
+   "CodeName": "Mauritius",
+   "CodeDescription": "Mauritius",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"CBCR\",\"EOI_CA_NAME\":\"Director Large Taxpayers Department & International Taxation Unit Mauritius Revenue Authority\",\"EOI_CA_ADDRESS\":\"Level 5 Ehram Court Cnr. Sir Virgil Naz & Mgr Gonin Streets Port Louis MAURITIUS\",\"EOI_CA_EMAIL\":[\"headoffice@mra.mu\",\"Faisal.Oozeerally@mra.mu\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "MLT",
+   "CodeName": "Malta",
+   "CodeDescription": "Malta",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"CBCR\",\"EOI_CA_NAME\":\"Chief Tax Officer, International & Corporate Tax Unit\",\"EOI_CA_ADDRESS\":\"AM Business Centre, Labour Road, ?ejtun ZTN 2401  Malta\",\"EOI_CA_EMAIL\":[\"ca-eoi.cfr@gov.mt\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "GNB",
+   "CodeName": "Guinea-Bissau",
+   "CodeDescription": "Guinea-Bissau",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "EGY",
+   "CodeName": "Mesir",
+   "CodeDescription": "Mesir",
+   "ParameterData": "{\"RecipientCountry\":true,\"TreatyPartner\":true,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":\"International Tax Department Director\",\"EOI_CA_ADDRESS\":\"Ministry of Finance Towers, Extension of Ramses St., Cairo, Egypt\",\"EOI_CA_EMAIL\":[\"hannan.khalaf@eta.gov.eg\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "FJ",
+   "CodeName": "Fiji",
+   "CodeDescription": "Fiji",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "TUV",
+   "CodeName": "Tuvalu",
+   "CodeDescription": "Tuvalu",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "FLK",
+   "CodeName": "Kepulauan Falkland (Malvinas)",
+   "CodeDescription": "Kepulauan Falkland (Malvinas)",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "SJM",
+   "CodeName": "Svalbard dan Jan Mayen",
+   "CodeDescription": "Svalbard dan Jan Mayen",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "ITA",
+   "CodeName": "Italia",
+   "CodeDescription": "Italia",
+   "ParameterData": "{\"RecipientCountry\":true,\"TreatyPartner\":true,\"EOI_PARTNER_TYPE\":\"CBCR\",\"EOI_CA_NAME\":\"Head of International Department\",\"EOI_CA_ADDRESS\":\"Revenue Agency  Taxpayers' Compliance and Enforcement  Division  Large Business Taxpayers Central Directorate  International Department  International Cooperation Office  Via Giorgione 106  00147 Rome (Italy)\",\"EOI_CA_EMAIL\":[\"dc.gci.cooperazioneinternazionale@agenziaentrate.it\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "NCL",
+   "CodeName": "Kaledonia Baru",
+   "CodeDescription": "Kaledonia Baru",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "SUR",
+   "CodeName": "Suriname",
+   "CodeDescription": "Suriname",
+   "ParameterData": "{\"RecipientCountry\":true,\"TreatyPartner\":true,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":\"Minister of Finance\",\"EOI_CA_ADDRESS\":\"S.M Jamaludinstraat 26, Paramaribo, Suriname\",\"EOI_CA_EMAIL\":[\"secdirbel@finance.gov.sr\",\"secmin@finance.gov.sr\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "KWT",
+   "CodeName": "Kuwait",
+   "CodeDescription": "Kuwait",
+   "ParameterData": "{\"RecipientCountry\":true,\"TreatyPartner\":true,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":\"Controller of International Treaties\",\"EOI_CA_ADDRESS\":\"P.O.Box 9 ? Safat 13001 ? Kuwait\",\"EOI_CA_EMAIL\":[\"owelayte@mof.gov.kw\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "HMD",
+   "CodeName": "Pulau Heard dan Kepulauan McDonald",
+   "CodeDescription": "Pulau Heard dan Kepulauan McDonald",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "PYF",
+   "CodeName": "Polinesia",
+   "CodeDescription": "Polinesia",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "EST",
+   "CodeName": "Estonia",
+   "CodeDescription": "Estonia",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"CBCR\",\"EOI_CA_NAME\":\"Head of Unit Intelligence Department / International Information Exchange Unit\",\"EOI_CA_ADDRESS\":\"L??tsa 8a Tallinn 15176 Estonia\",\"EOI_CA_EMAIL\":[\"emta@emta.ee\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "PER",
+   "CodeName": "Peru",
+   "CodeDescription": "Peru",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"CBCR\",\"EOI_CA_NAME\":\"National Superintendent of the National Superintendence of Customs and Tax Administration\",\"EOI_CA_ADDRESS\":\"Av. Garcilaso de la Vega 1472, Lima - Per?\",\"EOI_CA_EMAIL\":[\"lvera@sunat.gob.pe\",\"rtamayoto@sunat.gob.pe\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "AND",
+   "CodeName": "Andorra",
+   "CodeDescription": "Andorra",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"CBCR\",\"EOI_CA_NAME\":\"Secretary of State for International Financial Matters\",\"EOI_CA_ADDRESS\":\"Ministry of Finance C. Prat de la Creu,62-64 Edifici Administratiu AD500 Andorra la Vella Principality of Andorra\",\"EOI_CA_EMAIL\":[\"marcballesta@govern.ad\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "COL",
+   "CodeName": "Kolombia",
+   "CodeDescription": "Kolombia",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"CBCR\",\"EOI_CA_NAME\":\"Head of International Taxation Office\",\"EOI_CA_ADDRESS\":\"Edificio San Agustin  Carrera 8 # 6C-38 Piso 6to  Bogot?, Colombia\",\"EOI_CA_EMAIL\":[\"dir-gen-autoridadcompetente@dian.gov.co\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "RUS",
+   "CodeName": "Federasi Rusia",
+   "CodeDescription": "Federasi Rusia",
+   "ParameterData": "{\"RecipientCountry\":true,\"TreatyPartner\":true,\"EOI_PARTNER_TYPE\":\"CBCR\",\"EOI_CA_NAME\":\"Deputy Head of Tax and Customs Policy Department, Ministry of Finance of the Russian Federation\",\"EOI_CA_ADDRESS\":\"Ilyinka 9, 109097 Moscow, Russia\",\"EOI_CA_EMAIL\":[\"eoir@tax.gov.ru\",\"pokidko@tax.gov.ru\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "OMN",
+   "CodeName": "Oman",
+   "CodeDescription": "Oman",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":\"Director of International Cooperation, Department Tax Authority, Oman\",\"EOI_CA_ADDRESS\":\"P.O.Box: 285, Postal Code: 100, Muscat, Ruwi\",\"EOI_CA_EMAIL\":[\"wisal.abduwani@taxoman.gov.om\",\"info@taxoman.gov.om\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "LK",
+   "CodeName": "Tanpa kewarganegaraan",
+   "CodeDescription": "Tanpa kewarganegaraan",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "ERI",
+   "CodeName": "Eritrea",
+   "CodeDescription": "Eritrea",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "NIU",
+   "CodeName": "Niue",
+   "CodeDescription": "Niue",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":\"Financial Secretary of Niue\",\"EOI_CA_ADDRESS\":\"PO Box 40, Alofi, Niue\",\"EOI_CA_EMAIL\":[\"Doreen.Siataga@mail.gov.nu\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "PAK",
+   "CodeName": "Pakistan",
+   "CodeDescription": "Pakistan",
+   "ParameterData": "{\"RecipientCountry\":true,\"TreatyPartner\":true,\"EOI_PARTNER_TYPE\":\"CBCR\",\"EOI_CA_NAME\":\"Director General (Int. Taxes), Federal Board of Revenue\",\"EOI_CA_ADDRESS\":\"FBR House, Constitution Avenue, Islamabad-44000, Pakistan\",\"EOI_CA_EMAIL\":[\"ittaxes@fbr.gov.pk\",\"Muhammad.ashfaq@fbr.gov.pk\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "LUX",
+   "CodeName": "Luksemburg",
+   "CodeDescription": "Luksemburg",
+   "ParameterData": "{\"RecipientCountry\":true,\"TreatyPartner\":true,\"EOI_PARTNER_TYPE\":\"CBCR\",\"EOI_CA_NAME\":\"Comit? de direction, Administration des contributions directes ? Direction\",\"EOI_CA_ADDRESS\":\"45, Boulevard Roosevelt, L-2450 Luxembourg\",\"EOI_CA_EMAIL\":[\"comite_de_direction@co.etat.lu\",\"divrelint@co.etat.lu\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "BES",
+   "CodeName": "Bonaire, Sint Eustatius dan Saba",
+   "CodeDescription": "Bonaire, Sint Eustatius dan Saba",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "CIV",
+   "CodeName": "Pantai Gading",
+   "CodeDescription": "Pantai Gading",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "MYS",
+   "CodeName": "Malaysia",
+   "CodeDescription": "Malaysia",
+   "ParameterData": "{\"RecipientCountry\":true,\"TreatyPartner\":true,\"EOI_PARTNER_TYPE\":\"CBCR\",\"EOI_CA_NAME\":\"Director, International Affairs & Exchange of Information Division, Department of International Taxation\",\"EOI_CA_ADDRESS\":\"Level 12, Menara Hasil, Persiaran Rimba Permai, Cyber 8, 63600 Cyberjaya, Selangor, Malaysia\",\"EOI_CA_EMAIL\":[\"eoimalaysia@hasil.gov.my\",\"harris@hasil.gov.my\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "MTQ",
+   "CodeName": "Martinik",
+   "CodeDescription": "Martinik",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "TGO",
+   "CodeName": "Togo",
+   "CodeDescription": "Togo",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "GLP",
+   "CodeName": "Guadeloupe",
+   "CodeDescription": "Guadeloupe",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "CAN",
+   "CodeName": "Kanada",
+   "CodeDescription": "Kanada",
+   "ParameterData": "{\"RecipientCountry\":true,\"TreatyPartner\":true,\"EOI_PARTNER_TYPE\":\"CBCR\",\"EOI_CA_NAME\":\"Competent Authority  Specialized Audit Support Division\",\"EOI_CA_ADDRESS\":\"Specialized Audit Support Division  High Net Worth Compliance Directorate  Compliance Programs Branch  Canada Revenue Agency  Enterprise Building, 8th Floor  427 Laurier Avenue West  Ottawa, Ontario K1A 0L5 CANADA\",\"EOI_CA_EMAIL\":[\"Canadaei@cra-arc.gc.ca\",\"AEOICANADAG@cra-arc.gc.ca\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "TKM",
+   "CodeName": "Turkmenistan",
+   "CodeDescription": "Turkmenistan",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "ARG",
+   "CodeName": "Argentina",
+   "CodeDescription": "Argentina",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"CBCR\",\"EOI_CA_NAME\":\"Federal Administrator\",\"EOI_CA_ADDRESS\":\"Hip?lito Yrigoyen 370 2°  Piso ? Of. N° 2695 (1086) Buenos Aires ?  Argentina.\",\"EOI_CA_EMAIL\":[\"fiscalidadinternacional@afip.gob.ar\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "ESH",
+   "CodeName": "Sahara Barat",
+   "CodeDescription": "Sahara Barat",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "GRD",
+   "CodeName": "Grenada",
+   "CodeDescription": "Granada",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":\"Acting Comptroller, Inland Revenue Division\",\"EOI_CA_ADDRESS\":\"Financial Complex,  Carenage, St. George’s, GRENADA\",\"EOI_CA_EMAIL\":[\"COMPTROLLER@IRD.GOV.GD\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "MNG",
+   "CodeName": "Mongolia",
+   "CodeDescription": "Mongolia",
+   "ParameterData": "{\"RecipientCountry\":true,\"TreatyPartner\":true,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":\"Commissioner of the General Authority for Customs and Taxation\",\"EOI_CA_ADDRESS\":\"5/1 Street of NUB, Cingeltei district, Ulaanbaatar, Mongolia 15160\",\"EOI_CA_EMAIL\":[\"info@mta.mn\",\"badral.b@mta.mn\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "BHS",
+   "CodeName": "Bahama",
+   "CodeDescription": "Bahama",
+   "ParameterData": "{\"IsoCode\":\"BHS\",\"LastForeignId\":null,\"RegisteredByTaxAdministration\":null,\"RecipientCountry\":true,\"TreatyPartner\":true,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":\"Legal Advisor (Principal Delegate)\",\"EOI_CA_ADDRESS\":\"Cecil Wallace-Whitfield Centre West Bay Street P. O. Box N-3017 Nassau, The Bahamas\",\"EOI_CA_EMAIL\":\"competentauthorityMOF@bahamas.gov.bs\",\"WEB\":\"-\"}"
+  },
+  {
+   "Code": "GUM",
+   "CodeName": "Guam",
+   "CodeDescription": "Guam",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "LBR",
+   "CodeName": "Liberia",
+   "CodeDescription": "Liberia",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":\"Commissioner General of the Liberia Revenue Authority\",\"EOI_CA_ADDRESS\":\"ELWA Junction, Paynesville City, Liberia\",\"EOI_CA_EMAIL\":[\"info@lra.gov.lr\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "ROU",
+   "CodeName": "Rumania",
+   "CodeDescription": "Rumania",
+   "ParameterData": "{\"RecipientCountry\":true,\"TreatyPartner\":true,\"EOI_PARTNER_TYPE\":\"CBCR\",\"EOI_CA_NAME\":\"General Director, General Directorate for Fiscal Control Coordination Romanian National Agency for Fiscal Administration\",\"EOI_CA_ADDRESS\":\"17 Apolodor Street, District 5, Bucharest, Romania\",\"EOI_CA_EMAIL\":[\"secretariat.dgcif@anaf.ro\",\"daniela.teodoru@anaf.ro\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "LBN",
+   "CodeName": "Libanon",
+   "CodeDescription": "Libanon",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":\"Head of Department of Foreign Trade, Ministry of Economic and Trade\",\"EOI_CA_ADDRESS\":\"Artua Street, Assaf Building, Hamra-Beirut, Lebanon\",\"EOI_CA_EMAIL\":[\"massi@economy.gov.lb\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "MDV",
+   "CodeName": "Maladewa",
+   "CodeDescription": "Maladewa",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":\"Commissioner General of Taxation, Maldives Inland Revenue Authority\",\"EOI_CA_ADDRESS\":\"Ameenee Magu, Male’ 20379, Maldives\",\"EOI_CA_EMAIL\":[\"fathuhulla.j@mira.gov.mv\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "NZL",
+   "CodeName": "Selandia Baru",
+   "CodeDescription": "Selandia Baru",
+   "ParameterData": "{\"RecipientCountry\":true,\"TreatyPartner\":true,\"EOI_PARTNER_TYPE\":\"CBCR\",\"EOI_CA_NAME\":\"Commissioner of Inland Revenue; Manager (International Revenue Strategy)  Inland Revenue Department\",\"EOI_CA_ADDRESS\":\"Freyberg Building, 20 Aitken Street, Wellington 6140, NEW ZEALAND\",\"EOI_CA_EMAIL\":[\"CompetentAuthority@ird.govt.nz\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "GMB",
+   "CodeName": "Gambia",
+   "CodeDescription": "Gambia",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "NGA",
+   "CodeName": "Nigeria",
+   "CodeDescription": "Nigeria",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"CBCR\",\"EOI_CA_NAME\":\"Executive Chairman ? Delegated Competent Authority Federal Inland Revenue Service\",\"EOI_CA_ADDRESS\":\"No. 20 Sokode Crescent Wuse Zone 5, Abuja, FCT\",\"EOI_CA_EMAIL\":[\"tunde.fowler@firs.gov.ng\",\"canigeria@firs.gov.ng\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "BLM",
+   "CodeName": "Santo Barthelemy",
+   "CodeDescription": "Santo Barthelemy",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "CYM",
+   "CodeName": "Kepulauan Cayman",
+   "CodeDescription": "Kepulauan Cayman",
+   "ParameterData": "{\"IsoCode\":\"CYM\",\"LastForeignId\":null,\"RegisteredByTaxAdministration\":null,\"RecipientCountry\":true,\"TreatyPartner\":true,\"EOI_PARTNER_TYPE\":\"CBCR\",\"EOI_CA_NAME\":\"Tax Information Authority\",\"EOI_CA_ADDRESS\":\"Department for International Tax Cooperation, Government Administration Building, Box 135 133 Elgin Avenue George Town Grand Cayman KY1-9000 CAYMAN ISLANDS\",\"EOI_CA_EMAIL\":\"tia@gov.ky\",\"WEB\":\"-\"}"
+  },
+  {
+   "Code": "BMU",
+   "CodeName": "Bermuda",
+   "CodeDescription": "Bermuda",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"CBCR\",\"EOI_CA_NAME\":\"Assistant Financial Secretary\",\"EOI_CA_ADDRESS\":\"Government Administration Building 2nd Floor, 30 Parliament Street, Hamilton HM 12\",\"EOI_CA_EMAIL\":[\"wlbrown@gov.bm\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "NPL",
+   "CodeName": "Nepal",
+   "CodeDescription": "Nepal",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "GTM",
+   "CodeName": "Guatemala",
+   "CodeDescription": "Guatemala",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":\"Head of Information Management Unit\",\"EOI_CA_ADDRESS\":\"13 calle 1-10 Zona 10, Edificio Dubai Center,  Nivel 11, Oficina 1105\",\"EOI_CA_EMAIL\":[\"dgi@sat.gob.gt\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "ETH",
+   "CodeName": "Etiopia",
+   "CodeDescription": "Etiopia",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "BEN",
+   "CodeName": "Benin",
+   "CodeDescription": "Benin",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[\"eazanmasso@finances.bj\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "SLE",
+   "CodeName": "Sierra Leone",
+   "CodeDescription": "Sierra Leone",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "COD",
+   "CodeName": "Republik Demokratik Kongo",
+   "CodeDescription": "Republik Demokratik Kongo",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "FIN",
+   "CodeName": "Finlandia",
+   "CodeDescription": "Finlandia",
+   "ParameterData": "{\"IsoCode\":\"FIN\",\"LastForeignId\":\"FIN\",\"RegisteredByTaxAdministration\":true,\"RecipientCountry\":true,\"TreatyPartner\":true,\"EOI_PARTNER_TYPE\":\"CBCR\",\"EOI_CA_NAME\":\"Senior Adviser Customer Relations Unit\",\"EOI_CA_ADDRESS\":\"Finnish Tax Administration Customer Relations Unit P.O.Box 325 00052 Tax Finland\",\"EOI_CA_EMAIL\":\"Finland_EOI@vero.fi\",\"WEB\":\"-\"}"
+  },
+  {
+   "Code": "MM",
+   "CodeName": "Myanmar",
+   "CodeDescription": "Myanmar",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "COM",
+   "CodeName": "Komoro",
+   "CodeDescription": "Komoro",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "DJI",
+   "CodeName": "Djibouti",
+   "CodeDescription": "Djibouti",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "MLI",
+   "CodeName": "Mali",
+   "CodeDescription": "Mali",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "ATF",
+   "CodeName": "Wilayah Selatan Prancis",
+   "CodeDescription": "Wilayah Selatan Prancis",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "BGR",
+   "CodeName": "Bulgaria",
+   "CodeDescription": "Bulgaria",
+   "ParameterData": "{\"RecipientCountry\":true,\"TreatyPartner\":true,\"EOI_PARTNER_TYPE\":\"CBCR\",\"EOI_CA_NAME\":\"Acting Director Tax Treaties Directorate\",\"EOI_CA_ADDRESS\":\"52 Dondukov Blvd., 1000 Sofia, Bulgaria\",\"EOI_CA_EMAIL\":[\"bg-eoi@nra.bg\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "BLR",
+   "CodeName": "Belarus",
+   "CodeDescription": "Belarusia",
+   "ParameterData": "{\"RecipientCountry\":true,\"TreatyPartner\":true,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "GIN",
+   "CodeName": "Guinea",
+   "CodeDescription": "Guinea",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "BDI",
+   "CodeName": "Burundi",
+   "CodeDescription": "Burundi",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "WLF",
+   "CodeName": "Wallis dan Futuna",
+   "CodeDescription": "Wallis dan Futuna",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "ABW",
+   "CodeName": "Aruba",
+   "CodeDescription": "Aruba",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":\"Managing Director Tax Department\",\"EOI_CA_ADDRESS\":\"Camacuri 2, Aruba\",\"EOI_CA_EMAIL\":[\"lepieters@impuesto.aw\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "LCA",
+   "CodeName": "Santa Lucia",
+   "CodeDescription": "Santa Lucia",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":\"Comptroller of Inland Revenue Department\",\"EOI_CA_ADDRESS\":\"2276+83H, Heraldine Rock Administrative Building, Castries, St. Lucia\",\"EOI_CA_EMAIL\":[\"aeoisupport@ird.gov.lc\",\"eoisupport@ird.gov.lc\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "MCO",
+   "CodeName": "Monako",
+   "CodeDescription": "Monako",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"CBCR\",\"EOI_CA_NAME\":\"Chef de Section Department des Finances et de I'Economie\",\"EOI_CA_ADDRESS\":\"Ministere d'Etat-Place de Visitation - BO 522 MC 98015 MONACO CEDEX\",\"EOI_CA_EMAIL\":[\"rbugnicourt@gouv.mc\",\"iassenza@gouv.mc\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "GRL",
+   "CodeName": "Greenland",
+   "CodeDescription": "Greenland",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":\"Director General\",\"EOI_CA_ADDRESS\":\"-\",\"EOI_CA_EMAIL\":[\"tax@nanoq.gl\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "VCT",
+   "CodeName": "Saint Vincent dan Grenadines",
+   "CodeDescription": "Saint Vincent dan Grenadines",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":\"Comptroller of Inland Revenue Department\",\"EOI_CA_ADDRESS\":\"5Q3G+Q97, Halifax St, Kingstown, St. Vincent & Grenadines\",\"EOI_CA_EMAIL\":[\"svgird@caribsurf.com\",\"Edmond.jackson@gov.vc\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "SHN",
+   "CodeName": "Saint Helena, Ascension dan Tristan da Cunha",
+   "CodeDescription": "Saint Helena, Ascension dan Tristan da Cunha",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "NIC",
+   "CodeName": "Nikaragua",
+   "CodeDescription": "Nikaragua",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "PHL",
+   "CodeName": "Filipina",
+   "CodeDescription": "Filipina",
+   "ParameterData": "{\"RecipientCountry\":true,\"TreatyPartner\":true,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":\"Commissioner of Internal Revenue\",\"EOI_CA_ADDRESS\":\"BIR-National Office Building, BIR Road, DIliman, Quezon City 0829, Philippines\",\"EOI_CA_EMAIL\":[\"eoi_itad@bir.gov.ph\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "STP",
+   "CodeName": "Sao Tome dan Principe",
+   "CodeDescription": "Sao Tome dan Principe",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "ARE",
+   "CodeName": "Uni Emirat Arab",
+   "CodeDescription": "Uni Emirat Arab",
+   "ParameterData": "{\"RecipientCountry\":true,\"TreatyPartner\":true,\"EOI_PARTNER_TYPE\":\"CBCR\",\"EOI_CA_NAME\":\"Deputy Director of International Financial Relations Department\",\"EOI_CA_ADDRESS\":\"Al Qhubaiba Street PO BOX 1565 Dubai\",\"EOI_CA_EMAIL\":[\"TAXINFO@mof.gov.ae\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "CZE",
+   "CodeName": "Republik Ceko",
+   "CodeDescription": "Republik Ceko",
+   "ParameterData": "{\"RecipientCountry\":true,\"TreatyPartner\":true,\"EOI_PARTNER_TYPE\":\"CBCR\",\"EOI_CA_NAME\":\"Head of Direct Taxes International Cooperation Unit\",\"EOI_CA_ADDRESS\":\"Direct Taxes Department II  Lazarsk? 15/7, 117 22 Prague 1, Czech Republic\",\"EOI_CA_EMAIL\":[\"Michal.Rohacek@fs.mfcr.cz\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "DEU",
+   "CodeName": "Jerman",
+   "CodeDescription": "Jerman",
+   "ParameterData": "{\"RecipientCountry\":true,\"TreatyPartner\":true,\"EOI_PARTNER_TYPE\":\"CBCR\",\"EOI_CA_NAME\":\"Head of Division St I A 1\",\"EOI_CA_ADDRESS\":\"Bundeszentralamt f?r Steuern, An der K?ppe 1, 53225 Bonn, Germany\",\"EOI_CA_EMAIL\":[\"de.sia@bzst.bund.de\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "ZAF",
+   "CodeName": "Afrika Selatan",
+   "CodeDescription": "Afrika Selatan",
+   "ParameterData": "{\"RecipientCountry\":true,\"TreatyPartner\":true,\"EOI_PARTNER_TYPE\":\"CBCR\",\"EOI_CA_NAME\":\"Commisioner of South African Revenue Service\",\"EOI_CA_ADDRESS\":\"Private Bag X923, Pretoria, 0001\",\"EOI_CA_EMAIL\":[\"SARS_EOI@sars.gov.za\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "PCN",
+   "CodeName": "Pitcairn",
+   "CodeDescription": "Pitcairn",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "MHL",
+   "CodeName": "Kepulauan Marshall",
+   "CodeDescription": "Kepulauan Marshall",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":\"Secretary of Finance, Ministry of Finance Republic of the Marshall Islands\",\"EOI_CA_ADDRESS\":\"Po Box D Majuro Marshall Islands 96960\",\"EOI_CA_EMAIL\":[\"mofaadm@ntamar.net\",\"mofatsec.rmi@gmail.com\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "PLW",
+   "CodeName": "Palau",
+   "CodeDescription": "Palau",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "BRN",
+   "CodeName": "Brunei Darussalam",
+   "CodeDescription": "Brunei Darussalam",
+   "ParameterData": "{\"RecipientCountry\":true,\"TreatyPartner\":true,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":\"Permanent Secretary (Policy and Fiscal)/ Collector of Income Tax\",\"EOI_CA_ADDRESS\":\"Ministry of Finance and Economy  Commonwealth Drive  Bandar Seri Begawan BB3910  Brunei Darussalam\",\"EOI_CA_EMAIL\":[\"norliah.kula@mofe.gov.bn\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "LTU",
+   "CodeName": "Lithuania",
+   "CodeDescription": "Lithuania",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"CBCR\",\"EOI_CA_NAME\":\"Head of State Tax Inspectorate under the Ministry of Finance of the Republic of Lithuania\",\"EOI_CA_ADDRESS\":\"Vasario 16-osios str. 14, 01514 Vilnius, Lithuania\",\"EOI_CA_EMAIL\":[\"eoi@vmi.lt\",\"Vaide.Riskute@vmi.lt\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "ATG",
+   "CodeName": "Antigua dan Barbuda",
+   "CodeDescription": "Antigua dan Barbuda",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":\"Commissioner of Inland Revenue Department\",\"EOI_CA_ADDRESS\":\"Inland revenue Department, Woods Center, Friars Hill Road, St. John's Antigua\",\"EOI_CA_EMAIL\":[\"Revenue@antigua.gov.ag\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "MEX",
+   "CodeName": "Meksiko",
+   "CodeDescription": "Meksiko",
+   "ParameterData": "{\"RecipientCountry\":true,\"TreatyPartner\":true,\"EOI_PARTNER_TYPE\":\"CBCR\",\"EOI_CA_NAME\":\"Director General of Internasional Economics Organisations\",\"EOI_CA_ADDRESS\":\"Plaza Juarez No. 20, Col. Centro, Delg Cuahtemoc, C.P. 06010 Mexico D.F. , Meksiko\",\"EOI_CA_EMAIL\":[\"sdelara@sre.gob.mx\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "TCD",
+   "CodeName": "Chad",
+   "CodeDescription": "Chad",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "SGP",
+   "CodeName": "Singapura",
+   "CodeDescription": "Singapura",
+   "ParameterData": "{\"RecipientCountry\":true,\"TreatyPartner\":true,\"EOI_PARTNER_TYPE\":\"CBCR\",\"EOI_CA_NAME\":\"Commissioner of Inland Revenue Authority of Singapore\",\"EOI_CA_ADDRESS\":\"55 Newton Road, Revenue House, Singapore 307987\",\"EOI_CA_EMAIL\":[\"eoi@iras.gov.sg\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "TUN",
+   "CodeName": "Tunisia",
+   "CodeDescription": "Tunisia",
+   "ParameterData": "{\"RecipientCountry\":true,\"TreatyPartner\":true,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":\"Directeur G?n?ral des Etudes et de la L?gislation Fiscales ? Minist?re des Finances\",\"EOI_CA_ADDRESS\":\"Place du Gouvernement ? La Kasbah, 1000 Tunis\",\"EOI_CA_EMAIL\":[\"mfi@ministeres.tn\",\"cabinet.mf@planet.tn\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "KHM",
+   "CodeName": "Kamboja",
+   "CodeDescription": "Kamboja",
+   "ParameterData": "{\"RecipientCountry\":true,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":\"Director General\",\"EOI_CA_ADDRESS\":\"General Department of  Taxation, Corner of Russian Federation & Mao  Tsetong Blvd, Sangkat Toek Laak I, Khan Toul Kork,  Phnom Penh, Cambodia\",\"EOI_CA_EMAIL\":[\"sengcheaseth@tax.gov.kh\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "IRL",
+   "CodeName": "Irlandia",
+   "CodeDescription": "Irlandia",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"CBCR\",\"EOI_CA_NAME\":\"Director of International Tax Division\",\"EOI_CA_ADDRESS\":\"-\",\"EOI_CA_EMAIL\":[\"compautheoi@revenue.ie\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "KAZ",
+   "CodeName": "Kazakhstan",
+   "CodeDescription": "Kazakstan",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"CBCR\",\"EOI_CA_NAME\":\"Chairman State Revenue of Committee\",\"EOI_CA_ADDRESS\":\"11 Zhenis avenue, 010000, Nur-Sultan,  Kazakhstan\",\"EOI_CA_EMAIL\":[\"e.information@kgd.gov.kz\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "MAR",
+   "CodeName": "Maroko",
+   "CodeDescription": "Maroko",
+   "ParameterData": "{\"RecipientCountry\":true,\"TreatyPartner\":true,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":\"Director General, General Administration of Taxes\",\"EOI_CA_ADDRESS\":\"General Administration of Taxes, Avenue Haj Ahmed Cherkaoui, Quartier Administratif Agdal, 10090 Rabat, Morocco\",\"EOI_CA_EMAIL\":[\"o.faraj@tax.gov.ma\",\"o.raissouni@tax.gov.ma\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "TUR",
+   "CodeName": "Turki",
+   "CodeDescription": "Turki",
+   "ParameterData": "{\"RecipientCountry\":true,\"TreatyPartner\":true,\"EOI_PARTNER_TYPE\":\"CBCR\",\"EOI_CA_NAME\":\"Commissioner of Turkish Revenue Administration\",\"EOI_CA_ADDRESS\":\"Devlet Mahallesi, Merasim Caddesi No: 9/1 06450 ?ankaya-Ankara\",\"EOI_CA_EMAIL\":[\"akurt@gelirler.gov.tr\",\"ahmet.yildirim@gelirler.gov.tr\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "JAM",
+   "CodeName": "Jamaika",
+   "CodeDescription": "Jamaika",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":\"General Manager-Large Individual & EOI\",\"EOI_CA_ADDRESS\":\"Large Taxpayer Office, 191 Constant Spring Road, Kingston 8, Jamaica\",\"EOI_CA_EMAIL\":[\"eoi@taj.gov.jm\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "COG",
+   "CodeName": "Kongo",
+   "CodeDescription": "Kongo",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "BIH",
+   "CodeName": "Bosnia dan Herzegovina",
+   "CodeDescription": "Bosnia dan Herzegovina",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":\"Function Assistant Ministry for the Department for Tax Policy, Public Revenues and Games of Chance\",\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "MAF",
+   "CodeName": "Santo Martin (bagian Prancis)",
+   "CodeDescription": "Santo Martin (bagian Prancis)",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "CHE",
+   "CodeName": "Swiss",
+   "CodeDescription": "Swiss",
+   "ParameterData": "{\"RecipientCountry\":true,\"TreatyPartner\":true,\"EOI_PARTNER_TYPE\":\"CBCR\",\"EOI_CA_NAME\":\"Head of Service for Exchange of Information in Tax Matters, Swiss Federal Tax Administration\",\"EOI_CA_ADDRESS\":\"Eigerstrasse 65  3003 Berne\",\"EOI_CA_EMAIL\":[\"sei@estv.admin.ch\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "TJK",
+   "CodeName": "Tajikistan",
+   "CodeDescription": "Tajikistan",
+   "ParameterData": "{\"RecipientCountry\":true,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":\"Minister of Finance\",\"EOI_CA_ADDRESS\":\"Academics Rajabov Street 3, Dushanbe, Tajikistan\",\"EOI_CA_EMAIL\":[\"info@minfin.tj\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "LAO",
+   "CodeName": "Republik Demokratik Rakyat Laos",
+   "CodeDescription": "Republik Demokratik Rakyat Laos",
+   "ParameterData": "{\"RecipientCountry\":true,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":\"Minister of Finance\",\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "MK",
+   "CodeName": "Republik Makedonia Bekas Yugoslavia",
+   "CodeDescription": "Republik Makedonia Bekas Yugoslavia",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "SRB",
+   "CodeName": "Serbia",
+   "CodeDescription": "Serbia",
+   "ParameterData": "{\"RecipientCountry\":true,\"TreatyPartner\":true,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":\"Director of Fiscal System Department, Ministry of Finance\",\"EOI_CA_ADDRESS\":\"20, Kneza Milosa str. 11000 Belgrade\",\"EOI_CA_EMAIL\":[],\"WEB\":[\"fiskalni.sektor@mfin.gov.rs\",\"www.mfin.gov.rs\"]}"
+  },
+  {
+   "Code": "CYP",
+   "CodeName": "Siprus",
+   "CodeDescription": "Siprus",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "MOZ",
+   "CodeName": "Mozambik",
+   "CodeDescription": "Mozambik",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "MDA",
+   "CodeName": "Republik Moldova",
+   "CodeDescription": "Republik Moldova",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "CRI",
+   "CodeName": "Kosta Rika",
+   "CodeDescription": "Kosta Rika",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"CBCR\",\"EOI_CA_NAME\":\"General Director of Tax  Administration and Competent Authority\",\"EOI_CA_ADDRESS\":\"Edificio La Llacuna, 5th  Street, Central and first avenue. San Jos?, Costa  Rica\",\"EOI_CA_EMAIL\":[\"Direcciongeneral-DGT@hacienda.go.cr   tributacionInter@hacienda.go.cr\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "HND",
+   "CodeName": "Honduras",
+   "CodeDescription": "Honduras",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "SOM",
+   "CodeName": "Somalia",
+   "CodeDescription": "Somalia",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "BWA",
+   "CodeName": "Botswana",
+   "CodeDescription": "Botswana",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":\"Commissioner General\",\"EOI_CA_ADDRESS\":\"Plot 53976, Kudumatse Drive, Gaborone, Botswana\",\"EOI_CA_EMAIL\":[\"kmorris@burs.org.bw\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "KGZ",
+   "CodeName": "Kyrgyzstan",
+   "CodeDescription": "Kirgistan",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "TLS",
+   "CodeName": "Timor Leste",
+   "CodeDescription": "Timor Leste",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "GEO",
+   "CodeName": "Georgia",
+   "CodeDescription": "Georgia",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":\"Head of Analytical Department\",\"EOI_CA_ADDRESS\":\"16 Gorgasali st. 0114 Tbilisi, Georgia\",\"EOI_CA_EMAIL\":[\"geocompauthority@rs.ge\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "SWE",
+   "CodeName": "Swedia",
+   "CodeDescription": "Swedia",
+   "ParameterData": "{\"RecipientCountry\":true,\"TreatyPartner\":true,\"EOI_PARTNER_TYPE\":\"CBCR\",\"EOI_CA_NAME\":\"Head of Central Liaison Office (CLO) for Direct taxes and VAT, Large and International Business Department, Swedish Tax Agency\",\"EOI_CA_ADDRESS\":\"Solna strandv?g 22, 171 54 Solna, Sweden\",\"EOI_CA_EMAIL\":[\"eoi@skatteverket.se\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "GRC",
+   "CodeName": "Yunani",
+   "CodeDescription": "Yunani",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"CBCR\",\"EOI_CA_NAME\":\"Head of International Administrative Cooperation Department\",\"EOI_CA_ADDRESS\":\"-\",\"EOI_CA_EMAIL\":[\"c.darladima@aade.gr\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "HRV",
+   "CodeName": "Kroasia",
+   "CodeDescription": "Kroasia",
+   "ParameterData": "{\"RecipientCountry\":true,\"TreatyPartner\":true,\"EOI_PARTNER_TYPE\":\"CBCR\",\"EOI_CA_NAME\":\"Director General of the Tax Administration\",\"EOI_CA_ADDRESS\":\"Bo?kovi?eva 5  10.000 Zagreb\",\"EOI_CA_EMAIL\":[\"ured.ravnatelja@porezna-uprava.hr\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "USA",
+   "CodeName": "Amerika Serikat",
+   "CodeDescription": "Amerika Serikat",
+   "ParameterData": "{\"RecipientCountry\":true,\"TreatyPartner\":true,\"EOI_PARTNER_TYPE\":\"CBCR\",\"EOI_CA_NAME\":\"Commisioner of Large Business & International, Internal Revenue Service\",\"EOI_CA_ADDRESS\":\"24000 Avila Road M/S 1111 Laguna Niguel, CA 92677\",\"EOI_CA_EMAIL\":[\"Cherisse.K.Lee@irs.gov\",\"Tina.B.Masuda@irs.gov\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "FSM",
+   "CodeName": "Negara Federasi Mikronesia",
+   "CodeDescription": "Negara Federasi Mikronesia",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "PS",
+   "CodeName": "Negara Palestina",
+   "CodeDescription": "Negara Palestina",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "BTN",
+   "CodeName": "Bhutan",
+   "CodeDescription": "Bhutan",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "GAB",
+   "CodeName": "Gabon",
+   "CodeDescription": "Gabon",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":\"Directeur\",\"EOI_CA_ADDRESS\":\"BP 45 Libreville, Gabon\",\"EOI_CA_EMAIL\":[\"deleon020@yahoo.fr\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "IOT",
+   "CodeName": "Wilayah Samudra Hindia Britania",
+   "CodeDescription": "Wilayah Samudra Hindia Britania",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "IND",
+   "CodeName": "India",
+   "CodeDescription": "India",
+   "ParameterData": "{\"RecipientCountry\":true,\"TreatyPartner\":true,\"EOI_PARTNER_TYPE\":\"CBCR\",\"EOI_CA_NAME\":\"Joint Secretary, (FT&TR-I)\",\"EOI_CA_ADDRESS\":\"Room No 804, 8th Floor,“C” Wing, Hudco Vishala Building, Bhikaji Cama Place, New Delhi-110066\",\"EOI_CA_EMAIL\":[\"jsfttr-2@gov.in\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "LKA",
+   "CodeName": "Sri Lanka",
+   "CodeDescription": "Sri Lanka",
+   "ParameterData": "{\"RecipientCountry\":true,\"TreatyPartner\":true,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":\"Commissioner General of Inland Revenue\",\"EOI_CA_ADDRESS\":\"Inland Revenue Department, Sir Chittampalam A. Gardiner Mawatha, Colombo 02\",\"EOI_CA_EMAIL\":[\"cgir@ird.gov.lk\",\"hapuarachchi.drs@ird.gov.lk\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "CUB",
+   "CodeName": "Kuba",
+   "CodeDescription": "Kuba",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "CXR",
+   "CodeName": "Pulau Christmas",
+   "CodeDescription": "Pulau Natal",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "NRU",
+   "CodeName": "Nauru",
+   "CodeDescription": "Nauru",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":\"Minister of Finance\",\"EOI_CA_ADDRESS\":\"Civic Centre, Aiwo District, Republic of Nauru\",\"EOI_CA_EMAIL\":[\"nauru.tax@gmail.com\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "LVA",
+   "CodeName": "Latvia",
+   "CodeDescription": "Latvia",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"CBCR\",\"EOI_CA_NAME\":\"Director General of State Revenue Service of the Republic of Latvia\",\"EOI_CA_ADDRESS\":\"Talejas street 1, Riga, Latvia, LV-1978\",\"EOI_CA_EMAIL\":[\"vid@vid.gov.lv\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "KNA",
+   "CodeName": "Saint Kitts dan Nevis",
+   "CodeDescription": "Saint Kitts dan Nevis",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":\"Financial Secretary at Government of St. Kitts and Nevis\",\"EOI_CA_ADDRESS\":\"Bay Road, Basseterre, St. Kitts\",\"EOI_CA_EMAIL\":[\"skncompetentauthority@gmail.com\",\"finsec@govt.kn\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "AUS",
+   "CodeName": "Australia",
+   "CodeDescription": "Australia",
+   "ParameterData": "{\"RecipientCountry\":true,\"TreatyPartner\":true,\"EOI_PARTNER_TYPE\":\"CBCR\",\"EOI_CA_NAME\":\"Deputy Commissioner International\",\"EOI_CA_ADDRESS\":\"21 Genge Street, CIVIC SQUARE ACT 2601 Australia\",\"EOI_CA_EMAIL\":[\"AustralianCompetentAuthority@ato.gov.au\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "GS",
+   "CodeName": "Georgia Selatan dan Kepulauan Sandwich Selatan",
+   "CodeDescription": "Georgia Selatan dan Kepulauan Sandwich Selatan",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "UKR",
+   "CodeName": "Ukraina",
+   "CodeDescription": "Ukraina",
+   "ParameterData": "{\"RecipientCountry\":true,\"TreatyPartner\":true,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":\"Head of the State Tax Service of Ukraine\",\"EOI_CA_ADDRESS\":\"6-8 Lvivska square, 04655, Kyiv-53\",\"EOI_CA_EMAIL\":[\"eoi@sfs.gov.ua\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "ALA",
+   "CodeName": "Kepulauan Aland",
+   "CodeDescription": "Kepulauan Aland",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "SYR",
+   "CodeName": "Republik Arab Suriah",
+   "CodeDescription": "Republik Arab Suriah",
+   "ParameterData": "{\"RecipientCountry\":true,\"TreatyPartner\":true,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":\"Deputy Minister for Revenues, Taxes & Duties\",\"EOI_CA_ADDRESS\":\"Seven Fountains Square, Jul Jamal Street, PO BOX 13136, Damascus, Syria\",\"EOI_CA_EMAIL\":[\"fd_damas@mail.sy\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "DNK",
+   "CodeName": "Denmark",
+   "CodeDescription": "Denmark",
+   "ParameterData": "{\"RecipientCountry\":true,\"TreatyPartner\":true,\"EOI_PARTNER_TYPE\":\"CBCR\",\"EOI_CA_NAME\":\"Head of CLO\",\"EOI_CA_ADDRESS\":\"Lyseng All?, 8270 Hoejbjer\",\"EOI_CA_EMAIL\":[\"competent_authority@Sktst.dk\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "ROM",
+   "CodeName": "Rumania (New Code)",
+   "CodeDescription": "Rumania (New Code)",
+   "ParameterData": "{\"IsoCode\":null,\"LastForeignId\":null,\"RegisteredByTaxAdministration\":null}"
+  },
+  {
+   "Code": "ZMB",
+   "CodeName": "Zambia",
+   "CodeDescription": "Zambia",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "PNG",
+   "CodeName": "Papua Nugini",
+   "CodeDescription": "Papua Nugini",
+   "ParameterData": "{\"RecipientCountry\":true,\"TreatyPartner\":true,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":\"Commissioner General of Internal Revenue\",\"EOI_CA_ADDRESS\":\"Revenue Haus, Downtown Port Moresby National Capital District, Papua New Guinea\",\"EOI_CA_EMAIL\":[\"PNGCompetentAuthority@irc.gov.pg\",\"tituse@irc.gov.pg\"],\"WEB\":[]}"
+  },
+  {
+   "Code": "MDG",
+   "CodeName": "Madagaskar",
+   "CodeDescription": "Madagaskar",
+   "ParameterData": "{\"RecipientCountry\":false,\"TreatyPartner\":false,\"EOI_PARTNER_TYPE\":\"NON_CBCR\",\"EOI_CA_NAME\":null,\"EOI_CA_ADDRESS\":null,\"EOI_CA_EMAIL\":[],\"WEB\":[]}"
+  },
+  {
+   "Code": "SWA",
+   "CodeName": "SWAZILAND",
+   "CodeDescription": "SWAZILAND",
+   "ParameterData": "{\"IsoCode\":null,\"LastForeignId\":null,\"RegisteredByTaxAdministration\":null}"
+  },
+  {
+   "Code": "TWA",
+   "CodeName": "TAIWAN - PROVINCE OF CHINA",
+   "CodeDescription": "TAIWAN - PROVINCE OF CHINA",
+   "ParameterData": "{\"IsoCode\":null,\"LastForeignId\":null,\"RegisteredByTaxAdministration\":null}"
+  },
+  {
+   "Code": "RIL",
+   "CodeName": "Republik Irlandia",
+   "CodeDescription": "Republik Irlandia",
+   "ParameterData": "{\"IsoCode\":null,\"LastForeignId\":null,\"RegisteredByTaxAdministration\":null}"
+  },
+  {
+   "Code": "TLT",
+   "CodeName": "TIMOR LESTE DEMOCRATIC REPUBLIC",
+   "CodeDescription": "TIMOR LESTE DEMOCRATIC REPUBLIC",
+   "ParameterData": "{\"IsoCode\":null,\"LastForeignId\":null,\"RegisteredByTaxAdministration\":null}"
+  },
+  {
+   "Code": "KRS",
+   "CodeName": "KOREA (STH), REPUBLIC",
+   "CodeDescription": "KOREA (STH), REPUBLIC",
+   "ParameterData": "{\"IsoCode\":null,\"LastForeignId\":null,\"RegisteredByTaxAdministration\":null}"
+  },
+  {
+   "Code": "PRA",
+   "CodeName": "Perancis",
+   "CodeDescription": "Perancis",
+   "ParameterData": "{\"IsoCode\":null,\"LastForeignId\":null,\"RegisteredByTaxAdministration\":null}"
+  },
+  {
+   "Code": "KRU",
+   "CodeName": "KOREA (NTH) - DEMOCRATIC PEOPLES",
+   "CodeDescription": "KOREA (NTH) - DEMOCRATIC PEOPLES",
+   "ParameterData": "{\"IsoCode\":null,\"LastForeignId\":null,\"RegisteredByTaxAdministration\":null}"
+  },
+  {
+   "Code": "PBB",
+   "CodeName": "UNITED NATIONS AGENCY",
+   "CodeDescription": "UNITED NATIONS AGENCY",
+   "ParameterData": "{\"IsoCode\":null,\"LastForeignId\":null,\"RegisteredByTaxAdministration\":null}"
+  },
+  {
+   "Code": "QAT",
+   "CodeName": "Qatar",
+   "CodeDescription": "Qatar",
+   "ParameterData": "\r\n\r\n{\"EOI_CA_ADDRESS\":\"8G8C+XVG, Majlis Al Taawon Street, Doha, Qatar\",\"EOI_CA_EMAIL\":[\"TTIC@gta.gov.qa\",\"b.alkuwari@gta.gov.qa\"],\"EOI_CA_NAME\":\"Director of the Tax Treaty and International Cooperation (TTIC) Department, General Tax Authority of the State of Qatar\",\"EOI_PARTNER_TYPE\":\"CBCR\",\"RecipientCountry\":true,\"TreatyPartner\":true,\"WEB\":[\"\"]}\r\n"
+  },
+  {
+   "Code": "SVR",
+   "CodeName": "SLOVAK REPUBLIC",
+   "CodeDescription": "SLOVAK REPUBLIC",
+   "ParameterData": "{\"IsoCode\":null,\"LastForeignId\":null,\"RegisteredByTaxAdministration\":null}"
+  },
+  {
+   "Code": "CHN",
+   "CodeName": "Tiongkok",
+   "CodeDescription": "Tiongkok",
+   "ParameterData": "{\"IsoCode\":\"CHN\",\"LastForeignId\":null,\"RegisteredByTaxAdministration\":null,\"RecipientCountry\":true,\"TreatyPartner\":true,\"EOI_PARTNER_TYPE\":\"CBCR\",\"EOI_CA_NAME\":\"Deputy Director-general of International Taxation Department\",\"EOI_CA_ADDRESS\":\"No. 5, Yang Fang Dian Xi Lu, Haidian 100038, Beijing, the People’s Republic of China\",\"EOI_CA_EMAIL\":\"eoicompetentauthority@chinatax.gov.cn\",\"WEB\":\"-\"}"
+  },
+  {
+   "Code": "NLK",
+   "CodeName": "Belanda - Kerajaan",
+   "CodeDescription": "Belanda - Kerajaan",
+   "ParameterData": "{\"IsoCode\":null,\"LastForeignId\":null,\"RegisteredByTaxAdministration\":null}"
+  }
+ ],
+ "CURRENCY": [
+  {
+   "Code": "ARS",
+   "CodeName": "Peso Argentina",
+   "CodeDescription": "Peso Argentina"
+  },
+  {
+   "Code": "AUD",
+   "CodeName": "Dolar Australia",
+   "CodeDescription": "Dolar Australia"
+  },
+  {
+   "Code": "MUR",
+   "CodeName": "Rupee Mauritius",
+   "CodeDescription": "Rupee Mauritius"
+  },
+  {
+   "Code": "KGS",
+   "CodeName": "Som Kirgistan",
+   "CodeDescription": "Som Kirgistan"
+  },
+  {
+   "Code": "BMD",
+   "CodeName": "Dolar Bermuda",
+   "CodeDescription": "Dolar Bermuda"
+  },
+  {
+   "Code": "BYN",
+   "CodeName": "Rubel Belarusia",
+   "CodeDescription": "Rubel Belarusia"
+  },
+  {
+   "Code": "LAK",
+   "CodeName": "Kip Laos",
+   "CodeDescription": "Kip Laos"
+  },
+  {
+   "Code": "TWD",
+   "CodeName": "Dolar Baru Taiwan",
+   "CodeDescription": "Dolar Baru Taiwan"
+  },
+  {
+   "Code": "MXN",
+   "CodeName": "Peso Meksiko",
+   "CodeDescription": "Peso Meksiko"
+  },
+  {
+   "Code": "MZN",
+   "CodeName": "Metical Mozambik",
+   "CodeDescription": "Metical Mozambik"
+  },
+  {
+   "Code": "SRD",
+   "CodeName": "Dolar Suriname",
+   "CodeDescription": "Dolar Suriname"
+  },
+  {
+   "Code": "CAD",
+   "CodeName": "Dolar Kanada",
+   "CodeDescription": "Dolar Kanada"
+  },
+  {
+   "Code": "SVC",
+   "CodeName": "Kolon El Salvador",
+   "CodeDescription": "Kolon El Salvador"
+  },
+  {
+   "Code": "LKR",
+   "CodeName": "Rupee Sri Lanka",
+   "CodeDescription": "Rupee Sri Lanka"
+  },
+  {
+   "Code": "AZN",
+   "CodeName": "Manat Azerbaijan",
+   "CodeDescription": "Manat Azerbaijan"
+  },
+  {
+   "Code": "KPW",
+   "CodeName": "Won Korea Utara",
+   "CodeDescription": "Won Korea Utara"
+  },
+  {
+   "Code": "GYD",
+   "CodeName": "Dolar Guyana",
+   "CodeDescription": "Dolar Guyana"
+  },
+  {
+   "Code": "MYR",
+   "CodeName": "Ringgit Malaysia",
+   "CodeDescription": "Ringgit Malaysia"
+  },
+  {
+   "Code": "UYU",
+   "CodeName": "Peso Uruguay",
+   "CodeDescription": "Peso Uruguay"
+  },
+  {
+   "Code": "EGP",
+   "CodeName": "Pound Mesir",
+   "CodeDescription": "Pound Mesir"
+  },
+  {
+   "Code": "ZWD",
+   "CodeName": "Dolar Zimbabwe",
+   "CodeDescription": "Dolar Zimbabwe"
+  },
+  {
+   "Code": "NIO",
+   "CodeName": "Cordoba Nikaragua",
+   "CodeDescription": "Cordoba Nikaragua"
+  },
+  {
+   "Code": "NZD",
+   "CodeName": "Dolar Selandia Baru",
+   "CodeDescription": "Dolar Selandia Baru"
+  },
+  {
+   "Code": "RUB",
+   "CodeName": "Rubel Rusia",
+   "CodeDescription": "Rubel Rusia"
+  },
+  {
+   "Code": "PLN",
+   "CodeName": "Zloty Polandia",
+   "CodeDescription": "Zloty Polandia"
+  },
+  {
+   "Code": "ILS",
+   "CodeName": "Shekel Israel",
+   "CodeDescription": "Shekel Israel"
+  },
+  {
+   "Code": "JEP",
+   "CodeName": "Pound Jersey",
+   "CodeDescription": "Jersey Pound"
+  },
+  {
+   "Code": "TTD",
+   "CodeName": "Dolar Trinidad dan Tobago",
+   "CodeDescription": "Dolar Trinidad dan Tobago"
+  },
+  {
+   "Code": "DOP",
+   "CodeName": "Peso Republik Dominika",
+   "CodeDescription": "Peso Republik Dominika"
+  },
+  {
+   "Code": "GGP",
+   "CodeName": "Pound Guernsey",
+   "CodeDescription": "Pound Guernsey"
+  },
+  {
+   "Code": "BSD",
+   "CodeName": "Dolar Bahama",
+   "CodeDescription": "Dolar Bahama"
+  },
+  {
+   "Code": "KHR",
+   "CodeName": "Kamboja Riel",
+   "CodeDescription": "Kamboja Riel"
+  },
+  {
+   "Code": "USD",
+   "CodeName": "Dolar Amerika Serikat",
+   "CodeDescription": "Dolar Amerika Serikat"
+  },
+  {
+   "Code": "AFN",
+   "CodeName": "Afghani Afghanistan",
+   "CodeDescription": "Afghani Afghanistan"
+  },
+  {
+   "Code": "KZT",
+   "CodeName": "Tenge Kazakstan",
+   "CodeDescription": "Tenge Kazakstan"
+  },
+  {
+   "Code": "TRY",
+   "CodeName": "Lira Turki",
+   "CodeDescription": "Lira Turki"
+  },
+  {
+   "Code": "VEF",
+   "CodeName": "Bolivar Venezuela",
+   "CodeDescription": "Bolivar Venezuela"
+  },
+  {
+   "Code": "HKD",
+   "CodeName": "Dollar Hongkong",
+   "CodeDescription": "Dollar Hongkong"
+  },
+  {
+   "Code": "TVD",
+   "CodeName": "Dolar Tuvalu",
+   "CodeDescription": "Dolar Tuvalu"
+  },
+  {
+   "Code": "CNY",
+   "CodeName": "Yuan Renminbi: CHINA",
+   "CodeDescription": "Yuan Renminbi: CHINA"
+  },
+  {
+   "Code": "CLP",
+   "CodeName": "Peso Chili",
+   "CodeDescription": "Peso Chili"
+  },
+  {
+   "Code": "SGD",
+   "CodeName": "Dolar Singapura",
+   "CodeDescription": "Dolar Singapura"
+  },
+  {
+   "Code": "NAD",
+   "CodeName": "Dolar Namibia",
+   "CodeDescription": "Dolar Namibia"
+  },
+  {
+   "Code": "DKK",
+   "CodeName": "Krone Denmark",
+   "CodeDescription": "Krone Denmark"
+  },
+  {
+   "Code": "BRL",
+   "CodeName": "Real Brazil",
+   "CodeDescription": "Real Brazil"
+  },
+  {
+   "Code": "SAR",
+   "CodeName": "Riyal Arab Saudi",
+   "CodeDescription": "Riyal Arab Saudi"
+  },
+  {
+   "Code": "ZAR",
+   "CodeName": "Rand Afrika Selatan",
+   "CodeDescription": "Rand Afrika Selatan"
+  },
+  {
+   "Code": "HRK",
+   "CodeName": "Kuna Kroasia",
+   "CodeDescription": "Kuna Kroasia"
+  },
+  {
+   "Code": "NOK",
+   "CodeName": "Krone Norwegia",
+   "CodeDescription": "Krone Norwegia"
+  },
+  {
+   "Code": "IDR",
+   "CodeName": "Rupiah Indonesia",
+   "CodeDescription": "Rupiah Indonesia"
+  },
+  {
+   "Code": "JPY",
+   "CodeName": "Yen Jepang",
+   "CodeDescription": "Yen Jepang"
+  },
+  {
+   "Code": "SBD",
+   "CodeName": "Dolar Kepulauan Solomon",
+   "CodeDescription": "Dolar Kepulauan Solomon"
+  },
+  {
+   "Code": "INR",
+   "CodeName": "Rupee India",
+   "CodeDescription": "Rupee India"
+  },
+  {
+   "Code": "GTQ",
+   "CodeName": "Quetzal Guatemala",
+   "CodeDescription": "Quetzal Guatemala"
+  },
+  {
+   "Code": "SYP",
+   "CodeName": "Pound Suriah",
+   "CodeDescription": "Pound Suriah"
+  },
+  {
+   "Code": "BBD",
+   "CodeName": "Dolar Barbados",
+   "CodeDescription": "Dolar Barbados"
+  },
+  {
+   "Code": "BND",
+   "CodeName": "Dolar Brunei Darussalam",
+   "CodeDescription": "Dolar Brunei Darussalam"
+  },
+  {
+   "Code": "CHF",
+   "CodeName": "Franc Swiss",
+   "CodeDescription": "Franc Swiss"
+  },
+  {
+   "Code": "RON",
+   "CodeName": "Leu Romania",
+   "CodeDescription": "Leu Romania"
+  },
+  {
+   "Code": "SOS",
+   "CodeName": "Shilling Somalia",
+   "CodeDescription": "Shilling Somalia"
+  },
+  {
+   "Code": "IMP",
+   "CodeName": "Pulau Man Pound",
+   "CodeDescription": "Pulau Man Pound"
+  },
+  {
+   "Code": "PAB",
+   "CodeName": "Balboa Panama",
+   "CodeDescription": "Balboa Panama"
+  },
+  {
+   "Code": "OMR",
+   "CodeName": "Rial Oman",
+   "CodeDescription": "Rial Oman"
+  },
+  {
+   "Code": "LBP",
+   "CodeName": "Pound Lebanon",
+   "CodeDescription": "Pound Lebanon"
+  },
+  {
+   "Code": "BWP",
+   "CodeName": "Pula Botswana",
+   "CodeDescription": "Pula Botswana"
+  },
+  {
+   "Code": "KRW",
+   "CodeName": "Won Korea Selatan",
+   "CodeDescription": "Won Korea Selatan"
+  },
+  {
+   "Code": "GIP",
+   "CodeName": "Pound Gibraltar",
+   "CodeDescription": "Pound Gibraltar"
+  },
+  {
+   "Code": "ISK",
+   "CodeName": "Krona Islandia",
+   "CodeDescription": "Krona Islandia"
+  },
+  {
+   "Code": "YER",
+   "CodeName": "Rial Yaman",
+   "CodeDescription": "Rial Yaman"
+  },
+  {
+   "Code": "AWG",
+   "CodeName": "Gulden Aruba",
+   "CodeDescription": "Gulden Aruba"
+  },
+  {
+   "Code": "VND",
+   "CodeName": "Dong Vietnam",
+   "CodeDescription": "Dong Vietnam"
+  },
+  {
+   "Code": "SHP",
+   "CodeName": "Pound Saint Helena",
+   "CodeDescription": "Pound Saint Helena"
+  },
+  {
+   "Code": "FJD",
+   "CodeName": "Dolar Fiji",
+   "CodeDescription": "Dolar Fiji"
+  },
+  {
+   "Code": "GBP",
+   "CodeName": "Pound Inggris",
+   "CodeDescription": "Pound Inggris"
+  },
+  {
+   "Code": "CUP",
+   "CodeName": "Peso Kuba",
+   "CodeDescription": "Peso Kuba"
+  },
+  {
+   "Code": "IRR",
+   "CodeName": "Rial Iran",
+   "CodeDescription": "Rial Iran"
+  },
+  {
+   "Code": "NPR",
+   "CodeName": "Rupee Nepal",
+   "CodeDescription": "Rupee Nepal"
+  },
+  {
+   "Code": "PYG",
+   "CodeName": "Guarani Paraguay",
+   "CodeDescription": "Guarani Paraguay"
+  },
+  {
+   "Code": "EUR",
+   "CodeName": "Negara Anggota Euro",
+   "CodeDescription": "Negara Anggota Euro"
+  },
+  {
+   "Code": "ALL",
+   "CodeName": "Lek Albania",
+   "CodeDescription": "Albania Lek"
+  },
+  {
+   "Code": "PEN",
+   "CodeName": "Sol Peru",
+   "CodeDescription": "Sol Peru"
+  },
+  {
+   "Code": "HNL",
+   "CodeName": "Lempira Honduras",
+   "CodeDescription": "Lempira Honduras"
+  },
+  {
+   "Code": "JMD",
+   "CodeName": "Dolar Jamaika",
+   "CodeDescription": "Dolar Jamaika"
+  },
+  {
+   "Code": "BAM",
+   "CodeName": "Mark Konvertibel Bosnia dan Herzegovina",
+   "CodeDescription": "Mark Konvertibel Bosnia dan Herzegovina"
+  },
+  {
+   "Code": "XCD",
+   "CodeName": "Dolar Karibia Timur",
+   "CodeDescription": "Dolar Karibia Timur"
+  },
+  {
+   "Code": "COP",
+   "CodeName": "Peso Kolombia",
+   "CodeDescription": "Peso Kolombia"
+  },
+  {
+   "Code": "KYD",
+   "CodeName": "Dolar Kepulauan Cayman",
+   "CodeDescription": "Dolar Kepulauan Cayman"
+  },
+  {
+   "Code": "FKP",
+   "CodeName": "Kepulauan Falkland (Malvinas) Pound",
+   "CodeDescription": "Kepulauan Falkland (Malvinas) Pound"
+  },
+  {
+   "Code": "ANG",
+   "CodeName": "Gulden Antillen Belanda",
+   "CodeDescription": "Gulden Antillen Belanda"
+  },
+  {
+   "Code": "MKD",
+   "CodeName": "Denar Makedonia",
+   "CodeDescription": "Denar Makedonia"
+  },
+  {
+   "Code": "GHS",
+   "CodeName": "Cedi Ghana",
+   "CodeDescription": "Cedi Ghana"
+  },
+  {
+   "Code": "SEK",
+   "CodeName": "Krona Swedia",
+   "CodeDescription": "Krona Swedia"
+  },
+  {
+   "Code": "UAH",
+   "CodeName": "Ukraina Ukraina",
+   "CodeDescription": "Ukraina Ukraina"
+  },
+  {
+   "Code": "BGN",
+   "CodeName": "Lev Bulgaria",
+   "CodeDescription": "Lev Bulgaria"
+  },
+  {
+   "Code": "CZK",
+   "CodeName": "Koruna Republik Ceko",
+   "CodeDescription": "Koruna Republik Ceko"
+  },
+  {
+   "Code": "RSD",
+   "CodeName": "Dinar Serbia",
+   "CodeDescription": "Dinar Serbia"
+  },
+  {
+   "Code": "SCR",
+   "CodeName": "Rupee Seychelles",
+   "CodeDescription": "Rupee Seychelles"
+  },
+  {
+   "Code": "NGN",
+   "CodeName": "Naira Nigeria",
+   "CodeDescription": "Naira Nigeria"
+  },
+  {
+   "Code": "PKR",
+   "CodeName": "Rupee Pakistan",
+   "CodeDescription": "Rupee Pakistan"
+  },
+  {
+   "Code": "HUF",
+   "CodeName": "Forint Hongaria",
+   "CodeDescription": "Forint Hongaria"
+  },
+  {
+   "Code": "BOB",
+   "CodeName": "Boliviano Bolivia",
+   "CodeDescription": "Boliviano Bolivia"
+  },
+  {
+   "Code": "QAR",
+   "CodeName": "Riyal Qatar",
+   "CodeDescription": "Riyal Qatar"
+  },
+  {
+   "Code": "THB",
+   "CodeName": "Baht Thailand",
+   "CodeDescription": "Baht Thailand"
+  },
+  {
+   "Code": "CRC",
+   "CodeName": "Kolon Kosta Rika",
+   "CodeDescription": "Kolon Kosta Rika"
+  },
+  {
+   "Code": "BZD",
+   "CodeName": "Dolar Belize",
+   "CodeDescription": "Dolar Belize"
+  },
+  {
+   "Code": "MNT",
+   "CodeName": "Tughrik Mongolia",
+   "CodeDescription": "Tughrik Mongolia"
+  },
+  {
+   "Code": "LRD",
+   "CodeName": "Dolar Liberia",
+   "CodeDescription": "Dolar Liberia"
+  },
+  {
+   "Code": "UZS",
+   "CodeName": "Som Uzbekistan",
+   "CodeDescription": "Som Uzbekistan"
+  },
+  {
+   "Code": "PHP",
+   "CodeName": "Peso Filipina",
+   "CodeDescription": "Peso Filipina"
+  },
+  {
+   "Code": "AED",
+   "CodeName": "UAE Dirham: UNITED ARAB EMIRATES",
+   "CodeDescription": "UAE Dirham: UNITED ARAB EMIRATES"
+  },
+  {
+   "Code": "BDT",
+   "CodeName": "Bangladeshi Taka",
+   "CodeDescription": "Bangladeshi Taka"
+  }
+ ],
  "DOMESTIC_INCOME": [
   {
    "Code": "402",
@@ -717,6 +3595,45 @@
    "Code": "SPONSORSHIP",
    "CodeName": "SPONSORSHIP",
    "CodeDescription": "Biaya sponsorship yang berkaitan dengan promosi produk"
+  }
+ ],
+ "TAX_NET_INCOME_DEDUCTION": [
+  {
+   "Code": "504",
+   "CodeName": "504",
+   "CodeDescription": "Fasilitas keringanan pajak lainnya (Tax reliefs)"
+  },
+  {
+   "Code": "503",
+   "CodeName": "503",
+   "CodeDescription": "Fasilitas pengurang penghasilan Neto (Tax allowance)"
+  },
+  {
+   "Code": "501",
+   "CodeName": "501",
+   "CodeDescription": "Zakat (Sesuai PP Nomor 60 Tahun 2010)"
+  },
+  {
+   "Code": "502",
+   "CodeName": "502",
+   "CodeDescription": "Sumbangan keagamaan (Sesuai PP Nomor 60 Tahun 2010)"
+  },
+  {
+   "Code": "505",
+   "CodeName": "505",
+   "CodeDescription": "Pengurang penghasilan neto lainnya"
+  }
+ ],
+ "TAX_INCOME_DEDUCTION": [
+  {
+   "Code": "603",
+   "CodeName": "603",
+   "CodeDescription": "Pengurang PPh Lainnya"
+  },
+  {
+   "Code": "601",
+   "CodeName": "601",
+   "CodeDescription": "Fasilitas pembebasan atau pengurangan PPh (Tax holiday)"
   }
  ]
 }

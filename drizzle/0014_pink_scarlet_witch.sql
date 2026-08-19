@@ -1,0 +1,1 @@
+ALTER TABLE `referensi_lampiran_spt_pph_orang_pribadi` ADD `kode` text;
