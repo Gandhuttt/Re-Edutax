@@ -5,8 +5,10 @@
 	import { formatMonth } from '$lib/helpers/date';
 	import { listSptPpn } from '../listSptPpn.remote';
 	import { listSptPphBadan } from '../listSptPphBadan.remote';
+	import { listSptPphOrangPribadi } from '../listSptPphOrangPribadi.remote';
 	import { paySptPpn } from './paySptPpn.remote';
 	import { paySptPphBadan } from './paySptPphBadan.remote';
+	import { paySptPphOrangPribadi } from './paySptPphOrangPribadi.remote';
 
 	const rupiah = new Intl.NumberFormat('id-ID');
 </script>
@@ -77,6 +79,31 @@
 						{:else}
 							<tr>
 								<td colspan="7" class="tw:text-center tw:py-8">Belum ada SPT PPh Badan yang menunggu pembayaran.</td>
+							</tr>
+						{/each}
+						{#each await listSptPphOrangPribadi({ status: 'menunggu_pembayaran' }) as row}
+							{@const payForm = paySptPphOrangPribadi.for(row.id)}
+							<tr>
+								<td>
+									<div class="tw:flex tw:flex-row tw:gap-1">
+										<a href="/surat-pemberitahuan/pph-orang-pribadi?id={row.id}" class="tw:text-black!">
+											<Button>Lihat</Button>
+										</a>
+										<form {...payForm}>
+											<Button>Bayar</Button>
+										</form>
+									</div>
+								</td>
+								<td>SPT Tahunan PPh Orang Pribadi</td>
+								<td>-</td>
+								<td>{row.tahunPajak}</td>
+								<td>{row.pembetulanKe}</td>
+								<td>{rupiah.format(row.pphKurangLebihBayar)}</td>
+								<td>{row.tanggalPosting?.toLocaleDateString('id-ID') ?? ''}</td>
+							</tr>
+						{:else}
+							<tr>
+								<td colspan="7" class="tw:text-center tw:py-8">Belum ada SPT PPh Orang Pribadi yang menunggu pembayaran.</td>
 							</tr>
 						{/each}
 					{/snippet}

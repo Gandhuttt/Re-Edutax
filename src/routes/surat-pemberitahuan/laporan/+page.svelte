@@ -4,8 +4,10 @@
 	import Table from '$lib/components/Table.svelte';
 	import { formatMonth } from '$lib/helpers/date';
 	import { listSptPphBadan } from '../listSptPphBadan.remote';
+	import { listSptPphOrangPribadi } from '../listSptPphOrangPribadi.remote';
 	import { listSptPpn } from '../listSptPpn.remote';
 	import { newPembetulanSptPphBadan } from '../konsep/newPembetulanSptPphBadan.remote';
+	import { newPembetulanSptPphOrangPribadi } from '../konsep/newPembetulanSptPphOrangPribadi.remote';
 
 	const rupiah = new Intl.NumberFormat('id-ID');
 </script>
@@ -55,6 +57,25 @@
 									</form>
 								</td>
 								<td>SPT Tahunan PPh Badan</td>
+								<td>-</td>
+								<td>{row.tahunPajak}</td>
+								<td>{row.pembetulanKe}</td>
+								<td>{rupiah.format(row.pphKurangLebihBayar)}</td>
+								<td>{row.tanggalDilaporkan?.toLocaleDateString('id-ID') ?? ''}</td>
+							</tr>
+						{/each}
+						{#each await listSptPphOrangPribadi({ status: 'dilaporkan' }) as row}
+							<tr>
+								<td class="tw:flex tw:gap-2">
+									<a href="/surat-pemberitahuan/pph-orang-pribadi?id={row.id}" class="tw:text-black!">
+										<Button>Lihat</Button>
+									</a>
+									<form {...newPembetulanSptPphOrangPribadi}>
+										<input type="hidden" name="id" value={row.id} />
+										<Button>Buat Pembetulan</Button>
+									</form>
+								</td>
+								<td>SPT Tahunan PPh Orang Pribadi</td>
 								<td>-</td>
 								<td>{row.tahunPajak}</td>
 								<td>{row.pembetulanKe}</td>

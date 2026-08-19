@@ -11,6 +11,7 @@
 	import { newSptPphOrangPribadi } from './newSptPphOrangPribadi.remote';
 	import { newSptPpn } from './newSptPpn.remote';
 	import { deleteSptPphBadan } from './deleteSptPphBadan.remote';
+	import { deleteSptPphOrangPribadi } from './deleteSptPphOrangPribadi.remote';
 
 	const rupiah = new Intl.NumberFormat('id-ID');
 
@@ -119,10 +120,18 @@
 						{/each}
 						{#each await listSptPphOrangPribadi({ status: 'konsep' }) as row}
 							<tr>
-								<td>
+								<td class="tw:flex tw:gap-2">
 									<a href="/surat-pemberitahuan/pph-orang-pribadi?id={row.id}" class="tw:text-black!">
 										<Button>Buka</Button>
 									</a>
+									<form
+										{...deleteSptPphOrangPribadi.enhance(async (form) => {
+											if (confirm('Hapus konsep SPT PPh Orang Pribadi ini?')) await form.submit();
+										})}
+									>
+										<input type="hidden" name="id" value={row.id} />
+										<Button class={"tw:text-white"} color="var(--color-danger)">Hapus</Button>
+									</form>
 								</td>
 								<td>SPT Tahunan PPh Orang Pribadi</td>
 								<td>-</td>
