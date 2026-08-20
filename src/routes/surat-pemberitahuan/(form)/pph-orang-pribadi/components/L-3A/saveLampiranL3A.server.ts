@@ -4,7 +4,9 @@ import {
 	spt_pph_orang_pribadi_kode_koreksi_fiskal,
 	spt_pph_orang_pribadi_lampiran_3a_akun,
 	spt_pph_orang_pribadi_lampiran_3a_koreksi_fiskal,
-	spt_pph_orang_pribadi_lampiran_3a_laba_rugi
+	spt_pph_orang_pribadi_lampiran_3a_laba_rugi,
+	spt_pph_orang_pribadi_lampiran_3a_neraca,
+	spt_pph_orang_pribadi_lampiran_3a_neraca_akun
 } from '$lib/server/db/schema';
 import { eq } from 'drizzle-orm';
 import * as v from 'valibot';
@@ -26,6 +28,14 @@ export const L3ASchema = v.object({
 			penyesuaianFiskalNegatif: v.optional(v.number(), 0),
 			kodePenyesuaianFiskal: v.optional(v.array(v.string()), [])
 		})
+	),
+	// A.2 neraca. Same akunId keying and same abandoned-sektor filtering as
+	// the laba/rugi rows above.
+	l3aNeraca: jsonRows(
+		v.object({
+			akunId: v.string(),
+			nilai: v.optional(v.number(), 0)
+		})
 	)
 });
 
@@ -40,10 +50,16 @@ export async function saveLampiranL3A(sptId: string, sektor: Sektor | null, inpu
 	let n1b = 0;
 
 	if (sektor) {
-		const akun = await db
-			.select()
-			.from(spt_pph_orang_pribadi_lampiran_3a_akun)
-			.where(eq(spt_pph_orang_pribadi_lampiran_3a_akun.sektor, sektor));
+		const [akun, neracaAkun] = await Promise.all([
+			db
+				.select()
+				.from(spt_pph_orang_pribadi_lampiran_3a_akun)
+				.where(eq(spt_pph_orang_pribadi_lampiran_3a_akun.sektor, sektor)),
+			db
+				.select()
+				.from(spt_pph_orang_pribadi_lampiran_3a_neraca_akun)
+				.where(eq(spt_pph_orang_pribadi_lampiran_3a_neraca_akun.sektor, sektor))
+		]);
 
 		const akunById = new Map(akun.map((row) => [row.id, row]));
 
@@ -92,6 +108,26 @@ export async function saveLampiranL3A(sptId: string, sektor: Sektor | null, inpu
 					})
 				);
 			}
+		}
+
+		const neracaAkunById = new Map(neracaAkun.map((row) => [row.id, row]));
+		const neracaToInsert = input.l3aNeraca.filter((row) => neracaAkunById.has(row.akunId));
+
+		statements.push(
+			db
+				.delete(spt_pph_orang_pribadi_lampiran_3a_neraca)
+				.where(eq(spt_pph_orang_pribadi_lampiran_3a_neraca.sptPphOrangPribadiId, sptId))
+		);
+
+		for (const row of neracaToInsert) {
+			statements.push(
+				db.insert(spt_pph_orang_pribadi_lampiran_3a_neraca).values({
+					id: `${sptId}:${row.akunId}`,
+					sptPphOrangPribadiId: sptId,
+					akunId: row.akunId,
+					nilai: Math.round(Number(row.nilai))
+				})
+			);
 		}
 
 		const template = akun.map((row) => ({

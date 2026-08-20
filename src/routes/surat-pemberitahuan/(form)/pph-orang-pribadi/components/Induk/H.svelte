@@ -12,6 +12,16 @@
         // Berikutnya, mirrored onto 13.b's inline amount cell. On the live
         // form this cell appears the moment 13.b is answered Ya (L4.md).
         l4AngsuranPph25?: number;
+        // 13.a's own derived cell, Coretax's valueH1:
+        //   getArticle25IncomeTaxInstallment() patches
+        //   Math.round(1 / numberOfMonth * (C6 < D1 ? 0 : C6 - D1)),
+        // i.e. rows (9) - (10)(a), clamped at 0, spread over the period. It is
+        // declared {value: null, disabled: true} in the form group, so it is
+        // read-only like 13.b's, and re-patched whenever 9 or 10a moves.
+        angsuranPph25?: number;
+        // Period length in months, the divisor above. Shown in the hint text,
+        // which Coretax assembles as notif13aLabel + numberOfMonth + formula.
+        jumlahBulan?: number;
         readonly?: boolean;
     }
 
@@ -20,8 +30,15 @@
         h13bPerhitunganTersendiri = $bindable(),
         h13cAngsuranOppt = $bindable(),
         l4AngsuranPph25 = 0,
+        angsuranPph25 = 0,
+        jumlahBulan = 12,
         readonly = false
     }: Props = $props();
+
+    let hint13a = $derived({
+        ...HINTS.h13a,
+        ya: `Ya, Angsuran PPh Pasal 25 adalah 1/${jumlahBulan} x ((9) – (10)(a))`
+    });
 
     // Coretax has exactly ONE interlock here, 13a over 13b:
     //
@@ -60,7 +77,10 @@
                 label={"Apakah Anda hanya menerima penghasilan teratur dan berkewajiban membayar angsuran PPh Pasal 25 tahun berikutnya?"}
                 name={"H13a"}
                 bind:answer={h13aAngsuranTeratur}
-                hint={HINTS.h13a}
+                hint={hint13a}
+                amount={"derived"}
+                amountWhen={true}
+                amountValue={angsuranPph25}
                 {readonly}
             />
             <RowTanya

@@ -16,11 +16,25 @@
     // four fields here; BankCode has no equivalent, and the picker needs a DJP
     // bank registry we have no counterpart for. Whether BankCode should surface is
     // an open question, not a settled omission.
+    // Present on every return, not only a refund one. Coretax titles it
+    // "(DIISI JIKA STATUS SPT ADALAH LEBIH BAYAR)" and drives the fields, not the
+    // section, from the outcome: setMandatorySectionG adds required validators and
+    // sets isBankAccountDisabled = false when the return is in a refund position,
+    // and otherwise disables the picker and drops the validators.
+    //
+    // `aktif` reproduces the enable/disable half only. Coretax also wipes the
+    // four values on the way out (clearSectionGValue); we deliberately do not —
+    // an inapplicable section here is read-only, not destructive, so bank details
+    // typed while the return was in a refund position survive a swing back into
+    // kurang bayar and reappear if it swings again.
     interface Props {
         gMetodePengembalian: string;
         gNomorRekening: string;
         gNamaBank: string;
         gNamaPemilikRekening: string;
+        // Return is in a refund position. False leaves the section visible and
+        // read-only, values intact.
+        aktif: boolean;
         readonly?: boolean;
     }
 
@@ -29,6 +43,7 @@
         gNomorRekening = $bindable(),
         gNamaBank = $bindable(),
         gNamaPemilikRekening = $bindable(),
+        aktif,
         readonly = false
     }: Props = $props();
 
@@ -48,7 +63,7 @@
             <tr>
                 <td class="tw:w-[25rem]"><span>PPh lebih bayar pada 11a atau 12b mohon:</span></td>
                 <td>
-                    <Select bind:value={gMetodePengembalian} disabled={readonly}>
+                    <Select bind:value={gMetodePengembalian} disabled={readonly || !aktif}>
                         {#each metodeOptions as metode}
                             <option class="tw:text-black" value={metode.value}>{metode.label}</option>
                         {/each}
@@ -57,15 +72,15 @@
             </tr>
             <tr>
                 <td><span>Nomor Rekening</span></td>
-                <td><Input type={"text"} bind:value={gNomorRekening} disabled={readonly} /></td>
+                <td><Input type={"text"} bind:value={gNomorRekening} disabled={readonly || !aktif} /></td>
             </tr>
             <tr>
                 <td><span>Nama Bank</span></td>
-                <td><Input type={"text"} bind:value={gNamaBank} disabled={readonly} /></td>
+                <td><Input type={"text"} bind:value={gNamaBank} disabled={readonly || !aktif} /></td>
             </tr>
             <tr>
                 <td><span>Nama Pemilik Rekening</span></td>
-                <td><Input type={"text"} bind:value={gNamaPemilikRekening} disabled={readonly} /></td>
+                <td><Input type={"text"} bind:value={gNamaPemilikRekening} disabled={readonly || !aktif} /></td>
             </tr>
         {/snippet}
     </Table>

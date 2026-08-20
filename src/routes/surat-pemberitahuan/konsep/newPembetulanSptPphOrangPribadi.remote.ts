@@ -14,6 +14,7 @@ import {
 	spt_pph_orang_pribadi_lampiran_3a4_lainnya,
 	spt_pph_orang_pribadi_lampiran_3a_koreksi_fiskal,
 	spt_pph_orang_pribadi_lampiran_3a_laba_rugi,
+	spt_pph_orang_pribadi_lampiran_3a_neraca,
 	spt_pph_orang_pribadi_lampiran_3b_bulanan,
 	spt_pph_orang_pribadi_lampiran_3b_tku,
 	spt_pph_orang_pribadi_lampiran_3c,
@@ -134,6 +135,9 @@ export const newPembetulanSptPphOrangPribadi = form(
 			...(await copyTable(spt_pph_orang_pribadi_lampiran_2_bukan_objek, id, newSptId)),
 			...(await copyTable(spt_pph_orang_pribadi_lampiran_2_luar_negeri, id, newSptId)),
 			...(await copyLampiran3ALabaRugi(id, newSptId)),
+			// L-3A A.2 needs no special handling: unlike the laba/rugi rows it has no
+			// child junction table to re-parent, so the generic copier is enough.
+			...(await copyTable(spt_pph_orang_pribadi_lampiran_3a_neraca, id, newSptId)),
 			...(await copyTable(spt_pph_orang_pribadi_lampiran_3a4_lainnya, id, newSptId)),
 			...(await copyTable(spt_pph_orang_pribadi_lampiran_3b_tku, id, newSptId)),
 			...(await copyTable(spt_pph_orang_pribadi_lampiran_3b_bulanan, id, newSptId)),

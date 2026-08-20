@@ -166,6 +166,14 @@ this.mainFormData.PeriodYear < 2022 ? /* 50jt ladder */ : /* 60jt ladder */
 For `PeriodYear` 2021 the two sections disagree with each other. Untested live —
 would need a 2021 return.
 
+> **Closed by decision, 2026-08-20.** The pre-2022 ladder was implemented, then
+> removed again along with both predicates: this app now applies the UU HPP
+> schedule (60jt/5%, 250jt/15%, 500jt/25%, 5M/30%, 35%) for **every** tahun
+> pajak, in Induk row 7 and in L-4 Bagian A and B alike. This is a deliberate
+> divergence from Coretax for returns before 2022, not an oversight, and it also
+> retires the A-vs-B 2021 inconsistency. Reinstate from git history if pre-2022
+> returns ever become reachable.
+
 ### A8 — bracket implementation equivalent, float behaviour differs  (low)
 
 Ours accumulates marginal bands; Coretax applies `rate × PKP − minus`. Verified
@@ -358,7 +366,7 @@ pass unchanged):
 | A4 | `hitungInduk` → `n9` clamp + `pembulatanSetengahKeAtas` + `n7` back-write |
 | A5 | `hitungLampiranL4` → clamps on `jumlahPenghasilanNeto` and `pphYangHarusDibayar` |
 | A6 | `hitungJumlahBulan`, threaded from `periodeBulanMulai`/`Selesai` in `+page.svelte` |
-| A7 | `BANDS_PRA_HPP` + both year predicates, offset preserved |
+| A7 | ~~`BANDS_PRA_HPP` + both year predicates~~ — removed 2026-08-20, one ladder for every tahun pajak |
 | A8 | `terapkanTarif` uses the band form; row 7 left unrounded |
 | A9 | `_L4.svelte` Bagian B WP cell → new `n2` prop |
 | B1 | `_L4.svelte` `{#if bagianAGated}` |

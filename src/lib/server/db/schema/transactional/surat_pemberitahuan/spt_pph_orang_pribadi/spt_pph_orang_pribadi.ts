@@ -145,6 +145,21 @@ export const spt_pph_orang_pribadi = sqliteTable(
 		jdSuratKuasaKhusus: integer('jd_surat_kuasa_khusus', { mode: 'boolean' }),
 		jeDokumenLainnya: integer('je_dokumen_lainnya', { mode: 'boolean' }),
 
+		// L-3A Section A footer. Lives on the SPT header rather than in a lampiran
+		// table because it is a single row per SPT and survives a sektor switch,
+		// the
+		// same way the live form keeps one FinancialStatement control across
+		// L-3A-1/2/3. Codes are the FINANCIAL_STATEMENT reference list:
+		// TRADING = Diaudit, SELF_PREPARED = Tidak Diaudit (yes, "TRADING" means
+		// audited; it is DJP's code, not a sektor). The dropdown is required once
+		// an L-3A tab exists, and the akuntan publik pair is shown only for
+		// 'diaudit' — bundle: isShownAccountantFirm = ("TRADING" == FinancialStatement).
+		l3aLaporanKeuangan: text('l3a_laporan_keuangan', { enum: ['diaudit', 'tidak_diaudit'] }),
+		l3aNpwpKonsultanPajak: text('l3a_npwp_konsultan_pajak'),
+		l3aNamaKonsultanPajak: text('l3a_nama_konsultan_pajak'),
+		l3aNpwpKantorAkuntanPublik: text('l3a_npwp_kantor_akuntan_publik'),
+		l3aNamaKantorAkuntanPublik: text('l3a_nama_kantor_akuntan_publik'),
+
 		// K. Pernyataan
 		penandatangan: text('penandatangan', { enum: ['wajib_pajak', 'kuasa_wajib_pajak'] })
 			.notNull()

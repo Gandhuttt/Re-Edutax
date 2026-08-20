@@ -58,7 +58,9 @@
         if (!draft.tahunPerolehan) next.tahunPerolehan = 'Kolom ini wajib diisi!';
         if (!draft.hargaPerolehan) next.hargaPerolehan = 'Kolom ini wajib diisi!';
         if (!draft.nilaiSaatIni) next.nilaiSaatIni = 'Kolom ini wajib diisi!';
-        if (!draft.keterangan) next.keterangan = 'Kolom ini wajib diisi!';
+        // Keterangan is optional here, by decision on 2026-08-20: the live form
+        // rejects an empty one, but in this training app an empty Keterangan is
+        // not worth blocking a row on. Every other column keeps its check.
         errors = next;
         if (Object.keys(next).length > 0) return;
 

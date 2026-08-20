@@ -165,6 +165,10 @@
     // in a refund position. Both are driven by the computed outcome rather than
     // by the header's Status field: "status" is overloaded on this form, and the
     // Nihil / Kurang Bayar / Lebih Bayar chip is the computed one.
+    //
+    // These gate the *fields*, not the sections. Coretax renders F and G on every
+    // return and says so in their titles; hiding them outright (as this did until
+    // 2026-08-20) loses that instruction and makes the Induk look truncated.
     let adaPembetulan = $derived(spt.pembetulanKe > 0);
     let adaLebihBayar = $derived(computed.statusSpt === 'lebih_bayar');
 
@@ -235,28 +239,27 @@
         <Accordion item={"E. PPh KURANG/LEBIH BAYAR"}>
             <E {computed} bind:e11bAdaSkPengangsuranPenundaan bind:e11bJumlah {readonly} />
         </Accordion>
-        {#if adaPembetulan}
-            <Accordion item={"F. PEMBETULAN"}>
-                <F {computed} {f12a} bind:f12aGantiSptSebelumnya {readonly} />
-            </Accordion>
-        {/if}
-        {#if adaLebihBayar}
-            <Accordion item={"G. PERMOHONAN PENGEMBALIAN PPh LEBIH BAYAR"}>
-                <G
-                    bind:gMetodePengembalian
-                    bind:gNomorRekening
-                    bind:gNamaBank
-                    bind:gNamaPemilikRekening
-                    {readonly}
-                />
-            </Accordion>
-        {/if}
+        <Accordion item={"F. PEMBETULAN (DIISI JIKA STATUS SPT ADALAH PEMBETULAN)"}>
+            <F {computed} {f12a} bind:f12aGantiSptSebelumnya aktif={adaPembetulan} {readonly} />
+        </Accordion>
+        <Accordion item={"G. PERMOHONAN PENGEMBALIAN PPh LEBIH BAYAR (DIISI JIKA STATUS SPT ADALAH LEBIH BAYAR)"}>
+            <G
+                bind:gMetodePengembalian
+                bind:gNomorRekening
+                bind:gNamaBank
+                bind:gNamaPemilikRekening
+                aktif={adaLebihBayar}
+                {readonly}
+            />
+        </Accordion>
         <Accordion item={"H. ANGSURAN PPh PASAL 25 TAHUN PAJAK BERIKUTNYA"}>
             <H
                 bind:h13aAngsuranTeratur
                 bind:h13bPerhitunganTersendiri
                 bind:h13cAngsuranOppt
                 {l4AngsuranPph25}
+                angsuranPph25={computed.angsuranPph25TahunDepan}
+                jumlahBulan={computed.jumlahBulan}
                 {readonly}
             />
         </Accordion>

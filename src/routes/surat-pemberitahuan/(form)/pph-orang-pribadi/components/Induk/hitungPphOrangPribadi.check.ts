@@ -85,7 +85,7 @@ console.log('\n--- bundle-diff cases ---');
 // A1 — Bagian B floors PKP gabungan to the nearest 1.000 (calculateL4B6).
 const a1 = hitungLampiranL4SectionB({
   netoWp: 150_000_000, setelahDikurangiSuamiIstri: 100_000_777,
-  ptkpGabunganStatus: 'k_i_0', tahunPajak: 2025,
+  ptkpGabunganStatus: 'k_i_0',
 });
 eq('A1 PKP gabungan floored', a1.penghasilanKenaPajakGabungan, 137_500_000);
 eq('A1 PPh gabungan', a1.pphTerutangGabungan, 14_625_000);
@@ -96,7 +96,7 @@ eq('A1 PPh Suami/Istri', a1.pphDitanggungSuamiIstri, 5_850_027);
 // and spouse neto < 0 forces the spouse share to 0 (calculateL4B9).
 const a2 = hitungLampiranL4SectionB({
   netoWp: 400_000_000, setelahDikurangiSuamiIstri: -100_000_000,
-  ptkpGabunganStatus: 'k_i_0', tahunPajak: 2025,
+  ptkpGabunganStatus: 'k_i_0',
 });
 eq('A2 PPh gabungan', a2.pphTerutangGabungan, 22_125_000);
 eq('A2 PPh WP takes all', a2.pphDitanggungWp, 22_125_000);
@@ -104,14 +104,14 @@ eq('A2 PPh Suami/Istri forced 0', a2.pphDitanggungSuamiIstri, 0);
 
 const a2b = hitungLampiranL4SectionB({
   netoWp: 400_000_000, setelahDikurangiSuamiIstri: 0,
-  ptkpGabunganStatus: 'k_i_0', tahunPajak: 2025,
+  ptkpGabunganStatus: 'k_i_0',
 });
 eq('A2 spouse exactly 0 -> WP takes all', a2b.pphDitanggungWp, a2b.pphTerutangGabungan);
 eq('A2 spouse exactly 0 -> spouse 0', a2b.pphDitanggungSuamiIstri, 0);
 
 const a2c = hitungLampiranL4SectionB({
   netoWp: -50_000_000, setelahDikurangiSuamiIstri: 300_000_000,
-  ptkpGabunganStatus: null, tahunPajak: 2025,
+  ptkpGabunganStatus: null,
 });
 eq('A2 WP neto < 0 -> WP share 0', a2c.pphDitanggungWp, 0);
 
@@ -135,7 +135,7 @@ eq('A4 row 7 back-written to 0', a4.n7, 0);
 const a5 = hitungLampiranL4({
   penghasilanNeto: 367_000_500, kompensasiKerugian: 0, zakatSumbangan: 0,
   ptkpStatus: 'tk_0', pengurangPphTerutang: 250_000, kreditPajak: 70_000_000,
-  tahunPajak: 2025,
+ 
 });
 eq('A5 PKP floored', a5.penghasilanKenaPajak, 313_000_000);
 eq('A5 pajak terutang', a5.pajakTerutang, 47_250_000);
@@ -144,14 +144,14 @@ eq('A5 angsuran follows at 0', a5.angsuranPph25, 0);
 
 const a5b = hitungLampiranL4({
   penghasilanNeto: 0, kompensasiKerugian: 0, zakatSumbangan: 5_000_000,
-  ptkpStatus: 'k_1', pengurangPphTerutang: 0, kreditPajak: 0, tahunPajak: 2025,
+  ptkpStatus: 'k_1', pengurangPphTerutang: 0, kreditPajak: 0,
 });
 eq('A5 total neto clamped at 0', a5b.jumlahPenghasilanNeto, 0);
 
 // A5 baseline, no credits: the whole Bagian A chain.
 const a5c = hitungLampiranL4({
   penghasilanNeto: 367_000_500, kompensasiKerugian: 0, zakatSumbangan: 0,
-  ptkpStatus: 'tk_0', pengurangPphTerutang: 0, kreditPajak: 0, tahunPajak: 2025,
+  ptkpStatus: 'tk_0', pengurangPphTerutang: 0, kreditPajak: 0,
 });
 eq('A5 baseline PKP', a5c.penghasilanKenaPajak, 313_000_000);
 eq('A5 baseline pajak terutang', a5c.pajakTerutang, 47_250_000);
@@ -161,7 +161,7 @@ eq('A5 baseline angsuran (round, not floor)', a5c.angsuranPph25, 3_937_500);
 const a5d = hitungLampiranL4({
   penghasilanNeto: 28_000_000, kompensasiKerugian: 0, zakatSumbangan: 0,
   ptkpStatus: 'tidak_berlaku', pengurangPphTerutang: 0, kreditPajak: 0,
-  tahunPajak: 2025,
+ 
 });
 eq('A5 angsuran rounds half up (116.666,67)', a5d.angsuranPph25, 116_667);
 
@@ -169,7 +169,7 @@ eq('A5 angsuran rounds half up (116.666,67)', a5d.angsuranPph25, 116_667);
 const b2 = hitungLampiranL4({
   penghasilanNeto: 367_000_500, kompensasiKerugian: 0, zakatSumbangan: 0,
   ptkpStatus: 'tk_0', pengurangPphTerutang: 0, kreditPajak: 0,
-  tahunPajak: 2025, phMt: true,
+   phMt: true,
 });
 eq('B2 PTKP pinned to 0 on PH/MT', b2.ptkpNilai, 0);
 eq('B2 PKP ignores the selection', b2.penghasilanKenaPajak, 367_000_000);
@@ -194,28 +194,19 @@ const a6neg = hitungInduk({ ...base, n1a: 100_000_000, n1b: 0, n1c: 0, n1d: 0,
   n3: 0, c5PtkpStatus: 'tk_0', n8: 0, n10a: 999_000_000 });
 eq('A6 angsuran numerator clamped at 0', a6neg.angsuranPph25TahunDepan, 0);
 
-// A7 — pre-2022 schedule, and the one-year offset between the two predicates.
-// Bagian A switches on tahunPajak + 1 < 2022, Bagian B on tahunPajak < 2022, so
-// 2021 legitimately disagrees between the sections. PKP 100.000.000:
-//   UU HPP      -> 15% x 100jt - 6jt  = 9.000.000
-//   pre-UU HPP  -> 15% x 100jt - 5jt  = 10.000.000
-const a7a2020 = hitungLampiranL4({
+// A7 — one schedule, no year branch. The pre-UU-HPP ladder and the two
+// disagreeing year predicates were removed on 2026-08-20; both sections must now
+// return the same tax for the same PKP, whatever the tahun pajak.
+// PKP 100.000.000 -> 15% x 100jt - 6jt = 9.000.000.
+const a7a = hitungLampiranL4({
   penghasilanNeto: 100_000_000, kompensasiKerugian: 0, zakatSumbangan: 0,
   ptkpStatus: 'tidak_berlaku', pengurangPphTerutang: 0, kreditPajak: 0,
-  tahunPajak: 2020,
 });
-eq('A7 Bagian A 2020 uses pre-HPP', a7a2020.pajakTerutang, 10_000_000);
-const a7a2021 = hitungLampiranL4({
-  penghasilanNeto: 100_000_000, kompensasiKerugian: 0, zakatSumbangan: 0,
-  ptkpStatus: 'tidak_berlaku', pengurangPphTerutang: 0, kreditPajak: 0,
-  tahunPajak: 2021,
+eq('A7 Bagian A applies the UU HPP ladder', a7a.pajakTerutang, 9_000_000);
+const a7b = hitungLampiranL4SectionB({
+  netoWp: 100_000_000, setelahDikurangiSuamiIstri: 0, ptkpGabunganStatus: null,
 });
-eq('A7 Bagian A 2021 uses HPP (2021+1 = 2022)', a7a2021.pajakTerutang, 9_000_000);
-const a7b2021 = hitungLampiranL4SectionB({
-  netoWp: 100_000_000, setelahDikurangiSuamiIstri: 0,
-  ptkpGabunganStatus: null, tahunPajak: 2021,
-});
-eq('A7 Bagian B 2021 uses pre-HPP (disagrees with A)', a7b2021.pphTerutangGabungan, 10_000_000);
+eq('A7 Bagian B agrees with Bagian A', a7b.pphTerutangGabungan, 9_000_000);
 
 // B3 is enforced in +page.svelte (n1a gated on the 1.a answer), not here.
 

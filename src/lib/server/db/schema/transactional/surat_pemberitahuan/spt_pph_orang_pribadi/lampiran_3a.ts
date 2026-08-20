@@ -1,6 +1,7 @@
 import { integer, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
 import { spt_pph_orang_pribadi_kode_koreksi_fiskal } from '../../../references/spt_pph_orang_pribadi/kode_koreksi_fiskal';
 import { spt_pph_orang_pribadi_lampiran_3a_akun } from '../../../references/spt_pph_orang_pribadi/lampiran_3a_akun';
+import { spt_pph_orang_pribadi_lampiran_3a_neraca_akun } from '../../../references/spt_pph_orang_pribadi/lampiran_3a_neraca_akun';
 import { spt_pph_orang_pribadi } from './spt_pph_orang_pribadi';
 
 // L-3A A.1, LAPORAN LABA RUGI. Only the sektor matching Induk 1.b.4 is ever
@@ -53,6 +54,35 @@ export const spt_pph_orang_pribadi_lampiran_3a_koreksi_fiskal = sqliteTable(
 		uniqueIndex('spt_pph_orang_pribadi_lampiran_3a_koreksi_fiskal_unique').on(
 			t.labaRugiId,
 			t.kodeKoreksiFiskalId
+		)
+	]
+);
+
+// L-3A A.2, LAPORAN POSISI KEUANGAN (NERACA). One row per neraca account of the
+// sektor in play, entered inline (there is no row editor, unlike A.1).
+//
+// Kept in the same abandoned-sektor-tolerant shape as the laba/rugi table above:
+// keyed on the seeded akun row's own id, which is sektor-namespaced, so a row
+// left behind by a sektor switch can never be read back under a different
+// account.
+export const spt_pph_orang_pribadi_lampiran_3a_neraca = sqliteTable(
+	'spt_pph_orang_pribadi_lampiran_3a_neraca',
+	{
+		id: text('id')
+			.primaryKey()
+			.$defaultFn(() => crypto.randomUUID()),
+		sptPphOrangPribadiId: text('spt_pph_orang_pribadi_id')
+			.notNull()
+			.references(() => spt_pph_orang_pribadi.id, { onDelete: 'cascade' }),
+		akunId: text('akun_id')
+			.notNull()
+			.references(() => spt_pph_orang_pribadi_lampiran_3a_neraca_akun.id),
+		nilai: integer('nilai').notNull().default(0)
+	},
+	(t) => [
+		uniqueIndex('spt_pph_orang_pribadi_lampiran_3a_neraca_spt_akun_unique').on(
+			t.sptPphOrangPribadiId,
+			t.akunId
 		)
 	]
 );

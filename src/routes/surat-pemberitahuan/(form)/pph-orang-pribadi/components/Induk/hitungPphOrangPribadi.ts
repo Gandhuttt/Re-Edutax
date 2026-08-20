@@ -81,8 +81,17 @@ interface Band {
 	pengurang: number;
 }
 
-// UU HPP, tahun pajak 2022 and later.
-const BANDS_HPP: Band[] = [
+// The one schedule this app applies, for every tahun pajak.
+//
+// Coretax carries a second, pre-UU-HPP ladder (50jt/5%, four bands, no 35%) and
+// picks between them per tahun pajak, inconsistently: L-4 Bagian A's predicate
+// was `tahunPajak + 1 < 2022` and Bagian B's `tahunPajak < 2022`, so the two
+// disagreed for 2021. Both the second ladder and the predicates were removed on
+// 2026-08-20 by decision: this is a training app, the pre-2022 path was never
+// exercised, and one table that always applies beats two that disagree. If
+// pre-2022 returns ever matter, reinstate from git history rather than guessing
+// the old bracket values.
+const BANDS: Band[] = [
 	{ batasAtas: 60_000_000, tarif: 0.05, pengurang: 0 },
 	{ batasAtas: 250_000_000, tarif: 0.15, pengurang: 6_000_000 },
 	{ batasAtas: 500_000_000, tarif: 0.25, pengurang: 31_000_000 },
@@ -90,17 +99,9 @@ const BANDS_HPP: Band[] = [
 	{ batasAtas: Infinity, tarif: 0.35, pengurang: 306_000_000 }
 ];
 
-// Pre-UU HPP, carried by Coretax for older tahun pajak. Four bands, no 35%.
-const BANDS_PRA_HPP: Band[] = [
-	{ batasAtas: 50_000_000, tarif: 0.05, pengurang: 0 },
-	{ batasAtas: 250_000_000, tarif: 0.15, pengurang: 5_000_000 },
-	{ batasAtas: 500_000_000, tarif: 0.25, pengurang: 30_000_000 },
-	{ batasAtas: Infinity, tarif: 0.3, pengurang: 55_000_000 }
-];
-
-function terapkanTarif(penghasilanKenaPajak: number, bands: Band[]) {
+function terapkanTarif(penghasilanKenaPajak: number) {
 	if (penghasilanKenaPajak < 0) return 0;
-	for (const { batasAtas, tarif, pengurang } of bands) {
+	for (const { batasAtas, tarif, pengurang } of BANDS) {
 		if (penghasilanKenaPajak <= batasAtas) return tarif * penghasilanKenaPajak - pengurang;
 	}
 	return 0;
@@ -121,7 +122,7 @@ export function hitungPtkp(status: PtkpStatus | null | undefined) {
 // nothing matches. That data has never been observed, so the UU HPP schedule is
 // hardcoded here as the best available stand-in.
 export function hitungPphTerutang(penghasilanKenaPajak: number) {
-	return terapkanTarif(penghasilanKenaPajak, BANDS_HPP);
+	return terapkanTarif(penghasilanKenaPajak);
 }
 
 // Coretax carries two thousand-roundings that behave differently, and uses each
@@ -256,7 +257,9 @@ export function hitungInduk(input: HitungIndukInput) {
 	// valueH1 = Math.round(1 / numberOfMonth * (C6 < D1 ? 0 : C6 - D1)). Numerator
 	// clamped at 0, divisor is the period length rather than a fixed 12.
 	const jumlahBulan = hitungJumlahBulan(input.bulanMulai ?? 1, input.bulanSelesai ?? 12);
-	const angsuranPph25TahunDepan = Math.round(Math.max(0, n9 - n10a) / jumlahBulan);
+	// Written as (1 / n) * x, not x / n, to match getArticle25IncomeTaxInstallment
+	// bit for bit; the two can differ in the last place.
+	const angsuranPph25TahunDepan = Math.round((1 / jumlahBulan) * Math.max(0, n9 - n10a));
 
 	return {
 		n2,
@@ -345,9 +348,6 @@ export interface HitungLampiranL4Input {
 	ptkpStatus: PtkpStatus | null | undefined;
 	pengurangPphTerutang: number;
 	kreditPajak: number;
-	// Tahun pajak, selecting the bracket schedule. See the note in the body:
-	// Coretax's predicate here is deliberately different from Bagian B's.
-	tahunPajak?: number;
 	// PH/MT disables this section's PTKP dropdown outright
 	// (isTaxExemptionDisabled), leaving row 5 at 0 — the joint PTKP is claimed in
 	// Bagian B instead.
@@ -365,16 +365,8 @@ export function hitungLampiranL4(input: HitungLampiranL4Input) {
 
 	const penghasilanKenaPajak = pembulatanRibuanL4(Math.max(0, jumlahPenghasilanNeto - ptkpNilai));
 
-	// Bagian A's own year predicate is `parseInt(PeriodYear) + 1 < 2022`, whereas
-	// Bagian B's is `PeriodYear < 2022`. The two therefore disagree for tahun
-	// pajak 2021: Bagian A applies the UU HPP schedule while Bagian B applies the
-	// older one. Reproduced rather than reconciled, since matching Coretax is the
-	// point; untested against a real 2021 return.
-	const tahunPajak = input.tahunPajak ?? new Date().getFullYear();
-	const bands = tahunPajak + 1 < 2022 ? BANDS_PRA_HPP : BANDS_HPP;
-
 	// Unrounded, like Induk row 7 and unlike Bagian B's row 20.
-	const pajakTerutang = terapkanTarif(penghasilanKenaPajak, bands);
+	const pajakTerutang = terapkanTarif(penghasilanKenaPajak);
 
 	// calculateL4A9: max(0, V7 - V23 - V8). Kredit pajak exceeding the tax due
 	// yields 0, not a negative.
@@ -413,7 +405,6 @@ export interface HitungLampiranL4SectionBInput {
 	// gabungan sum, NOT the plain "Penghasilan Neto (Suami/Istri)" cell above it.
 	setelahDikurangiSuamiIstri: number;
 	ptkpGabunganStatus: PtkpStatus | null | undefined;
-	tahunPajak?: number;
 }
 
 export function hitungLampiranL4SectionB(input: HitungLampiranL4SectionBInput) {
@@ -429,16 +420,11 @@ export function hitungLampiranL4SectionB(input: HitungLampiranL4SectionBInput) {
 		Math.max(0, netoGabungan - ptkpGabunganNilai)
 	);
 
-	// Bagian B's predicate is PeriodYear < 2022, one year off Bagian A's. See the
-	// note in hitungLampiranL4.
-	const tahunPajak = input.tahunPajak ?? new Date().getFullYear();
-	const bands = tahunPajak < 2022 ? BANDS_PRA_HPP : BANDS_HPP;
-
 	// calculationIncomeTaxPaybleL4B rounds each band and clamps at 0, unlike
 	// Bagian A's unrounded equivalent.
 	const pphTerutangGabungan = Math.max(
 		0,
-		Math.round(terapkanTarif(penghasilanKenaPajakGabungan, bands))
+		Math.round(terapkanTarif(penghasilanKenaPajakGabungan))
 	);
 
 	// calculateL4B8 / calculateL4B9. Three branches beyond the plain

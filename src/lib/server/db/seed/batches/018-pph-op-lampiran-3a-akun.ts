@@ -26,7 +26,15 @@ type RowDef = readonly [
 	sign?: 1 | -1 | null
 ];
 
-const BEBAN_USAHA_TAIL = (gajiLabel: string, promosiLabel: string): RowDef[] => [
+// 5319 Biaya Royalti exists in the Jasa tree only, not in Dagang or Industri.
+// Checked against the deployed Coretax bundle (chunk 827) on 2026-08-20: the row
+// was missing here because the shared tail was factored out of the L3A.md
+// transcript, whose Jasa listing had already dropped it.
+const BEBAN_USAHA_TAIL = (
+	gajiLabel: string,
+	promosiLabel: string,
+	royalti = false
+): RowDef[] => [
 	[null, 'Beban Usaha', 'header'],
 	['5311', gajiLabel, 'data', '5400', 1],
 	['5313', 'Beban Transportasi', 'data', '5400', 1],
@@ -35,6 +43,7 @@ const BEBAN_USAHA_TAIL = (gajiLabel: string, promosiLabel: string): RowDef[] => 
 	['5316', 'Beban Bunga', 'data', '5400', 1],
 	['5317', 'Beban Sehubungan dengan Jasa', 'data', '5400', 1],
 	['5318', 'Beban Piutang Tidak Tertagih', 'data', '5400', 1],
+	...(royalti ? ([['5319', 'Biaya Royalti', 'data', '5400', 1]] as RowDef[]) : []),
 	['5320', promosiLabel, 'data', '5400', 1],
 	['5321', 'Beban Entertainment', 'data', '5400', 1],
 	['5322', 'Beban Umum dan Administrasi', 'data', '5400', 1],
@@ -71,7 +80,11 @@ const jasaRows: RowDef[] = [
 	['4300', 'Laba Kotor', 'sum', '4800', 1],
 	// The live form has a typo, "Grafikasi" for gratifikasi; corrected here
 	// rather than reproduced.
-	...BEBAN_USAHA_TAIL('Gaji, Upah, Bonus, Gratifikasi, Honorarium, THR, Dsb', 'Biaya Pemasaran/Promosi')
+	...BEBAN_USAHA_TAIL(
+		'Gaji, Upah, Bonus, Gratifikasi, Honorarium, THR, Dsb',
+		'Biaya Pemasaran/Promosi',
+		true
+	)
 ];
 
 const industriRows: RowDef[] = [

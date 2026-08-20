@@ -209,7 +209,12 @@ Dagang), and `5020` is `Jumlah Harga Pokok Penjualan` rather than `Jumlah HPP`.
 
 ### Shared tail
 
-All three end with the identical `5311`..`5400` beban usaha block, with only
+> **[bundle-corrected]** 2026-08-20. The tail is **not** identical across all
+> three: Jasa has one extra row, `5319 Biaya Royalti`, between `5318` and
+> `5320`. It is absent from Dagang and Industri. This transcript had dropped it,
+> and the seed inherited the omission until 2026-08-20.
+
+All three end with a near-identical `5311`..`5400` beban usaha block, with only
 cosmetic label drift (`dsb` / `Dsb` / `dll`, `Beban Pemasaran atau Promosi` vs
 `Biaya Pemasaran/Promosi`). Treat it as one shared block in our schema.
 
@@ -263,10 +268,33 @@ Derived footer rows:
 - `2999 Jumlah Liabilitas`, `3299 Jumlah Ekuitas`,
   `3300 Jumlah Liabilitas dan Ekuitas` (right table)
 
-**The neraca does not enforce balance.** Entered `1101 Kas` 5.000.000.000 and
+> **[bundle-corrected]** 2026-08-20. Read against chunk `827`, which carries the
+> whole of A.2 as code: three aset classes (Dagang, Jasa, Industri) and **one**
+> liabilitas/ekuitas class shared by all three. Everything measured below held,
+> and three things are added or overturned:
+>
+> - The **Dagang variant**, listed under "Not captured", is byte-identical to
+>   Jasa apart from the `1499` casing. No further capture needed.
+> - The subtotal signs are explicit in the `AC1700` getter: `1131`, `1524`,
+>   `1526`, `1528` and `1530` subtract, everything else adds. `AC2999`,
+>   `AC3299` and `AC3300 = AC2999 + AC3299` have no contra rows.
+> - **Balance *is* enforced**, see below.
+>
+> Implemented 2026-08-20 as `019-pph-op-lampiran-3a-neraca-akun.ts` +
+> `L-3A/A2.svelte`.
+
+**The neraca does not block entry when unbalanced.** Entered `1101 Kas` 5.000.000.000 and
 `2102 Utang Usaha` 1.000.000.000, giving `1700` = 5.000.000.000 against `3300` =
-1.000.000.000. No warning, no error, no block. It is disclosure only, with
-derived subtotals and no aset = liabilitas + ekuitas check.
+1.000.000.000. No warning, no error, no block **while typing**.
+
+> **[bundle-corrected]** 2026-08-20. "Disclosure only, no aset = liabilitas +
+> ekuitas check" was true of inline entry and false of the form as a whole.
+> `isFinancialStatementTotalValid()` returns `AC1700 == AC3300`, and
+> `checkFinancialStatementValidity` turns a false into
+> `"<form> Grid A.2. STATEMENT OF FINANCIAL POSITION  Total Assets must equals
+> with Total Liabilities and Equity"`, raised from the same posting-time sweep
+> that validates every other lampiran, gated on `selectB1B47` being 1, 2 or 3.
+> So an unbalanced neraca is accepted into the draft and rejected at Posting.
 
 Whether A.2 feeds anything downstream was not observed; nothing in Induk moved.
 
@@ -279,6 +307,19 @@ Below the neraca, outside both tables:
 | `LAPORAN KEUANGAN` | dropdown: `Tidak Diaudit`, `Diaudit` |
 | `NPWP KONSULTAN PAJAK` | text |
 | `NAMA KONSULTAN PAJAK` | text |
+| `NPWP KANTOR AKUNTAN PUBLIK` | text, **only when Diaudit** |
+| `NAMA KANTOR AKUNTAN PUBLIK` | text, **only when Diaudit** |
+
+> **[bundle-corrected]** 2026-08-20. The footer has **five** fields, not three.
+> The akuntan publik pair is hidden unless the return says Diaudit —
+> `isShownAccountantFirm = ("TRADING" == FinancialStatement)` — which is why UI
+> capture never saw it.
+>
+> `LAPORAN KEUANGAN` is the `FINANCIAL_STATEMENT` reference list, and its codes
+> are a trap: **`TRADING` = Diaudit**, `SELF_PREPARED` = Tidak Diaudit. It
+> carries `Validators.required`. `NPWP/NAMA KONSULTAN PAJAK` are the
+> `TaxAgentTIN`/`TaxAgentName` controls, prefilled from the logged-in tax
+> agent and disabled once filled, unless the appointment number starts `DA`.
 
 Aset, **Jasa variant** (24 rows):
 
@@ -531,8 +572,8 @@ Induk `1.b.5` → row 2 → PTKP → progressive tariff.**
 - Whether `KODE PENYESUAIAN FISKAL` restricts FPO codes to the positif amount
   and FNE codes to the negatif amount at save time (FPO-01 was accepted on a row
   that had *both* a positif and a negatif amount, so probably not)
-- The Dagang neraca variant
 - The `Laba Kotor` formula when `5020` is populated (it was left empty)
 - Delete/clear of an A.1 row once saved
 - Whether A.2 feeds anything downstream (nothing in Induk moved)
 - Whether `LAPORAN KEUANGAN = Diaudit` makes the konsultan fields required
+  (the bundle gives neither pair a validator, so probably not)

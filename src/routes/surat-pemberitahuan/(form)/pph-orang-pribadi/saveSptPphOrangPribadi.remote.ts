@@ -105,6 +105,16 @@ const SaveSptPphOrangPribadiSchema = v.object({
 	jdSuratKuasaKhusus: booleanRadio(false),
 	jeDokumenLainnya: booleanRadio(false),
 
+	// L-3A Section A footer. Optional here rather than required, even though
+	// the live form marks LAPORAN KEUANGAN required, because the field only
+	// exists once Induk 1.b.4 has produced an L-3A tab; requiring it at the
+	// schema level would block saving every non-pembukuan return.
+	l3aLaporanKeuangan: v.optional(v.picklist(['', 'diaudit', 'tidak_diaudit']), ''),
+	l3aNpwpKonsultanPajak: v.optional(v.string(), ''),
+	l3aNamaKonsultanPajak: v.optional(v.string(), ''),
+	l3aNpwpKantorAkuntanPublik: v.optional(v.string(), ''),
+	l3aNamaKantorAkuntanPublik: v.optional(v.string(), ''),
+
 	penandatangan: v.optional(v.picklist(['wajib_pajak', 'kuasa_wajib_pajak']), 'wajib_pajak'),
 
 	...L1Schema.entries,
@@ -172,11 +182,8 @@ export const saveSptPphOrangPribadi = form(SaveSptPphOrangPribadiSchema, async (
 	const lampiran2 = saveLampiranL2(input.id, input);
 	// The only one of these that queries the DB itself (to resolve the
 	// currently selected sektor's chart of accounts before computing 4800).
-	const lampiran3a = await saveLampiranL3A(
-		input.id,
-		(input.b1b4Sektor || null) as 'dagang' | 'jasa' | 'industri' | null,
-		input
-	);
+	const sektorL3A = (input.b1b4Sektor || null) as 'dagang' | 'jasa' | 'industri' | null;
+	const lampiran3a = await saveLampiranL3A(input.id, sektorL3A, input);
 	const lampiran3a4 = saveLampiranL3A4(input.id, input);
 	const lampiran3b = saveLampiranL3B(input.id, input);
 	const lampiran4 = saveLampiranL4(input.id, input);
@@ -281,6 +288,21 @@ export const saveSptPphOrangPribadi = form(SaveSptPphOrangPribadiSchema, async (
 				jcBuktiPotongLuarNegeri: input.jcBuktiPotongLuarNegeri,
 				jdSuratKuasaKhusus: input.jdSuratKuasaKhusus,
 				jeDokumenLainnya: input.jeDokumenLainnya,
+				// Cleared along with 1.b.4 itself: with no sektor there is no L-3A
+				// tab, so the footer it lives in is gone too. The akuntan publik
+				// pair additionally clears when the answer is not Diaudit, the
+				// same collapse rule the rest of the Induk answers follow.
+				l3aLaporanKeuangan: sektorL3A ? input.l3aLaporanKeuangan || null : null,
+				l3aNpwpKonsultanPajak: sektorL3A ? input.l3aNpwpKonsultanPajak : null,
+				l3aNamaKonsultanPajak: sektorL3A ? input.l3aNamaKonsultanPajak : null,
+				l3aNpwpKantorAkuntanPublik:
+					sektorL3A && input.l3aLaporanKeuangan === 'diaudit'
+						? input.l3aNpwpKantorAkuntanPublik
+						: null,
+				l3aNamaKantorAkuntanPublik:
+					sektorL3A && input.l3aLaporanKeuangan === 'diaudit'
+						? input.l3aNamaKantorAkuntanPublik
+						: null,
 				penandatangan: input.penandatangan,
 				pphKurangLebihBayar: Math.round(terutang),
 				statusDraft,

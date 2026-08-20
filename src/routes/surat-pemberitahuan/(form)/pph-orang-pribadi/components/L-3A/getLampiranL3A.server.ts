@@ -3,7 +3,9 @@ import {
 	spt_pph_orang_pribadi_kode_koreksi_fiskal,
 	spt_pph_orang_pribadi_lampiran_3a_akun,
 	spt_pph_orang_pribadi_lampiran_3a_koreksi_fiskal,
-	spt_pph_orang_pribadi_lampiran_3a_laba_rugi
+	spt_pph_orang_pribadi_lampiran_3a_laba_rugi,
+	spt_pph_orang_pribadi_lampiran_3a_neraca,
+	spt_pph_orang_pribadi_lampiran_3a_neraca_akun
 } from '$lib/server/db/schema';
 import { asc, eq, inArray } from 'drizzle-orm';
 
@@ -14,15 +16,26 @@ export type Sektor = 'dagang' | 'jasa' | 'industri';
 // switched sektor before, and rows from an abandoned sektor are kept rather
 // than deleted (see lampiran_3a.ts).
 export async function getLampiranL3A(sptId: string) {
-	const [akun, labaRugi, kodeKoreksiFiskal] = await Promise.all([
+	const [akun, neracaAkun, labaRugi, neraca, kodeKoreksiFiskal] = await Promise.all([
 		db.select().from(spt_pph_orang_pribadi_lampiran_3a_akun).orderBy(
 			asc(spt_pph_orang_pribadi_lampiran_3a_akun.sektor),
 			asc(spt_pph_orang_pribadi_lampiran_3a_akun.nomorUrut)
 		),
 		db
 			.select()
+			.from(spt_pph_orang_pribadi_lampiran_3a_neraca_akun)
+			.orderBy(
+				asc(spt_pph_orang_pribadi_lampiran_3a_neraca_akun.sektor),
+				asc(spt_pph_orang_pribadi_lampiran_3a_neraca_akun.nomorUrut)
+			),
+		db
+			.select()
 			.from(spt_pph_orang_pribadi_lampiran_3a_laba_rugi)
 			.where(eq(spt_pph_orang_pribadi_lampiran_3a_laba_rugi.sptPphOrangPribadiId, sptId)),
+		db
+			.select()
+			.from(spt_pph_orang_pribadi_lampiran_3a_neraca)
+			.where(eq(spt_pph_orang_pribadi_lampiran_3a_neraca.sptPphOrangPribadiId, sptId)),
 		db
 			.select({
 				kode: spt_pph_orang_pribadi_kode_koreksi_fiskal.kode,
@@ -67,8 +80,19 @@ export async function getLampiranL3A(sptId: string) {
 		akunPerSektor[row.sektor as Sektor].push(row);
 	}
 
+	const neracaAkunPerSektor: Record<Sektor, typeof neracaAkun> = {
+		dagang: [],
+		jasa: [],
+		industri: []
+	};
+	for (const row of neracaAkun) {
+		neracaAkunPerSektor[row.sektor as Sektor].push(row);
+	}
+
 	return {
 		akunPerSektor,
+		neracaAkunPerSektor,
+		neraca,
 		labaRugi: labaRugi.map((row) => ({
 			...row,
 			kodePenyesuaianFiskal: kodeByLabaRugiId.get(row.id) ?? []

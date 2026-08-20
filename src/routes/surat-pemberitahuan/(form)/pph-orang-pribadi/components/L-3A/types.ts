@@ -21,3 +21,24 @@ export interface KodeKoreksiFiskal {
 	nama: string;
 	jenis: 'positif' | 'negatif';
 }
+
+// A.2 neraca. Keyed by the seeded neraca akun row's own id for the same reason
+// the laba/rugi rows are (see above): the id is sektor-namespaced, the kode is
+// not, and 1401 vs 1402-1404 differ between sektors.
+export interface BarisNeraca {
+	akunId: string;
+	nilai: number;
+}
+
+// FINANCIAL_STATEMENT reference list: TRADING = Diaudit, SELF_PREPARED = Tidak
+// Diaudit. Stored in our own words rather than DJP's codes, since "TRADING"
+// meaning "audited" is a trap for anyone reading the column later.
+export type LaporanKeuangan = 'diaudit' | 'tidak_diaudit';
+
+export interface FooterL3A {
+	laporanKeuangan: LaporanKeuangan | null;
+	npwpKonsultanPajak: string | null;
+	namaKonsultanPajak: string | null;
+	npwpKantorAkuntanPublik: string | null;
+	namaKantorAkuntanPublik: string | null;
+}

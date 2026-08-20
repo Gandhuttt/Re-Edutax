@@ -39,7 +39,6 @@
         // annualNetIncome (valueC1) and Value15 from netIncomeSummary
         // (valueC3). It feeds no formula, so this is display fidelity only.
         n2: number;
-        tahunPajak: number;
         // Induk 13b (chkH2). Bagian A is gated on it independently of this
         // tab's own visibility: on a PH/MT return with 13b = Tidak the tab is
         // present for Bagian B alone and Coretax hides Bagian A entirely.
@@ -55,7 +54,6 @@
         data = $bindable(),
         n4,
         n2,
-        tahunPajak,
         bagianAGated,
         statusKewajibanSuamiIstri,
         identitas,
@@ -88,7 +86,6 @@
             ptkpStatus: (data.ptkpStatus || null) as PtkpStatus | null,
             pengurangPphTerutang: Number(data.pengurangPphTerutang),
             kreditPajak: Number(data.kreditPajak),
-            tahunPajak: Number(tahunPajak),
             // PH/MT locks this section's PTKP to 0; the joint PTKP is claimed
             // in Bagian B instead.
             phMt: sectionBGated
@@ -99,8 +96,7 @@
         hitungLampiranL4SectionB({
             netoWp: Number(n4),
             setelahDikurangiSuamiIstri: Number(data.setelahDikurangiSuamiIstri),
-            ptkpGabunganStatus: (data.ptkpGabunganStatus || null) as PtkpStatus | null,
-            tahunPajak: Number(tahunPajak)
+            ptkpGabunganStatus: (data.ptkpGabunganStatus || null) as PtkpStatus | null
         })
     );
 </script>

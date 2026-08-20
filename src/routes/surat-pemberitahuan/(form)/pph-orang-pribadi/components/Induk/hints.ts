@@ -54,6 +54,10 @@ export const HINTS = {
 	h13a: {
 		// Not navigation: this states how the value is computed, and the formula is
 		// implemented as angsuranPph25TahunDepan in hitungPphOrangPribadi.ts.
+		//
+		// The 12 is a placeholder. Coretax builds this string as
+		// notif13aLabel + numberOfMonth + notif13aFormula, so the divisor is the
+		// period length; H.svelte overrides `ya` with the real one.
 		ya: 'Ya, Angsuran PPh Pasal 25 adalah 1/12 x ((9) – (10)(a))',
 		tidak: 'Tidak, silahkan lanjut pertanyaan berikutnya'
 	},

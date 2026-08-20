@@ -40,7 +40,13 @@
 		Harta
 	} from './components/L-1/types';
 	import type { BarisBukanObjek, BarisFinal, BarisLuarNegeri } from './components/L-2/types';
-	import type { BarisLabaRugi, KodeKoreksiFiskal, Sektor } from './components/L-3A/types';
+	import type {
+		BarisLabaRugi,
+		BarisNeraca,
+		FooterL3A,
+		KodeKoreksiFiskal,
+		Sektor
+	} from './components/L-3A/types';
 	import type { BarisLainnya } from './components/L-3A-4/types';
 	import type { BarisFinalBulanan, BarisPeredaranBulanan, TkuL3B } from './components/L-3B/types';
 	import type { LampiranL4 } from './components/L-4/types';
@@ -332,7 +338,21 @@
 	// currently selected (see getLampiranL3A.server.ts), so switching Induk
 	// 1.b.4 needs no extra round trip.
 	const l3aAkunPerSektor = lampiran3a.akunPerSektor;
+	const l3aNeracaAkunPerSektor = lampiran3a.neracaAkunPerSektor;
 	const l3aKodeKoreksiFiskal: KodeKoreksiFiskal[] = lampiran3a.kodeKoreksiFiskal;
+	// A.2 neraca, and the Section A footer that sits below it. The footer is
+	// five scalars on the SPT row rather than a lampiran table, matching how the
+	// live form keeps one FinancialStatement control across L-3A-1/2/3.
+	let l3aNeraca = $state<BarisNeraca[]>(
+		lampiran3a.neraca.map((row) => ({ akunId: row.akunId, nilai: row.nilai }))
+	);
+	let l3aFooter = $state<FooterL3A>({
+		laporanKeuangan: spt.l3aLaporanKeuangan ?? null,
+		npwpKonsultanPajak: spt.l3aNpwpKonsultanPajak ?? '',
+		namaKonsultanPajak: spt.l3aNamaKonsultanPajak ?? '',
+		npwpKantorAkuntanPublik: spt.l3aNpwpKantorAkuntanPublik ?? '',
+		namaKantorAkuntanPublik: spt.l3aNamaKantorAkuntanPublik ?? ''
+	});
 	let l3aLabaRugi = $state<BarisLabaRugi[]>(
 		lampiran3a.labaRugi.map((row) => ({
 			akunId: row.akunId,
@@ -431,8 +451,7 @@
 			? hitungLampiranL4SectionB({
 					netoWp: computedBase.n4,
 					setelahDikurangiSuamiIstri: Number(l4.setelahDikurangiSuamiIstri),
-					ptkpGabunganStatus: (l4.ptkpGabunganStatus || null) as PtkpStatus | null,
-					tahunPajak: Number(spt.tahunPajak)
+					ptkpGabunganStatus: (l4.ptkpGabunganStatus || null) as PtkpStatus | null
 				})
 			: null
 	);
@@ -457,7 +476,6 @@
 			ptkpStatus: (l4.ptkpStatus || null) as PtkpStatus | null,
 			pengurangPphTerutang: Number(l4.pengurangPphTerutang),
 			kreditPajak: Number(l4.kreditPajak),
-			tahunPajak: Number(spt.tahunPajak),
 			// Bagian A's PTKP is locked to 0 on PH/MT, so this mirror of its
 			// angsuran must be computed the same way the section displays it.
 			phMt: isPhMt
@@ -669,6 +687,28 @@
 			<input type="hidden" name="l2LuarNegeri" value={JSON.stringify(l2LuarNegeri)} />
 			<!-- L-3A-4 Bagian B rows. Bagian A (Norma) is not implemented. -->
 			<input type="hidden" name="l3aLabaRugi" value={JSON.stringify(l3aLabaRugi)} />
+			<input type="hidden" name="l3aNeraca" value={JSON.stringify(l3aNeraca)} />
+			<input type="hidden" name="l3aLaporanKeuangan" value={l3aFooter.laporanKeuangan ?? ''} />
+			<input
+				type="hidden"
+				name="l3aNpwpKonsultanPajak"
+				value={l3aFooter.npwpKonsultanPajak ?? ''}
+			/>
+			<input
+				type="hidden"
+				name="l3aNamaKonsultanPajak"
+				value={l3aFooter.namaKonsultanPajak ?? ''}
+			/>
+			<input
+				type="hidden"
+				name="l3aNpwpKantorAkuntanPublik"
+				value={l3aFooter.npwpKantorAkuntanPublik ?? ''}
+			/>
+			<input
+				type="hidden"
+				name="l3aNamaKantorAkuntanPublik"
+				value={l3aFooter.namaKantorAkuntanPublik ?? ''}
+			/>
 			<input type="hidden" name="l3a4Lainnya" value={JSON.stringify(l3a4Lainnya)} />
 			<!-- L-3B rows. The TKU registry is a single scalar record, not an array. -->
 			<input type="hidden" name="l3bTkuNama" value={l3bTku.nama} />
@@ -831,7 +871,10 @@
 				{currentTab}
 				sektor={b1b4Sektor ? (b1b4Sektor as Sektor) : null}
 				akunPerSektor={l3aAkunPerSektor}
+				neracaAkunPerSektor={l3aNeracaAkunPerSektor}
 				bind:labaRugi={l3aLabaRugi}
+				bind:neraca={l3aNeraca}
+				bind:footer={l3aFooter}
 				kodeKoreksiFiskal={l3aKodeKoreksiFiskal}
 				{readonly}
 			/>
@@ -868,7 +911,6 @@
 				bind:data={l4}
 				n4={computed.n4}
 				n2={computed.n2}
-				tahunPajak={spt.tahunPajak}
 				bagianAGated={Boolean(h13bPerhitunganTersendiri)}
 				statusKewajibanSuamiIstri={a7StatusKewajibanSuamiIstri}
 				{identitas}
