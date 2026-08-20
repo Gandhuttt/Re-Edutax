@@ -1,4 +1,5 @@
 <script lang="ts">
+    import { untrack } from "svelte";
     import Input from "$lib/components/Input.svelte";
     import Select from "$lib/components/Select.svelte";
     import Table from "$lib/components/Table.svelte";
@@ -90,15 +91,32 @@
     // with either "Ya" branch (OPPT) auto-checks Kegiatan Usaha in the header;
     // reverting 1.b.2 to Tidak auto-unchecks it again. 1.b.1 Ya alone does
     // neither.
+    //
+    // Fires on the OPPT *transition* only. Reacting to the current answers
+    // instead made Kegiatan Usaha impossible to tick by hand: checking the box
+    // re-ran the effect, which saw no OPPT answer and stripped it straight back
+    // out. The header is a real editable multi-select sitting on top of this
+    // convenience coupling (HEADER-FIELDS.md), so a hand-made choice has to
+    // survive.
+    let opptSebelumnya: boolean | undefined = undefined;
     $effect(() => {
         const oppt = b1b1PenghasilanUsaha === true &&
             (b1b2Oppt === 'peredaran_bruto_tertentu' || b1b2Oppt === 'pengusaha_tertentu');
-        const has = sumberPenghasilan.includes('kegiatan_usaha');
-        if (oppt && !has) {
-            sumberPenghasilan = [...sumberPenghasilan, 'kegiatan_usaha'];
-        } else if (!oppt && has) {
-            sumberPenghasilan = sumberPenghasilan.filter((s) => s !== 'kegiatan_usaha');
+        // The first run only seeds the baseline, so a selection loaded from the
+        // draft is not wiped on mount.
+        if (opptSebelumnya === undefined || oppt === opptSebelumnya) {
+            opptSebelumnya = oppt;
+            return;
         }
+        opptSebelumnya = oppt;
+        untrack(() => {
+            const has = sumberPenghasilan.includes('kegiatan_usaha');
+            if (oppt && !has) {
+                sumberPenghasilan = [...sumberPenghasilan, 'kegiatan_usaha'];
+            } else if (!oppt && has) {
+                sumberPenghasilan = sumberPenghasilan.filter((s) => s !== 'kegiatan_usaha');
+            }
+        });
     });
 
     // 1.b.4 only exists while 1.b.3 is "Tidak, saya menyelenggarakan
