@@ -3,7 +3,7 @@
     import Button from "$lib/components/Button.svelte";
     import Table from "$lib/components/Table.svelte";
     import { closeBsModal } from "$lib/helpers/bsModal";
-    import { applyRupiahInput, formatRupiah } from "$lib/helpers/rupiahInput";
+    import { applyRupiahInput, formatRupiah, formatRupiahDerived } from "$lib/helpers/rupiahInput";
     import type { BarisEntertainment } from "./types";
 
     // A. DAFTAR NOMINATIF BIAYA ENTERTAINMENT.
@@ -114,7 +114,7 @@
                         <td>{row.namaTempat}</td>
                         <td>{row.alamat}</td>
                         <td>{row.jenis}</td>
-                        <td class="tw:text-end">{formatRupiah(row.jumlahPemberian)}</td>
+                        <td class="tw:text-end">{formatRupiahDerived(row.jumlahPemberian)}</td>
                         <td>{row.namaRelasi}</td>
                         <td>{row.posisiJabatan}</td>
                         <td>{row.namaPerusahaan}</td>
@@ -127,7 +127,7 @@
             {/snippet}
         </Table>
     </div>
-    <div class="tw:mt-2 tw:text-sm tw:font-bold tw:text-end">JUMLAH: {formatRupiah(total)}</div>
+    <div class="tw:mt-2 tw:text-sm tw:font-bold tw:text-end">JUMLAH: {formatRupiahDerived(total)}</div>
 </div>
 
 <div class="modal fade" id="modalOpL3DA" tabindex="-1" aria-labelledby="modalOpL3DALabel" aria-hidden="true">

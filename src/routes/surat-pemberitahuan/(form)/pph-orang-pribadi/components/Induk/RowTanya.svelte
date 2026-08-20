@@ -2,7 +2,7 @@
     import Alert from "$lib/components/Alert.svelte";
     import Input from "$lib/components/Input.svelte";
     import RadioPair from "$lib/components/RadioPair.svelte";
-    import { applyRupiahInput, formatRupiah } from "$lib/helpers/rupiahInput";
+    import { applyRupiahInput, formatRupiah, formatRupiahDerived } from "$lib/helpers/rupiahInput";
     import type { Hint } from "./hints";
 
     // One Ya/Tidak question row, with its hint chip and optional amount cell.
@@ -72,7 +72,7 @@
                     disabled={readonly || disabled}
                 />
             {:else}
-                <Input class={"tw:text-end"} type={"text"} value={formatRupiah(amountValue)} disabled />
+                <Input class={"tw:text-end"} type={"text"} value={formatRupiahDerived(amountValue)} disabled />
             {/if}
         {/if}
     </td>

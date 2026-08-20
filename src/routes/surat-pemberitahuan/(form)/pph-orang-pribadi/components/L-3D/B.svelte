@@ -3,7 +3,7 @@
     import Button from "$lib/components/Button.svelte";
     import Table from "$lib/components/Table.svelte";
     import { closeBsModal } from "$lib/helpers/bsModal";
-    import { applyRupiahInput, formatRupiah } from "$lib/helpers/rupiahInput";
+    import { applyRupiahInput, formatRupiah, formatRupiahDerived } from "$lib/helpers/rupiahInput";
     import type { BarisPromosi } from "./types";
 
     // B. DAFTAR NOMINATIF BIAYA PROMOSI SERTA PENGGANTIAN ATAU IMBALAN DALAM
@@ -115,9 +115,9 @@
                         <td>{row.tanggal}</td>
                         <td>{row.kodeBentukJenisBiaya}</td>
                         <td>{row.bentukJenisBiaya}</td>
-                        <td class="tw:text-end">{formatRupiah(row.nilai)}</td>
+                        <td class="tw:text-end">{formatRupiahDerived(row.nilai)}</td>
                         <td>{row.keterangan}</td>
-                        <td class="tw:text-end">{formatRupiah(row.jumlahPemotongan)}</td>
+                        <td class="tw:text-end">{formatRupiahDerived(row.jumlahPemotongan)}</td>
                         <td>{row.nomorBuktiPotong}</td>
                     </tr>
                 {:else}
@@ -126,7 +126,7 @@
             {/snippet}
         </Table>
     </div>
-    <div class="tw:mt-2 tw:text-sm tw:font-bold tw:text-end">JUMLAH: {formatRupiah(total)}</div>
+    <div class="tw:mt-2 tw:text-sm tw:font-bold tw:text-end">JUMLAH: {formatRupiahDerived(total)}</div>
 </div>
 
 <div class="modal fade" id="modalOpL3DB" tabindex="-1" aria-labelledby="modalOpL3DBLabel" aria-hidden="true">

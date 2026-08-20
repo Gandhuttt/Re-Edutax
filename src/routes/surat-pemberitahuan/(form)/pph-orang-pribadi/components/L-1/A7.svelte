@@ -1,6 +1,6 @@
 <script lang="ts">
     import Table from "$lib/components/Table.svelte";
-    import { formatRupiah } from "$lib/helpers/rupiahInput";
+    import { formatRupiahDerived } from "$lib/helpers/rupiahInput";
     import type { Harta } from "./types";
 
     // A7. IKHTISAR HARTA
@@ -63,14 +63,14 @@
                 {#each baris as row}
                     <tr>
                         <td>{row.deskripsi}</td>
-                        <td class="tw:text-end">{formatRupiah(row.hargaPerolehan)}</td>
-                        <td class="tw:text-end">{formatRupiah(row.nilaiSaatIni)}</td>
+                        <td class="tw:text-end">{formatRupiahDerived(row.hargaPerolehan)}</td>
+                        <td class="tw:text-end">{formatRupiahDerived(row.nilaiSaatIni)}</td>
                     </tr>
                 {/each}
                 <tr class="total">
                     <td>JUMLAH HARTA PADA AKHIR TAHUN PAJAK</td>
-                    <td class="tw:text-end">{formatRupiah(totalHarga)}</td>
-                    <td class="tw:text-end">{formatRupiah(totalNilai)}</td>
+                    <td class="tw:text-end">{formatRupiahDerived(totalHarga)}</td>
+                    <td class="tw:text-end">{formatRupiahDerived(totalNilai)}</td>
                 </tr>
             {/snippet}
         </Table>

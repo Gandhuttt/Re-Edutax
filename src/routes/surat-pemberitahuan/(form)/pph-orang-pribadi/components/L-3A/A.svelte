@@ -3,7 +3,7 @@
     import CheckableSelect from "$lib/components/CheckableSelect.svelte";
     import Table from "$lib/components/Table.svelte";
     import { closeBsModal } from "$lib/helpers/bsModal";
-    import { applyRupiahInput, formatRupiah } from "$lib/helpers/rupiahInput";
+    import { applyRupiahInput, formatRupiah, formatRupiahDerived } from "$lib/helpers/rupiahInput";
     import { computeLabaRugiRows, type LabaRugiAkunTemplate } from "../../../pph-badan/components/L1/labaRugiRollup";
     import type { BarisLabaRugi, KodeKoreksiFiskal } from "./types";
 
@@ -237,7 +237,7 @@
           </div>
           <div style="display: flex; align-items: center;">
             <label for="l3a-tidakfinal" style="width: 260px;">Objek Pajak Tidak Final</label>
-            <input type="text" id="l3a-tidakfinal" value={formatRupiah(draftTidakFinal)} readonly style="flex: 1; text-align: right; background-color: #e9ecef;" />
+            <input type="text" id="l3a-tidakfinal" value={formatRupiahDerived(draftTidakFinal)} readonly style="flex: 1; text-align: right; background-color: #e9ecef;" />
           </div>
           <div style="display: flex; align-items: center;">
             <label for="l3a-positif" style="width: 260px;">Penyesuaian Fiskal Positif</label>
@@ -275,7 +275,7 @@
           {#if errors.kodePenyesuaianFiskal}<span class="error">{errors.kodePenyesuaianFiskal}</span>{/if}
           <div style="display: flex; align-items: center;">
             <label for="l3a-fiskal" style="width: 260px;">Nilai Fiskal (Sebelum Fasilitas Perpajakan)</label>
-            <input type="text" id="l3a-fiskal" value={formatRupiah(draftNilaiFiskal)} readonly style="flex: 1; text-align: right; background-color: #e9ecef;" />
+            <input type="text" id="l3a-fiskal" value={formatRupiahDerived(draftNilaiFiskal)} readonly style="flex: 1; text-align: right; background-color: #e9ecef;" />
           </div>
         </div>
       </div>

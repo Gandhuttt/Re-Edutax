@@ -2,7 +2,7 @@
     import type { DaftarReferensi, KodeReferensi } from "../referensi";
     import Accordion from "$lib/components/AccordionItem.svelte";
     import Grid from "./Grid.svelte";
-    import { applyRupiahInput, formatRupiah } from "$lib/helpers/rupiahInput";
+    import { applyRupiahInput, formatRupiah, formatRupiahDerived } from "$lib/helpers/rupiahInput";
     import { L3C_AMORTISASI, L3C_PENYUSUTAN, L3C_SUB_GRID, type BarisPerTabel } from "./types";
 
     // L-3C, DAFTAR PENYUSUTAN DAN AMORTISASI FISKAL.
@@ -72,7 +72,7 @@
     <div class="tw:mt-4 tw:flex tw:flex-col tw:gap-2">
         <div style="display: flex; align-items: center;">
             <label for={`${id}-fiskal`} style="width: 320px; font-weight: bold;">{labelFiskal}</label>
-            <input type="text" id={`${id}-fiskal`} value={formatRupiah(fiskal)} readonly style="flex: 1; text-align: right; background-color: #e9ecef;" />
+            <input type="text" id={`${id}-fiskal`} value={formatRupiahDerived(fiskal)} readonly style="flex: 1; text-align: right; background-color: #e9ecef;" />
         </div>
         <div style="display: flex; align-items: center;">
             <label for={`${id}-komersial`} style="width: 320px; font-weight: bold;">{labelKomersial}</label>
@@ -88,7 +88,7 @@
         </div>
         <div style="display: flex; align-items: center;">
             <label for={`${id}-selisih`} style="width: 320px; font-weight: bold;">{labelSelisih}</label>
-            <input type="text" id={`${id}-selisih`} value={formatRupiah(selisih)} readonly style="flex: 1; text-align: right; background-color: #e9ecef;" />
+            <input type="text" id={`${id}-selisih`} value={formatRupiahDerived(selisih)} readonly style="flex: 1; text-align: right; background-color: #e9ecef;" />
         </div>
     </div>
 {/snippet}

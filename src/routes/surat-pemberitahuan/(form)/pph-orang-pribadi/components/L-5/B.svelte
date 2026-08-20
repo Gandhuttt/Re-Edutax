@@ -3,7 +3,7 @@
     import Button from "$lib/components/Button.svelte";
     import { closeBsModal } from "$lib/helpers/bsModal";
     import Table from "$lib/components/Table.svelte";
-    import { applyRupiahInput, formatRupiah } from "$lib/helpers/rupiahInput";
+    import { applyRupiahInput, formatRupiah, formatRupiahDerived } from "$lib/helpers/rupiahInput";
     import type { BarisPengurang } from "./types";
 
     // B. PENGURANG PENGHASILAN NETO. Feeds Induk row 3 together with L-5 A's
@@ -97,14 +97,14 @@
                         <td>{index + 1}</td>
                         <td>{row.kode}</td>
                         <td>{row.jenisPengurang}</td>
-                        <td class="tw:text-end">{formatRupiah(row.jumlah)}</td>
+                        <td class="tw:text-end">{formatRupiahDerived(row.jumlah)}</td>
                     </tr>
                 {:else}
                     <tr><td colspan={bisaEdit ? 5 : 4} class="tw:text-center">Tidak ada data untuk ditampilkan.</td></tr>
                 {/each}
                 <tr class="total">
                     <td colspan={bisaEdit ? 3 : 2}>JUMLAH</td>
-                    <td class="tw:text-end">{formatRupiah(total)}</td>
+                    <td class="tw:text-end">{formatRupiahDerived(total)}</td>
                 </tr>
             {/snippet}
         </Table>

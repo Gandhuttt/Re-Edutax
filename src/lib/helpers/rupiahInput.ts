@@ -3,6 +3,19 @@ export function formatRupiah(value: number | undefined): string {
 }
 
 /**
+ * Same, but a computed zero stays a visible "0" instead of collapsing to an
+ * empty box. Editable fields want the blank — it is what an untouched input
+ * looks like, and what a taxpayer clearing the field types their way back to.
+ * Read-only cells do not: their zero is an answer. Coretax renders these as
+ * `p-inputNumber mode="decimal"` and patches a literal 0 into them (e.g.
+ * `checkedChkH1` writing `valueH1: 0`), so a blank there reads as "not yet
+ * calculated" for a figure that has in fact been calculated.
+ */
+export function formatRupiahDerived(value: number | undefined): string {
+	return value === undefined || Number.isNaN(value) ? '' : value.toLocaleString('id-ID');
+}
+
+/**
  * Reformats a rupiah-style text input on every keystroke while keeping the
  * cursor at the same digit position, instead of letting it jump to the end.
  */

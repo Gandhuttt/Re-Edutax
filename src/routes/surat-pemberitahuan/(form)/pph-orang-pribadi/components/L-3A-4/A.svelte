@@ -1,7 +1,7 @@
 <script lang="ts">
     import Input from "$lib/components/Input.svelte";
     import Table from "$lib/components/Table.svelte";
-    import { formatRupiah } from "$lib/helpers/rupiahInput";
+    import { formatRupiahDerived } from "$lib/helpers/rupiahInput";
     import { hitungLampiranL3A4BagianA } from "../Induk/hitungPphOrangPribadi";
 
     // A. PENGHASILAN NETO DALAM NEGERI DARI USAHA DAN/ATAU PEKERJAAN BEBAS
@@ -102,9 +102,9 @@
         </tr>
         <tr>
             <td colspan="3" class="tw:text-end">JUMLAH PEREDARAN BRUTO (Rp)</td>
-            <td class="tw:text-end">{formatRupiah(computed.totalPeredaranBruto)}</td>
+            <td class="tw:text-end">{formatRupiahDerived(computed.totalPeredaranBruto)}</td>
             <td class="tw:text-end">TOTAL PENGHASILAN NETO</td>
-            <td class="tw:text-end">{formatRupiah(computed.totalPenghasilanNeto)}</td>
+            <td class="tw:text-end">{formatRupiahDerived(computed.totalPenghasilanNeto)}</td>
         </tr>
     {/snippet}
 </Table>

@@ -81,6 +81,18 @@ export const HINTS = {
 		ya: 'Ya, silahkan mengisi lampiran 2 Bagian B',
 		tidak: 'Tidak, lanjutkan ke pertanyaan berikutnya'
 	},
+	// 14.e and 14.f are answerable only under the gates documented in I.svelte,
+	// so these chips were missing for as long as both rows were hardcoded
+	// disabled. Text taken from the Coretax bundle, where the pair sits directly
+	// between 14.d's and 14.g's; HINTS_DISABLED repeats the `tidak` string.
+	i14e: {
+		ya: 'Ya, silahkan mengisi lampiran 3C',
+		tidak: 'Tidak, lanjutkan ke pertanyaan berikutnya'
+	},
+	i14f: {
+		ya: 'Ya, silahkan mengisi lampiran 3D',
+		tidak: 'Tidak, lanjutkan ke pertanyaan berikutnya'
+	},
 	i14g: {
 		// Routes nowhere; it is a compliance reminder rather than navigation.
 		ya: 'Pastikan Anda sudah menyampaikan laporan realisasi investasi secara terpisah.',

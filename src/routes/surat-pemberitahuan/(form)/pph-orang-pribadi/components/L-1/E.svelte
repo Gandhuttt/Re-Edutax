@@ -2,7 +2,7 @@
     import Button from "$lib/components/Button.svelte";
     import { closeBsModal } from "$lib/helpers/bsModal";
     import Table from "$lib/components/Table.svelte";
-    import { applyRupiahInput, formatRupiah } from "$lib/helpers/rupiahInput";
+    import { applyRupiahInput, formatRupiah, formatRupiahDerived } from "$lib/helpers/rupiahInput";
     import type { BarisBuktiPotong } from "./types";
 
     // E. DAFTAR BUKTI PEMOTONGAN/PEMUNGUTAN PPh. Feeds Induk 10a.
@@ -118,23 +118,23 @@
                         <td>{row.nomorBukti}</td>
                         <td>{row.tanggalBukti}</td>
                         <td>{row.jenisPajak}</td>
-                        <td class="tw:text-end">{formatRupiah(row.penghasilanBruto)}</td>
-                        <td class="tw:text-end">{formatRupiah(row.pphDipotong)}</td>
+                        <td class="tw:text-end">{formatRupiahDerived(row.penghasilanBruto)}</td>
+                        <td class="tw:text-end">{formatRupiahDerived(row.pphDipotong)}</td>
                     </tr>
                 {:else}
                     <tr><td colspan={bisaEdit ? 9 : 8} class="tw:text-center">Tidak ada data yang ditemukan.</td></tr>
                 {/each}
                 <tr class="total">
                     <td colspan={bisaEdit ? 8 : 7}>JUMLAH</td>
-                    <td class="tw:text-end">{formatRupiah(jumlah)}</td>
+                    <td class="tw:text-end">{formatRupiahDerived(jumlah)}</td>
                 </tr>
                 <tr class="total">
                     <td colspan={bisaEdit ? 8 : 7}>KREDIT PAJAK ATAS PENGHASILAN LUAR NEGERI</td>
-                    <td class="tw:text-end">{formatRupiah(kreditPajakLuarNegeri)}</td>
+                    <td class="tw:text-end">{formatRupiahDerived(kreditPajakLuarNegeri)}</td>
                 </tr>
                 <tr class="total">
                     <td colspan={bisaEdit ? 8 : 7}>JUMLAH BAGIAN E</td>
-                    <td class="tw:text-end">{formatRupiah(jumlahBagianE)}</td>
+                    <td class="tw:text-end">{formatRupiahDerived(jumlahBagianE)}</td>
                 </tr>
             {/snippet}
         </Table>

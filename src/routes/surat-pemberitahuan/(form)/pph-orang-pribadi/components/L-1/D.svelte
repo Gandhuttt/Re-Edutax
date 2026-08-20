@@ -2,7 +2,7 @@
     import Button from "$lib/components/Button.svelte";
     import Table from "$lib/components/Table.svelte";
     import { closeBsModal } from "$lib/helpers/bsModal";
-    import { applyRupiahInput, formatRupiah } from "$lib/helpers/rupiahInput";
+    import { applyRupiahInput, formatRupiah, formatRupiahDerived } from "$lib/helpers/rupiahInput";
     import type { BarisPekerjaan } from "./types";
 
     // D. PENGHASILAN NETO DALAM NEGERI DARI PEKERJAAN. Feeds Induk 1.a.
@@ -109,16 +109,16 @@
                         <td>{index + 1}</td>
                         <td>{row.namaPemberiKerja}</td>
                         <td>{row.nomorIdentitasPemberiKerja}</td>
-                        <td class="tw:text-end">{formatRupiah(row.penghasilanBruto)}</td>
-                        <td class="tw:text-end">{formatRupiah(row.pengurangPenghasilanBruto)}</td>
-                        <td class="tw:text-end">{formatRupiah(row.penghasilanNeto)}</td>
+                        <td class="tw:text-end">{formatRupiahDerived(row.penghasilanBruto)}</td>
+                        <td class="tw:text-end">{formatRupiahDerived(row.pengurangPenghasilanBruto)}</td>
+                        <td class="tw:text-end">{formatRupiahDerived(row.penghasilanNeto)}</td>
                     </tr>
                 {:else}
                     <tr><td colspan={bisaEdit ? 7 : 6} class="tw:text-center">Tidak ada data yang ditemukan.</td></tr>
                 {/each}
                 <tr class="total">
                     <td colspan={bisaEdit ? 6 : 5}>JUMLAH BAGIAN D</td>
-                    <td class="tw:text-end">{formatRupiah(total)}</td>
+                    <td class="tw:text-end">{formatRupiahDerived(total)}</td>
                 </tr>
             {/snippet}
         </Table>
@@ -175,7 +175,7 @@
             <input
               type="text"
               id="d-neto"
-              value={formatRupiah(draftNeto)}
+              value={formatRupiahDerived(draftNeto)}
               readonly
               style="flex: 1; text-align: right; background-color: #e9ecef;"
             />

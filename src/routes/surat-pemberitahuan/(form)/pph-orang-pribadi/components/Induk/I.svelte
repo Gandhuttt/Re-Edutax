@@ -99,15 +99,12 @@
                 amountValue={n14d}
                 {readonly}
             />
-            <!-- 14e and 14f render disabled. What gates them was never isolated:
-                 the Metode Pembukuan hypothesis was measured and disproved, and
-                 14f later became enabled for reasons that could not be pinned
-                 down. Left permanently disabled rather than gated on a guess. -->
             <RowTanya
                 nomor={"14.e"}
                 label={"Apakah Anda melaporkan biaya penyusutan dan/atau amortisasi fiskal?"}
                 name={"I14e"}
                 bind:answer={i14ePenyusutanAmortisasiFiskal}
+                hint={HINTS.i14e}
                 disabled={b1b3Norma !== 'tidak_pembukuan'}
                 disabledHint={HINTS_DISABLED.i14e}
                 {readonly}
@@ -117,6 +114,7 @@
                 label={"Apakah Anda melaporkan biaya entertainment, promosi, penggantian atau imbalan dalam bentuk natura dan/atau kenikmatan, serta piutang yang nyata-nyata tidak dapat ditagih?"}
                 name={"I14f"}
                 bind:answer={i14fBiayaEntertainment}
+                hint={HINTS.i14f}
                 disabled={!b1b1PenghasilanUsaha}
                 disabledHint={HINTS_DISABLED.i14f}
                 {readonly}

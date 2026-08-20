@@ -3,7 +3,7 @@
     import Button from "$lib/components/Button.svelte";
     import { closeBsModal } from "$lib/helpers/bsModal";
     import Table from "$lib/components/Table.svelte";
-    import { applyRupiahInput, formatRupiah } from "$lib/helpers/rupiahInput";
+    import { applyRupiahInput, formatRupiah, formatRupiahDerived } from "$lib/helpers/rupiahInput";
     import type { BarisBukanObjek } from "./types";
 
     // B. PENGHASILAN YANG TIDAK TERMASUK OBJEK PAJAK. Feeds Induk 14d.
@@ -106,7 +106,7 @@
                         <td>{row.kode}</td>
                         <td>{row.jenisPenghasilan}</td>
                         <td>{row.namaSumber}</td>
-                        <td class="tw:text-end">{formatRupiah(row.penghasilanBruto)}</td>
+                        <td class="tw:text-end">{formatRupiahDerived(row.penghasilanBruto)}</td>
                         <td>{row.npwpSumber}</td>
                     </tr>
                 {:else}
@@ -114,7 +114,7 @@
                 {/each}
                 <tr class="total">
                     <td colspan={bisaEdit ? 5 : 4}>JUMLAH TABEL B</td>
-                    <td class="tw:text-end">{formatRupiah(total)}</td>
+                    <td class="tw:text-end">{formatRupiahDerived(total)}</td>
                     <td></td>
                 </tr>
             {/snippet}

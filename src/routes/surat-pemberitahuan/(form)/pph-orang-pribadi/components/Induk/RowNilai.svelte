@@ -1,6 +1,6 @@
 <script lang="ts">
     import Input from "$lib/components/Input.svelte";
-    import { applyRupiahInput, formatRupiah } from "$lib/helpers/rupiahInput";
+    import { applyRupiahInput, formatRupiah, formatRupiahDerived } from "$lib/helpers/rupiahInput";
 
     // An amount row with no question attached: either a figure the form computes
     // (rows 2, 4, 6, 7, 9, 11a, 11c, 12b) or one the taxpayer types (10b, 10c).
@@ -29,7 +29,7 @@
                 disabled={readonly}
             />
         {:else}
-            <Input class={"tw:text-end"} type={"text"} value={formatRupiah(value)} disabled />
+            <Input class={"tw:text-end"} type={"text"} value={formatRupiahDerived(value)} disabled />
         {/if}
     </td>
     <td class="tw:w-[30rem]"></td>

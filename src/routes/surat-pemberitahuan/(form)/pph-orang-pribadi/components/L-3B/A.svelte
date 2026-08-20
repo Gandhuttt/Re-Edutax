@@ -2,7 +2,7 @@
     import Button from "$lib/components/Button.svelte";
     import Table from "$lib/components/Table.svelte";
     import { closeBsModal } from "$lib/helpers/bsModal";
-    import { applyRupiahInput, formatRupiah } from "$lib/helpers/rupiahInput";
+    import { applyRupiahInput, formatRupiah, formatRupiahDerived } from "$lib/helpers/rupiahInput";
     import { hitungPeredaranBrutoFinal } from "./hitungPeredaranBrutoFinal";
     import type { BarisFinalBulanan } from "./types";
 
@@ -82,15 +82,15 @@
                     {/if}
                     <td>{namaTku}</td>
                     {#each hasil.baris as baris}
-                        <td class="tw:text-end">{formatRupiah(baris.peredaranBruto)}</td>
+                        <td class="tw:text-end">{formatRupiahDerived(baris.peredaranBruto)}</td>
                     {/each}
-                    <td class="tw:text-end">{formatRupiah(hasil.totalBruto)}</td>
+                    <td class="tw:text-end">{formatRupiahDerived(hasil.totalBruto)}</td>
                 </tr>
                 <tr class="footer">
                     {#if bisaEdit}<td></td>{/if}
                     <td>b. AKUMULASI PEREDARAN BRUTO</td>
                     {#each hasil.baris as baris}
-                        <td class="tw:text-end">{formatRupiah(baris.akumulasi)}</td>
+                        <td class="tw:text-end">{formatRupiahDerived(baris.akumulasi)}</td>
                     {/each}
                     <td></td>
                 </tr>
@@ -104,17 +104,17 @@
                     {#if bisaEdit}<td></td>{/if}
                     <td>d. PEREDARAN BRUTO KENA PAJAK</td>
                     {#each hasil.baris as baris}
-                        <td class="tw:text-end">{formatRupiah(baris.kenaPajak)}</td>
+                        <td class="tw:text-end">{formatRupiahDerived(baris.kenaPajak)}</td>
                     {/each}
-                    <td class="tw:text-end">{formatRupiah(hasil.totalKenaPajak)}</td>
+                    <td class="tw:text-end">{formatRupiahDerived(hasil.totalKenaPajak)}</td>
                 </tr>
                 <tr class="footer">
                     {#if bisaEdit}<td></td>{/if}
                     <td>e. JUMLAH PPh FINAL TERUTANG</td>
                     {#each hasil.baris as baris}
-                        <td class="tw:text-end">{formatRupiah(baris.pphTerutang)}</td>
+                        <td class="tw:text-end">{formatRupiahDerived(baris.pphTerutang)}</td>
                     {/each}
-                    <td class="tw:text-end">{formatRupiah(hasil.totalPphTerutang)}</td>
+                    <td class="tw:text-end">{formatRupiahDerived(hasil.totalPphTerutang)}</td>
                 </tr>
                 <tr class="footer">
                     {#if bisaEdit}<td></td>{/if}
@@ -138,19 +138,19 @@
                                     class="tw:w-full tw:text-end tw:bg-transparent"
                                 />
                             {:else}
-                                {formatRupiah(row.dipotongPihakLain)}
+                                {formatRupiahDerived(row.dipotongPihakLain)}
                             {/if}
                         </td>
                     {/each}
-                    <td class="tw:text-end">{formatRupiah(hasil.totalDipotongPihakLain)}</td>
+                    <td class="tw:text-end">{formatRupiahDerived(hasil.totalDipotongPihakLain)}</td>
                 </tr>
                 <tr class="footer">
                     {#if bisaEdit}<td></td>{/if}
                     <td>h. SELISIH (e-f-g)</td>
                     {#each hasil.baris as baris}
-                        <td class="tw:text-end">{formatRupiah(baris.selisih)}</td>
+                        <td class="tw:text-end">{formatRupiahDerived(baris.selisih)}</td>
                     {/each}
-                    <td class="tw:text-end">{formatRupiah(hasil.totalSelisih)}</td>
+                    <td class="tw:text-end">{formatRupiahDerived(hasil.totalSelisih)}</td>
                 </tr>
             {/snippet}
         </Table>
@@ -192,7 +192,7 @@
             <tr class="tw:font-bold">
               <td>JUMLAH</td>
               <td class="tw:text-end">
-                {formatRupiah(draft.reduce((s, r) => s + Number(r.peredaranBruto || 0), 0))}
+                {formatRupiahDerived(draft.reduce((s, r) => s + Number(r.peredaranBruto || 0), 0))}
               </td>
             </tr>
           </tbody>

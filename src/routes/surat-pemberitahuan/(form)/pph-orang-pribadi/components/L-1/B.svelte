@@ -3,7 +3,7 @@
     import Button from "$lib/components/Button.svelte";
     import { closeBsModal } from "$lib/helpers/bsModal";
     import Table from "$lib/components/Table.svelte";
-    import { applyRupiahInput, formatRupiah } from "$lib/helpers/rupiahInput";
+    import { applyRupiahInput, formatRupiah, formatRupiahDerived } from "$lib/helpers/rupiahInput";
     import type { BarisUtang } from "./types";
 
     // B. UTANG PADA AKHIR TAHUN PAJAK. Feeds Induk 14b.
@@ -115,7 +115,7 @@
                         <td>{row.namaKreditur}</td>
                         <td>{row.negaraKreditur}</td>
                         <td>{row.tahunPeminjaman}</td>
-                        <td class="tw:text-end">{formatRupiah(row.saldo)}</td>
+                        <td class="tw:text-end">{formatRupiahDerived(row.saldo)}</td>
                         <td>{row.keterangan}</td>
                         <td>{row.nikNpwpKreditur}</td>
                     </tr>
@@ -124,7 +124,7 @@
                 {/each}
                 <tr class="total">
                     <td colspan={bisaEdit ? 7 : 6}>JUMLAH BAGIAN B</td>
-                    <td class="tw:text-end">{formatRupiah(total)}</td>
+                    <td class="tw:text-end">{formatRupiahDerived(total)}</td>
                     <td colspan="2"></td>
                 </tr>
             {/snippet}

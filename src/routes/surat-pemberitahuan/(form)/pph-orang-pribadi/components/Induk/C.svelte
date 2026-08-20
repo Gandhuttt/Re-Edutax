@@ -6,7 +6,7 @@
     import RowNilai from "./RowNilai.svelte";
     import { HINTS } from "./hints";
     import { PTKP_OPTIONS, type hitungInduk } from "./hitungPphOrangPribadi";
-    import { formatRupiah } from "$lib/helpers/rupiahInput";
+    import { formatRupiahDerived } from "$lib/helpers/rupiahInput";
 
     interface Props {
         computed: ReturnType<typeof hitungInduk>;
@@ -62,7 +62,7 @@
                     </Select>
                 </td>
                 <td class="tw:w-[20rem]">
-                    <Input class={"tw:text-end"} type={"text"} value={formatRupiah(computed.n5)} disabled />
+                    <Input class={"tw:text-end"} type={"text"} value={formatRupiahDerived(computed.n5)} disabled />
                 </td>
                 <td class="tw:w-[30rem]"></td>
             </tr>

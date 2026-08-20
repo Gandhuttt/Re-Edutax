@@ -3,7 +3,7 @@
     import Button from "$lib/components/Button.svelte";
     import Table from "$lib/components/Table.svelte";
     import { closeBsModal } from "$lib/helpers/bsModal";
-    import { applyRupiahInput, formatRupiah } from "$lib/helpers/rupiahInput";
+    import { applyRupiahInput, formatRupiah, formatRupiahDerived } from "$lib/helpers/rupiahInput";
     import type { BarisHartaFiskal } from "./types";
 
     // One sub-grid of L-3C. Coretax renders twelve of these -- five KELOMPOK for
@@ -164,11 +164,11 @@
                         <td>{row.kodeHarta}</td>
                         <td>{row.jenisHarta}</td>
                         <td>{tampilPerolehan(row)}</td>
-                        <td class="tw:text-end">{formatRupiah(row.hargaPerolehan)}</td>
-                        <td class="tw:text-end">{formatRupiah(row.nilaiSisaBukuFiskal)}</td>
+                        <td class="tw:text-end">{formatRupiahDerived(row.hargaPerolehan)}</td>
+                        <td class="tw:text-end">{formatRupiahDerived(row.nilaiSisaBukuFiskal)}</td>
                         <td>{row.metodeKomersial}</td>
                         <td>{row.metodeFiskal}</td>
-                        <td class="tw:text-end">{formatRupiah(row.penyusutanFiskalTahunIni)}</td>
+                        <td class="tw:text-end">{formatRupiahDerived(row.penyusutanFiskalTahunIni)}</td>
                         <td>{row.keterangan}</td>
                     </tr>
                 {:else}
@@ -176,7 +176,7 @@
                 {/each}
                 <tr class="total">
                     <td colspan={bisaEdit ? 9 : 8}>JUMLAH</td>
-                    <td class="tw:text-end">{formatRupiah(total)}</td>
+                    <td class="tw:text-end">{formatRupiahDerived(total)}</td>
                     <td></td>
                 </tr>
             {/snippet}

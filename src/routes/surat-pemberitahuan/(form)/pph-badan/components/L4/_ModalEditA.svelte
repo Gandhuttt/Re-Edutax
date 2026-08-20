@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { applyRupiahInput, formatRupiah } from '$lib/helpers/rupiahInput';
+    import { applyRupiahInput, formatRupiah, formatRupiahDerived } from '$lib/helpers/rupiahInput';
 
     let {
         data = $bindable() as {
@@ -97,7 +97,7 @@
               <input
                 type="text"
                 id="pphFinalTerutang"
-                value={formatRupiah(data.pphFinalTerutang)}
+                value={formatRupiahDerived(data.pphFinalTerutang)}
                 readonly
                 style="flex: 1; text-align: right; background-color: #e9ecef;"
               />

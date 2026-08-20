@@ -2,7 +2,7 @@
     import Button from "$lib/components/Button.svelte";
     import Table from "$lib/components/Table.svelte";
     import { closeBsModal } from "$lib/helpers/bsModal";
-    import { applyRupiahInput, formatRupiah } from "$lib/helpers/rupiahInput";
+    import { applyRupiahInput, formatRupiah, formatRupiahDerived } from "$lib/helpers/rupiahInput";
     import type { BarisKompensasi } from "./types";
 
     // A. PENGHITUNGAN KOMPENSASI KERUGIAN FISKAL.
@@ -118,23 +118,23 @@
                         {/if}
                         <td>{index + 1}</td>
                         <td>{row.tahunPajak}</td>
-                        <td class="tw:text-end">{formatRupiah(row.labaRugiNetoFiskal)}</td>
-                        <td class="tw:text-end">{formatRupiah(row.kompensasiYMin4)}</td>
-                        <td class="tw:text-end">{formatRupiah(row.kompensasiYMin3)}</td>
-                        <td class="tw:text-end">{formatRupiah(row.kompensasiYMin2)}</td>
-                        <td class="tw:text-end">{formatRupiah(row.kompensasiYMin1)}</td>
-                        <td class="tw:text-end">{formatRupiah(row.kompensasiTahunIni)}</td>
-                        <td class="tw:text-end">{formatRupiah(row.kompensasiYPlus1)}</td>
+                        <td class="tw:text-end">{formatRupiahDerived(row.labaRugiNetoFiskal)}</td>
+                        <td class="tw:text-end">{formatRupiahDerived(row.kompensasiYMin4)}</td>
+                        <td class="tw:text-end">{formatRupiahDerived(row.kompensasiYMin3)}</td>
+                        <td class="tw:text-end">{formatRupiahDerived(row.kompensasiYMin2)}</td>
+                        <td class="tw:text-end">{formatRupiahDerived(row.kompensasiYMin1)}</td>
+                        <td class="tw:text-end">{formatRupiahDerived(row.kompensasiTahunIni)}</td>
+                        <td class="tw:text-end">{formatRupiahDerived(row.kompensasiYPlus1)}</td>
                     </tr>
                 {/each}
                 <tr class="total">
                     <td colspan={bisaEdit ? 4 : 3}>JUMLAH BAGIAN A</td>
-                    <td class="tw:text-end">{formatRupiah(jumlah.yMin4)}</td>
-                    <td class="tw:text-end">{formatRupiah(jumlah.yMin3)}</td>
-                    <td class="tw:text-end">{formatRupiah(jumlah.yMin2)}</td>
-                    <td class="tw:text-end">{formatRupiah(jumlah.yMin1)}</td>
-                    <td class="tw:text-end">{formatRupiah(jumlah.tahunIni)}</td>
-                    <td class="tw:text-end">{formatRupiah(jumlah.yPlus1)}</td>
+                    <td class="tw:text-end">{formatRupiahDerived(jumlah.yMin4)}</td>
+                    <td class="tw:text-end">{formatRupiahDerived(jumlah.yMin3)}</td>
+                    <td class="tw:text-end">{formatRupiahDerived(jumlah.yMin2)}</td>
+                    <td class="tw:text-end">{formatRupiahDerived(jumlah.yMin1)}</td>
+                    <td class="tw:text-end">{formatRupiahDerived(jumlah.tahunIni)}</td>
+                    <td class="tw:text-end">{formatRupiahDerived(jumlah.yPlus1)}</td>
                 </tr>
             {/snippet}
         </Table>

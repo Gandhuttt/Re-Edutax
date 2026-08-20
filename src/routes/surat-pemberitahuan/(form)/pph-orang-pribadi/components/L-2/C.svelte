@@ -3,7 +3,7 @@
     import Button from "$lib/components/Button.svelte";
     import { closeBsModal } from "$lib/helpers/bsModal";
     import Table from "$lib/components/Table.svelte";
-    import { applyRupiahInput, formatRupiah } from "$lib/helpers/rupiahInput";
+    import { applyRupiahInput, formatRupiah, formatRupiahDerived } from "$lib/helpers/rupiahInput";
     import type { BarisLuarNegeri } from "./types";
 
     // C. PENGHASILAN NETO LUAR NEGERI.
@@ -134,11 +134,11 @@
                         <td>{row.negara}</td>
                         <td>{row.tanggalTransaksi}</td>
                         <td>{row.jenisPenghasilan}</td>
-                        <td class="tw:text-end">{formatRupiah(row.penghasilanNeto)}</td>
+                        <td class="tw:text-end">{formatRupiahDerived(row.penghasilanNeto)}</td>
                         <td>{row.mataUang}</td>
-                        <td class="tw:text-end">{formatRupiah(row.pajakLuarNegeriAsing)}</td>
-                        <td class="tw:text-end">{formatRupiah(row.pajakLuarNegeriRupiah)}</td>
-                        <td class="tw:text-end">{formatRupiah(row.kreditPajakDiperhitungkan)}</td>
+                        <td class="tw:text-end">{formatRupiahDerived(row.pajakLuarNegeriAsing)}</td>
+                        <td class="tw:text-end">{formatRupiahDerived(row.pajakLuarNegeriRupiah)}</td>
+                        <td class="tw:text-end">{formatRupiahDerived(row.kreditPajakDiperhitungkan)}</td>
                     </tr>
                 {:else}
                     <!-- Different empty-state wording from the L-1 grids. -->
@@ -146,10 +146,10 @@
                 {/each}
                 <tr class="total">
                     <td colspan={bisaEdit ? 6 : 5}>JUMLAH PENGHASILAN NETO</td>
-                    <td class="tw:text-end">{formatRupiah(totalNeto)}</td>
+                    <td class="tw:text-end">{formatRupiahDerived(totalNeto)}</td>
                     <td colspan="2"></td>
-                    <td class="tw:text-end">{formatRupiah(totalPajakRupiah)}</td>
-                    <td class="tw:text-end">{formatRupiah(totalKredit)}</td>
+                    <td class="tw:text-end">{formatRupiahDerived(totalPajakRupiah)}</td>
+                    <td class="tw:text-end">{formatRupiahDerived(totalKredit)}</td>
                 </tr>
             {/snippet}
         </Table>

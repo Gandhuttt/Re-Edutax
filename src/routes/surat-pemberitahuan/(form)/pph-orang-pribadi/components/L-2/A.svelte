@@ -3,7 +3,7 @@
     import Button from "$lib/components/Button.svelte";
     import { closeBsModal } from "$lib/helpers/bsModal";
     import Table from "$lib/components/Table.svelte";
-    import { applyRupiahInput, formatRupiah } from "$lib/helpers/rupiahInput";
+    import { applyRupiahInput, formatRupiah, formatRupiahDerived } from "$lib/helpers/rupiahInput";
     import type { BarisFinal } from "./types";
 
     // A. PENGHASILAN YANG DIKENAKAN PAJAK PENGHASILAN BERSIFAT FINAL
@@ -114,15 +114,15 @@
                         <td>{row.namaPemotong}</td>
                         <td>{row.kodeObjekPajak}</td>
                         <td>{row.jenisPenghasilan}</td>
-                        <td class="tw:text-end">{formatRupiah(row.dasarPengenaanPajak)}</td>
-                        <td class="tw:text-end">{formatRupiah(row.pphTerutang)}</td>
+                        <td class="tw:text-end">{formatRupiahDerived(row.dasarPengenaanPajak)}</td>
+                        <td class="tw:text-end">{formatRupiahDerived(row.pphTerutang)}</td>
                     </tr>
                 {:else}
                     <tr><td colspan={bisaEdit ? 8 : 7} class="tw:text-center">Tidak ada data yang ditemukan.</td></tr>
                 {/each}
                 <tr class="total">
                     <td colspan={bisaEdit ? 6 : 5}>JUMLAH TABEL A</td>
-                    <td class="tw:text-end">{formatRupiah(totalDpp)}</td>
+                    <td class="tw:text-end">{formatRupiahDerived(totalDpp)}</td>
                     <td></td>
                 </tr>
             {/snippet}

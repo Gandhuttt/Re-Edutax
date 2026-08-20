@@ -3,7 +3,7 @@
     import Button from "$lib/components/Button.svelte";
     import { closeBsModal } from "$lib/helpers/bsModal";
     import Table from "$lib/components/Table.svelte";
-    import { applyRupiahInput, formatRupiah } from "$lib/helpers/rupiahInput";
+    import { applyRupiahInput, formatRupiah, formatRupiahDerived } from "$lib/helpers/rupiahInput";
     import type { BarisA4 } from "./types";
 
     // A4. HARTA BERGERAK
@@ -128,8 +128,8 @@
                         <td>{row.nomorIdentitasPemilik}</td>
                         <td>{row.namaPemilik}</td>
                         <td>{row.tahunPerolehan}</td>
-                        <td class="tw:text-end">{formatRupiah(row.hargaPerolehan)}</td>
-                        <td class="tw:text-end">{formatRupiah(row.nilaiSaatIni)}</td>
+                        <td class="tw:text-end">{formatRupiahDerived(row.hargaPerolehan)}</td>
+                        <td class="tw:text-end">{formatRupiahDerived(row.nilaiSaatIni)}</td>
                         <td>{row.keterangan}</td>
                     </tr>
                 {:else}
@@ -137,7 +137,7 @@
                 {/each}
                 <tr class="total">
                     <td colspan={bisaEdit ? 11 : 10}>JUMLAH TABEL 4</td>
-                    <td class="tw:text-end">{formatRupiah(total)}</td>
+                    <td class="tw:text-end">{formatRupiahDerived(total)}</td>
                     <td></td>
                 </tr>
             {/snippet}

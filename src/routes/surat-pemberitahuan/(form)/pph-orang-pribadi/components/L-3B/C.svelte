@@ -2,7 +2,7 @@
     import Button from "$lib/components/Button.svelte";
     import Table from "$lib/components/Table.svelte";
     import { closeBsModal } from "$lib/helpers/bsModal";
-    import { applyRupiahInput, formatRupiah } from "$lib/helpers/rupiahInput";
+    import { applyRupiahInput, formatRupiah, formatRupiahDerived } from "$lib/helpers/rupiahInput";
     import type { BarisPeredaranBulanan } from "./types";
 
     // C. PENGGUNA NORMA PENGHITUNGAN PENGHASILAN NETO (NPPN).
@@ -76,17 +76,17 @@
                     <td>{namaTku}</td>
                     <td>{jenisUsahaPekerjaanBebas}</td>
                     {#each rows as row}
-                        <td class="tw:text-end">{formatRupiah(row.peredaranBruto)}</td>
+                        <td class="tw:text-end">{formatRupiahDerived(row.peredaranBruto)}</td>
                     {/each}
-                    <td class="tw:text-end">{formatRupiah(jumlahBruto)}</td>
+                    <td class="tw:text-end">{formatRupiahDerived(jumlahBruto)}</td>
                 </tr>
                 <tr class="footer">
                     {#if bisaEdit}<td></td>{/if}
                     <td colspan="2">JUMLAH PEREDARAN BRUTO</td>
                     {#each rows as row}
-                        <td class="tw:text-end">{formatRupiah(row.peredaranBruto)}</td>
+                        <td class="tw:text-end">{formatRupiahDerived(row.peredaranBruto)}</td>
                     {/each}
-                    <td class="tw:text-end">{formatRupiah(jumlahBruto)}</td>
+                    <td class="tw:text-end">{formatRupiahDerived(jumlahBruto)}</td>
                 </tr>
                 <tr class="footer">
                     {#if bisaEdit}<td></td>{/if}
@@ -140,7 +140,7 @@
             <tr class="tw:font-bold">
               <td>JUMLAH</td>
               <td class="tw:text-end">
-                {formatRupiah(draft.reduce((s, r) => s + Number(r.peredaranBruto || 0), 0))}
+                {formatRupiahDerived(draft.reduce((s, r) => s + Number(r.peredaranBruto || 0), 0))}
               </td>
             </tr>
           </tbody>

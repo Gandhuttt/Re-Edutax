@@ -3,7 +3,7 @@
     import Button from "$lib/components/Button.svelte";
     import Table from "$lib/components/Table.svelte";
     import { closeBsModal } from "$lib/helpers/bsModal";
-    import { applyRupiahInput, formatRupiah } from "$lib/helpers/rupiahInput";
+    import { applyRupiahInput, formatRupiah, formatRupiahDerived } from "$lib/helpers/rupiahInput";
     import type { BarisPiutang } from "./types";
 
     // C. Piutang yang nyata-nyata tidak dapat ditagih.
@@ -110,8 +110,8 @@
                         <td>{row.nomorIdentitasDebitur}</td>
                         <td>{row.namaDebitur}</td>
                         <td>{row.alamatDebitur}</td>
-                        <td class="tw:text-end">{formatRupiah(row.jumlahPlafon)}</td>
-                        <td class="tw:text-end">{formatRupiah(row.jumlahTidakDapatDitagih)}</td>
+                        <td class="tw:text-end">{formatRupiahDerived(row.jumlahPlafon)}</td>
+                        <td class="tw:text-end">{formatRupiahDerived(row.jumlahTidakDapatDitagih)}</td>
                         <td>{row.kodeMetodePembebanan}</td>
                         <td>{row.metodePembebanan}</td>
                         <td>{row.kodeJenisDokumen}</td>
@@ -123,7 +123,7 @@
             {/snippet}
         </Table>
     </div>
-    <div class="tw:mt-2 tw:text-sm tw:font-bold tw:text-end">JUMLAH: {formatRupiah(total)}</div>
+    <div class="tw:mt-2 tw:text-sm tw:font-bold tw:text-end">JUMLAH: {formatRupiahDerived(total)}</div>
 </div>
 
 <div class="modal fade" id="modalOpL3DC" tabindex="-1" aria-labelledby="modalOpL3DCLabel" aria-hidden="true">
