@@ -54,7 +54,9 @@
         if (!draft.negaraKreditur) next.negaraKreditur = 'Kolom ini wajib diisi!';
         // Tahun Peminjaman carries no asterisk on the live form and stays optional.
         if (!draft.saldo) next.saldo = 'Kolom ini wajib diisi!';
-        if (!draft.keterangan) next.keterangan = 'Kolom ini wajib diisi!';
+        // Keterangan is optional here, matching A.1-A.6: the live form rejects an
+        // empty one, but in this training app an empty Keterangan is not worth
+        // blocking a row on. Every other column keeps its check.
         errors = next;
         if (Object.keys(next).length > 0) return;
 
@@ -195,7 +197,7 @@
           </div>
           {#if errors.saldo}<span class="error">{errors.saldo}</span>{/if}
           <div style="display: flex; align-items: center;">
-            <label for="b-keterangan" style="width: 220px;">Keterangan *</label>
+            <label for="b-keterangan" style="width: 220px;">Keterangan</label>
             <select id="b-keterangan" bind:value={draft.keterangan} style="flex: 1;">
               <option value={""}>Silakan pilih</option>
               {#each referensi.l1_b_keterangan ?? [] as opsi}
