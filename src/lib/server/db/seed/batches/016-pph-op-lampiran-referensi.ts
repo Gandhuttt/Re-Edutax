@@ -10,8 +10,8 @@ export const name = '016 SPT PPh Orang Pribadi lampiran reference lists';
 // reconciled against the reference-data endpoint
 // (docs/coretax-api/reference-data-1770.json).
 //
-// An entry is either a bare description or a [kode, deskripsi] pair. 19 of the
-// 20 lists carry codes; the endpoint is the only source for the codes Coretax
+// An entry is either a bare description or a [kode, deskripsi] pair. All but
+// one of the lists carry codes; the endpoint is the only source for the codes Coretax
 // derives its disabled KODE cells from. The exception is l2_c_jenis_penghasilan
 // -- a sweep of all 416 populated reference types found none that covers it, and
 // none even close to its 29 options, so its KODE stays blank.
@@ -34,6 +34,10 @@ export const name = '016 SPT PPh Orang Pribadi lampiran reference lists';
 //
 // All 20 lists in the source file: L-1 (13), L-2 (4: L-2 A/B/C + shared Mata
 // Uang), L-3A-4 B, and L-5 B/C.
+//
+// l1_c_hubungan was added later, from the endpoint alone: Bagian C is read-only
+// on the live form, so its dropdown could never be captured from the UI. The
+// bundle names FAMILY_STATUS as its reference type; see the list's own note.
 //
 // The eight l3c_*/l3d_* lists were added later, when those lampiran were built.
 // They come straight from the reference endpoint and were never captured from
@@ -409,6 +413,31 @@ const daftar: Record<string, readonly Opsi[]> = {
 	],
 	l1_b_keterangan: [
 		['1', 'Debt in relation to Voluntary Disclosure Program Assets/Utang terkait PPS']
+	],
+	// L-1 C, HUBUNGAN DENGAN WAJIB PAJAK. The C grid's one dropdown: the bundle
+	// declares that column as Dropdown over "FAMILY_STATUS" and every other C
+	// column as String or Date, PEKERJAAN included -- its reference type is
+	// null, so Pekerjaan is free text by DJP's own definition rather than for
+	// want of a list.
+	//
+	// Order is the endpoint's. It happens to read as a household order but is
+	// unverified as a DISPLAY order: the live grid is read-only, so this
+	// dropdown has never been seen rendered.
+	//
+	// The codes are enum names, not the numeric codes the other lists carry, and
+	// nothing derives a KODE cell from them -- Bagian C has no KODE column.
+	l1_c_hubungan: [
+		['HEAD_OF_FAMILY', 'Kepala Keluarga'],
+		['HUSBAND', 'Suami'],
+		['WIFE', 'Istri'],
+		['CHILD', 'Anak'],
+		['SON_DAUGHTER', 'Menantu'],
+		['GRANDCHILD', 'Cucu'],
+		['PARENT', 'Orang Tua'],
+		['IN_LAW', 'Mertua'],
+		['OTHER_FAMILY', 'Family Lain'],
+		['MAID', 'Pembantu'],
+		['OTHER', 'Lainnya']
 	],
 	l1_e_jenis_pajak: [
 		['ARTICLE15', 'PPh Pasal 15'],

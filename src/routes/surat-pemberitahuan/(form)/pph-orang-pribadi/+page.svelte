@@ -679,6 +679,7 @@
 			<input type="hidden" name="l1HartaA5" value={JSON.stringify(l1Harta.a5)} />
 			<input type="hidden" name="l1HartaA6" value={JSON.stringify(l1Harta.a6)} />
 			<input type="hidden" name="l1Utang" value={JSON.stringify(l1Utang)} />
+			<input type="hidden" name="l1Keluarga" value={JSON.stringify(l1Keluarga)} />
 			<input type="hidden" name="l1Pekerjaan" value={JSON.stringify(l1Pekerjaan)} />
 			<input type="hidden" name="l1BuktiPotong" value={JSON.stringify(l1BuktiPotong)} />
 			<!-- L-2 rows, same unconditional-block rule as above. -->
@@ -844,7 +845,7 @@
 				{kodeReferensi}
 				bind:harta={l1Harta}
 				bind:utang={l1Utang}
-				keluarga={l1Keluarga}
+				bind:keluarga={l1Keluarga}
 				bind:pekerjaan={l1Pekerjaan}
 				bind:buktiPotong={l1BuktiPotong}
 				kreditPajakLuarNegeri={jumlah(l2LuarNegeri, 'kreditPajakDiperhitungkan')}

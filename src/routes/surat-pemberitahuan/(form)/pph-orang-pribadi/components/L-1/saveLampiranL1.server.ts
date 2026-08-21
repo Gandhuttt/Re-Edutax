@@ -3,6 +3,7 @@ import { db, type Statement } from '$lib/server/db';
 import {
 	spt_pph_orang_pribadi_lampiran_1_bukti_potong,
 	spt_pph_orang_pribadi_lampiran_1_harta,
+	spt_pph_orang_pribadi_lampiran_1_keluarga,
 	spt_pph_orang_pribadi_lampiran_1_pekerjaan,
 	spt_pph_orang_pribadi_lampiran_1_utang
 } from '$lib/server/db/schema';
@@ -22,6 +23,7 @@ export const L1Schema = v.object({
 	l1HartaA5: looseRows,
 	l1HartaA6: looseRows,
 	l1Utang: looseRows,
+	l1Keluarga: looseRows,
 	l1Pekerjaan: looseRows,
 	l1BuktiPotong: looseRows
 });
@@ -48,6 +50,9 @@ export function saveLampiranL1(sptId: string, input: L1Input) {
 		db
 			.delete(spt_pph_orang_pribadi_lampiran_1_utang)
 			.where(eq(spt_pph_orang_pribadi_lampiran_1_utang.sptPphOrangPribadiId, sptId)),
+		db
+			.delete(spt_pph_orang_pribadi_lampiran_1_keluarga)
+			.where(eq(spt_pph_orang_pribadi_lampiran_1_keluarga.sptPphOrangPribadiId, sptId)),
 		db
 			.delete(spt_pph_orang_pribadi_lampiran_1_pekerjaan)
 			.where(eq(spt_pph_orang_pribadi_lampiran_1_pekerjaan.sptPphOrangPribadiId, sptId)),
@@ -116,6 +121,22 @@ export function saveLampiranL1(sptId: string, input: L1Input) {
 				tahunPeminjaman: angkaOpsional(row.tahunPeminjaman),
 				saldo: angka(row.saldo),
 				keterangan: teks(row.keterangan)
+			})
+		);
+	}
+
+	// Bagian C feeds no Induk figure: it is a disclosure of dependants, and the
+	// PTKP that depends on them is answered on the Induk itself, not counted here.
+	for (const [index, row] of (input.l1Keluarga as Row[]).entries()) {
+		statements.push(
+			db.insert(spt_pph_orang_pribadi_lampiran_1_keluarga).values({
+				sptPphOrangPribadiId: sptId,
+				nomorUrut: index + 1,
+				nama: teks(row.nama),
+				nik: teks(row.nik),
+				tanggalLahir: teks(row.tanggalLahir),
+				hubungan: teks(row.hubungan),
+				pekerjaan: teks(row.pekerjaan)
 			})
 		);
 	}

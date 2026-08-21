@@ -26,10 +26,14 @@ export const spt_pph_orang_pribadi_lampiran_1_utang = sqliteTable(
 
 // L-1 Bagian C, DAFTAR ANGGOTA KELUARGA YANG MENJADI TANGGUNGAN.
 //
-// Read-only on the live form in every captured state: it is populated from DJP
-// records independently of the Posting SPT action (it held three dependants even
-// though Posting reported "belum pernah dilakukan"). For a training app this is
-// seeded rather than fetched, so rows exist but the grid offers no editor.
+// Read-only on the live form in every captured state: there it is populated from
+// DJP records independently of the Posting SPT action (it held three dependants
+// even though Posting reported "belum pernah dilakukan"), and the bundle gives
+// its grid no TINDAKAN column. A training app has no DJP records to pull from,
+// so these rows are entered through the form's own editor instead.
+//
+// hubungan holds a FAMILY_STATUS description (seeded as l1_c_hubungan); the
+// bundle types pekerjaan as a plain string with no reference list at all.
 export const spt_pph_orang_pribadi_lampiran_1_keluarga = sqliteTable(
 	'spt_pph_orang_pribadi_lampiran_1_keluarga',
 	{

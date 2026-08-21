@@ -39,7 +39,7 @@
         kodeReferensi,
         harta = $bindable(),
         utang = $bindable(),
-        keluarga,
+        keluarga = $bindable(),
         pekerjaan = $bindable(),
         buktiPotong = $bindable(),
         kreditPajakLuarNegeri,
@@ -70,7 +70,7 @@
         </Accordion>
         <Accordion item={"C. DAFTAR ANGGOTA KELUARGA YANG MENJADI TANGGUNGAN"}>
             <div class="tw:p-5">
-                <C rows={keluarga} />
+                <C bind:rows={keluarga} {referensi} {readonly} />
             </div>
         </Accordion>
         <Accordion item={"D. PENGHASILAN NETO DALAM NEGERI DARI PEKERJAAN"}>
