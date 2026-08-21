@@ -217,6 +217,16 @@
 </div>
 
 <style>
+    /* l1_b_deskripsi 103 is a ~150-character option, and a select's min-content
+       width is its widest option. Left at min-width:auto the flex:1 control
+       refuses to shrink and drags the whole row past modal-lg, so Deskripsi
+       renders wider than every other field. The popup still shows the full
+       text. */
+    .modal-body select,
+    .modal-body input {
+    	min-width: 0;
+    }
+
     th {
     	font-size: .7rem;
     	font-weight: bold;
