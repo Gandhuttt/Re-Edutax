@@ -1,14 +1,11 @@
 import { form, getRequestEvent } from '$app/server';
 import { decimalString } from '$lib/helpers/valibot-schema';
-import { SptPpnBlobSchema } from '$lib/schemas/surat-pemberitahuan/spt-ppn';
-import type { SptPpnBlob } from '$lib/schemas/surat-pemberitahuan/spt-ppn';
 import { db } from '$lib/server/db';
 import { spt_ppn } from '$lib/server/db/schema';
 import { error, redirect } from '@sveltejs/kit';
 import { eq } from 'drizzle-orm';
 import * as v from 'valibot';
 import { getOwnedSptPpn } from './server/getOwnedSptPpn.server';
-import { summarizeSptPpnBlob } from './server/summarizeSptPpnBlob.server';
 
 const lebihBayarTindakanSchema = v.nullish(
 	v.picklist(['dikompensasikan', 'dikembalikan_pendahuluan', 'dikembalikan_pemeriksaan'])
@@ -17,8 +14,6 @@ const lebihBayarTindakanSchema = v.nullish(
 const SaveSptPpnSchema = v.object({
 	id: v.string(),
 	action: v.optional(v.picklist(['Simpan Konsep', 'Simpan Lapor'])),
-	sptBlob: v.optional(v.string(), ''),
-	sptPosted: v.optional(v.boolean()),
 	IV_i: v.optional(decimalString('PPN terutang DPP'), '0'),
 	IV_ii: v.optional(decimalString('PPN terutang'), '0'),
 	'check-ganti': v.optional(v.boolean()),
@@ -37,8 +32,6 @@ export const saveSptPpn = form('unchecked', async (rawInput) => {
 	const input = v.parse(SaveSptPpnSchema, {
 		id: stringValue(rawInput.id),
 		action: stringValue(rawInput.action) || 'Simpan Konsep',
-		sptBlob: stringValue(rawInput.sptBlob),
-		sptPosted: booleanValue(rawInput.sptPosted),
 		IV_i: stringValue(rawInput.IV_i) || '0',
 		IV_ii: stringValue(rawInput.IV_ii) || '0',
 		'check-ganti': booleanValue(rawInput['check-ganti']),
@@ -65,42 +58,13 @@ export const saveSptPpn = form('unchecked', async (rawInput) => {
 		error(400, 'SPT yang sudah dilaporkan tidak dapat disimpan sebagai konsep');
 	}
 
-	const blob = parseSptBlobInput(input.sptBlob) ?? v.parse(SptPpnBlobSchema, sptPpn.blob);
-	const nextBlob: SptPpnBlob = {
-		...blob,
-		III: [
-			blob.III[0],
-			blob.III[1],
-			blob.III[2],
-			blob.III[3],
-			blob.III[4],
-			blob.III[5],
-			blob.III[6],
-			{
-				gantiSptSebelumnya: input['check-ganti'] ?? false,
-				tindakan: input['radio-ganti'] ?? null,
-				lampiranNamaFile: blob.III[7].lampiranNamaFile ?? null,
-				rekening: {
-					pilihRekeningBank: blob.III[7].rekening?.pilihRekeningBank ?? null,
-					nomor: input.III_H_rekening_nomor || null,
-					namaBank: input.III_H_rekening_namaBank || null,
-					namaPemilik: input.III_H_rekening_namaPemilik || null
-				}
-			}
-		],
-		IV: [Math.round(Number(input.IV_i)), Math.round(Number(input.IV_ii))],
-		IX: [input.IX_0 ?? false, input.IX_1 ?? false],
-		X: {
-			...blob.X,
-			setuju: input['check-ttd'] ?? false,
-			ditandatanganiOleh: input['radio-ttd'] ?? null,
-			jabatan: input.X_jabatan || blob.X.jabatan
-		}
-	};
-	const summary = summarizeSptPpnBlob(nextBlob);
+	// III.A-G (including III.E, the kurang/lebih bayar figure) are read-only
+	// values already recomputed and persisted by postSptPpn, so the status
+	// decision reads straight off the stored row rather than a value
+	// round-tripped through the form.
 	const status =
 		input.action === 'Simpan Lapor'
-			? summary.ppnKurangLebihBayar > 0
+			? sptPpn.iiiE > 0
 				? 'menunggu_pembayaran'
 				: 'dilaporkan'
 			: 'konsep';
@@ -109,9 +73,18 @@ export const saveSptPpn = form('unchecked', async (rawInput) => {
 		.update(spt_ppn)
 		.set({
 			status,
-			blob: nextBlob,
-			...summary,
-			tanggalPosting: input.sptPosted ? new Date() : sptPpn.tanggalPosting,
+			iiiHGantiSptSebelumnya: input['check-ganti'] ?? false,
+			iiiHTindakan: input['radio-ganti'] ?? null,
+			iiiHRekeningNomor: input.III_H_rekening_nomor || null,
+			iiiHRekeningNamaBank: input.III_H_rekening_namaBank || null,
+			iiiHRekeningNamaPemilik: input.III_H_rekening_namaPemilik || null,
+			ivDpp: Math.round(Number(input.IV_i)),
+			ivPpn: Math.round(Number(input.IV_ii)),
+			ixA: input.IX_0 ?? false,
+			ixB: input.IX_1 ?? false,
+			xSetuju: input['check-ttd'] ?? false,
+			xDitandatanganiOleh: input['radio-ttd'] ?? null,
+			xJabatan: input.X_jabatan || sptPpn.xJabatan,
 			tanggalDilaporkan: status === 'dilaporkan' ? new Date() : sptPpn.tanggalDilaporkan
 		})
 		.where(eq(spt_ppn.id, input.id));
@@ -126,16 +99,6 @@ export const saveSptPpn = form('unchecked', async (rawInput) => {
 
 	redirect(303, '/surat-pemberitahuan/konsep');
 });
-
-function parseSptBlobInput(value: string) {
-	if (!value) return undefined;
-
-	try {
-		return v.parse(SptPpnBlobSchema, JSON.parse(value));
-	} catch {
-		error(400, 'Data SPT hasil posting tidak valid');
-	}
-}
 
 function firstValue(value: unknown) {
 	return Array.isArray(value) ? value[0] : value;

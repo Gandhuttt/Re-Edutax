@@ -1,8 +1,7 @@
 import { db } from '$lib/server/db';
-import { spt_ppn } from '$lib/server/db/schema';
+import { spt_ppn, spt_ppn_penyerahan, spt_ppn_perolehan } from '$lib/server/db/schema';
 import { and, eq } from 'drizzle-orm';
-import { createEmptySptPpnBlob } from '../createEmptySptPpnBlob';
-import { summarizeSptPpnBlob } from './summarizeSptPpnBlob.server';
+import { createEmptySptPpnFields } from '../createEmptySptPpnFields';
 
 export async function getOrCreateSptPpnForPeriod(
 	activeNpwp: string,
@@ -24,11 +23,7 @@ export async function getOrCreateSptPpnForPeriod(
 		.limit(1);
 
 	if (!sptPpn) {
-		const blob = createEmptySptPpnBlob({
-			periodeBulan,
-			periodeTahun,
-			nama
-		});
+		const { penyerahan, perolehan, ...induk } = createEmptySptPpnFields({ nama });
 
 		[sptPpn] = await db
 			.insert(spt_ppn)
@@ -37,10 +32,12 @@ export async function getOrCreateSptPpnForPeriod(
 				masaPajak: periodeBulan,
 				tahun: periodeTahun,
 				pembetulanKe: 0,
-				blob,
-				...summarizeSptPpnBlob(blob)
+				...induk
 			})
 			.returning();
+
+		await db.insert(spt_ppn_penyerahan).values({ sptPpnId: sptPpn.id, ...penyerahan });
+		await db.insert(spt_ppn_perolehan).values({ sptPpnId: sptPpn.id, ...perolehan });
 	}
 
 	return sptPpn;

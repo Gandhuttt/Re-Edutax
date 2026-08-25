@@ -1,7 +1,8 @@
 import { getRequestEvent, query } from '$app/server';
-import { SptPpnBlobSchema } from '$lib/schemas/surat-pemberitahuan/spt-ppn';
+import { db } from '$lib/server/db';
+import { spt_ppn_penyerahan, spt_ppn_perolehan } from '$lib/server/db/schema';
 import { error } from '@sveltejs/kit';
-import * as v from 'valibot';
+import { eq } from 'drizzle-orm';
 import { getOrCreateCurrentSptPpn } from './server/getOrCreateCurrentSptPpn.server';
 import { getOwnedSptPpn } from './server/getOwnedSptPpn.server';
 import { getTaxpayerForSptPpn } from './server/getTaxpayerForSptPpn.server';
@@ -20,11 +21,26 @@ export const getSptPpn = query(async () => {
 		? await getOwnedSptPpn(requestedId, activeNpwp)
 		: await getOrCreateCurrentSptPpn(activeNpwp, taxpayer.nama);
 
+	// Bagian I and II live on their own child tables (see spt_ppn_penyerahan/
+	// spt_ppn_perolehan), so they're joined back in here and flattened onto a
+	// single object — the rekap I/II components and +page.svelte still expect
+	// one flat sptItem shape, unaware the columns moved off spt_ppn itself.
+	const [penyerahan] = await db
+		.select()
+		.from(spt_ppn_penyerahan)
+		.where(eq(spt_ppn_penyerahan.sptPpnId, sptPpn.id))
+		.limit(1);
+	const [perolehan] = await db
+		.select()
+		.from(spt_ppn_perolehan)
+		.where(eq(spt_ppn_perolehan.sptPpnId, sptPpn.id))
+		.limit(1);
+
 	return {
 		id: sptPpn.id,
 		status: sptPpn.status,
 		readonly: sptPpn.status !== 'konsep',
 		taxpayer,
-		blob: v.parse(SptPpnBlobSchema, sptPpn.blob)
+		spt: { ...penyerahan, ...perolehan, ...sptPpn }
 	};
 });

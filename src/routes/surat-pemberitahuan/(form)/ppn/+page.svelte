@@ -18,13 +18,15 @@
 	import { postSptPpn } from './postSptPpn.remote';
 	import { saveSptPpn } from './saveSptPpn.remote';
 
-	const { id, readonly, taxpayer, blob } = await getSptPpn();
+	const { id, readonly, taxpayer, spt } = await getSptPpn();
 	const postForm = postSptPpn.for(id);
 	const saveForm = saveSptPpn.for(id);
-	const displayedBlob = $derived(postForm.result?.blob ?? blob);
+	const displayedSpt = $derived(
+		postForm.result ? { ...spt, ...postForm.result.fields } : spt
+	);
 
-	let switchMasaPajak = $state(blob.periodeBulan);
-	let switchTahun = $state(blob.periodeTahun);
+	let switchMasaPajak = $state(spt.masaPajak);
+	let switchTahun = $state(spt.tahun);
 
 	async function handlePeriodeChange(bulan: number, tahun: number) {
 		switchMasaPajak = bulan;
@@ -42,8 +44,6 @@
 
 <div class="accordion" id="accordionSPT">
 	<form {...saveForm} id="spt-save-form">
-		<input type="hidden" name="sptBlob" value={JSON.stringify(displayedBlob)} />
-		<input type="hidden" name="sptPosted" value={postForm.result ? 'true' : ''} />
 		<Accordion item="Header" target="#accordionSPT">
 			<Header
 				{readonly}
@@ -54,30 +54,30 @@
 				noTelepon={taxpayer.noTelepon}
 				teleponSeluler={taxpayer.teleponSeluler}
 				klasifikasiLapanganUsaha={taxpayer.klasifikasiLapanganUsaha}
-				periode={{ bulan: displayedBlob.periodeBulan, tahun: displayedBlob.periodeTahun }}
+				periode={{ bulan: spt.masaPajak, tahun: spt.tahun }}
 				onPeriodeChange={handlePeriodeChange}
 			/>
 		</Accordion>
-		<Accordion item="I. PENYERAHAN BARANG DAN JASA" target="#accordionSPT"><I sptItem={displayedBlob.I} /></Accordion>
-		<Accordion item="II. PEROLEHAN BARANG DAN JASA" target="#accordionSPT"><II sptItem={displayedBlob.II} /></Accordion>
+		<Accordion item="I. PENYERAHAN BARANG DAN JASA" target="#accordionSPT"><I sptItem={displayedSpt} /></Accordion>
+		<Accordion item="II. PEROLEHAN BARANG DAN JASA" target="#accordionSPT"><II sptItem={displayedSpt} /></Accordion>
 		<Accordion item="III. PERHITUNGAN PPN KURANG BAYAR / LEBIH BAYAR" target="#accordionSPT">
-			<III sptItem={displayedBlob.III} />
+			<III sptItem={displayedSpt} />
 		</Accordion>
 		<Accordion item="IV. PPN TERUTANG ATAS KEGIATAN MEMBANGUN SENDIRI" target="#accordionSPT">
-			<IV sptItem={displayedBlob.IV} />
+			<IV sptItem={displayedSpt} />
 		</Accordion>
 		<Accordion item="V. PEMBAYARAN KEMBALI PAJAK MASUKAN YANG TIDAK DAPAT DIKREDITKAN" target="#accordionSPT">
-			<V sptItem={displayedBlob.V} />
+			<V sptItem={displayedSpt} />
 		</Accordion>
-		<Accordion item="VI. PAJAK PENJUALAN ATAS BARANG MEWAH" target="#accordionSPT"><VI sptItem={displayedBlob.VI} /></Accordion>
+		<Accordion item="VI. PAJAK PENJUALAN ATAS BARANG MEWAH" target="#accordionSPT"><VI sptItem={displayedSpt} /></Accordion>
 		<Accordion item="VII. PEMUNGUTAN PPN ATAU PPN DAN PPNBM OLEH PEMUNGUT PPN" target="#accordionSPT">
-			<VII sptItem={displayedBlob.VII} />
+			<VII sptItem={displayedSpt} />
 		</Accordion>
 		<Accordion item="VIII. PEMUNGUTAN PPN ATAU PPN DAN PPNBM OLEH PIHAK LAIN" target="#accordionSPT">
-			<VIII sptItem={displayedBlob.VIII} />
+			<VIII sptItem={displayedSpt} />
 		</Accordion>
-		<Accordion item="IX. KELENGKAPAN" target="#accordionSPT"><IX sptItem={displayedBlob.IX} /></Accordion>
-		<Accordion item="X. PERNYATAAN" target="#accordionSPT"><X sptItem={displayedBlob.X} /></Accordion>
+		<Accordion item="IX. KELENGKAPAN" target="#accordionSPT"><IX sptItem={displayedSpt} /></Accordion>
+		<Accordion item="X. PERNYATAAN" target="#accordionSPT"><X sptItem={displayedSpt} /></Accordion>
 
 		<Footer {readonly} saveFormId="spt-save-form" reportFormId="spt-save-form" />
 	</form>

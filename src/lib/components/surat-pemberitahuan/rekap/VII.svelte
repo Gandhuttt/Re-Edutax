@@ -1,8 +1,24 @@
 <script lang="ts">
     import Input from "$lib/components/Input.svelte";
-	import type { SptPpnBlob } from "$lib/schemas/surat-pemberitahuan/spt-ppn";
 
-    let { sptItem }: { sptItem: SptPpnBlob["VII"] } = $props();
+    let {
+		sptItem
+	}: {
+		sptItem: {
+			viiADpp: number;
+			viiADppNilaiLain: number;
+			viiAPpn: number;
+			viiAPpnbm: number;
+			viiBDpp: number;
+			viiBDppNilaiLain: number;
+			viiBPpn: number;
+			viiBPpnbm: number;
+			viiCDpp: number;
+			viiCDppNilaiLain: number;
+			viiCPpn: number;
+			viiCPpnbm: number;
+		};
+	} = $props();
 </script>
 
 <table class="table table-hover align-middle">
@@ -20,26 +36,26 @@
         <tr>
             <td class="tw:w-1">A.</td>
             <td>Jumlah PPN dan PPnBM yang dipungut</td>
-            <td><Input type={'text'} value={sptItem[0][0]} disabled/></td>
-            <td><Input type={'text'} value={sptItem[0][1]} disabled/></td>
-            <td><Input type={'text'} value={sptItem[0][2]} disabled/></td>
-            <td><Input type={'text'} value={sptItem[0][3]} disabled/></td>
+            <td><Input type={'text'} value={sptItem.viiADpp} disabled/></td>
+            <td><Input type={'text'} value={sptItem.viiADppNilaiLain} disabled/></td>
+            <td><Input type={'text'} value={sptItem.viiAPpn} disabled/></td>
+            <td><Input type={'text'} value={sptItem.viiAPpnbm} disabled/></td>
         </tr>
         <tr>
             <td class="tw:w-1">B.</td>
             <td>PPN dan PPnBM kurang atau (lebih) bayar pada SPT yang dibetulkan sebelumnya</td>
-            <td><Input type={'text'} value={sptItem[1][0]} disabled/></td>
-            <td><Input type={'text'} value={sptItem[1][1]} disabled/></td>
-            <td><Input type={'text'} value={sptItem[1][2]} disabled/></td>
-            <td><Input type={'text'} value={sptItem[1][3]} disabled/></td>
+            <td><Input type={'text'} value={sptItem.viiBDpp} disabled/></td>
+            <td><Input type={'text'} value={sptItem.viiBDppNilaiLain} disabled/></td>
+            <td><Input type={'text'} value={sptItem.viiBPpn} disabled/></td>
+            <td><Input type={'text'} value={sptItem.viiBPpnbm} disabled/></td>
         </tr>
         <tr>
             <td class="tw:w-1">C.</td>
             <td>PPN dan PPnBM kurang atau (lebih) byar karena pembetulan SPT (VII.A - VII.B)</td>
-            <td><Input type={'text'} value={sptItem[2][0]} disabled/></td>
-            <td><Input type={'text'} value={sptItem[2][1]} disabled/></td>
-            <td><Input type={'text'} value={sptItem[2][2]} disabled/></td>
-            <td><Input type={'text'} value={sptItem[2][3]} disabled/></td>
+            <td><Input type={'text'} value={sptItem.viiCDpp} disabled/></td>
+            <td><Input type={'text'} value={sptItem.viiCDppNilaiLain} disabled/></td>
+            <td><Input type={'text'} value={sptItem.viiCPpn} disabled/></td>
+            <td><Input type={'text'} value={sptItem.viiCPpnbm} disabled/></td>
         </tr>
         <tr>
             <td></td>

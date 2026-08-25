@@ -16,6 +16,8 @@ export * from './transactional/faktur/faktur_pajak';
 export * from './transactional/faktur/informasi_tambahan_faktur_pajak';
 export * from './transactional/transaksi_faktur/transaksi_faktur_pajak';
 export * from './transactional/surat_pemberitahuan/spt_ppn';
+export * from './transactional/surat_pemberitahuan/spt_ppn_penyerahan';
+export * from './transactional/surat_pemberitahuan/spt_ppn_perolehan';
 export * from './references/spt_pph_badan/sektor_usaha';
 export * from './references/spt_pph_badan/opini_auditor';
 export * from './references/spt_pph_badan/negara';

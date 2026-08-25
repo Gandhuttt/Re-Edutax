@@ -1,11 +1,21 @@
 <script lang="ts">
     import Input from "$lib/components/Input.svelte";
 	import { untrack } from 'svelte';
-	import type { SptPpnBlob } from "$lib/schemas/surat-pemberitahuan/spt-ppn";
 
-    let { sptItem }: { sptItem:SptPpnBlob["X"] } = $props();
+    let {
+		sptItem
+	}: {
+		sptItem: {
+			xSetuju: boolean | null;
+			xDitandatanganiOleh: 'PKP' | 'KuasaWajibPajak' | null;
+			xKotaPenandatanganSpt: string | null;
+			xNama: string | null;
+			xJabatan: string | null;
+			xBatasWaktuPenyampaian: string | null;
+		};
+	} = $props();
 
-    let checked = $state(untrack(() => sptItem.setuju));
+    let checked = $state(untrack(() => sptItem.xSetuju ?? false));
     let isDisabled = $derived(!checked);
 </script>
 
@@ -22,11 +32,11 @@
                     <td>
                         <div class="tw:flex tw:flex-row">
                             <div class="form-check tw:mr-5">
-                                <Input type={"radio"} id={"X-1"} name={"radio-ttd"} value="PKP" checked={sptItem.ditandatanganiOleh === 'PKP'} disabled={isDisabled}/>
+                                <Input type={"radio"} id={"X-1"} name={"radio-ttd"} value="PKP" checked={sptItem.xDitandatanganiOleh === 'PKP'} disabled={isDisabled}/>
                                 <label class="form-check-label" for="X-1">PKP</label>
                             </div>
                             <div class="form-check">
-                                <Input type={"radio"} id={"X-2"} name={"radio-ttd"} value="KuasaWajibPajak" checked={sptItem.ditandatanganiOleh === 'KuasaWajibPajak'} disabled={isDisabled}/>
+                                <Input type={"radio"} id={"X-2"} name={"radio-ttd"} value="KuasaWajibPajak" checked={sptItem.xDitandatanganiOleh === 'KuasaWajibPajak'} disabled={isDisabled}/>
                                 <label class="form-check-label" for="X-2">Kuasa Wajib Pajak</label>
                             </div>
                         </div>
@@ -34,19 +44,19 @@
                 </tr>
                 <tr>
                     <td><label for="X-3">Kota Penandatanganan SPT</label></td>
-                    <td><Input id={"X-3"} type={'text'} value={sptItem.kotaPenandatanganSPT} disabled/></td>
+                    <td><Input id={"X-3"} type={'text'} value={sptItem.xKotaPenandatanganSpt} disabled/></td>
                 </tr>
                 <tr>
                     <td><label for="X-4">Nama</label></td>
-                    <td><Input id={"X-4"} type={'text'} value={sptItem.nama} disabled/></td>
+                    <td><Input id={"X-4"} type={'text'} value={sptItem.xNama} disabled/></td>
                 </tr>
                 <tr>
                     <td><label for="X-5">Jabatan</label></td>
-                    <td><Input id={"X-5"} name="X_jabatan" type={'text'} value={sptItem.jabatan} disabled={isDisabled}/></td>
+                    <td><Input id={"X-5"} name="X_jabatan" type={'text'} value={sptItem.xJabatan} disabled={isDisabled}/></td>
                 </tr>
                 <tr>
                     <td><label for="X-6"></label>Batas Waktu Penyampaian SPT</td>
-                    <td><Input id={"X-6"} type={"date"} value={sptItem.batasWaktuPenyampaian} disabled/></td>
+                    <td><Input id={"X-6"} type={"date"} value={sptItem.xBatasWaktuPenyampaian} disabled/></td>
                 </tr>
             </tbody>
         </table>

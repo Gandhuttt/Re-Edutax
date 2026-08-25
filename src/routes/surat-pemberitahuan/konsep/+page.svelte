@@ -73,8 +73,8 @@
 								<td>{formatMonth(row.masaPajak)}</td>
 								<td>{row.tahun}</td>
 								<td>{row.pembetulanKe}</td>
-								<td>{rupiah.format(row.totalPpnKeluaran)}</td>
-								<td>{rupiah.format(row.totalPpnMasukan)}</td>
+								<td>{rupiah.format(row.totalPpnKeluaran ?? 0)}</td>
+								<td>{rupiah.format(row.totalPpnMasukan ?? 0)}</td>
 								<td>{rupiah.format(row.ppnKurangLebihBayar)}</td>
 							</tr>
 						{/each}

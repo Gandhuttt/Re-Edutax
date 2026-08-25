@@ -1,4 +1,3 @@
-import type { SptPpnBlob } from '$lib/schemas/surat-pemberitahuan/spt-ppn';
 import { db } from '$lib/server/db';
 import {
 	faktur_pajak,
@@ -7,17 +6,19 @@ import {
 } from '$lib/server/db/schema';
 import { and, eq, or } from 'drizzle-orm';
 
-export async function createPostedSptPpnBlob({
+// Recomputes every induk field that is derived from posted faktur_pajak data
+// (sections I, II and the top rows of III). Fields the user can edit by hand
+// (III.H, IV, V.., IX, X) are left untouched by the caller, since this only
+// returns the columns it actually recomputes.
+export async function computePostedSptPpnFields({
 	npwp,
 	periodeBulan,
-	periodeTahun,
-	existingBlob
+	periodeTahun
 }: {
 	npwp: string;
 	periodeBulan: number;
 	periodeTahun: number;
-	existingBlob: SptPpnBlob;
-}): Promise<SptPpnBlob> {
+}) {
 	const allTransactions = await db
 		.select({
 			kodeTransaksi: kode_transaksi_faktur_pajak.kode,
@@ -96,38 +97,80 @@ export async function createPostedSptPpnBlob({
 	const IIIE = IIIA - IIIC;
 
 	return {
-		...existingBlob,
-		periodeBulan,
-		periodeTahun,
-		I: {
-			A: [
-				0,
-				[IA2.dpp, IA2.dppNilaiLain, IA2.ppn, IA2.ppnbm],
-				[IA3.dpp, IA3.dppNilaiLain, IA3.ppn, IA3.ppnbm],
-				[IA4.dpp, IA4.ppn, IA4.ppnbm],
-				[IA5.dpp, IA5.dppNilaiLain, IA5.ppn, IA5.ppnbm],
-				[IA6.dpp, IA6.dppNilaiLain, IA6.ppn, IA6.ppnbm],
-				[IA7.dpp, IA7.dppNilaiLain, IA7.ppn, IA7.ppnbm],
-				[IA8.dpp, IA8.dppNilaiLain, IA8.ppn, IA8.ppnbm],
-				[0, 0, 0, 0],
-				[IAT.dpp, IAT.ppn, IAT.ppnbm]
-			],
-			B: 0,
-			C: IAT.dpp
+		penyerahan: {
+			iA1: 0,
+			iA2HargaJual: IA2.dpp,
+			iA2DppNilaiLain: IA2.dppNilaiLain,
+			iA2Ppn: IA2.ppn,
+			iA2Ppnbm: IA2.ppnbm,
+			iA3HargaJual: IA3.dpp,
+			iA3DppNilaiLain: IA3.dppNilaiLain,
+			iA3Ppn: IA3.ppn,
+			iA3Ppnbm: IA3.ppnbm,
+			iA4HargaJual: IA4.dpp,
+			iA4Ppn: IA4.ppn,
+			iA4Ppnbm: IA4.ppnbm,
+			iA5HargaJual: IA5.dpp,
+			iA5DppNilaiLain: IA5.dppNilaiLain,
+			iA5Ppn: IA5.ppn,
+			iA5Ppnbm: IA5.ppnbm,
+			iA6HargaJual: IA6.dpp,
+			iA6DppNilaiLain: IA6.dppNilaiLain,
+			iA6Ppn: IA6.ppn,
+			iA6Ppnbm: IA6.ppnbm,
+			iA7HargaJual: IA7.dpp,
+			iA7DppNilaiLain: IA7.dppNilaiLain,
+			iA7Ppn: IA7.ppn,
+			iA7Ppnbm: IA7.ppnbm,
+			iA8HargaJual: IA8.dpp,
+			iA8DppNilaiLain: IA8.dppNilaiLain,
+			iA8Ppn: IA8.ppn,
+			iA8Ppnbm: IA8.ppnbm,
+			iA9HargaJual: 0,
+			iA9DppNilaiLain: 0,
+			iA9Ppn: 0,
+			iA9Ppnbm: 0,
+			iAJumlahHargaJual: IAT.dpp,
+			iAJumlahPpn: IAT.ppn,
+			iAJumlahPpnbm: IAT.ppnbm,
+			iB: 0,
+			iC: IAT.dpp
 		},
-		II: [
-			[0, 0, 0],
-			[IIB.dpp, IIB.dppNilaiLain, IIB.ppn, IIB.ppnbm],
-			[IIC.dpp, IIC.ppn, IIC.ppnbm],
-			[IID.dpp, IID.dppNilaiLain, IID.ppn, IID.ppnbm],
-			0,
-			0,
-			[IIG.dpp, IIG.ppn],
-			[0, 0, 0, 0],
-			0,
-			IIG.dpp
-		],
-		III: [IIIA, 0, IIIC, 0, IIIE, 0, 0, existingBlob.III[7]]
+
+		perolehan: {
+			iiADpp: 0,
+			iiAPpn: 0,
+			iiAPpnbm: 0,
+			iiBDpp: IIB.dpp,
+			iiBDppNilaiLain: IIB.dppNilaiLain,
+			iiBPpn: IIB.ppn,
+			iiBPpnbm: IIB.ppnbm,
+			iiCDpp: IIC.dpp,
+			iiCPpn: IIC.ppn,
+			iiCPpnbm: IIC.ppnbm,
+			iiDDpp: IID.dpp,
+			iiDDppNilaiLain: IID.dppNilaiLain,
+			iiDPpn: IID.ppn,
+			iiDPpnbm: IID.ppnbm,
+			iiE: 0,
+			iiF: 0,
+			iiGDpp: IIG.dpp,
+			iiGPpn: IIG.ppn,
+			iiHDpp: 0,
+			iiHDppNilaiLain: 0,
+			iiHPpn: 0,
+			iiHPpnbm: 0,
+			iiI: 0,
+			iiJ: IIG.dpp
+		},
+
+		iiiA: IIIA,
+		iiiB: 0,
+		iiiC: IIIC,
+		iiiD: 0,
+		iiiE: IIIE,
+		iiiF: 0,
+		iiiG: 0
 	};
 }
 

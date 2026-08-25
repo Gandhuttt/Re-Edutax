@@ -74,7 +74,7 @@ export const getPesertaDetail = query(GetPesertaDetailSchema, async (npwp) => {
 				tahun: spt_ppn.tahun,
 				pembetulanKe: spt_ppn.pembetulanKe,
 				status: spt_ppn.status,
-				ppnKurangLebihBayar: spt_ppn.ppnKurangLebihBayar,
+				ppnKurangLebihBayar: spt_ppn.iiiE,
 				tanggalDilaporkan: spt_ppn.tanggalDilaporkan
 			})
 			.from(spt_ppn)

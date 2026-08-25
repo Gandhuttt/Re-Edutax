@@ -1,9 +1,8 @@
 <script lang="ts">
 	import Input from "$lib/components/Input.svelte";
     import Table from "$lib/components/Table.svelte";
-	import type { SptPpnBlob } from "$lib/schemas/surat-pemberitahuan/spt-ppn";
 
-    let { sptItem }: { sptItem: SptPpnBlob["V"] } = $props();
+    let { sptItem }: { sptItem: { v: number } } = $props();
 </script>
 
 <Table class="tw:table-fixed tw:min-w-full tw:border-collapse" >
@@ -16,7 +15,7 @@
     {#snippet body()}
         <tr>
             <td>PPN yang wajib dibayar kembali</td>
-            <td><Input type={'text'} value={sptItem} disabled/></td>
+            <td><Input type={'text'} value={sptItem.v} disabled/></td>
         </tr>
     {/snippet}
 </Table>

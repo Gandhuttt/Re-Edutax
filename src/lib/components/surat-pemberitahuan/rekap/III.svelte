@@ -1,11 +1,26 @@
 <script lang="ts">
 	import Table from '$lib/components/Table.svelte';
 	import Input from '$lib/components/Input.svelte';
-	import type { SptPpnBlob } from '$lib/schemas/surat-pemberitahuan/spt-ppn';
 
-	let { sptItem }: { sptItem: SptPpnBlob['III'] } = $props();
-	// let checkbox = $state(false);
-	// let isDisabled = $derived(!checkbox);
+	let {
+		sptItem
+	}: {
+		sptItem: {
+			iiiA: number;
+			iiiB: number;
+			iiiC: number;
+			iiiD: number;
+			iiiE: number;
+			iiiF: number;
+			iiiG: number;
+			iiiHGantiSptSebelumnya: boolean | null;
+			iiiHTindakan: 'dikompensasikan' | 'dikembalikan_pendahuluan' | 'dikembalikan_pemeriksaan' | null;
+			iiiHRekeningPilihBank: string | null;
+			iiiHRekeningNomor: string | null;
+			iiiHRekeningNamaBank: string | null;
+			iiiHRekeningNamaPemilik: string | null;
+		};
+	} = $props();
 </script>
 
 <Table class="tw:table-fixed tw:min-w-full tw:border-collapse" >
@@ -22,58 +37,37 @@
 			<td class="tw:w-1">A.</td>
 			<td colspan="2">Pajak Keluaran yang harus dipungut sendiri (I.A.2 + I.A.3 + I.A.4 + I.A.5)</td
 			>
-			<td>
-				<Input type={'hidden'} value={sptItem[0]} name="III_A" />
-				<Input type={'text'} value={sptItem[0]} disabled /></td
-			>
+			<td><Input type={'text'} value={sptItem.iiiA} disabled /></td>
 		</tr>
 		<tr>
 			<td class="tw:w-1">B.</td>
 			<td colspan="2">PPN disetor di muka dalam masa pajak yang sama</td>
-			<td>
-				<Input type={'hidden'} value={sptItem[1]} name="III_B" />
-				<Input type={'text'} value={sptItem[1]} disabled /></td
-			>
+			<td><Input type={'text'} value={sptItem.iiiB} disabled /></td>
 		</tr>
 		<tr>
 			<td class="tw:w-1">C.</td>
 			<td colspan="2">Pajak Masukan yang dapat diperhitungkan (II.G)</td>
-			<td>
-				<Input type={'hidden'} value={sptItem[2]} name="III_C" />
-				<Input type={'text'} value={sptItem[2]} disabled /></td
-			>
+			<td><Input type={'text'} value={sptItem.iiiC} disabled /></td>
 		</tr>
 		<tr>
 			<td class="tw:w-1">D.</td>
 			<td colspan="2">Kelebihan pemungutan PPN oleh Pemungut PPN</td>
-			<td>
-				<Input type={'hidden'} value={sptItem[3]} name="III_D" />
-				<Input type={'text'} value={sptItem[3]} disabled /></td
-			>
+			<td><Input type={'text'} value={sptItem.iiiD} disabled /></td>
 		</tr>
 		<tr>
 			<td class="tw:w-1">E.</td>
 			<td colspan="2">PPN kurang atau (lebih) bayar (III.A - III.B - III.C - III.D)</td>
-			<td>
-				<Input type={'hidden'} value={sptItem[4]} name="III_E" />
-				<Input type={'text'} value={sptItem[4]} disabled /></td
-			>
+			<td><Input type={'text'} value={sptItem.iiiE} disabled /></td>
 		</tr>
 		<tr>
 			<td class="tw:w-1">F.</td>
 			<td colspan="2">PPN kurang atau (lebih) bayar pada SPT yang dibetulkan sebelumnya</td>
-			<td>
-				<Input type={'hidden'} value={sptItem[5]} name="III_F" />
-				<Input type={'text'} value={sptItem[5]} disabled /></td
-			>
+			<td><Input type={'text'} value={sptItem.iiiF} disabled /></td>
 		</tr>
 		<tr>
 			<td class="tw:w-1">G.</td>
 			<td colspan="2">PPN kurang atau (lebih) bayar karena pembetulan SPT (III.E - III.F)</td>
-			<td>
-				<Input type={'hidden'} value={sptItem[6]} name="III_G" />
-				<Input type={'text'} value={sptItem[6]} disabled /></td
-			>
+			<td><Input type={'text'} value={sptItem.iiiG} disabled /></td>
 		</tr>
 		<tr>
 			<td class="tw:w-1">H.</td>
@@ -82,7 +76,12 @@
 				<div class="tw:flex tw:flex-row tw:justify-center">
 					<div class="tw:mr-5 tw:flex tw:flex-col">
 						<div class="form-check">
-							<Input type={'checkbox'} id={'III-H-1'} name={'check-ganti'} />
+							<Input
+								type={'checkbox'}
+								id={'III-H-1'}
+								name={'check-ganti'}
+								checked={sptItem.iiiHGantiSptSebelumnya ?? false}
+							/>
 							<label class="form-check-label" for="III-H-1">Ganti SPT sebelumnya</label>
 						</div>
 						<div class="form-check">
@@ -90,7 +89,7 @@
 								type={'radio'}
 								id={'III-H-2'}
 								name={'radio-ganti'}
-								checked={sptItem[7].tindakan === 'dikompensasikan'}
+								checked={sptItem.iiiHTindakan === 'dikompensasikan'}
 								value={'dikompensasikan'}
 							/>
 							<label class="form-check-label" for="III-H-2">1. Dikompensasikan</label>
@@ -100,7 +99,7 @@
 								type={'radio'}
 								id={'III-H-3'}
 								name={'radio-ganti'}
-								checked={sptItem[7].tindakan === 'dikembalikan_pendahuluan'}
+								checked={sptItem.iiiHTindakan === 'dikembalikan_pendahuluan'}
 								value={'dikembalikan_pendahuluan'}
 							/>
 							<label class="form-check-label" for="III-H-3"
@@ -112,7 +111,7 @@
 								type={'radio'}
 								id={'III-H-4'}
 								name={'radio-ganti'}
-								checked={sptItem[7].tindakan === 'dikembalikan_pemeriksaan'}
+								checked={sptItem.iiiHTindakan === 'dikembalikan_pemeriksaan'}
 								value={'dikembalikan_pemeriksaan'}
 							/>
 							<label class="form-check-label" for="III-H-4"
@@ -129,7 +128,7 @@
 										><Input
 											type={'file'}
 											id={'III-H-5'}
-											value={sptItem[7].rekening?.pilihRekeningBank}
+											value={sptItem.iiiHRekeningPilihBank}
 										/></td
 									>
 								</tr>
@@ -140,7 +139,7 @@
 											type={'text'}
 											id={'III-H-6'}
 											name="III_H_rekening_nomor"
-											value={sptItem[7].rekening?.nomor}
+											value={sptItem.iiiHRekeningNomor}
 										/></td
 									>
 								</tr>
@@ -151,7 +150,7 @@
 											type={'text'}
 											id={'III-H-7'}
 											name="III_H_rekening_namaBank"
-											value={sptItem[7].rekening?.namaBank}
+											value={sptItem.iiiHRekeningNamaBank}
 										/></td
 									>
 								</tr>
@@ -162,7 +161,7 @@
 											type={'text'}
 											id={'III-H-8'}
 											name="III_H_rekening_namaPemilik"
-											value={sptItem[7].rekening?.namaPemilik}
+											value={sptItem.iiiHRekeningNamaPemilik}
 										/></td
 									>
 								</tr>

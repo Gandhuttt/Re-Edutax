@@ -2,11 +2,10 @@
 	import Table from '$lib/components/Table.svelte';
 	import Input from '$lib/components/Input.svelte';
 	import { untrack } from 'svelte';
-	import type { SptPpnBlob } from '$lib/schemas/surat-pemberitahuan/spt-ppn';
 
-	const { sptItem }: { sptItem: SptPpnBlob['IV'] } = $props();
+	const { sptItem }: { sptItem: { ivDpp: number } } = $props();
 
-	let sptItemDpp = $state(untrack(() => sptItem[0]));
+	let sptItemDpp = $state(untrack(() => sptItem.ivDpp));
 	let ppnTerutang = $derived(Math.round((Number(sptItemDpp) * 22) / 1000));
 </script>
 
