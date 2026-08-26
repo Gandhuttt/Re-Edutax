@@ -51,12 +51,101 @@
 	} = $props();
 
 	let fileInputEl: HTMLInputElement | undefined = $state();
+	let uploadMode: 'add' | 'replace' = $state('add');
 
 	function submitUpload(event: Event) {
 		(event.currentTarget as HTMLInputElement).form?.requestSubmit();
 	}
+
+	function openUploadPicker(mode: 'add' | 'replace') {
+		uploadMode = mode;
+		fileInputEl?.click();
+	}
+
+	// Verbatim shape of the templates Coretax itself serves from each row's
+	// "Unggah XML" menu (confirmed by downloading Retail_IA5/IA9/IB.xml from
+	// the live site) -- one shared RetailInvoiceBulk schema, only the
+	// TrxCode/example row differs per template.
+	const RETAIL_INVOICE_TEMPLATES = {
+		IA5: {
+			filename: 'Retail_IA5.xml',
+			trxCode: 'Normal',
+			example: {
+				BuyerIdOpt: 'NPWP',
+				GoodServiceOpt: 'A',
+				SerialNo: '0101010101',
+				TransactionDate: '2023-03-20',
+				TaxBaseSellingPrice: 2000000,
+				OtherTaxBaseSellingPrice: 2000000,
+				VAT: 200000,
+				STLG: 0
+			}
+		},
+		IA9: {
+			filename: 'Retail_IA9.xml',
+			trxCode: '07',
+			example: {
+				BuyerIdOpt: 'NIK',
+				GoodServiceOpt: 'B',
+				SerialNo: 'string',
+				TransactionDate: '2023-03-05',
+				TaxBaseSellingPrice: 50000000,
+				OtherTaxBaseSellingPrice: 5000000,
+				VAT: 5000000,
+				STLG: 2000000
+			}
+		},
+		IB: {
+			filename: 'Retail_IB.xml',
+			trxCode: 'NoVAT',
+			example: {
+				BuyerIdOpt: 'NPWP',
+				GoodServiceOpt: 'A',
+				SerialNo: '123184283228',
+				TransactionDate: '2023-03-05',
+				TaxBaseSellingPrice: 30000000,
+				OtherTaxBaseSellingPrice: 3000000,
+				VAT: 0,
+				STLG: 0
+			}
+		}
+	} as const;
+
+	function downloadTemplate(kind: keyof typeof RETAIL_INVOICE_TEMPLATES) {
+		const { filename, trxCode, example } = RETAIL_INVOICE_TEMPLATES[kind];
+		const xml = `<?xml version="1.0" encoding="utf-8" ?>
+<RetailInvoiceBulk xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="schema.xsd">
+	<TIN>xxxxxxxxxxxxxxxx</TIN>
+	<TaxPeriodMonth>1</TaxPeriodMonth>
+	<TaxPeriodYear>2026</TaxPeriodYear>
+	<ListOfRetailInvoice>
+		<RetailInvoice>
+			<TrxCode>${trxCode}</TrxCode>
+			<BuyerName>Contoh Pembeli</BuyerName>
+			<BuyerIdOpt>${example.BuyerIdOpt}</BuyerIdOpt>
+			<BuyerIdNumber>xxxxxxxxxxxxxxxx</BuyerIdNumber>
+			<GoodServiceOpt>${example.GoodServiceOpt}</GoodServiceOpt>
+			<SerialNo>${example.SerialNo}</SerialNo>
+			<TransactionDate>${example.TransactionDate}</TransactionDate>
+			<TaxBaseSellingPrice>${example.TaxBaseSellingPrice}</TaxBaseSellingPrice>
+			<OtherTaxBaseSellingPrice>${example.OtherTaxBaseSellingPrice}</OtherTaxBaseSellingPrice>
+			<VAT>${example.VAT}</VAT>
+			<STLG>${example.STLG}</STLG>
+			<Info/>
+		</RetailInvoice>
+	</ListOfRetailInvoice>
+</RetailInvoiceBulk>`;
+
+		const url = URL.createObjectURL(new Blob([xml], { type: 'application/xml' }));
+		const link = document.createElement('a');
+		link.href = url;
+		link.download = filename;
+		link.click();
+		URL.revokeObjectURL(url);
+	}
 </script>
 
+<input type="hidden" name="mode" value={uploadMode} form={uploadFormId} />
 <input
 	type="file"
 	accept=".xml"
@@ -66,6 +155,30 @@
 	onchange={submitUpload}
 	class="tw:hidden"
 />
+
+{#snippet uploadDropdown(kind: keyof typeof RETAIL_INVOICE_TEMPLATES)}
+	<div class="dropdown tw:ml-2 tw:inline-block">
+		<button
+			type="button"
+			class="btn btn-sm btn-outline-secondary dropdown-toggle"
+			data-bs-toggle="dropdown"
+			aria-expanded="false">Unggah XML</button
+		>
+		<ul class="dropdown-menu">
+			<li>
+				<button type="button" class="dropdown-item" onclick={() => openUploadPicker('add')}>Tambah</button>
+			</li>
+			<li>
+				<button type="button" class="dropdown-item" onclick={() => openUploadPicker('replace')}>Ganti</button>
+			</li>
+			<li>
+				<button type="button" class="dropdown-item" onclick={() => downloadTemplate(kind)}
+					>Download Template</button
+				>
+			</li>
+		</ul>
+	</div>
+{/snippet}
 
 <Table class="tw:table-fixed tw:min-w-full tw:border-collapse" >
 	{#snippet head()}
@@ -119,11 +232,7 @@
 			<td>5.</td>
 			<td>
 				Penyerahan yang PPN atau PPN dan PPnBM-nya harus dipungut sendiri dengan Faktur Pajak yang dilaporkan secara digunggung
-				{#if !readonly}
-					<button type="button" class="btn btn-sm btn-outline-secondary tw:ml-2" onclick={() => fileInputEl?.click()}
-						>Unggah XML</button
-					>
-				{/if}
+				{#if !readonly}{@render uploadDropdown('IA5')}{/if}
 			</td>
 			<td><Input type={'text'} value={sptItem.iA5HargaJual} disabled /></td>
 			<td><Input type={'text'} value={sptItem.iA5DppNilaiLain} disabled /></td>
@@ -158,11 +267,7 @@
 			<td>9.</td>
 			<td>
 				Penyerahan yang mendapat fasilitas PPN atau PPnBM dengan Faktur Pajak yang dilaporkan secara digunggung
-				{#if !readonly}
-					<button type="button" class="btn btn-sm btn-outline-secondary tw:ml-2" onclick={() => fileInputEl?.click()}
-						>Unggah XML</button
-					>
-				{/if}
+				{#if !readonly}{@render uploadDropdown('IA9')}{/if}
 			</td>
 			<td><Input type={'text'} value={sptItem.iA9HargaJual} disabled /></td>
 			<td><Input type={'text'} value={sptItem.iA9DppNilaiLain} disabled /></td>
@@ -181,11 +286,7 @@
 			<td>B.</td>
 			<td>
 				Penyerahan barang/jasa yang tidak terutang PPN
-				{#if !readonly}
-					<button type="button" class="btn btn-sm btn-outline-secondary tw:ml-2" onclick={() => fileInputEl?.click()}
-						>Unggah XML</button
-					>
-				{/if}
+				{#if !readonly}{@render uploadDropdown('IB')}{/if}
 			</td>
 			<td><Input type={'text'} value={sptItem.iB} disabled /></td>
 			<td class="tw:text-center">-</td>
