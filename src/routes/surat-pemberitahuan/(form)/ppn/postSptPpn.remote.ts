@@ -1,10 +1,18 @@
 import { form, getRequestEvent } from '$app/server';
 import { db } from '$lib/server/db';
-import { spt_ppn, spt_ppn_penyerahan, spt_ppn_perolehan } from '$lib/server/db/schema';
+import {
+	spt_ppn,
+	spt_ppn_lampiran_a2,
+	spt_ppn_lampiran_b2,
+	spt_ppn_lampiran_c,
+	spt_ppn_penyerahan,
+	spt_ppn_perolehan
+} from '$lib/server/db/schema';
 import { error } from '@sveltejs/kit';
 import { eq } from 'drizzle-orm';
 import * as v from 'valibot';
 import { computePostedSptPpnFields } from './server/computePostedSptPpnFields.server';
+import { computePostedSptPpnLampiran } from './server/computePostedSptPpnLampiran.server';
 import { getOwnedSptPpn } from './server/getOwnedSptPpn.server';
 
 const SptPpnIdSchema = v.object({
@@ -36,19 +44,46 @@ export const postSptPpn = form(SptPpnIdSchema, async ({ id }) => {
 		periodeBulan: sptPpn.masaPajak,
 		periodeTahun: sptPpn.tahun
 	});
+	const { a2, b2, c } = await computePostedSptPpnLampiran({
+		npwp: activeNpwp,
+		periodeBulan: sptPpn.masaPajak,
+		periodeTahun: sptPpn.tahun
+	});
 
-	await db
-		.update(spt_ppn)
-		.set({ ...induk, tanggalPosting: new Date() })
-		.where(eq(spt_ppn.id, id));
-	await db
-		.update(spt_ppn_penyerahan)
-		.set(penyerahan)
-		.where(eq(spt_ppn_penyerahan.sptPpnId, id));
-	await db
-		.update(spt_ppn_perolehan)
-		.set(perolehan)
-		.where(eq(spt_ppn_perolehan.sptPpnId, id));
+	// D1 has no real multi-statement transaction over the Workers binding, only
+	// db.batch() (every statement must be built upfront, no reading results
+	// back mid-batch).
+	const statements = [
+		db
+			.update(spt_ppn)
+			.set({ ...induk, tanggalPosting: new Date() })
+			.where(eq(spt_ppn.id, id)),
+		// Older SPTs created before the induk normalization migration have no
+		// matching penyerahan/perolehan row yet — upsert instead of a plain
+		// UPDATE so posting one of those self-heals it instead of silently
+		// affecting 0 rows.
+		db
+			.insert(spt_ppn_penyerahan)
+			.values({ sptPpnId: id, ...penyerahan })
+			.onConflictDoUpdate({ target: spt_ppn_penyerahan.sptPpnId, set: penyerahan }),
+		db
+			.insert(spt_ppn_perolehan)
+			.values({ sptPpnId: id, ...perolehan })
+			.onConflictDoUpdate({ target: spt_ppn_perolehan.sptPpnId, set: perolehan }),
+		db.delete(spt_ppn_lampiran_a2).where(eq(spt_ppn_lampiran_a2.sptPpnId, id)),
+		db.delete(spt_ppn_lampiran_b2).where(eq(spt_ppn_lampiran_b2.sptPpnId, id)),
+		db.delete(spt_ppn_lampiran_c).where(eq(spt_ppn_lampiran_c.sptPpnId, id)),
+		...a2.map((row, index) =>
+			db.insert(spt_ppn_lampiran_a2).values({ sptPpnId: id, nomorUrut: index + 1, ...row })
+		),
+		...b2.map((row, index) =>
+			db.insert(spt_ppn_lampiran_b2).values({ sptPpnId: id, nomorUrut: index + 1, ...row })
+		),
+		...c.map((row, index) =>
+			db.insert(spt_ppn_lampiran_c).values({ sptPpnId: id, nomorUrut: index + 1, ...row })
+		)
+	];
+	await db.batch(statements as [(typeof statements)[number], ...(typeof statements)[number][]]);
 
-	return { fields: { ...penyerahan, ...perolehan, ...induk } };
+	return { fields: { ...penyerahan, ...perolehan, ...induk }, lampiran: { a2, b2, c } };
 });

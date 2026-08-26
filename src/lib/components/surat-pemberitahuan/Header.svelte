@@ -21,6 +21,7 @@
 		periode = { bulan: currentDate.getMonth() + 1, tahun: currentDate.getFullYear() },
 		readonly = true,
 		postFormId,
+		showPostButton = true,
 		onPeriodeChange
 	}: {
 		namaPKP?: string;
@@ -32,6 +33,7 @@
 		periode?: { bulan: number; tahun: number };
 		readonly?: boolean;
 		postFormId?: string;
+		showPostButton?: boolean;
 		onPeriodeChange?: (bulan: number, tahun: number) => void;
 	} = $props();
 </script>
@@ -193,7 +195,7 @@
 	</div>
 </div>
 <div class="tw:flex tw:flex-row">
-	{#if readonly === false}
+	{#if readonly === false && showPostButton}
 		<div class="tw:mr-5">
 			<button class="btn btn-success" form={postFormId} name="action" value="Post">Posting SPT</button>
 		</div>

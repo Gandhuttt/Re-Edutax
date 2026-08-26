@@ -2,9 +2,11 @@ import { db } from '$lib/server/db';
 import {
 	faktur_pajak,
 	kode_transaksi_faktur_pajak,
+	spt_ppn_retail_invoice,
 	transaksi_faktur_pajak
 } from '$lib/server/db/schema';
 import { and, eq, or } from 'drizzle-orm';
+import { computeFakturLineAmounts } from './computeFakturLineAmounts';
 
 // Recomputes every induk field that is derived from posted faktur_pajak data
 // (sections I, II and the top rows of III). Fields the user can edit by hand
@@ -53,6 +55,23 @@ export async function computePostedSptPpnFields({
 	const outputTransactions = allTransactions.filter((transaction) => transaction.npwpPenjual === npwp);
 	const inputTransactions = allTransactions.filter((transaction) => transaction.npwpPembeli === npwp);
 
+	const retailInvoices = await db
+		.select({
+			trxCode: spt_ppn_retail_invoice.trxCode,
+			taxBaseSellingPrice: spt_ppn_retail_invoice.taxBaseSellingPrice,
+			otherTaxBaseSellingPrice: spt_ppn_retail_invoice.otherTaxBaseSellingPrice,
+			vat: spt_ppn_retail_invoice.vat,
+			stlg: spt_ppn_retail_invoice.stlg
+		})
+		.from(spt_ppn_retail_invoice)
+		.where(
+			and(
+				eq(spt_ppn_retail_invoice.npwp, npwp),
+				eq(spt_ppn_retail_invoice.masaPajak, periodeBulan),
+				eq(spt_ppn_retail_invoice.tahun, periodeTahun)
+			)
+		);
+
 	const IA2 = createBucket();
 	const IA3 = createBucket();
 	const IA4 = createBucket();
@@ -60,6 +79,8 @@ export async function computePostedSptPpnFields({
 	const IA6 = createBucket();
 	const IA7 = createBucket();
 	const IA8 = createBucket();
+	const IA9 = createBucket();
+	const IB = createBucket();
 
 	for (const transaction of outputTransactions) {
 		const target = getOutputBucket(transaction.kodeTransaksi, { IA2, IA3, IA4, IA6, IA7, IA8 });
@@ -69,10 +90,24 @@ export async function computePostedSptPpnFields({
 		}
 	}
 
+	for (const invoice of retailInvoices) {
+		const target =
+			invoice.trxCode === 'Normal'
+				? IA5
+				: invoice.trxCode === '07' || invoice.trxCode === '08'
+					? IA9
+					: IB;
+
+		target.dpp += invoice.taxBaseSellingPrice;
+		target.dppNilaiLain += invoice.otherTaxBaseSellingPrice;
+		target.ppn += invoice.vat;
+		target.ppnbm += invoice.stlg;
+	}
+
 	const IAT = {
-		dpp: IA2.dpp + IA3.dpp + IA4.dpp + IA5.dpp + IA6.dpp + IA7.dpp + IA8.dpp,
-		ppn: IA2.ppn + IA3.ppn + IA4.ppn + IA5.ppn + IA6.ppn + IA7.ppn + IA8.ppn,
-		ppnbm: IA2.ppnbm + IA3.ppnbm + IA4.ppnbm + IA5.ppnbm + IA6.ppnbm + IA7.ppnbm + IA8.ppnbm
+		dpp: IA2.dpp + IA3.dpp + IA4.dpp + IA5.dpp + IA6.dpp + IA7.dpp + IA8.dpp + IA9.dpp,
+		ppn: IA2.ppn + IA3.ppn + IA4.ppn + IA5.ppn + IA6.ppn + IA7.ppn + IA8.ppn + IA9.ppn,
+		ppnbm: IA2.ppnbm + IA3.ppnbm + IA4.ppnbm + IA5.ppnbm + IA6.ppnbm + IA7.ppnbm + IA8.ppnbm + IA9.ppnbm
 	};
 
 	const IIB = createBucket();
@@ -92,7 +127,7 @@ export async function computePostedSptPpnFields({
 		ppn: IIB.ppn + IIC.ppn + IID.ppn
 	};
 
-	const IIIA = IA2.ppn + IA3.ppn + IA4.ppn;
+	const IIIA = IA2.ppn + IA3.ppn + IA4.ppn + IA5.ppn;
 	const IIIC = IIB.ppn + IIC.ppn + IID.ppn;
 	const IIIE = IIIA - IIIC;
 
@@ -126,15 +161,15 @@ export async function computePostedSptPpnFields({
 			iA8DppNilaiLain: IA8.dppNilaiLain,
 			iA8Ppn: IA8.ppn,
 			iA8Ppnbm: IA8.ppnbm,
-			iA9HargaJual: 0,
-			iA9DppNilaiLain: 0,
-			iA9Ppn: 0,
-			iA9Ppnbm: 0,
+			iA9HargaJual: IA9.dpp,
+			iA9DppNilaiLain: IA9.dppNilaiLain,
+			iA9Ppn: IA9.ppn,
+			iA9Ppnbm: IA9.ppnbm,
 			iAJumlahHargaJual: IAT.dpp,
 			iAJumlahPpn: IAT.ppn,
 			iAJumlahPpnbm: IAT.ppnbm,
-			iB: 0,
-			iC: IAT.dpp
+			iB: IB.dpp,
+			iC: IAT.dpp + IB.dpp
 		},
 
 		perolehan: {
@@ -194,13 +229,12 @@ function addTransaction(
 		tarifPpnBm: number;
 	}
 ) {
-	const dpp = Math.max(0, transaction.kuantitas * transaction.hargaSatuan - transaction.hargaPotongan);
-	const ppnBase = transaction.dppNilaiLain > 0 ? transaction.dppNilaiLain : dpp;
+	const amounts = computeFakturLineAmounts(transaction);
 
-	bucket.dpp += dpp;
-	bucket.dppNilaiLain += transaction.dppNilaiLain;
-	bucket.ppn += Math.round((ppnBase * transaction.tarifPpn) / 100);
-	bucket.ppnbm += Math.round((dpp * transaction.tarifPpnBm) / 100);
+	bucket.dpp += amounts.dpp;
+	bucket.dppNilaiLain += amounts.dppNilaiLain;
+	bucket.ppn += amounts.ppn;
+	bucket.ppnbm += amounts.ppnbm;
 }
 
 function getOutputBucket(

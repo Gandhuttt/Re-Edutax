@@ -1,11 +1,14 @@
 <script lang="ts">
 	import Table from '$lib/components/Table.svelte';
-	import List from '$lib/components/surat-pemberitahuan/PenyerahanList.svelte';
 	import Input from '$lib/components/Input.svelte';
 
 	let {
-		sptItem
+		sptItem,
+		readonly = true,
+		uploadFormId
 	}: {
+		readonly?: boolean;
+		uploadFormId?: string;
 		sptItem: {
 			iA1: number;
 			iA2HargaJual: number;
@@ -46,7 +49,23 @@
 			iC: number;
 		};
 	} = $props();
+
+	let fileInputEl: HTMLInputElement | undefined = $state();
+
+	function submitUpload(event: Event) {
+		(event.currentTarget as HTMLInputElement).form?.requestSubmit();
+	}
 </script>
+
+<input
+	type="file"
+	accept=".xml"
+	name="file"
+	form={uploadFormId}
+	bind:this={fileInputEl}
+	onchange={submitUpload}
+	class="tw:hidden"
+/>
 
 <Table class="tw:table-fixed tw:min-w-full tw:border-collapse" >
 	{#snippet head()}
@@ -65,106 +84,86 @@
 			<td colspan="5">Penyerahan BKP/JKP yang terutang PPN</td>
 		</tr>
 		<tr>
-			<td></td>
-			<td><List index={'1.'} description={'Ekspor BKP/BKP Tidak Berwujud/JKP'} /></td>
+			<td>1.</td>
+			<td>Ekspor BKP/BKP Tidak Berwujud/JKP</td>
 			<td><Input type={'text'} value={sptItem.iA1} disabled /></td>
 			<td class="tw:text-center">-</td>
 			<td class="tw:text-center">-</td>
 			<td class="tw:text-center">-</td>
 		</tr>
 		<tr>
-			<td
-				><List
-					index={'2.'}
-					description={'Penyerahan yang PPN atau PPN dan PPnBM-nya harus dipungut sendiri dengan DPP Nilai Lain atau Besaran Tertentu (dengan Faktur Pajak Kode 04 dan 05)'}
-				/></td
-			>
+			<td>2.</td>
+			<td>Penyerahan yang PPN atau PPN dan PPnBM-nya harus dipungut sendiri dengan DPP Nilai Lain atau Besaran Tertentu (dengan Faktur Pajak Kode 04 dan 05)</td>
 			<td><Input type={'text'} value={sptItem.iA2HargaJual} disabled /></td>
 			<td><Input type={'text'} value={sptItem.iA2DppNilaiLain} disabled /></td>
 			<td><Input type={'text'} value={sptItem.iA2Ppn} disabled /></td>
 			<td><Input type={'text'} value={sptItem.iA2Ppnbm} disabled /></td>
 		</tr>
 		<tr>
-			<td
-				><List
-					index={'3.'}
-					description={'Penyerahan yang PPN atau PPN dan PPnBM-nya harus dipungut sendiri kepada turis sesuai dengan Pasal 16E UU PPN (dengan Faktur Pajak Kode 06)'}
-				/></td
-			>
+			<td>3.</td>
+			<td>Penyerahan yang PPN atau PPN dan PPnBM-nya harus dipungut sendiri kepada turis sesuai dengan Pasal 16E UU PPN (dengan Faktur Pajak Kode 06)</td>
 			<td><Input type={'text'} value={sptItem.iA3HargaJual} disabled /></td>
 			<td><Input type={'text'} value={sptItem.iA3DppNilaiLain} disabled /></td>
 			<td><Input type={'text'} value={sptItem.iA3Ppn} disabled /></td>
 			<td><Input type={'text'} value={sptItem.iA3Ppnbm} disabled /></td>
 		</tr>
 		<tr>
-			<td
-				><List
-					index={'4.'}
-					description={'Penyerahan yang PPN atau PPN dan PPnBM-nya harus dipungut sendiri lainnya (dengan Faktur Pajak Kode 01, 09 dan 10)'}
-				/></td
-			>
+			<td>4.</td>
+			<td>Penyerahan yang PPN atau PPN dan PPnBM-nya harus dipungut sendiri lainnya (dengan Faktur Pajak Kode 01, 09 dan 10)</td>
 			<td><Input type={'text'} value={sptItem.iA4HargaJual} disabled /></td>
 			<td class="tw:text-center">-</td>
 			<td><Input type={'text'} value={sptItem.iA4Ppn} disabled /></td>
 			<td><Input type={'text'} value={sptItem.iA4Ppnbm} disabled /></td>
 		</tr>
 		<tr>
-			<td
-				><List
-					index={'5.'}
-					description={'Penyerahan yang PPN atau PPN dan PPnBM-nya harus dipungut sendiri dengan Faktur Pajak yang dilaporkan secara digunggung'}
-					isUpload
-				/></td
-			>
+			<td>5.</td>
+			<td>
+				Penyerahan yang PPN atau PPN dan PPnBM-nya harus dipungut sendiri dengan Faktur Pajak yang dilaporkan secara digunggung
+				{#if !readonly}
+					<button type="button" class="btn btn-sm btn-outline-secondary tw:ml-2" onclick={() => fileInputEl?.click()}
+						>Unggah XML</button
+					>
+				{/if}
+			</td>
 			<td><Input type={'text'} value={sptItem.iA5HargaJual} disabled /></td>
 			<td><Input type={'text'} value={sptItem.iA5DppNilaiLain} disabled /></td>
 			<td><Input type={'text'} value={sptItem.iA5Ppn} disabled /></td>
 			<td><Input type={'text'} value={sptItem.iA5Ppnbm} disabled /></td>
 		</tr>
 		<tr>
-			<td
-				><List
-					index={'6.'}
-					description={'Penyerahan yang PPN atau PPN dan PPnBM-nya harus dipungut oleh Pemungut PPN (dengan Faktur Pajak Kode 02 dan 03)'}
-				/></td
-			>
+			<td>6.</td>
+			<td>Penyerahan yang PPN atau PPN dan PPnBM-nya harus dipungut oleh Pemungut PPN (dengan Faktur Pajak Kode 02 dan 03)</td>
 			<td><Input type={'text'} value={sptItem.iA6HargaJual} disabled /></td>
 			<td><Input type={'text'} value={sptItem.iA6DppNilaiLain} disabled /></td>
 			<td><Input type={'text'} value={sptItem.iA6Ppn} disabled /></td>
 			<td><Input type={'text'} value={sptItem.iA6Ppnbm} disabled /></td>
 		</tr>
 		<tr>
-			<td
-				><List
-					index={'7.'}
-					description={'Penyerahan yang mendapat fasilitas PPN atau PPnBM Tidak Dipungut (dengan Faktur Pajak Kode 07'}
-				/></td
-			>
+			<td>7.</td>
+			<td>Penyerahan yang mendapat fasilitas PPN atau PPnBM Tidak Dipungut (dengan Faktur Pajak Kode 07</td>
 			<td><Input type={'text'} value={sptItem.iA7HargaJual} disabled /></td>
 			<td><Input type={'text'} value={sptItem.iA7DppNilaiLain} disabled /></td>
 			<td><Input type={'text'} value={sptItem.iA7Ppn} disabled /></td>
 			<td><Input type={'text'} value={sptItem.iA7Ppnbm} disabled /></td>
 		</tr>
 		<tr>
-			<td
-				><List
-					index={'8.'}
-					description={'Penyerahan yang mendapat fasilitas PPN atau PPnBM Dibebaskan (dengan Faktur Pajak Kode 08'}
-				/></td
-			>
+			<td>8.</td>
+			<td>Penyerahan yang mendapat fasilitas PPN atau PPnBM Dibebaskan (dengan Faktur Pajak Kode 08</td>
 			<td><Input type={'text'} value={sptItem.iA8HargaJual} disabled /></td>
 			<td><Input type={'text'} value={sptItem.iA8DppNilaiLain} disabled /></td>
 			<td><Input type={'text'} value={sptItem.iA8Ppn} disabled /></td>
 			<td><Input type={'text'} value={sptItem.iA8Ppnbm} disabled /></td>
 		</tr>
 		<tr>
-			<td
-				><List
-					index={'9.'}
-					description={'Penyerahan yang mendapat fasilitas PPN atau PPnBM dengan Faktur Pajak yang dilaporkan secara digunggung'}
-					isUpload
-				/></td
-			>
+			<td>9.</td>
+			<td>
+				Penyerahan yang mendapat fasilitas PPN atau PPnBM dengan Faktur Pajak yang dilaporkan secara digunggung
+				{#if !readonly}
+					<button type="button" class="btn btn-sm btn-outline-secondary tw:ml-2" onclick={() => fileInputEl?.click()}
+						>Unggah XML</button
+					>
+				{/if}
+			</td>
 			<td><Input type={'text'} value={sptItem.iA9HargaJual} disabled /></td>
 			<td><Input type={'text'} value={sptItem.iA9DppNilaiLain} disabled /></td>
 			<td><Input type={'text'} value={sptItem.iA9Ppn} disabled /></td>
@@ -180,9 +179,13 @@
 		</tr>
 		<tr>
 			<td>B.</td>
-			<td
-				>Penyerahan barang/jasa yang tidak terutang PPN
-				<!-- <Upload label={"Unggah XML"} icon={"bi bi-upload"}/> -->
+			<td>
+				Penyerahan barang/jasa yang tidak terutang PPN
+				{#if !readonly}
+					<button type="button" class="btn btn-sm btn-outline-secondary tw:ml-2" onclick={() => fileInputEl?.click()}
+						>Unggah XML</button
+					>
+				{/if}
 			</td>
 			<td><Input type={'text'} value={sptItem.iB} disabled /></td>
 			<td class="tw:text-center">-</td>

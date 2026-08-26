@@ -134,6 +134,20 @@
       "when": 1787691467570,
       "tag": "0018_volatile_secret_warriors",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "6",
+      "when": 1787694004751,
+      "tag": "0019_purple_bug",
+      "breakpoints": true
+    },
+    {
+      "idx": 20,
+      "version": "6",
+      "when": 1787701497604,
+      "tag": "0020_smart_jackal",
+      "breakpoints": true
     }
   ]
 }

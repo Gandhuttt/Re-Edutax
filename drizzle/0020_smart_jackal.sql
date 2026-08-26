@@ -1,0 +1,20 @@
+CREATE TABLE `spt_ppn_retail_invoice` (
+	`id` text PRIMARY KEY NOT NULL,
+	`npwp` text NOT NULL,
+	`masa_pajak` integer NOT NULL,
+	`tahun` integer NOT NULL,
+	`trx_code` text NOT NULL,
+	`buyer_name` text NOT NULL,
+	`buyer_id_opt` text NOT NULL,
+	`buyer_id_number` text NOT NULL,
+	`good_service_opt` text NOT NULL,
+	`serial_no` text NOT NULL,
+	`transaction_date` text NOT NULL,
+	`tax_base_selling_price` integer DEFAULT 0 NOT NULL,
+	`other_tax_base_selling_price` integer DEFAULT 0 NOT NULL,
+	`vat` integer DEFAULT 0 NOT NULL,
+	`stlg` integer DEFAULT 0 NOT NULL,
+	`info` text,
+	`created_at` integer NOT NULL,
+	FOREIGN KEY (`npwp`) REFERENCES `wajib_pajak`(`npwp`) ON UPDATE no action ON DELETE no action
+);
