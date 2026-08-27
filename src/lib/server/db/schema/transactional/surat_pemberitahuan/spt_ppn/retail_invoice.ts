@@ -1,5 +1,5 @@
 import { integer, sqliteTable, text } from 'drizzle-orm/sqlite-core';
-import { wajib_pajak } from '../wajib_pajak/wajib_pajak';
+import { wajib_pajak } from '../../wajib_pajak/wajib_pajak';
 
 // One row per <RetailInvoice> element from a Coretax "Unggah XML"
 // RetailInvoiceBulk upload, feeding induk rows I.A.5 (TrxCode=Normal), I.A.9

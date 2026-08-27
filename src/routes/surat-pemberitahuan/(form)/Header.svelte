@@ -1,8 +1,8 @@
 <script lang="ts">
 	import { formatMonth } from '$lib/helpers/date';
-	import Input from '../Input.svelte';
-	import Label from '../Label.svelte';
-	import Select from '../Select.svelte';
+	import Input from '$lib/components/Input.svelte';
+	import Label from '$lib/components/Label.svelte';
+	import Select from '$lib/components/Select.svelte';
 
 	const currentDate = new Date();
 	const monthOptions = Array.from({ length: 12 }, (_, index) => ({

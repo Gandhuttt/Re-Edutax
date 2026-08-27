@@ -1,5 +1,5 @@
 import { integer, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
-import { wajib_pajak } from '../wajib_pajak/wajib_pajak';
+import { wajib_pajak } from '../../wajib_pajak/wajib_pajak';
 
 // SPT PPN Induk. Bagian I (Penyerahan) and Bagian II (Perolehan) live on the
 // spt_ppn_penyerahan/spt_ppn_perolehan child tables instead of here — the
