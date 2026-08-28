@@ -12,8 +12,17 @@ import type { SeedContext } from './context';
 // sektor_usaha id seeded by 003 earlier in the same run -- see correct data,
 // unlike a fully-faked driver) while a logging proxy captures every
 // prepare/bind call. A Node script can't get a live binding to production's
-// real D1 the way a deployed Worker can, so the output is meant to be handed
-// to `wrangler d1 execute DB --remote --file=...` instead.
+// real D1 the way a deployed Worker can, so the output is written as a
+// drizzle-shaped SQL file (statements separated by `--> statement-breakpoint`,
+// matching the convention used throughout drizzle/).
+//
+// The output is meant to be committed as the next numbered migration file
+// (drizzle/NNNN_reference_data.sql, with a matching drizzle/meta/_journal.json
+// entry and a copied-forward drizzle/meta/NNNN_snapshot.json, since this is a
+// data-only change with no schema diff), then applied the normal way via
+// `npm run db:migrate` / `db:migrate:prod` -- not run ad hoc against prod
+// with `wrangler d1 execute --remote`. The existing ON CONFLICT upserts make
+// re-running the migration safe if it's ever regenerated with updated data.
 
 type Captured = { sql: string; params: unknown[] };
 
@@ -54,6 +63,8 @@ function inlineSql({ sql, params }: Captured): string {
 	return `${inlined};`;
 }
 
+const STATEMENT_BREAKPOINT = '--> statement-breakpoint';
+
 const outputPath = process.argv[2];
 if (!outputPath) {
 	console.error('Usage: tsx generate-reference-sql.ts <output.sql>');
@@ -81,7 +92,7 @@ const run = async () => {
 	// prepare/bind -- drop those so the output file is a clean write-only
 	// script, safe to hand to `wrangler d1 execute --remote --file=...`.
 	const writes = captured.filter((entry) => /^\s*(insert|update|delete)\b/i.test(entry.sql));
-	const sqlText = writes.map(inlineSql).join('\n');
+	const sqlText = writes.map(inlineSql).join(STATEMENT_BREAKPOINT + '\n');
 	writeFileSync(outputPath, sqlText);
 	console.log(`\nWrote ${writes.length} statements to ${outputPath}`);
 };

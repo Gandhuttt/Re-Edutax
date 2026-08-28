@@ -17,7 +17,7 @@
 		"db:seed": "tsx src/lib/server/db/seed/seed.ts",
 		"db:seed:reference": "tsx src/lib/server/db/seed/seed-reference.ts",
 		"cf-typegen": "wrangler types",
-		"deploy": "vite build && wrangler deploy"
+		"deploy": "vite build && wrangler d1 migrations apply DB --remote && wrangler deploy"
 	},
 	"devDependencies": {
 		"@sveltejs/adapter-cloudflare": "^7.2.9",
