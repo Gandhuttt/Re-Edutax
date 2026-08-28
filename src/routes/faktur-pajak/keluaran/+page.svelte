@@ -1,4 +1,5 @@
 <script lang="ts">
+	import * as XLSX from 'xlsx';
 	import Button from '$lib/components/Button.svelte';
 	import Card from '$lib/components/Card.svelte';
 	import Table from '$lib/components/Table.svelte';
@@ -61,6 +62,132 @@
 		link.click();
 		URL.revokeObjectURL(url);
 	}
+
+	// Shape of the real Coretax e-Faktur "Impor Data" Excel template (four
+	// sheets: Faktur/DetailFaktur/REF/Keterangan, confirmed against a real
+	// filled-in export -- see parseFakturBulkXlsx). REF/Keterangan here are
+	// trimmed to what's actually useful to fill the sheet correctly, rather
+	// than reproducing every dropdown list Coretax embeds (satuan ukur and
+	// kode barang/jasa run into the thousands of rows).
+	function downloadXlsxTemplate() {
+		const wb = XLSX.utils.book_new();
+
+		const fakturHeader = [
+			'Baris',
+			'Tanggal Faktur',
+			'Jenis Faktur',
+			'Kode Transaksi',
+			'Keterangan Tambahan',
+			'Dokumen Pendukung',
+			'Period Dok Pendukung',
+			'Referensi',
+			'Cap Fasilitas',
+			'ID TKU Penjual',
+			'NPWP/NIK Pembeli',
+			'Jenis ID Pembeli',
+			'Negara Pembeli',
+			'Nomor Dokumen Pembeli',
+			'Nama Pembeli',
+			'Alamat Pembeli',
+			'Email Pembeli',
+			'ID TKU Pembeli'
+		];
+		const fakturSheet = XLSX.utils.aoa_to_sheet([
+			['NPWP Penjual', null, 'xxxxxxxxxxxxxxxx'],
+			[],
+			fakturHeader,
+			[
+				1,
+				'27/08/2026',
+				'Normal',
+				'01',
+				null,
+				null,
+				null,
+				'Referensi contoh',
+				null,
+				'xxxxxxxxxxxxxxxx000000',
+				'xxxxxxxxxxxxxxxx',
+				'TIN',
+				'IDN',
+				'-',
+				'-',
+				'Contoh Alamat Pembeli',
+				'-',
+				'xxxxxxxxxxxxxxxx000000'
+			],
+			['END']
+		]);
+		XLSX.utils.book_append_sheet(wb, fakturSheet, 'Faktur');
+
+		const detailHeader = [
+			'Baris',
+			'Barang/Jasa',
+			'Kode Barang Jasa',
+			'Nama Barang/Jasa',
+			'Nama Satuan Ukur',
+			'Harga Satuan',
+			'Jumlah Barang Jasa',
+			'Total Diskon',
+			'DPP',
+			'DPP Nilai Lain',
+			'Tarif PPN',
+			'PPN',
+			'Tarif PPnBM',
+			'PPnBM'
+		];
+		const detailSheet = XLSX.utils.aoa_to_sheet([
+			detailHeader,
+			[1, 'A', '000000', 'Contoh Barang', 'UM.0001', 15000, 200, 100000, 2900000, 2900000, 12, 348000, 0, 0],
+			['END']
+		]);
+		XLSX.utils.book_append_sheet(wb, detailSheet, 'DetailFaktur');
+
+		const refSheet = XLSX.utils.aoa_to_sheet([
+			['Kode', 'Keterangan'],
+			['Barang/Jasa', 'A'],
+			[null, 'Barang'],
+			['', 'B'],
+			[null, 'Jasa'],
+			['Kode Transaksi', ''],
+			...transactionCodeOptions.map((option) => [String(option.key).padStart(2, '0'), option.value])
+		]);
+		XLSX.utils.book_append_sheet(wb, refSheet, 'REF');
+
+		const keteranganSheet = XLSX.utils.aoa_to_sheet([
+			['Sheet', 'Kolom', 'Wajib', 'Keterangan'],
+			['Faktur', 'Baris', 'Ya', 'Urut dari angka 1, sama dengan Baris pada sheet DetailFaktur'],
+			['Faktur', 'Tanggal Faktur', 'Ya', 'Format DD/MM/YYYY'],
+			['Faktur', 'Jenis Faktur', 'Ya', 'Selalu diisi: Normal'],
+			['Faktur', 'Kode Transaksi', 'Ya', 'Lihat sheet REF, 2 digit (01-10)'],
+			['Faktur', 'Keterangan Tambahan', 'Tidak', 'Wajib diisi untuk Kode Transaksi 07 atau 08, format "<kode> - <nama>"'],
+			['Faktur', 'Referensi', 'Tidak', ''],
+			['Faktur', 'NPWP/NIK Pembeli', 'Ya', ''],
+			['Faktur', 'Alamat Pembeli', 'Tidak', "Isikan '-' jika tidak ada"],
+			['DetailFaktur', 'Baris', 'Ya', 'Wajib diisi sesuai kolom Baris dari sheet Faktur'],
+			['DetailFaktur', 'Barang/Jasa', 'Ya', 'Lihat sheet REF: A = Barang, B = Jasa'],
+			['DetailFaktur', 'Kode Barang Jasa', 'Ya', 'Kode barang/jasa tanpa awalan A/B, contoh: 000000'],
+			['DetailFaktur', 'Nama Barang/Jasa', 'Ya', ''],
+			['DetailFaktur', 'Nama Satuan Ukur', 'Ya', 'Kode satuan ukur, contoh: UM.0001 (lihat pilihan pada form Buat Faktur)'],
+			['DetailFaktur', 'Harga Satuan', 'Ya', 'Maks 2 digit di belakang koma'],
+			['DetailFaktur', 'Jumlah Barang Jasa', 'Ya', ''],
+			['DetailFaktur', 'Total Diskon', 'Ya', "Isikan 0 jika tidak ada"],
+			['DetailFaktur', 'DPP Nilai Lain', 'Ya', ''],
+			['DetailFaktur', 'Tarif PPN', 'Ya', 'Ikut tarif yang berlaku'],
+			['DetailFaktur', 'Tarif PPnBM', 'Ya', "Isikan 0 jika tidak ada"]
+		]);
+		XLSX.utils.book_append_sheet(wb, keteranganSheet, 'Keterangan');
+
+		const buffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+		const url = URL.createObjectURL(
+			new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
+		);
+		const link = document.createElement('a');
+		link.href = url;
+		link.download = 'Impor Data Faktur Keluaran.xlsx';
+		link.click();
+		URL.revokeObjectURL(url);
+	}
 </script>
 
 <input
@@ -96,7 +223,12 @@
 							</li>
 							<li>
 								<button type="button" class="dropdown-item" onclick={downloadTemplate}
-									>Unduh Format Data</button
+									>Unduh Format Data (XML)</button
+								>
+							</li>
+							<li>
+								<button type="button" class="dropdown-item" onclick={downloadXlsxTemplate}
+									>Unduh Format Data (Excel)</button
 								>
 							</li>
 						</ul>
