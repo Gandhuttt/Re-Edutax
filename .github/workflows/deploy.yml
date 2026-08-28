@@ -23,9 +23,12 @@ jobs:
 
       - run: npm ci
 
+      - name: Apply local D1 migrations (build-time prerendering reads from local D1)
+        run: npm run db:migrate
+
       - run: npm run build
 
-      - name: Apply D1 migrations
+      - name: Apply remote D1 migrations
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
