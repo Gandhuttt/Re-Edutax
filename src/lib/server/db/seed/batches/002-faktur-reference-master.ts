@@ -12,12 +12,17 @@ import {
 } from '../../schema';
 import type { SeedContext } from '../context';
 import { batchInsert } from '../helpers';
+import { notInArray } from 'drizzle-orm';
 
 export const name = '002 faktur reference master data';
 
 const jenisItemId = {
 	Barang: 'jenis-item-barang',
-	Jasa: 'jenis-item-jasa'
+	Jasa: 'jenis-item-jasa',
+	// Units valid for both goods and services (e.g. EINVOICE_UNIT_MEASUREMENT's
+	// "Other") aren't restricted to either jenis -- null matches the existing
+	// nullable jenisItemId column, not a third jenis_item_transaksi_faktur row.
+	Both: null
 } as const;
 
 const kodeTransaksiId = (kode: number) => `kode-transaksi-${kode}`;
@@ -86,6 +91,21 @@ export const run = async ({ db }: SeedContext) => {
 				})
 		)
 	);
+
+	// satuanUkurTransaksiFaktur used to be hand-typed placeholder codes
+	// ("000001".."000024", "001001".."001011") that never matched DJP's real
+	// "UM.xxxx" codes. Deactivate whatever's left over from that old scheme --
+	// not delete, since existing transaksi_faktur_pajak rows may still FK to
+	// them by id -- rather than leave them selectable alongside the real codes.
+	await db
+		.update(satuan_ukur_transaksi_faktur)
+		.set({ aktif: false })
+		.where(
+			notInArray(
+				satuan_ukur_transaksi_faktur.kode,
+				satuanUkurTransaksiFaktur.map((row) => row.index)
+			)
+		);
 
 	await batchInsert(
 		db,
