@@ -19,6 +19,7 @@ import * as pphOpLampiranReferensi from './016-pph-op-lampiran-referensi';
 import * as pphOpKodeKoreksiFiskal from './017-pph-op-kode-koreksi-fiskal';
 import * as pphOpLampiran3aAkun from './018-pph-op-lampiran-3a-akun';
 import * as pphOpLampiran3aNeracaAkun from './019-pph-op-lampiran-3a-neraca-akun';
+import * as ebupotReferenceMaster from './020-ebupot-reference-master';
 
 type SeedBatchModule = {
 	name: string;
@@ -52,5 +53,6 @@ export const seedRegistry: { batch: SeedBatchModule; kind: 'reference' | 'demo' 
 	{ batch: pphOpKodeKoreksiFiskal, kind: 'reference' },
 	{ batch: pphOpLampiran3aAkun, kind: 'reference' },
 	{ batch: pphOpLampiran3aNeracaAkun, kind: 'reference' },
+	{ batch: ebupotReferenceMaster, kind: 'reference' },
 	{ batch: fakturDemo, kind: 'demo' }
 ];

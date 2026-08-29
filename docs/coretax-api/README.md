@@ -130,3 +130,4 @@ is two lists the app itself excludes from its cache — `BLACKLIST_EMAIL_DOMAIN`
 | `fetch-reference-data.mjs` | the fetcher, no dependencies, plain `node` |
 | `reference-type-names.txt` | 425 type names extracted from `main.js` |
 | `reference-data-1770.json` | the 27 lists SPT 1770 uses, 658 options, checked in |
+| `reference-data-ebupot.json` | the 15 populated lists `withholding-slips-portal` uses (BP21/BPU/BP26/BPA1/BPA2/MP/BPNR/SP/CY object catalogs, document types, status, tax certificate), 483 options, checked in — see `../ui-reference/coretax/ebupot/NOTES.md` for the `ParameterData` TER-bracket shape found inside these rows |
