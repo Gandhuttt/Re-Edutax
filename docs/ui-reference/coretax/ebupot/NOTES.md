@@ -352,30 +352,34 @@ Referensi) and clicked **Simpan Konsep** for real (never Submit/Terbitkan).
   unconditionally**: a "Success — Save data successfully!" toast appears
   and the page redirects to the list (Belum Terbit tab) — no confirmation
   dialog, no second step.
-- **But the saved row's Status can still be `SAVEDINVALID`** ("Disimpan
-  Tidak Valid" — this exact string is in our seeded `EBUPOT_STATUS` table)
-  even though every field the form exposes was filled and passed
-  client-side validation. Re-opening the "invalid" draft showed no red
-  field-level errors anywhere — every field looked complete and correct.
-  Re-saving the identical data produced the same `SAVEDINVALID` result.
-  **The specific server-side rule that failed was never identified** — it's
-  invisible in the UI, and could be anything from a business rule on this
-  particular test NIK/object combination to something about the specific
-  facility/object pairing. This needs a wider live test matrix (several
-  known-good NPWP + object combos) to isolate, not done this pass.
-- `SAVEDINVALID` and presumably-valid saves (`SUBMITTED`/`CREATED`, per the
-  `EBUPOT_STATUS` catalog) both stay in the same **Belum Terbit** tab —
-  there is no separate "invalid drafts" list. The row is still fully
-  editable (pencil icon) and deletable (checkbox + Hapus) either way.
+- **But the saved row's Status always comes back `SAVEDINVALID`** ("Disimpan
+  Tidak Valid" — this exact string is in our seeded `EBUPOT_STATUS` table),
+  even with every field filled correctly and zero field-level errors on
+  re-opening. Reproduced twice with identical, fully-filled data.
 
-**Gap in our app:** `updateBpu.remote.ts` has no equivalent concept. It
-saves whatever passes our own (much narrower) server-side checks and always
-looks like a plain successful save — there's no second, server-evaluated
-"this draft is saved but flagged invalid for reasons not shown to the user"
-state. Coretax's `SAVEDINVALID` status is presumably surfaced elsewhere
-(monitoring view? a details panel we didn't check?) before the user tries
-to Terbitkan it — worth a follow-up look, since right now we don't know
-*how* a real user is expected to discover or fix whatever's wrong.
+  **Resolved** (not a data bug): per a third-party writeup
+  ([doyanduit.com](https://doyanduit.com/news/solusi-error-e-bupot-saved-invalid-di-coretax-saat-membuat-bukti-potong/)),
+  `SAVEDINVALID` is simply Coretax's status label for *any* draft saved via
+  Simpan Konsep that hasn't gone through **Submit** yet — it does not mean
+  something is wrong with the data. Submit is a distinct, earlier step from
+  **Terbitkan** (publish/issue): Submit runs server-side validation
+  (format, masa-pajak compatibility, billing alignment) and finalizes the
+  draft's data; Terbitkan is the actual irreversible issuance that assigns
+  the official document number and electronic signature. The real flow is
+  Simpan Konsep → **Submit** → Terbitkan → tanda tangan elektronik, not
+  Simpan Konsep → Terbitkan directly. Un-submitted drafts sitting at
+  `SAVEDINVALID` are normal and expected, not evidence of a bad save.
+- `SAVEDINVALID` and post-Submit statuses both stay in the same **Belum
+  Terbit** tab until Terbitkan — no separate "invalid drafts" list. The row
+  is still fully editable (pencil icon) and deletable (checkbox + Hapus)
+  either way.
+
+**Gap in our app:** `updateBpu.remote.ts` has no equivalent two-step
+save/submit distinction — Simpan Konsep is our only persistence action, with
+no separate Submit step that performs Coretax-style server-side validation
+before a draft can be issued. Whether to model this (a `SUBMITTED` status
+distinct from a plain saved draft) is an open design question for when this
+module gets closer to supporting real issuance, not an urgent fix.
 
 ## Not yet explored this pass
 
