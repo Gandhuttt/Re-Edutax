@@ -44,6 +44,13 @@
 						<li><a class="dropdown-item" href="/surat-pemberitahuan/laporan">SPT Dilaporkan</a></li>
 					</ul>
 				</li>
+				<li class="dropdown" aria-current={page.url.pathname.startsWith('/ebupot') ? 'page' : undefined}>
+					<button class="dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">eBupot</button>
+					<ul class="dropdown-menu">
+						<li><a class="dropdown-item" href="/ebupot/bukti-potong-saya">Bukti Potong Saya</a></li>
+						<li><a class="dropdown-item" href="/ebupot/bpu">BPU</a></li>
+					</ul>
+				</li>
 			{/if}
 		</ul>
 		<div class="corner">
