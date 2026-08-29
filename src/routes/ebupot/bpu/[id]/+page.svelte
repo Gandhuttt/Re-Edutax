@@ -12,7 +12,7 @@
 	import { getWajibPajak } from '../../../getWajibPajak.remote';
 	import { getBpu } from './getBpu.remote';
 	import { submitBpu } from './submitBpu.remote';
-	import { terbitkanBpu } from './terbitkanBpu.remote';
+	import { terbitkanBpu } from '../terbitkanBpu.remote';
 	import { updateBpu } from './updateBpu.remote';
 
 	const bpu = await getBpu();
@@ -261,7 +261,7 @@
 					<Button type="submit" class="tw:text-white" color="var(--color-danger)">Submit</Button>
 				</form>
 			{:else}
-				<form {...terbitkanBpu}>
+				<form {...terbitkanBpu.for(bpu.id)}>
 					<Button type="submit" class="tw:text-white" color="var(--color-secondary)">
 						Terbitkan
 					</Button>

@@ -3,29 +3,28 @@ import { db } from '$lib/server/db';
 import { bukti_potong_bpu } from '$lib/server/db/schema';
 import { error, redirect } from '@sveltejs/kit';
 import { and, eq } from 'drizzle-orm';
+import * as v from 'valibot';
 
 // Simulated Terbitkan: this app never calls the real Coretax issuance
 // action. Requires status SUBMITTED (a draft must go through Submit first,
 // matching the real Simpan Konsep -> Submit -> Terbitkan order) and assigns
 // a Nomor Pemotongan. Once issued the slip is locked (see updateBpu's
 // diterbitkan=false guard) and becomes visible to the recipient's own
-// "Bukti Potong Saya" recap.
+// "Bukti Potong Saya" recap. Usable both from the list (per-row action,
+// like Hapus) and from the detail page via .for(id).
 const generateNomorPemotongan = () => {
 	const random = crypto.getRandomValues(new Uint32Array(1))[0];
 	return String(random).padStart(10, '0').slice(0, 10);
 };
 
-export const terbitkanBpu = form(async () => {
+const TerbitkanBpuSchema = v.object({ id: v.string() });
+
+export const terbitkanBpu = form(TerbitkanBpuSchema, async ({ id }) => {
 	const event = getRequestEvent();
 	const activeNpwp = event.locals.user?.username;
-	const id = event.params.id;
 
 	if (!activeNpwp) {
 		error(401, 'Belum login');
-	}
-
-	if (!id) {
-		error(400, 'Bad id');
 	}
 
 	const [existing] = await db

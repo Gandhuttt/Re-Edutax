@@ -5,6 +5,7 @@
 	import { deleteBpu } from './deleteBpu.remote';
 	import { listBpu } from './listBpu.remote';
 	import { newEmpty } from './newEmpty.remote';
+	import { terbitkanBpu } from './terbitkanBpu.remote';
 
 	const rupiah = new Intl.NumberFormat('id-ID', { minimumFractionDigits: 0 });
 
@@ -36,10 +37,7 @@
 </script>
 
 <div class="tw:w-full tw:p-25">
-	<div class="tw:flex tw:flex-row tw:justify-between tw:items-center tw:mb-3">
-		<span class="tw:text-2xl tw:h-10 tw:flex tw:items-center">eBupot BPU</span>
-		<form {...newEmpty}><Button type="submit">+ Create eBupot BPU</Button></form>
-	</div>
+	<div class="tw:text-2xl tw:h-10 tw:flex tw:items-center tw:mb-3">eBupot BPU</div>
 
 	<div class="tw:flex tw:flex-row tw:gap-5">
 		<div class="tw:w-[12rem] tw:shrink-0 tw:rounded-sm tw:bg-gray-100 tw:border tw:border-[#a9a9a9]">
@@ -59,8 +57,13 @@
 		</div>
 
 		<div class="tw:grow tw:min-h-100 tw:overflow-scroll tw:rounded-sm tw:bg-gray-100 tw:border tw:border-[#a9a9a9]">
-			<div class="tw:px-3 tw:py-2 tw:font-semibold tw:border-b tw:border-b-[#a9a9a9] tw:uppercase">
-				EBUPOT BPU {activeTab}
+			<div
+				class="tw:px-3 tw:py-2 tw:font-semibold tw:border-b tw:border-b-[#a9a9a9] tw:flex tw:flex-row tw:justify-between tw:items-center"
+			>
+				<span class="tw:uppercase">EBUPOT BPU {activeTab}</span>
+				{#if activeTab === 'Belum Terbit'}
+					<form {...newEmpty}><Button type="submit">+ Create eBupot BPU</Button></form>
+				{/if}
 			</div>
 			<Table class="tw:w-full">
 				{#snippet head()}
@@ -77,6 +80,7 @@
 				{#snippet body()}
 					{#each filterRows(await listBpu(), activeTab) as row}
 						{@const hapusBpu = deleteBpu.for(row.id)}
+						{@const terbitkanRow = terbitkanBpu.for(row.id)}
 						<tr>
 							<td>
 								<div class="tw:flex tw:flex-row tw:gap-1">
@@ -84,6 +88,13 @@
 										<Button>Buka</Button>
 									</a>
 									{#if !row.diterbitkan}
+										{#if row.status === 'SUBMITTED'}
+											<form {...terbitkanRow}>
+												<Button color="var(--color-secondary)" class="tw:text-white">
+													Terbitkan
+												</Button>
+											</form>
+										{/if}
 										<form {...hapusBpu}>
 											<Button color="var(--color-danger)" class="tw:text-white">Hapus</Button>
 										</form>
