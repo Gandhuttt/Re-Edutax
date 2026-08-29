@@ -36,3 +36,21 @@ export const getFasilitasPajakBpu = prerender(
 	},
 	{ dynamic: true }
 );
+
+// Live-verified (see docs/ui-reference/coretax/ebupot/NOTES.md): BP21's
+// ParameterData across all 36 objects only ever references TaxCertificateCode
+// 4 (DTP), 8 (Fasilitas Lainnya), 9 (Tanpa Fasilitas), 10 (SKB Pasal 21).
+const bp21FasilitasKode = ['4', '8', '9', '10'];
+
+export const getFasilitasPajakBp21 = prerender(
+	async () => {
+		const rows = await db
+			.select()
+			.from(fasilitas_pajak_ebupot)
+			.where(and(eq(fasilitas_pajak_ebupot.aktif, true), inArray(fasilitas_pajak_ebupot.kode, bp21FasilitasKode)))
+			.orderBy(asc(fasilitas_pajak_ebupot.kode));
+
+		return rows;
+	},
+	{ dynamic: true }
+);

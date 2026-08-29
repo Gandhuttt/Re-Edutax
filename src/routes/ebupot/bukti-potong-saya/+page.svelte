@@ -17,6 +17,7 @@
 				<Table class="tw:w-full">
 					{#snippet head()}
 						<tr>
+							<th class="tw:w-[6rem]">Jenis</th>
 							<th class="tw:w-[15rem]">Nomor Pemotongan</th>
 							<th class="tw:w-[10rem]">Masa Pajak</th>
 							<th class="tw:w-[15rem]">NPWP Pemotong</th>
@@ -28,6 +29,7 @@
 					{#snippet body()}
 						{#each await listBuktiPotongSaya() as row}
 							<tr>
+								<td>{row.jenis}</td>
 								<td class="tw:font-mono">{row.nomorPemotongan}</td>
 								<td>{formatMonth(row.masaPajak)} {row.tahun}</td>
 								<td>{row.npwpPemotong}</td>
@@ -37,7 +39,7 @@
 							</tr>
 						{:else}
 							<tr>
-								<td colspan="6">Tidak ada data yang ditemukan.</td>
+								<td colspan="7">Tidak ada data yang ditemukan.</td>
 							</tr>
 						{/each}
 					{/snippet}

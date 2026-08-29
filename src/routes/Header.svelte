@@ -49,6 +49,7 @@
 					<ul class="dropdown-menu">
 						<li><a class="dropdown-item" href="/ebupot/bukti-potong-saya">Bukti Potong Saya</a></li>
 						<li><a class="dropdown-item" href="/ebupot/bpu">BPU</a></li>
+						<li><a class="dropdown-item" href="/ebupot/bp21">BP21</a></li>
 					</ul>
 				</li>
 			{/if}

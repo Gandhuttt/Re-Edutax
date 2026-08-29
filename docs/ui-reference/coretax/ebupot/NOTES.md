@@ -450,6 +450,60 @@ this doc update: `fasilitasPajak.remote.ts` now scopes BPU's facility list to
 codes 8/9/4, and the BPU form makes Tarif editable when Fasilitas Lainnya is
 selected instead of erroring server-side.
 
+## BP21: TER, flat, and cumulative-bracket formulas -- live-verified 2026-08-29
+
+Re-verified live before implementing BP21 (not just relying on the notes
+above from the first pass). NIK `3273010101900001` ("INDRA SANJAYA") on the
+BP21 create form: entering it auto-fills Nama (read-only, grey) AND Status
+PTKP (editable, white background + clear button, defaulted to `K/0`) --
+confirms Status PTKP is a derived-but-overridable field, not purely manual
+and not purely locked.
+
+**TER formula** -- selected object `21-100-35` ("Upah Pegawai Tidak Tetap
+yang Dibayarkan secara Bulanan"). Bruto 10,000,000 + PTKP `K/0` -> Tarif
+2.00%, PPh 200,000. Same bruto, switched PTKP to `K/3` -> Tarif 1.50%, PPh
+150,000. Both match `ParameterData.ItemList[].Rates[]` exactly: filter bands
+by `TaxExemptionStatus` containing the PTKP code, then find the band whose
+`[Min,Max]` contains the bruto. `PPh = bruto x DeemedRate% x band.Rate%`.
+
+**Flat formula** -- object `21-402-02` ("Honor... PNS Golongan III..."): DPP
+100.00%, Tarif 5.00% regardless of PTKP or bruto -- matches a plain
+`Rate: 5` on the `ItemList` entry, no bracket table.
+
+**Cumulative/`Minus`-bracket formula** (only `21-401-01`/`21-401-02`,
+pesangon/pensiun sekaligus) -- these show an extra "Pendapatan Bruto yang
+Telah Dibayar Sebelumnya" field. Set previous=60,000,000, current bruto=
+50,000,000 (total=110,000,000) on `21-401-01` -> **Tarif 15.00%, PPh
+3,500,000**. Reverse-engineered and confirmed exact: bands carry a `Minus`
+subtraction constant (Pasal 17 lump-sum style), `tax(x) = x * band(x).Rate/100
+- band(x).Minus`; `taxOnTotal = tax(110,000,000) = 110,000,000*15% -
+12,500,000 = 4,000,000`; `taxOnPrevious = tax(60,000,000) = 60,000,000*5% -
+2,500,000 = 500,000`; `PPh = taxOnTotal - taxOnPrevious = 3,500,000`. Tarif
+shown is the bracket-of-total's `Rate`.
+
+**Fasilitas Pajak restricted to codes 4/8/9/10** (DTP, Fasilitas Lainnya,
+Tanpa Fasilitas, SKB Pasal 21) across all 36 `EBUPOTBP21_TAX_OBJECT` rows --
+same restriction mechanism as BPU's 3-code scoping, confirmed live (dropdown
+showed exactly these 4 options).
+
+**`ManualDeemedRate` is NOT dead code for BP21** (unlike BPU, where it never
+triggers) -- several objects (e.g. `21-100-38`, `21-402-04` facility 8,
+`21-401-01`/`02` facility 8) set `ManualDeemedRate: "TRUE"` alongside
+`ManualTaxRate`/`ManualIncomeTaxWithheld`, so BP21 needs all three manual
+override fields (DPP%, Tarif%, Pajak Penghasilan) wired up, not just two.
+
+One click sequence this pass showed the Fasilitas Pajak dropdown appearing
+unresponsive after selecting Nama Objek Pajak first -- not conclusively
+reproduced (may have been a stray click), so the BP21 form implements it as
+a normal always-editable `Select` without assuming any lock ordering. Worth
+re-checking live if a future pass has budget for it.
+
+Implemented in `src/lib/server/ebupot/resolveBp21.ts`,
+`src/routes/ebupot/bp21/*`. Reference data (`kode_objek_pajak_pph` rows with
+`jenisBuktiPotong='bp21'`) was already fully seeded via migration
+`0025_reference_data.sql` from earlier session work -- no new reference
+migration was needed, only the new `bukti_potong_bp21` schema migration.
+
 ## Not yet explored this pass
 
 BPNR, Penyetoran Sendiri, Pemotongan Secara Digunggung, Dokumen yang
