@@ -6,7 +6,7 @@
 	import Select from '$lib/components/Select.svelte';
 	import { formatMonth } from '$lib/helpers/date';
 	import { getContext } from 'svelte';
-	import { getFasilitasPajak } from '../../fasilitasPajak.remote';
+	import { getFasilitasPajakBpu } from '../../fasilitasPajak.remote';
 	import { getJenisDokumenEbupot } from '../../jenisDokumen.remote';
 	import { getObjekPajakBpu } from '../../objekPajakBpu.remote';
 	import { getWajibPajak } from '../../../getWajibPajak.remote';
@@ -18,7 +18,7 @@
 	const bpu = await getBpu();
 	const [objekPajakOptions, fasilitasOptions, jenisDokumenOptions] = await Promise.all([
 		getObjekPajakBpu(),
-		getFasilitasPajak(),
+		getFasilitasPajakBpu(),
 		getJenisDokumenEbupot()
 	]);
 
@@ -27,9 +27,38 @@
 	let nomorIdentitasWpState = $state(bpu.nomorIdentitasWp);
 	let namaPenerimaState = $state(bpu.namaPenerima);
 	let kodeObjekPajakIdState = $state(bpu.kodeObjekPajakId ?? '');
+	let fasilitasPajakIdState = $state(bpu.fasilitasPajakId ?? '');
 	const selectedObjekPajak = $derived(objekPajakOptions.find((o) => o.id === kodeObjekPajakIdState));
+	const selectedFasilitas = $derived(fasilitasOptions.find((f) => f.id === fasilitasPajakIdState));
 	const nitkuPenerima = $derived(nomorIdentitasWpState ? `${nomorIdentitasWpState}000000` : '');
 	const nitkuPemotong = `${bpu.npwpPemotong}000000`;
+
+	// Client-side mirror of resolveTarif.ts, for display only -- the server
+	// is the source of truth at save time. See docs/ui-reference/coretax/
+	// ebupot/NOTES.md "BPU: Fasilitas Pajak and manual-rate objects": Coretax
+	// unlocks Tarif(%) for manual entry when the matching ItemList entry has
+	// ManualTaxRate: "TRUE", instead of leaving it derived-and-readonly.
+	const resolvedTarif = $derived.by(() => {
+		if (!selectedObjekPajak || !selectedFasilitas) return null;
+		const item = selectedObjekPajak.parameterData.ItemList.find(
+			(entry) =>
+				entry.TaxCertificateCode === selectedFasilitas.kode ||
+				entry.TaxCertificateCodes?.includes(selectedFasilitas.kode)
+		);
+		if (!item) return null;
+		const manual = item.ManualTaxRate?.toUpperCase() === 'TRUE';
+		const tarif = typeof item.Rate === 'number' ? item.Rate : (item.Rates?.[0]?.Rate ?? 0);
+		return { tarif, manual };
+	});
+
+	let tarifManualState = $state(bpu.tarif);
+	$effect(() => {
+		// Every combo change resets Tarif to Coretax's default for it, even
+		// when manual entry is allowed -- matches live behavior (switching
+		// Fasilitas re-populates Tarif with the new default rather than
+		// preserving a prior manual override).
+		if (resolvedTarif) tarifManualState = resolvedTarif.tarif;
+	});
 
 	async function cariNpwpPenerima() {
 		const wp = await getWajibPajak({ npwp: nomorIdentitasWpState });
@@ -179,7 +208,7 @@
 						<Select
 							name="fasilitasPajakId"
 							id={getContext('id')}
-							value={bpu.fasilitasPajakId ?? ''}
+							bind:value={fasilitasPajakIdState}
 							disabled={!bpu.canEdit}
 						>
 							<option value="" disabled>Please select</option>
@@ -225,12 +254,31 @@
 						/>
 					</Label>
 					<Label>
+						<span>Tarif (%)</span>
+						{#if resolvedTarif?.manual}
+							<Input
+								name="tarifManual"
+								type="text"
+								id={getContext('id')}
+								bind:value={tarifManualState}
+								disabled={!bpu.canEdit}
+							/>
+						{:else}
+							<Input type="text" id={getContext('id')} value={resolvedTarif?.tarif ?? bpu.tarif} disabled />
+						{/if}
+					</Label>
+					<Label>
 						<span>KAP</span>
 						<Input type="text" id={getContext('id')} value={selectedObjekPajak?.kap ?? ''} disabled />
 					</Label>
 					<p class="tw:text-sm tw:text-gray-500">
-						Tarif dan Pajak Penghasilan dihitung otomatis dari kombinasi Nama Objek Pajak dan
-						Fasilitas Pajak saat disimpan.
+						{#if resolvedTarif?.manual}
+							Tarif untuk kombinasi ini dapat diisi manual. Pajak Penghasilan dihitung otomatis
+							dari Dasar Pengenaan Pajak x Tarif saat disimpan.
+						{:else}
+							Tarif dan Pajak Penghasilan dihitung otomatis dari kombinasi Nama Objek Pajak dan
+							Fasilitas Pajak saat disimpan.
+						{/if}
 					</p>
 				</div>
 			{/snippet}

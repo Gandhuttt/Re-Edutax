@@ -381,6 +381,75 @@ before a draft can be issued. Whether to model this (a `SUBMITTED` status
 distinct from a plain saved draft) is an open design question for when this
 module gets closer to supporting real issuance, not an urgent fix.
 
+## BPU: Fasilitas Pajak and manual-rate objects — live + bundle-verified 2026-08-29
+
+Two follow-ups from the initial pass, both confirmed live and (for the second)
+grounded directly in `main.03469c0b8e38345f.js` source, not just UI clicking.
+
+**Fasilitas Pajak dropdown always shows only 3 of the 11
+`EBUPOT_TAX_CERTIFICATE` codes**, reproduced across two separate sessions/
+accounts: **Tanpa Fasilitas** (code 9, `NoCertificate`), **PPh Ditanggung
+Pemerintah/DTP** (code 4, `IncomeTaxBorneByGovernment`), **Fasilitas Lainnya**
+(code 8, `OtherCertificate`) — regardless of which Nama Objek Pajak is
+selected, or even before one is selected. The other 8 codes (SKB Pasal 21/22/
+23, SKD, Peredaran Bruto Tertentu, etc.) are never offered in BPU's UI at all.
+Confirmed in the bundle that the field's `referenceDataType` really is the
+full `EBUPOT_TAX_CERTIFICATE` list (`EBUPOTTAXCERTIFICATE` resolves to the
+same `_l.ReferenceDataTypeName = "EBUPOT_TAX_CERTIFICATE"` as everywhere
+else), so the reduction to 3 must happen via a client-side filter applied
+specifically in BPU's form init — the exact filter expression wasn't located
+in the minified source in a reasonable search, but the *effect* is solid
+(two live sessions, consistent both times).
+
+**Field order is Fasilitas Pajak → Nama Objek Pajak, not the other way
+around.** Nama Objek Pajak stays empty ("Tidak ada opsi tersedia") until a
+Fasilitas is picked first — the reverse of what the original NOTES pass
+assumed.
+
+**Manual-rate objects — mechanism now confirmed in source.** Selected
+Dividen + Fasilitas Lainnya (the `ManualTaxRate: "TRUE"` entry in that
+object's `ParameterData.ItemList`): Tarif (%) changed from a greyed-out
+derived field to an editable input, pre-filled with the object's default
+rate (15.00). Typed `7,50`, it was accepted; with DPP = 10,000,000 the
+computed Pajak Penghasilan came out to 750,000 (10,000,000 × 7.5%) — same
+formula, just fed a user-supplied rate.
+
+Grounded directly in the bundle — this exact line appears ~16 times across
+different eBupot form modules, always the same shape:
+
+```js
+// find the ItemList entry matching the selected TaxCertificateCode, then:
+this.form.setDisabled(t.XUk.TaxRate.name, "TRUE" != upperCase(T.ManualTaxRate)),
+this.form.setDisabled(t.XUk.DeemedNetIncome.name, "TRUE" != upperCase(T.ManualDeemedRate)),
+this.form.setDisabled(t.XUk.IncomeTax.name, "TRUE" != upperCase(T.ManualIncomeTaxWithheld))
+```
+
+So the rule is exactly `ManualTaxRate/ManualDeemedRate/ManualIncomeTaxWithheld
+== "TRUE"` on the matching `ItemList` entry ⇒ that specific field
+(Tarif/DPP%/Pajak Penghasilan respectively) unlocks for manual entry instead
+of staying derived-and-readonly. **This is broader than just Tarif** — the
+same mechanism can unlock DPP% (`DeemedNetIncome`) or even the final tax
+amount itself (`IncomeTax`/`IncomeTaxWithheld`) on other object/facility
+combinations, not tested live this pass but present in the same code path.
+
+**Bonus, unrelated to the above:** typing a NIK Coretax doesn't recognize
+triggers a confirmation dialog — "TIN {x} saat ini belum terdaftar dalam
+sistem. Sistem akan otomatis menggunakan TIN 9990000000999000 sebagai TIN
+penerima penghasilan..." — and on confirming, Nomor Identitas WP becomes the
+literal placeholder `9990000000999000` and Nama becomes
+`PENERIMA PENGHASILAN#{original typed NIK}`. This is Coretax's defined
+fallback for an unregistered recipient; our app has no equivalent (see gap
+list — no DJP registry access at all, this shows what the real system does
+instead of just accepting anything typed).
+
+**App gap this closes/updates:** `resolveTarif` (`src/lib/server/ebupot/
+resolveTarif.ts`) rejects any `ManualTaxRate: "TRUE"` case outright. The real
+behavior isn't "no rate exists" — it's "let the preparer type one," pre-filled
+with the same default the non-manual case would have used. Fixed alongside
+this doc update: `fasilitasPajak.remote.ts` now scopes BPU's facility list to
+codes 8/9/4, and the BPU form makes Tarif editable when Fasilitas Lainnya is
+selected instead of erroring server-side.
+
 ## Not yet explored this pass
 
 BPNR, Penyetoran Sendiri, Pemotongan Secara Digunggung, Dokumen yang

@@ -15,6 +15,10 @@ const UpdateBpuSchema = v.object({
 	kodeObjekPajakId: requiredString('Nama Objek Pajak harus dipilih'),
 	fasilitasPajakId: requiredString('Fasilitas Pajak harus dipilih'),
 	dasarPengenaanPajak: decimalString('Dasar Pengenaan Pajak'),
+	// Only used when the resolved object+facility combination allows a manual
+	// rate (Coretax's ManualTaxRate: "TRUE" -- see resolveTarif). Ignored
+	// otherwise; the derived rate always wins for non-manual combinations.
+	tarifManual: v.optional(decimalString('Tarif')),
 	jenisDokumenId: requiredString('Jenis Dokumen harus dipilih'),
 	nomorDokumen: requiredString('Nomor Dokumen harus diisi'),
 	tanggalDokumen: v.pipe(
@@ -93,13 +97,18 @@ export const updateBpu = form(UpdateBpuSchema, async (input) => {
 		error(400, 'Jenis Dokumen tidak valid');
 	}
 
-	let tarif: number;
+	let resolved: ReturnType<typeof resolveTarif>;
 	try {
-		tarif = resolveTarif(objekPajak.parameterData, fasilitas.kode);
+		resolved = resolveTarif(objekPajak.parameterData, fasilitas.kode);
 	} catch (err) {
 		error(400, err instanceof Error ? err.message : 'Tarif tidak dapat dihitung');
 	}
 
+	if (resolved.manual && !input.tarifManual) {
+		error(400, 'Tarif harus diisi untuk kombinasi objek pajak dan fasilitas ini');
+	}
+
+	const tarif = resolved.manual ? Number(input.tarifManual) : resolved.tarif;
 	const dasarPengenaanPajak = Number(input.dasarPengenaanPajak);
 	const pajakPenghasilan = Math.round((dasarPengenaanPajak * tarif) / 100);
 
