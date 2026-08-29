@@ -25,6 +25,7 @@ export * from './transactional/surat_pemberitahuan/spt_ppn/retail_invoice';
 export * from './references/ebupot/kode_objek_pajak_pph';
 export * from './references/ebupot/jenis_dokumen_ebupot';
 export * from './references/ebupot/fasilitas_pajak_ebupot';
+export * from './transactional/ebupot/bukti_potong_bpu';
 export * from './references/spt_pph_badan/sektor_usaha';
 export * from './references/spt_pph_badan/opini_auditor';
 export * from './references/spt_pph_badan/negara';

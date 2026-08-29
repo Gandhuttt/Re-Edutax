@@ -1,0 +1,22 @@
+CREATE TABLE `bukti_potong_bpu` (
+	`id` text PRIMARY KEY NOT NULL,
+	`npwp_pemotong` text NOT NULL,
+	`masa_pajak` integer NOT NULL,
+	`tahun` integer NOT NULL,
+	`status` text DEFAULT 'NORMAL' NOT NULL,
+	`nomor_identitas_wp` text DEFAULT '' NOT NULL,
+	`nama_penerima` text DEFAULT '' NOT NULL,
+	`kode_objek_pajak_id` text,
+	`fasilitas_pajak_id` text,
+	`dasar_pengenaan_pajak` real DEFAULT 0 NOT NULL,
+	`tarif` real DEFAULT 0 NOT NULL,
+	`pajak_penghasilan` real DEFAULT 0 NOT NULL,
+	`jenis_dokumen_id` text,
+	`nomor_dokumen` text DEFAULT '' NOT NULL,
+	`tanggal_dokumen` text,
+	`diterbitkan` integer DEFAULT false NOT NULL,
+	FOREIGN KEY (`npwp_pemotong`) REFERENCES `wajib_pajak`(`npwp`) ON UPDATE no action ON DELETE no action,
+	FOREIGN KEY (`kode_objek_pajak_id`) REFERENCES `kode_objek_pajak_pph`(`id`) ON UPDATE no action ON DELETE no action,
+	FOREIGN KEY (`fasilitas_pajak_id`) REFERENCES `fasilitas_pajak_ebupot`(`id`) ON UPDATE no action ON DELETE no action,
+	FOREIGN KEY (`jenis_dokumen_id`) REFERENCES `jenis_dokumen_ebupot`(`id`) ON UPDATE no action ON DELETE no action
+);
