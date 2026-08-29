@@ -169,6 +169,13 @@
       "when": 1787978976621,
       "tag": "0023_lowly_phantom_reporter",
       "breakpoints": true
+    },
+    {
+      "idx": 24,
+      "version": "6",
+      "when": 1787983743888,
+      "tag": "0024_awesome_tattoo",
+      "breakpoints": true
     }
   ]
 }

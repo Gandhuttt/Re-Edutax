@@ -55,5 +55,12 @@ export const bukti_potong_bpu = sqliteTable('bukti_potong_bpu', {
 	nomorDokumen: text('nomor_dokumen').notNull().default(''),
 	tanggalDokumen: text('tanggal_dokumen'),
 
+	// Assigned on Terbitkan (see terbitkanBpu.remote.ts) -- simulated locally,
+	// never issued through the real Coretax Terbitkan action. Once issued,
+	// the slip also becomes visible to the recipient's own "Bukti Potong
+	// Saya" recap (see bukti-potong-saya route) by matching nomorIdentitasWp
+	// against their NPWP, the same way a faktur keluaran shows up in the
+	// buyer's Faktur Masukan.
+	nomorPemotongan: text('nomor_pemotongan'),
 	diterbitkan: integer('diterbitkan', { mode: 'boolean' }).notNull().default(false)
 });

@@ -12,6 +12,7 @@
 	import { getWajibPajak } from '../../../getWajibPajak.remote';
 	import { getBpu } from './getBpu.remote';
 	import { submitBpu } from './submitBpu.remote';
+	import { terbitkanBpu } from './terbitkanBpu.remote';
 	import { updateBpu } from './updateBpu.remote';
 
 	const bpu = await getBpu();
@@ -254,12 +255,25 @@
 	<div class="tw:text-2xl tw:mb-5">EBUPOT BPU</div>
 	{#if bpu.canEdit}
 		<form {...updateBpu}>{@render formContent()}</form>
-		<div class="tw:flex tw:flex-row tw:justify-end tw:mt-3">
-			<form {...submitBpu}>
-				<Button type="submit" class="tw:text-white" color="var(--color-danger)">Submit</Button>
-			</form>
+		<div class="tw:flex tw:flex-row tw:justify-end tw:items-center tw:mt-3 tw:gap-2">
+			{#if bpu.status !== 'SUBMITTED'}
+				<form {...submitBpu}>
+					<Button type="submit" class="tw:text-white" color="var(--color-danger)">Submit</Button>
+				</form>
+			{:else}
+				<form {...terbitkanBpu}>
+					<Button type="submit" class="tw:text-white" color="var(--color-secondary)">
+						Terbitkan
+					</Button>
+				</form>
+			{/if}
 		</div>
 	{:else}
+		{#if bpu.nomorPemotongan}
+			<p class="tw:text-sm tw:text-gray-600 tw:mb-3">
+				Nomor Pemotongan: <span class="tw:font-mono">{bpu.nomorPemotongan}</span>
+			</p>
+		{/if}
 		{@render formContent()}
 	{/if}
 </div>

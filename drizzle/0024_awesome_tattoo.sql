@@ -1,0 +1,1 @@
+ALTER TABLE `bukti_potong_bpu` ADD `nomor_pemotongan` text;
