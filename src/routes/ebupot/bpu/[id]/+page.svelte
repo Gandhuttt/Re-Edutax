@@ -9,6 +9,7 @@
 	import { getFasilitasPajak } from '../../fasilitasPajak.remote';
 	import { getJenisDokumenEbupot } from '../../jenisDokumen.remote';
 	import { getObjekPajakBpu } from '../../objekPajakBpu.remote';
+	import { getWajibPajak } from '../../../getWajibPajak.remote';
 	import { getBpu } from './getBpu.remote';
 	import { updateBpu } from './updateBpu.remote';
 
@@ -21,65 +22,149 @@
 
 	let masaPajakState = $state(bpu.masaPajak);
 	let tahunState = $state(bpu.tahun);
+	let nomorIdentitasWpState = $state(bpu.nomorIdentitasWp);
+	let namaPenerimaState = $state(bpu.namaPenerima);
 	let kodeObjekPajakIdState = $state(bpu.kodeObjekPajakId ?? '');
 	const selectedObjekPajak = $derived(objekPajakOptions.find((o) => o.id === kodeObjekPajakIdState));
+	const nitkuPenerima = $derived(nomorIdentitasWpState ? `${nomorIdentitasWpState}000000` : '');
+	const nitkuPemotong = `${bpu.npwpPemotong}000000`;
+
+	async function cariNpwpPenerima() {
+		const wp = await getWajibPajak({ npwp: nomorIdentitasWpState });
+		if (wp) namaPenerimaState = wp.nama;
+	}
 
 	const months = Array.from({ length: 12 }, (_, i) => i + 1);
 </script>
 
 {#snippet formContent()}
-	<div class="tw:flex tw:flex-col tw:gap-5 tw:w-full tw:max-w-2xl">
-		<Card>
-			{#snippet head()}
-				<span class="tw:text-xl">Informasi Umum</span>
-			{/snippet}
-			{#snippet body()}
-				<div class="tw:flex tw:flex-col tw:gap-3 tw:px-3">
-					<Label>
-						<span>Masa Pajak</span>
-						<div class="tw:flex tw:flex-row tw:gap-2">
-							<Select
-								name="masaPajak"
-								id={getContext('id')}
-								bind:value={masaPajakState}
-								disabled={!bpu.canEdit}
-							>
-								{#each months as m (m)}
-									<option value={m}>{formatMonth(m)}</option>
-								{/each}
-							</Select>
-							<Input
-								name="tahun"
-								type="number"
-								bind:value={tahunState}
-								disabled={!bpu.canEdit}
-								class="tw:w-30"
-							/>
+	<div class="tw:flex tw:flex-col tw:gap-5 tw:w-full">
+		<div class="tw:flex tw:flex-row tw:gap-5">
+			<div class="tw:basis-1/2">
+				<Card>
+					{#snippet head()}
+						<span class="tw:text-xl">Informasi Umum</span>
+					{/snippet}
+					{#snippet body()}
+						<div class="tw:flex tw:flex-col tw:gap-3 tw:px-3">
+							<Label>
+								<span>Masa Pajak</span>
+								<div class="tw:flex tw:flex-row tw:gap-2">
+									<Select
+										name="masaPajak"
+										id={getContext('id')}
+										bind:value={masaPajakState}
+										disabled={!bpu.canEdit}
+									>
+										{#each months as m (m)}
+											<option value={m}>{formatMonth(m)}</option>
+										{/each}
+									</Select>
+									<Input
+										name="tahun"
+										type="number"
+										bind:value={tahunState}
+										disabled={!bpu.canEdit}
+										class="tw:w-30"
+									/>
+								</div>
+							</Label>
+							<Label>
+								<span>Status</span>
+								<Input type="text" id={getContext('id')} value={bpu.status} disabled />
+							</Label>
+							<Label>
+								<span>Nomor Identitas WP (Penerima)</span>
+								<div class="tw:flex tw:flex-row">
+									<Input
+										class={bpu.canEdit ? 'tw:rounded-e-none! tw:border-e-0' : ''}
+										name="nomorIdentitasWp"
+										type="text"
+										id={getContext('id')}
+										bind:value={nomorIdentitasWpState}
+										disabled={!bpu.canEdit}
+									/>
+									{#if bpu.canEdit}
+										<Button
+											type="button"
+											color="#FFD230"
+											class="tw:rounded-s-none! tw:w-30"
+											onclick={cariNpwpPenerima}
+										>
+											Cari NPWP
+										</Button>
+									{/if}
+								</div>
+							</Label>
+							<Label>
+								<span>Nama Penerima</span>
+								<Input
+									name="namaPenerima"
+									type="text"
+									id={getContext('id')}
+									bind:value={namaPenerimaState}
+									disabled={!bpu.canEdit}
+								/>
+							</Label>
+							<Label>
+								<span>NITKU/Nomor Identitas Subunit Organisasi Penerima Penghasilan</span>
+								<Input type="text" id={getContext('id')} value={nitkuPenerima} disabled />
+							</Label>
 						</div>
-					</Label>
-					<Label>
-						<span>Nomor Identitas WP (Penerima)</span>
-						<Input
-							name="nomorIdentitasWp"
-							type="text"
-							id={getContext('id')}
-							value={bpu.nomorIdentitasWp}
-							disabled={!bpu.canEdit}
-						/>
-					</Label>
-					<Label>
-						<span>Nama Penerima</span>
-						<Input
-							name="namaPenerima"
-							type="text"
-							id={getContext('id')}
-							value={bpu.namaPenerima}
-							disabled={!bpu.canEdit}
-						/>
-					</Label>
-				</div>
-			{/snippet}
-		</Card>
+					{/snippet}
+				</Card>
+			</div>
+
+			<div class="tw:basis-1/2">
+				<Card>
+					{#snippet head()}
+						<span class="tw:text-xl">Dokumen Referensi</span>
+					{/snippet}
+					{#snippet body()}
+						<div class="tw:flex tw:flex-col tw:gap-3 tw:px-3">
+							<Label>
+								<span>Jenis Dokumen</span>
+								<Select
+									name="jenisDokumenId"
+									id={getContext('id')}
+									value={bpu.jenisDokumenId ?? ''}
+									disabled={!bpu.canEdit}
+								>
+									<option value="" disabled>Please select</option>
+									{#each jenisDokumenOptions as d (d.id)}
+										<option value={d.id}>{d.nama}</option>
+									{/each}
+								</Select>
+							</Label>
+							<Label>
+								<span>Nomor Dokumen</span>
+								<Input
+									name="nomorDokumen"
+									type="text"
+									id={getContext('id')}
+									value={bpu.nomorDokumen}
+									disabled={!bpu.canEdit}
+								/>
+							</Label>
+							<Label>
+								<span>Tanggal Dokumen</span>
+								<Input
+									name="tanggalDokumen"
+									type="date"
+									id={getContext('id')}
+									value={bpu.tanggalDokumen ?? ''}
+									disabled={!bpu.canEdit}
+								/>
+							</Label>
+							<Label>
+								<span>NITKU/Nomor Identitas Sub Unit Organisasi</span>
+								<Input type="text" id={getContext('id')} value={nitkuPemotong} disabled />
+							</Label>
+						</div>
+					{/snippet}
+				</Card>
+			</div>
+		</div>
 
 		<Card>
 			{#snippet head()}
@@ -145,50 +230,6 @@
 						Tarif dan Pajak Penghasilan dihitung otomatis dari kombinasi Nama Objek Pajak dan
 						Fasilitas Pajak saat disimpan.
 					</p>
-				</div>
-			{/snippet}
-		</Card>
-
-		<Card>
-			{#snippet head()}
-				<span class="tw:text-xl">Dokumen Referensi</span>
-			{/snippet}
-			{#snippet body()}
-				<div class="tw:flex tw:flex-col tw:gap-3 tw:px-3">
-					<Label>
-						<span>Jenis Dokumen</span>
-						<Select
-							name="jenisDokumenId"
-							id={getContext('id')}
-							value={bpu.jenisDokumenId ?? ''}
-							disabled={!bpu.canEdit}
-						>
-							<option value="" disabled>Please select</option>
-							{#each jenisDokumenOptions as d (d.id)}
-								<option value={d.id}>{d.nama}</option>
-							{/each}
-						</Select>
-					</Label>
-					<Label>
-						<span>Nomor Dokumen</span>
-						<Input
-							name="nomorDokumen"
-							type="text"
-							id={getContext('id')}
-							value={bpu.nomorDokumen}
-							disabled={!bpu.canEdit}
-						/>
-					</Label>
-					<Label>
-						<span>Tanggal Dokumen</span>
-						<Input
-							name="tanggalDokumen"
-							type="date"
-							id={getContext('id')}
-							value={bpu.tanggalDokumen ?? ''}
-							disabled={!bpu.canEdit}
-						/>
-					</Label>
 				</div>
 			{/snippet}
 		</Card>
