@@ -337,6 +337,46 @@ entry time by evaluating `ItemList`/`Rates` against the selected facility +
 the "logic" here is meaningfully more complex than a lookup and needs an
 actual small TER-evaluation function, not just a join.
 
+## Post-"Simpan Konsep" behavior — live-verified 2026-08-29 (BPU)
+
+Filled a full BPU draft live (NPWP `3273010101900001` "INDRA SANJAYA",
+Tanpa Fasilitas, Dividen, DPP 20,000,000, both NITKU fields, full Dokumen
+Referensi) and clicked **Simpan Konsep** for real (never Submit/Terbitkan).
+
+- **Client-side required-field validation still blocks the save.** Leaving
+  NITKU (or any `*` field) empty and clicking Simpan Konsep does NOT
+  navigate away — it stays on the form and shows an inline red "Kolom ini
+  wajib diisi!" under the empty field. This matches the same validation we
+  saw earlier on BP21.
+- **Once every visible required field is filled, the save succeeds
+  unconditionally**: a "Success — Save data successfully!" toast appears
+  and the page redirects to the list (Belum Terbit tab) — no confirmation
+  dialog, no second step.
+- **But the saved row's Status can still be `SAVEDINVALID`** ("Disimpan
+  Tidak Valid" — this exact string is in our seeded `EBUPOT_STATUS` table)
+  even though every field the form exposes was filled and passed
+  client-side validation. Re-opening the "invalid" draft showed no red
+  field-level errors anywhere — every field looked complete and correct.
+  Re-saving the identical data produced the same `SAVEDINVALID` result.
+  **The specific server-side rule that failed was never identified** — it's
+  invisible in the UI, and could be anything from a business rule on this
+  particular test NIK/object combination to something about the specific
+  facility/object pairing. This needs a wider live test matrix (several
+  known-good NPWP + object combos) to isolate, not done this pass.
+- `SAVEDINVALID` and presumably-valid saves (`SUBMITTED`/`CREATED`, per the
+  `EBUPOT_STATUS` catalog) both stay in the same **Belum Terbit** tab —
+  there is no separate "invalid drafts" list. The row is still fully
+  editable (pencil icon) and deletable (checkbox + Hapus) either way.
+
+**Gap in our app:** `updateBpu.remote.ts` has no equivalent concept. It
+saves whatever passes our own (much narrower) server-side checks and always
+looks like a plain successful save — there's no second, server-evaluated
+"this draft is saved but flagged invalid for reasons not shown to the user"
+state. Coretax's `SAVEDINVALID` status is presumably surfaced elsewhere
+(monitoring view? a details panel we didn't check?) before the user tries
+to Terbitkan it — worth a follow-up look, since right now we don't know
+*how* a real user is expected to discover or fix whatever's wrong.
+
 ## Not yet explored this pass
 
 BPNR, Penyetoran Sendiri, Pemotongan Secara Digunggung, Dokumen yang
