@@ -4,7 +4,7 @@ import { db } from '$lib/server/db';
 import { bukti_potong_bpu, fasilitas_pajak_ebupot, jenis_dokumen_ebupot, kode_objek_pajak_pph } from '$lib/server/db/schema';
 import { resolveTarif } from '$lib/server/ebupot/resolveTarif';
 import { error, redirect } from '@sveltejs/kit';
-import { and, eq } from 'drizzle-orm';
+import { and, eq, ne } from 'drizzle-orm';
 import * as v from 'valibot';
 
 const UpdateBpuSchema = v.object({
@@ -97,6 +97,28 @@ export const updateBpu = form(UpdateBpuSchema, async (input) => {
 
 	if (!jenisDokumen) {
 		error(400, 'Jenis Dokumen tidak valid');
+	}
+
+	const [duplicate] = await db
+		.select({ id: bukti_potong_bpu.id })
+		.from(bukti_potong_bpu)
+		.where(
+			and(
+				eq(bukti_potong_bpu.npwpPemotong, activeNpwp),
+				ne(bukti_potong_bpu.id, id),
+				eq(bukti_potong_bpu.nomorIdentitasWp, input.nomorIdentitasWp.trim()),
+				eq(bukti_potong_bpu.kodeObjekPajakId, objekPajak.id),
+				eq(bukti_potong_bpu.masaPajak, input.masaPajak),
+				eq(bukti_potong_bpu.tahun, input.tahun)
+			)
+		)
+		.limit(1);
+
+	if (duplicate) {
+		error(
+			400,
+			'Sudah ada Bukti Potong lain untuk penerima, objek pajak, dan masa pajak yang sama'
+		);
 	}
 
 	let resolved: ReturnType<typeof resolveTarif>;
