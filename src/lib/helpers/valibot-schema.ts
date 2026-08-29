@@ -20,6 +20,18 @@ export const decimalString = (field: string) =>
 export const decimalInput = (field: string) =>
 	v.union([decimalString(field), v.number(`${field} harus berupa angka`)]);
 
+// The DOM value of an `Input type="rupiah"` field: digit-grouping dots only,
+// no decimals (applyRupiahInput never produces a fractional part). Strips
+// the dots so the result is a plain digit string, safe to pass to Number()
+// wherever decimalString's output already is.
+export const rupiahString = (field: string) =>
+	v.pipe(
+		v.string(),
+		v.nonEmpty(`${field} harus diisi`),
+		v.transform((value) => value.replaceAll('.', '')),
+		v.regex(digitsRegex, `${field} harus berupa angka`)
+	);
+
 // Backed by an always-present hidden input (see the non-destructive gate-flip
 // invariant), so an unanswered question submits "" rather than actually
 // omitting the field. v.optional's fallback only fires on a missing key, so

@@ -1,5 +1,5 @@
 import { form, getRequestEvent } from '$app/server';
-import { decimalString, isRealIsoDate, requiredString } from '$lib/helpers/valibot-schema';
+import { decimalString, isRealIsoDate, requiredString, rupiahString } from '$lib/helpers/valibot-schema';
 import { db } from '$lib/server/db';
 import { bukti_potong_bpu, fasilitas_pajak_ebupot, jenis_dokumen_ebupot, kode_objek_pajak_pph } from '$lib/server/db/schema';
 import { resolveTarif } from '$lib/server/ebupot/resolveTarif';
@@ -14,11 +14,13 @@ const UpdateBpuSchema = v.object({
 	namaPenerima: requiredString('Nama penerima harus diisi'),
 	kodeObjekPajakId: requiredString('Nama Objek Pajak harus dipilih'),
 	fasilitasPajakId: requiredString('Fasilitas Pajak harus dipilih'),
-	dasarPengenaanPajak: decimalString('Dasar Pengenaan Pajak'),
+	dasarPengenaanPajak: rupiahString('Dasar Pengenaan Pajak'),
 	// Only used when the resolved object+facility combination allows a manual
-	// rate (Coretax's ManualTaxRate: "TRUE" -- see resolveTarif). Ignored
-	// otherwise; the derived rate always wins for non-manual combinations.
+	// rate/amount (Coretax's ManualTaxRate/ManualIncomeTaxWithheld: "TRUE" --
+	// see resolveTarif). Ignored otherwise; the derived value always wins for
+	// non-manual combinations.
 	tarifManual: v.optional(decimalString('Tarif')),
+	pajakPenghasilanManual: v.optional(rupiahString('Pajak Penghasilan')),
 	jenisDokumenId: requiredString('Jenis Dokumen harus dipilih'),
 	nomorDokumen: requiredString('Nomor Dokumen harus diisi'),
 	tanggalDokumen: v.pipe(
@@ -108,9 +110,15 @@ export const updateBpu = form(UpdateBpuSchema, async (input) => {
 		error(400, 'Tarif harus diisi untuk kombinasi objek pajak dan fasilitas ini');
 	}
 
+	if (resolved.manualIncomeTax && !input.pajakPenghasilanManual) {
+		error(400, 'Pajak Penghasilan harus diisi untuk kombinasi objek pajak dan fasilitas ini');
+	}
+
 	const tarif = resolved.manual ? Number(input.tarifManual) : resolved.tarif;
 	const dasarPengenaanPajak = Number(input.dasarPengenaanPajak);
-	const pajakPenghasilan = Math.round((dasarPengenaanPajak * tarif) / 100);
+	const pajakPenghasilan = resolved.manualIncomeTax
+		? Number(input.pajakPenghasilanManual)
+		: Math.round((dasarPengenaanPajak * tarif) / 100);
 
 	await db
 		.update(bukti_potong_bpu)

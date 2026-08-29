@@ -5,7 +5,7 @@
 	import Label from '$lib/components/Label.svelte';
 	import Select from '$lib/components/Select.svelte';
 	import { formatMonth } from '$lib/helpers/date';
-	import { getContext } from 'svelte';
+	import { getContext, untrack } from 'svelte';
 	import { getFasilitasPajakBpu } from '../../fasilitasPajak.remote';
 	import { getJenisDokumenEbupot } from '../../jenisDokumen.remote';
 	import { getObjekPajakBpu } from '../../objekPajakBpu.remote';
@@ -47,10 +47,12 @@
 		);
 		if (!item) return null;
 		const manual = item.ManualTaxRate?.toUpperCase() === 'TRUE';
+		const manualIncomeTax = item.ManualIncomeTaxWithheld?.toUpperCase() === 'TRUE';
 		const tarif = typeof item.Rate === 'number' ? item.Rate : (item.Rates?.[0]?.Rate ?? 0);
-		return { tarif, manual };
+		return { tarif, manual, manualIncomeTax };
 	});
 
+	let dasarPengenaanPajakState = $state(bpu.dasarPengenaanPajak);
 	let tarifManualState = $state(bpu.tarif);
 	$effect(() => {
 		// Every combo change resets Tarif to Coretax's default for it, even
@@ -58,6 +60,20 @@
 		// Fasilitas re-populates Tarif with the new default rather than
 		// preserving a prior manual override).
 		if (resolvedTarif) tarifManualState = resolvedTarif.tarif;
+	});
+
+	const pajakPenghasilanDefault = $derived(
+		Math.round(((dasarPengenaanPajakState ?? 0) * tarifManualState) / 100)
+	);
+	let pajakPenghasilanManualState = $state(bpu.pajakPenghasilan);
+	$effect(() => {
+		// Resets only when the combo changes (same trigger as Tarif's reset
+		// above), not on every DPP/Tarif keystroke -- otherwise a manual
+		// Pajak Penghasilan override would be impossible to keep, since
+		// editing DPP or Tarif afterward would silently wipe it back to the
+		// derived default. `untrack` reads the current default without
+		// subscribing to its own DPP/Tarif dependencies.
+		if (resolvedTarif) pajakPenghasilanManualState = untrack(() => pajakPenghasilanDefault);
 	});
 
 	async function cariNpwpPenerima() {
@@ -247,9 +263,9 @@
 						<span>Dasar Pengenaan Pajak (Rp)</span>
 						<Input
 							name="dasarPengenaanPajak"
-							type="text"
+							type="rupiah"
 							id={getContext('id')}
-							value={bpu.dasarPengenaanPajak}
+							bind:value={dasarPengenaanPajakState}
 							disabled={!bpu.canEdit}
 						/>
 					</Label>
@@ -268,13 +284,26 @@
 						{/if}
 					</Label>
 					<Label>
+						<span>Pajak Penghasilan (Rp)</span>
+						{#if resolvedTarif?.manualIncomeTax}
+							<Input
+								name="pajakPenghasilanManual"
+								type="rupiah"
+								id={getContext('id')}
+								bind:value={pajakPenghasilanManualState}
+								disabled={!bpu.canEdit}
+							/>
+						{:else}
+							<Input type="rupiah" id={getContext('id')} value={pajakPenghasilanDefault} disabled />
+						{/if}
+					</Label>
+					<Label>
 						<span>KAP</span>
 						<Input type="text" id={getContext('id')} value={selectedObjekPajak?.kap ?? ''} disabled />
 					</Label>
 					<p class="tw:text-sm tw:text-gray-500">
-						{#if resolvedTarif?.manual}
-							Tarif untuk kombinasi ini dapat diisi manual. Pajak Penghasilan dihitung otomatis
-							dari Dasar Pengenaan Pajak x Tarif saat disimpan.
+						{#if resolvedTarif?.manual || resolvedTarif?.manualIncomeTax}
+							Tarif dan/atau Pajak Penghasilan untuk kombinasi ini dapat diisi manual.
 						{:else}
 							Tarif dan Pajak Penghasilan dihitung otomatis dari kombinasi Nama Objek Pajak dan
 							Fasilitas Pajak saat disimpan.
