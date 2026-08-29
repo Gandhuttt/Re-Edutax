@@ -8,6 +8,13 @@
 	import { newEmpty } from './newEmpty.remote';
 
 	const rupiah = new Intl.NumberFormat('id-ID', { minimumFractionDigits: 0 });
+
+	// Matches Coretax's Status column wording (EBUPOT_STATUS reference data).
+	const statusLabel = {
+		NORMAL: 'Normal',
+		SAVEDINVALID: 'Disimpan Tidak Valid',
+		SUBMITTED: 'Disimpan'
+	} as const;
 </script>
 
 <div class="tw:w-full tw:p-25">
@@ -53,7 +60,9 @@
 								<td>{row.namaPenerima}</td>
 								<td>{row.namaObjekPajak ?? ''}</td>
 								<td>{rupiah.format(row.pajakPenghasilan)}</td>
-								<td>{row.diterbitkan ? 'Telah Terbit' : 'Belum Terbit'}</td>
+								<td>
+									{row.diterbitkan ? 'Telah Terbit' : statusLabel[row.status]}
+								</td>
 							</tr>
 						{:else}
 							<tr>

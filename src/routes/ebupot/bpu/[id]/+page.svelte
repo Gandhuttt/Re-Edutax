@@ -11,6 +11,7 @@
 	import { getObjekPajakBpu } from '../../objekPajakBpu.remote';
 	import { getWajibPajak } from '../../../getWajibPajak.remote';
 	import { getBpu } from './getBpu.remote';
+	import { submitBpu } from './submitBpu.remote';
 	import { updateBpu } from './updateBpu.remote';
 
 	const bpu = await getBpu();
@@ -235,7 +236,7 @@
 		</Card>
 
 		{#if bpu.canEdit}
-			<div class="tw:flex tw:flex-row tw:justify-end tw:gap-2">
+			<div class="tw:flex tw:flex-row tw:justify-end tw:items-center tw:gap-2">
 				<a href="/ebupot/bpu" class="tw:text-black!"><Button type="button">Kembali</Button></a>
 				<Button type="submit" class="tw:text-white" color="var(--color-secondary)">
 					Simpan Konsep
@@ -253,6 +254,11 @@
 	<div class="tw:text-2xl tw:mb-5">EBUPOT BPU</div>
 	{#if bpu.canEdit}
 		<form {...updateBpu}>{@render formContent()}</form>
+		<div class="tw:flex tw:flex-row tw:justify-end tw:mt-3">
+			<form {...submitBpu}>
+				<Button type="submit" class="tw:text-white" color="var(--color-danger)">Submit</Button>
+			</form>
+		</div>
 	{:else}
 		{@render formContent()}
 	{/if}

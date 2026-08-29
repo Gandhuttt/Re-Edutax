@@ -117,7 +117,11 @@ export const updateBpu = form(UpdateBpuSchema, async (input) => {
 			pajakPenghasilan,
 			jenisDokumenId: jenisDokumen.id,
 			nomorDokumen: input.nomorDokumen.trim(),
-			tanggalDokumen: input.tanggalDokumen
+			tanggalDokumen: input.tanggalDokumen,
+			// Matches Coretax: every Simpan Konsep save resets the draft to
+			// "Disimpan Tidak Valid" regardless of whether the data is
+			// correct -- only Submit (submitBpu.remote.ts) flips this.
+			status: 'SAVEDINVALID'
 		})
 		.where(eq(bukti_potong_bpu.id, id));
 

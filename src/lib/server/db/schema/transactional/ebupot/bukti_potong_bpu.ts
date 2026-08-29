@@ -7,13 +7,23 @@ import { wajib_pajak } from '../wajib_pajak/wajib_pajak';
 // eBupot BPU ("Bukti Pemotongan/Pemungutan Unifikasi Standar") -- general
 // PPh 23/26/4(2)/22 withholding slips. See
 // docs/ui-reference/coretax/ebupot/NOTES.md for the live Coretax form this
-// mirrors (withholding-slips-portal/id-ID/ebupotbpu).
+// mirrors (withholding-slips-portal/id-ID/ebupotbpu), including the real
+// Simpan Konsep -> Submit -> Terbitkan flow `status` mirrors.
 //
-// NITKU (recipient sub-unit) is intentionally not modeled yet -- Coretax
-// requires it, but this is a first slice and most withholders/recipients
-// don't have registered sub-units. Nama Penerima is stored as typed input
-// rather than looked up, since Coretax derives it from the DJP taxpayer
-// master, which this app has no access to.
+// NITKU is derived (NPWP + "000000") rather than looked up against a real
+// sub-unit registry, and Nama Penerima is either typed or filled via
+// "Cari NPWP" against this app's own wajib_pajak table -- neither is a DJP
+// taxpayer-master lookup, which this app has no access to.
+//
+// `status` is the same field Coretax's Informasi Umum "Status*" shows --
+// live-verified it displays the literal lifecycle code (SAVEDINVALID,
+// SUBMITTED, ...), not a separate correction-type flag. NORMAL is only the
+// pre-save placeholder for a brand-new draft; the first Simpan Konsep moves
+// it to SAVEDINVALID regardless of data correctness, and Submit is what
+// flips it to SUBMITTED.
+export const buktiPotongBpuStatusValues = ['NORMAL', 'SAVEDINVALID', 'SUBMITTED'] as const;
+export type BuktiPotongBpuStatus = (typeof buktiPotongBpuStatusValues)[number];
+
 export const bukti_potong_bpu = sqliteTable('bukti_potong_bpu', {
 	id: text('id')
 		.primaryKey()
@@ -29,7 +39,7 @@ export const bukti_potong_bpu = sqliteTable('bukti_potong_bpu', {
 	tahun: integer('tahun')
 		.notNull()
 		.$defaultFn(() => new Date().getFullYear()),
-	status: text('status').notNull().default('NORMAL'),
+	status: text('status', { enum: buktiPotongBpuStatusValues }).notNull().default('NORMAL'),
 
 	nomorIdentitasWp: text('nomor_identitas_wp').notNull().default(''),
 	namaPenerima: text('nama_penerima').notNull().default(''),
