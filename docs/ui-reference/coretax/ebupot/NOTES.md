@@ -236,6 +236,76 @@ Much larger form than the others — this is the annual 1721-A1-equivalent.
 - KAP-KJS* (readonly)
 - NITKU/Nomor Identitas Sub Unit Organisasi* (select)
 
+## BPA1 — live-verified mechanics and build status (2026-08-30)
+
+- **Status PTKP dropdown offers exactly 8 codes**: TK/0-3, K/0-3 — no HB
+  variants (unlike BP21's 12-option list). See `ptkp-bpa1.ts`.
+- **PTKP amounts** = the standard PMK 101/2016 table (TK/0=54,000,000,
+  K/0=58,500,000, each subsequent step +4,500,000 up to K/3=72,000,000/
+  TK/3=67,500,000). Confirmed exact via 2 live data points (K/0, TK/0);
+  not embedded in the bundle's `ParameterData` — this is backend-computed
+  from `Status PTKP`, so the full 8-value table is taken from the
+  government-mandated, stable PMK 101/2016 schedule rather than
+  independently re-verified point by point.
+- **Biaya Jabatan / Biaya Pensiun** = `min(5% × Jumlah Penghasilan Bruto,
+  500,000 × monthCount)`, where `monthCount` is the actual number of months
+  in the Masa Pajak Awal..Akhir range (NOT always 12 — this is a period
+  range, not a single Masa Pajak). Live-verified exact: an 8-month period
+  (Jan–Aug) with 200,000,000 bruto → cap = 4,000,000 (5% = 10,000,000 >
+  cap), not the 6,000,000 a naive 12-month assumption would give.
+- **Progressive Pasal 17 bracket tax** — identical `tax(x) = x×Rate/100 −
+  Minus` cumulative-bracket mechanism as BP21's pesangon objects. Live-
+  verified exact: PKP 137,500,000 → PPh 14,625,000 (Tarif 15%).
+- **Jenis Pemotongan** — 3 options: `Kurang dari Setahun`, `Kurang dari
+  setahun yang penghasilannya disetahunkan`, `Setahun Penuh`. Only
+  "Setahun Penuh" was live-verified (no annualization adjustment needed —
+  `penghasilanNetoSetahunDisetahunkan` passes the combined Neto straight
+  through). The "disetahunkan" annualize/de-annualize formula
+  (`× 12 / monthCount` then de-annualize the resulting tax back by
+  `× monthCount / 12`) is implemented per standard Indonesian payroll
+  technique but was **not** independently live-verified this pass.
+- **Jenis Fasilitas** (BPA1's own facility field, distinct from other
+  bukti types' Fasilitas Pajak) — 3 options mapping to `EBUPOT_TAX_
+  CERTIFICATE` codes: `8` (Fasilitas Lainnya), `9` (Tanpa Fasilitas), `11`
+  (PPh Pasal 21 Ditanggung Pemerintah/DTP — a Pasal-21-specific DTP code,
+  distinct from BPU's general code `4`).
+- **Nomor Identitas WP → Nama lookup** confirmed live (same DJP
+  taxpayer-master pattern as BP21): NIK `3273010101900001` →
+  "INDRA SANJAYA".
+- Prior-employer "Get data" pull (auto-fetching `Penghasilan Neto dari
+  Pemotongan Sebelumnya`) requires DJP registry access this app doesn't
+  have — implemented as plain manual-entry fields
+  (`nomorBuktiSebelumnya`, `penghasilanNetoSebelumnya`,
+  `pphPasal21DipotongSebelumnya`) instead, consistent with the established
+  "not doable" precedent from BPU/BP21.
+- Gross Up checkbox exists on the live form but was deliberately scoped
+  out of this build (deferred, not implemented).
+- "PPh Pasal 21 Kurang (Lebih) Dipotong pada Masa Pajak Desember" is left
+  at 0 — computing it for real requires a monthly Bukti Pemotongan
+  Bulanan Pegawai Tetap withholding-history feature this app doesn't have.
+
+**Build status**: BPA1 shipped locally this session (schema, resolver,
+full CRUD, detail form, nav link, "Bukti Potong Saya" recap union) and
+smoke-tested end-to-end against the exact live-verified numbers above
+(biaya jabatan cap 4,000,000, PTKP 58,500,000, PKP 137,500,000, PPh
+14,625,000 — all matched exactly through Simpan Konsep → Submit →
+Terbitkan). Two real bugs were found and fixed during the smoke test,
+not just browser-automation flakiness:
+1. `nama` was missing entirely from `UpdateBpa1Schema` and the update
+   handler's `.set({...})` — the field rendered and even auto-filled via
+   "Cari NPWP" client-side, but was silently dropped on every save.
+2. The optional-rupiah fields (`tunjanganPph`, `honorarium`, etc.) used
+   `v.optional(rupiahString(field), '0')`, but `formatRupiah(0)` renders
+   an untouched editable field as `""` by design (see `rupiahInput.ts`) —
+   so an unfilled field submits `""`, and `v.optional`'s fallback only
+   fires on a genuinely missing key, not `""`. Fixed with a `''`→`'0'`
+   union branch, mirroring `booleanRadio`'s already-documented pattern in
+   `valibot-schema.ts` for the same "'' vs undefined" trap. Other bukti
+   types with `v.optional(rupiahString(...))` on truly-optional amount
+   fields (e.g. BP21/BPU's `pendapatanBrutoSebelumnya`) may carry the same
+   latent bug — not re-audited this pass, flagged here for future
+   reference.
+
 ## Reference-data pull (2026-08-29) — the real spec
 
 Pulled the `withholding-slips-portal` bundle

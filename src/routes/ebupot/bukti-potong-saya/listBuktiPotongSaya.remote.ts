@@ -3,6 +3,7 @@ import { db } from '$lib/server/db';
 import {
 	bukti_potong_bp21,
 	bukti_potong_bp26,
+	bukti_potong_bpa1,
 	bukti_potong_bpu,
 	kode_objek_pajak_pph,
 	wajib_pajak
@@ -90,7 +91,31 @@ export const listBuktiPotongSaya = query(async () => {
 		.leftJoin(kode_objek_pajak_pph, eq(bukti_potong_bp26.kodeObjekPajakId, kode_objek_pajak_pph.id))
 		.where(and(eq(bukti_potong_bp26.nomorIdentitasWp, activeNpwp), eq(bukti_potong_bp26.diterbitkan, true)));
 
-	return [...bpuRows, ...bp21Rows, ...bp26Rows].sort(
+	// BPA1 has no local taxpayer-master lookup on the recipient side, so its
+	// "Nama" is plain-typed on the bukti row itself rather than joined
+	// from wajib_pajak. It also runs over a Masa Pajak Awal..Akhir range
+	// rather than a single Masa Pajak -- normalized here to the same
+	// masaPajak/tahun/pajakPenghasilan shape as the other three, keyed off
+	// the period's end (matches how the BPA1 list page itself sorts).
+	const bpa1Rows = await db
+		.select({
+			id: bukti_potong_bpa1.id,
+			jenis: sql<'BPA1'>`'BPA1'`,
+			masaPajak: bukti_potong_bpa1.masaPajakAkhir,
+			tahun: bukti_potong_bpa1.tahunAkhir,
+			nomorPemotongan: bukti_potong_bpa1.nomorPemotongan,
+			npwpPemotong: bukti_potong_bpa1.npwpPemotong,
+			namaPemotong: wajib_pajak.nama,
+			namaObjekPajak: kode_objek_pajak_pph.nama,
+			tarif: bukti_potong_bpa1.tarif,
+			pajakPenghasilan: bukti_potong_bpa1.pphPasal21TerutangPadaIni
+		})
+		.from(bukti_potong_bpa1)
+		.innerJoin(wajib_pajak, eq(bukti_potong_bpa1.npwpPemotong, wajib_pajak.npwp))
+		.leftJoin(kode_objek_pajak_pph, eq(bukti_potong_bpa1.kodeObjekPajakId, kode_objek_pajak_pph.id))
+		.where(and(eq(bukti_potong_bpa1.nomorIdentitasWp, activeNpwp), eq(bukti_potong_bpa1.diterbitkan, true)));
+
+	return [...bpuRows, ...bp21Rows, ...bp26Rows, ...bpa1Rows].sort(
 		(a, b) => b.tahun - a.tahun || b.masaPajak - a.masaPajak
 	);
 });

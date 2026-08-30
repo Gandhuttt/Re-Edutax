@@ -73,3 +73,23 @@ export const getFasilitasPajakBp26 = prerender(
 	},
 	{ dynamic: true }
 );
+
+// Live-verified (see docs/ui-reference/coretax/ebupot/NOTES.md "BPA1"):
+// the "Jenis Fasilitas pada Masa Pajak Desember/Masa Pajak Terakhir"
+// dropdown offers exactly 3 options -- Fasilitas Lainnya (8), Tanpa
+// Fasilitas (9), PPh Pasal 21 Ditanggung Pemerintah/DTP (11, the
+// Pasal-21-specific DTP code, distinct from BPU's general code 4).
+const bpa1FasilitasKode = ['8', '9', '11'];
+
+export const getFasilitasPajakBpa1 = prerender(
+	async () => {
+		const rows = await db
+			.select()
+			.from(fasilitas_pajak_ebupot)
+			.where(and(eq(fasilitas_pajak_ebupot.aktif, true), inArray(fasilitas_pajak_ebupot.kode, bpa1FasilitasKode)))
+			.orderBy(asc(fasilitas_pajak_ebupot.kode));
+
+		return rows;
+	},
+	{ dynamic: true }
+);
