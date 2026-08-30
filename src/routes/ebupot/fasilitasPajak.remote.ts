@@ -93,3 +93,23 @@ export const getFasilitasPajakBpa1 = prerender(
 	},
 	{ dynamic: true }
 );
+
+// Derived from the reference-data pull's ParameterData (not live UI-clicked
+// this pass, see docs/ui-reference/coretax/ebupot/NOTES.md "MP"): MP's
+// object codes' ItemList only ever references TaxCertificateCodes 9 (Tanpa
+// Fasilitas) + 4 (DTP) combined into the TER-band entry, plus 8 (Fasilitas
+// Lainnya) as the sole manual entry -- the same 3-code scope as BPU.
+const mpFasilitasKode = ['4', '8', '9'];
+
+export const getFasilitasPajakMp = prerender(
+	async () => {
+		const rows = await db
+			.select()
+			.from(fasilitas_pajak_ebupot)
+			.where(and(eq(fasilitas_pajak_ebupot.aktif, true), inArray(fasilitas_pajak_ebupot.kode, mpFasilitasKode)))
+			.orderBy(asc(fasilitas_pajak_ebupot.kode));
+
+		return rows;
+	},
+	{ dynamic: true }
+);

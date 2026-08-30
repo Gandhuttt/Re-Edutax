@@ -178,6 +178,46 @@ selecting a treaty-eligible Nama Fasilitas, not observed this session).
 **No Dokumen Referensi section** — MP doesn't require an underlying source
 document reference, unlike BP21/BPU/BP26.
 
+**Build status (2026-08-30)**: MP shipped locally this session. Ground truth
+came entirely from the already-fetched `reference-data-ebupot.json` (per
+"always refer to the build artifact") plus this section's earlier live-
+verified field list — no fresh Coretax login needed this pass, since
+`EBUPOTMP_TAX_OBJECT`'s `ParameterData` confirmed MP's tax mechanism is TER
+(Tarif Efektif Rata-rata, PMK 168/2023): the exact same band shape
+(`TaxExemptionStatus`-keyed `Rates`) BP21 already resolves for its own
+permanent-employee-monthly-wage objects. `resolveBp21()` is reused directly
+as MP's resolver (no separate `resolveMp.ts`) — MP's `ItemList` shape (TER
+bands + one manual-facility entry, no cumulative bracket) is a strict subset
+of what it already handles; `brutoSebelumnya` is always passed as `0`.
+Reuses BP21's 12-value PTKP enum (`ptkp-ebupot.ts`) since the TER bands are
+keyed to the identical K/TK/HB codes.
+
+Two things needed fixing in the reference data before it was usable:
+1. `kode_objek_pajak_pph`'s seed data had no `'mp'` rows at all (unlike
+   `bpnr`/`cy`/`sp`, which were seeded even though unbuilt) — added the 3
+   canonical MP object codes (`21-100-01/02/32`) to
+   `seed/data/ebupot/kode_objek_pajak_pph.ts` and added `'mp'` to
+   `jenisBuktiPotongValues`.
+2. MP's `ParameterData` in the reference-data pull has no top-level
+   `IncomeTaxStatus` field at all (every other bukti type's does) — filled
+   in as `'Tidak Final'` to satisfy the schema type, consistent with the
+   same `21-100-XX` objects under BPA1. The 2 legacy codes (`9999`/`9998`)
+   were dropped entirely — their `ParameterData` came back with a
+   completely different flat shape (no `ItemList` wrapper), and "legacy
+   pre-TER" is semantically incoherent anyway since TER didn't exist before
+   PMK 168/2023.
+
+Fasilitas Pajak scope (`4`/`8`/`9`) is derived from the `ItemList`'s
+`TaxCertificateCodes`, not live-UI-confirmed this pass — flagged in
+`fasilitasPajak.remote.ts`'s comment in case a future session finds a 4th
+option live.
+
+Smoke-tested end-to-end (Bruto 10,000,000, PTKP K/0, object `21-100-01`,
+Tanpa Fasilitas) through Simpan Konsep → Submit → Terbitkan: Tarif 2%,
+Pajak Penghasilan yang Dipotong 200,000 — matches the TER band
+[9,650,001–10,050,000] exactly, same table structure already live-verified
+for BP21.
+
 ## BPA1 (annual permanent-employee recap) create form — full field list
 
 Much larger form than the others — this is the annual 1721-A1-equivalent.

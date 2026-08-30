@@ -53,6 +53,7 @@
 						<li><a class="dropdown-item" href="/ebupot/bp26">BP26</a></li>
 						<li><a class="dropdown-item" href="/ebupot/bpa1">BPA1</a></li>
 						<li><a class="dropdown-item" href="/ebupot/bpa2">BPA2</a></li>
+						<li><a class="dropdown-item" href="/ebupot/mp">MP</a></li>
 					</ul>
 				</li>
 			{/if}

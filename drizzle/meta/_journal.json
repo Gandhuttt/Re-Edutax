@@ -218,6 +218,13 @@
       "when": 1788074935946,
       "tag": "0030_safe_lifeguard",
       "breakpoints": true
+    },
+    {
+      "idx": 31,
+      "version": "6",
+      "when": 1788076573214,
+      "tag": "0031_white_katie_power",
+      "breakpoints": true
     }
   ]
 }

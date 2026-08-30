@@ -6,6 +6,7 @@ import {
 	bukti_potong_bpa1,
 	bukti_potong_bpa2,
 	bukti_potong_bpu,
+	bukti_potong_mp,
 	kode_objek_pajak_pph,
 	wajib_pajak
 } from '$lib/server/db/schema';
@@ -136,7 +137,29 @@ export const listBuktiPotongSaya = query(async () => {
 		.leftJoin(kode_objek_pajak_pph, eq(bukti_potong_bpa2.kodeObjekPajakId, kode_objek_pajak_pph.id))
 		.where(and(eq(bukti_potong_bpa2.nomorIdentitasWp, activeNpwp), eq(bukti_potong_bpa2.diterbitkan, true)));
 
-	return [...bpuRows, ...bp21Rows, ...bp26Rows, ...bpa1Rows, ...bpa2Rows].sort(
+	// MP is a single Masa Pajak like BPU/BP21/BP26 (not a period range), and
+	// its Nama is DJP-taxpayer-master-derived like BP21's namaPenerima, but
+	// that's the recipient's own name -- namaPemotong here still comes from
+	// the withholder-side join, same as every other row.
+	const mpRows = await db
+		.select({
+			id: bukti_potong_mp.id,
+			jenis: sql<'MP'>`'MP'`,
+			masaPajak: bukti_potong_mp.masaPajak,
+			tahun: bukti_potong_mp.tahun,
+			nomorPemotongan: bukti_potong_mp.nomorPemotongan,
+			npwpPemotong: bukti_potong_mp.npwpPemotong,
+			namaPemotong: wajib_pajak.nama,
+			namaObjekPajak: kode_objek_pajak_pph.nama,
+			tarif: bukti_potong_mp.tarif,
+			pajakPenghasilan: bukti_potong_mp.pajakPenghasilanDipotong
+		})
+		.from(bukti_potong_mp)
+		.innerJoin(wajib_pajak, eq(bukti_potong_mp.npwpPemotong, wajib_pajak.npwp))
+		.leftJoin(kode_objek_pajak_pph, eq(bukti_potong_mp.kodeObjekPajakId, kode_objek_pajak_pph.id))
+		.where(and(eq(bukti_potong_mp.nomorIdentitasWp, activeNpwp), eq(bukti_potong_mp.diterbitkan, true)));
+
+	return [...bpuRows, ...bp21Rows, ...bp26Rows, ...bpa1Rows, ...bpa2Rows, ...mpRows].sort(
 		(a, b) => b.tahun - a.tahun || b.masaPajak - a.masaPajak
 	);
 });

@@ -13,6 +13,7 @@ export const jenisBuktiPotongValues = [
 	'bpa2',
 	'bpa',
 	'bpnr',
+	'mp',
 	'sp',
 	'cy'
 ] as const;
