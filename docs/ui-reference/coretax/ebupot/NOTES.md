@@ -481,6 +481,28 @@ subtraction constant (Pasal 17 lump-sum style), `tax(x) = x * band(x).Rate/100
 2,500,000 = 500,000`; `PPh = taxOnTotal - taxOnPrevious = 3,500,000`. Tarif
 shown is the bracket-of-total's `Rate`.
 
+**A fourth, plain bruto-only bracket shape also exists** -- found by
+exhaustively running every one of the 36 objects' `ItemList` entries through
+`resolveBp21.ts`'s classification logic (all facility codes x all 12 PTKP
+codes x a spread of bruto amounts): `21-100-24` and `21-100-29` (both "Upah
+Pegawai Tidak Tetap...Harian...sampai dengan Rp2.500.000 Sehari", plain and
+"Fasilitas Tertentu" variants) carry `Rates` bands with **neither**
+`TaxExemptionStatus` **nor** `Minus` -- `{Min,Max,Rate}` only, selected
+purely by bruto. The original resolver only recognized TER (`TaxExemptionStatus`)
+and cumulative (`Minus`) bands, so it silently fell through to the
+exempt/manual branch for these two objects and always returned Tarif=0/no
+override, regardless of the real bracket. **Live-verified and fixed**:
+`21-100-24`, bruto=1,000,000, Status PTKP left unset -> Tarif 0.50%, PPh
+5,000 (bracket `[450001,2500000]=0.5%`); switching Status PTKP to `K/3`
+(same bruto) -> **identical** Tarif/PPh, confirming this bracket is genuinely
+PTKP-independent. Also confirmed live: entering a bruto above this object's
+own max (2,500,000) triggers Coretax's own "Gross Income exceed the maximum
+value allowed for this tax object" validation error -- this app doesn't
+replicate that per-object max validation (only the bracket lookup itself),
+which is a minor known gap, not incorrect computation. `resolveBp21.ts` and
+its client-side mirror in `bp21/[id]/+page.svelte` now check for this plain
+band shape between the TER and flat branches.
+
 **Fasilitas Pajak restricted to codes 4/8/9/10** (DTP, Fasilitas Lainnya,
 Tanpa Fasilitas, SKB Pasal 21) across all 36 `EBUPOTBP21_TAX_OBJECT` rows --
 same restriction mechanism as BPU's 3-code scoping, confirmed live (dropdown
@@ -492,11 +514,24 @@ triggers) -- several objects (e.g. `21-100-38`, `21-402-04` facility 8,
 `ManualTaxRate`/`ManualIncomeTaxWithheld`, so BP21 needs all three manual
 override fields (DPP%, Tarif%, Pajak Penghasilan) wired up, not just two.
 
-One click sequence this pass showed the Fasilitas Pajak dropdown appearing
-unresponsive after selecting Nama Objek Pajak first -- not conclusively
-reproduced (may have been a stray click), so the BP21 form implements it as
-a normal always-editable `Select` without assuming any lock ordering. Worth
-re-checking live if a future pass has budget for it.
+**Resolved, source-grounded**: the Fasilitas Pajak dropdown's apparent
+lock had nothing to do with Nama Objek Pajak selection order. Confirmed via
+DOM inspection (fresh page load, before touching anything: the dropdown
+already carries `disabled=""` + `p-disabled`, defaulted to "Tanpa
+Fasilitas") and via `main.03469c0b8e38345f.js` source: `validateListFacilityRegister()`
+only fires once both `TaxPeriodCode` (Masa Pajak) and `TaxIdentificationNumber`
+(recipient NIK/NPWP) are filled, calls
+`ebupotHelperService.checkListFacilityRegister(nik, ['AS.19-01'], masaPajak)`
+-- a live DJP facility-certificate registry lookup for that specific
+recipient+period -- filters `EBUPOTTAXCERTIFICATE` down to whichever
+certificates (SKB Pasal 21/22/23 etc.) that recipient is actually
+registered for, then only *then* calls
+`form.setDisabled(TaxCertificateCode.name, false)` to unlock the field.
+This is the same class of gap as NITKU/Nama Penerima real DJP-registry
+access (not doable in this app), not an object-selection ordering quirk --
+the BP21 form's always-editable `Select` (no restriction beyond the
+4/8/9/10 code scoping already confirmed) is the right simplification given
+that constraint.
 
 Implemented in `src/lib/server/ebupot/resolveBp21.ts`,
 `src/routes/ebupot/bp21/*`. Reference data (`kode_objek_pajak_pph` rows with

@@ -80,6 +80,17 @@ export const resolveBp21 = (
 		return { dppPercent, tarif: band?.Rate ?? 0, manualDpp, manualTarif, manualIncomeTax };
 	}
 
+	// Plain bruto-only bracket -- bands with neither TaxExemptionStatus nor
+	// Minus, e.g. 21-100-24/21-100-29 (Upah Pegawai Tidak Tetap harian <=
+	// Rp2.500.000/hari). Selected purely by bruto, independent of PTKP --
+	// live-verified: 21-100-24, bruto=1,000,000 -> Tarif 0.50% (band
+	// [450001,2500000]=0.5%) whether Status PTKP is unset or K/3.
+	const plainBands = item.Rates ?? [];
+	if (plainBands.length > 0) {
+		const band = plainBands.find((b) => bandContains(b, bruto));
+		return { dppPercent, tarif: band?.Rate ?? 0, manualDpp, manualTarif, manualIncomeTax };
+	}
+
 	if (typeof item.Rate === 'number') {
 		return { dppPercent, tarif: item.Rate, manualDpp, manualTarif, manualIncomeTax };
 	}

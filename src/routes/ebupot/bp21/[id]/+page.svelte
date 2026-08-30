@@ -110,6 +110,22 @@
 			};
 		}
 
+		// Plain bruto-only bracket -- bands with neither TaxExemptionStatus nor
+		// Minus (e.g. 21-100-24/21-100-29, daily wage <= Rp2.500.000/hari),
+		// selected purely by bruto, independent of PTKP. See resolveBp21.ts.
+		const plainBands = item.Rates ?? [];
+		if (plainBands.length > 0) {
+			const band = plainBands.find((b) => bandContains(b, penghasilanBrutoState));
+			return {
+				dppPercent,
+				tarif: band?.Rate ?? 0,
+				manualDpp,
+				manualTarif,
+				manualIncomeTax,
+				pajakPenghasilanOverride: undefined
+			};
+		}
+
 		if (typeof item.Rate === 'number') {
 			return {
 				dppPercent,
