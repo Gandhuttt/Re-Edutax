@@ -4,6 +4,7 @@ import {
 	bukti_potong_bp21,
 	bukti_potong_bp26,
 	bukti_potong_bpa1,
+	bukti_potong_bpa2,
 	bukti_potong_bpu,
 	kode_objek_pajak_pph,
 	wajib_pajak
@@ -115,7 +116,27 @@ export const listBuktiPotongSaya = query(async () => {
 		.leftJoin(kode_objek_pajak_pph, eq(bukti_potong_bpa1.kodeObjekPajakId, kode_objek_pajak_pph.id))
 		.where(and(eq(bukti_potong_bpa1.nomorIdentitasWp, activeNpwp), eq(bukti_potong_bpa1.diterbitkan, true)));
 
-	return [...bpuRows, ...bp21Rows, ...bp26Rows, ...bpa1Rows].sort(
+	// BPA2 mirrors BPA1's shape exactly (period range keyed off the end,
+	// plain-typed Nama, pphPasal21TerutangPadaIni as the credit figure).
+	const bpa2Rows = await db
+		.select({
+			id: bukti_potong_bpa2.id,
+			jenis: sql<'BPA2'>`'BPA2'`,
+			masaPajak: bukti_potong_bpa2.masaPajakAkhir,
+			tahun: bukti_potong_bpa2.tahunAkhir,
+			nomorPemotongan: bukti_potong_bpa2.nomorPemotongan,
+			npwpPemotong: bukti_potong_bpa2.npwpPemotong,
+			namaPemotong: wajib_pajak.nama,
+			namaObjekPajak: kode_objek_pajak_pph.nama,
+			tarif: bukti_potong_bpa2.tarif,
+			pajakPenghasilan: bukti_potong_bpa2.pphPasal21TerutangPadaIni
+		})
+		.from(bukti_potong_bpa2)
+		.innerJoin(wajib_pajak, eq(bukti_potong_bpa2.npwpPemotong, wajib_pajak.npwp))
+		.leftJoin(kode_objek_pajak_pph, eq(bukti_potong_bpa2.kodeObjekPajakId, kode_objek_pajak_pph.id))
+		.where(and(eq(bukti_potong_bpa2.nomorIdentitasWp, activeNpwp), eq(bukti_potong_bpa2.diterbitkan, true)));
+
+	return [...bpuRows, ...bp21Rows, ...bp26Rows, ...bpa1Rows, ...bpa2Rows].sort(
 		(a, b) => b.tahun - a.tahun || b.masaPajak - a.masaPajak
 	);
 });

@@ -211,6 +211,13 @@
       "when": 1788067972153,
       "tag": "0029_woozy_switch",
       "breakpoints": true
+    },
+    {
+      "idx": 30,
+      "version": "6",
+      "when": 1788074935946,
+      "tag": "0030_safe_lifeguard",
+      "breakpoints": true
     }
   ]
 }

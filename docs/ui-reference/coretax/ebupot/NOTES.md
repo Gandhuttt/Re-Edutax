@@ -752,17 +752,84 @@ SPT-Badan-specific data. Reference data (`kode_objek_pajak_pph`,
 `0025_reference_data.sql` -- only the new `bukti_potong_bp26` schema
 migration was needed.
 
-## Not yet explored this pass
+## BPA2 (PNS/TNI/Polri/pejabat negara A2 recap) — live-verified field list and mechanics (2026-08-30)
 
-BPNR, Penyetoran Sendiri, Pemotongan Secara Digunggung, Dokumen yang
-Dipersamakan, BPA2, and the referencedata API pull for the Nama Objek Pajak
-catalog (full list — only spot-checked ~7 of what looked like 20+ entries by
-scrolling). BPA2 is very likely BPA1's field set minus civilian-specific bits
-plus PNS/TNI/Polri rank fields — not confirmed live.
+Live create form fully walked (`ebupotbpa2/create`), test filled with the
+same 8-month period / K/0 / 200,000,000 gaji scenario used for BPA1's
+verification, to compare mechanics directly.
 
-Next step for full parity: pull the withholding-slips-portal JS bundle (same
-method as [[coretax-bundle-as-spec]]) and the reference-data API (per
-[[coretax-reference-data-api]]) to get the *complete* Nama Objek Pajak →
-{jenis_pajak, kode_objek_pajak, sifat, dpp%, tarif%, kap_kjs} catalog instead
-of manual UI scrolling — this is the highest-value single artifact since it's
-shared across BP21/BPU/BP26/MP/BPA1/BPA2.
+**Full field list, differences from BPA1 in bold:**
+- Informasi Umum: Bekerja di Lebih dari Satu Pemberi Kerja*, Masa Pajak
+  Awal*/Akhir*, Status*, Nomor Identitas WP* → Nama* (derived — DJP
+  taxpayer-master lookup confirmed live, same as BPA1/BP21: NIK
+  `3273010101900001` → "INDRA SANJAYA"). **No Pegawai Asing field at all**
+  (makes sense — PNS/TNI/Polri aren't foreign employees). **New: NIP/NRP*
+  and Pangkat/Golongan*** (plain text, no lookup/validation observed).
+  Status PTKP* (same 8-option TK/K 0-3 list as BPA1 — shares the
+  `EBUPOTBPA_STATUS`... no, shares the PTKP table itself, reuse
+  `ptkp-bpa1.ts` directly, no need for a separate `ptkp-bpa2.ts`). **"Jabatan" is renamed "Posisi"** (same plain-text concept). Nama Objek
+  Pajak* → Jenis Pajak*/Kode Objek Pajak* (derived) — **only 2 options
+  live** (Pegawai Tetap `21-100-01`, Pensiunan `21-100-02`) — no
+  "Fasilitas di Daerah Tertentu" variant (`21-100-32`) that BPA1 has.
+  Jenis Pemotongan* — same 3 options (`Kurang dari Setahun`, disetahunkan
+  variant, `Setahun Penuh`) from the shared `EBUPOTBPA_STATUS` reference
+  type — confirmed via reference-data pull these are literally the same
+  enum BPA1 uses.
+- **Penghasilan Bruto — completely different component breakdown**, PNS
+  payroll-structure specific: Gaji Pokok/Pensiun*, Tunjangan Istri,
+  Tunjangan Anak, Tunjangan Perbaikan Penghasilan, Tunjangan
+  Struktural/Fungsional, Tunjangan Beras, Tunjangan Lain-lain,
+  Penghasilan Tetap dan Teratur Lainnya yang Pembayarannya Terpisah dari
+  Pembayaran Gaji, Jumlah Penghasilan Bruto (sum). **No Gross Up
+  checkbox, no Honorarium/Premi Asuransi/Natura/Tantiem Bonus** (BPA1's
+  private-sector-specific components are entirely absent).
+- Pengurang — **identical to BPA1**: Biaya Jabatan/Biaya Pensiun* (same
+  `min(5%×bruto, 500,000×monthCount)` cap formula, live-verified exact
+  match: 4,000,000 for the same 8-month/200,000,000 test case), Iuran
+  terkait Pensiun atau Hari Tua*, Zakat*, Jumlah Pengurangan (sum).
+- Penghitungan PPh Pasal 21 — **same PTKP amounts, same progressive
+  Pasal 17 bracket formula**, live-verified exact match to BPA1's own
+  reference case (PKP 137,500,000 → PPh 14,625,000, Tarif 15%) using the
+  *same* test inputs. Jumlah Penghasilan Neto*, "Get data" prior-employer
+  pull (same not-doable-here pattern as BPA1), Penghasilan Neto dari
+  Pemotongan Sebelumnya, Jumlah Penghasilan Neto untuk Perhitungan
+  (Setahun/Disetahunkan)*, Penghasilan Tidak Kena Pajak*, Penghasilan
+  Kena Pajak*, PPh Pasal 21 atas PKP*, PPh Pasal 21 Terutang, PPh Pasal 21
+  Dipotong dari Bukti Sebelumnya*, PPh Pasal 21 Terutang pada Bukti Ini*.
+  **No "Jenis Fasilitas pada Masa Pajak Desember" dropdown at all** —
+  BPA1's facility/DTP mechanism doesn't exist for BPA2. Instead there's
+  **"PPh Pasal 21 yang Telah Dipotong*"**, confirmed live to be a
+  disabled/system-computed field (not manually enterable) — defaults to
+  0 with no monthly withholding history behind it, presumably auto-pulled
+  from Bukti Pemotongan Bulanan Pegawai Tetap records when they exist
+  (same monthly-history feature this app lacks for BPA1 too). "PPh Pasal
+  21 Kurang (Lebih) Dipotong pada Masa Pajak Desember / Masa Pajak
+  Terakhir*" = `PPh Terutang pada Ini − PPh yang Telah Dipotong`,
+  live-verified exact (14,625,000 − 0 = 14,625,000) — same structural
+  formula as BPA1's fixed version, just without the DTP-facility branch.
+  KAP-KJS* (derived, `411121-100`, same). **NITKU/Nomor Identitas Sub
+  Unit Organisasi\* is an actual `<select>` here** (not a readonly derived
+  field like BPA1) — but live-verified to offer exactly one option (the
+  withholder's own single sub-unit), so functionally equivalent; safe to
+  implement the same way BPA1 does (derived plain value, no real FK
+  reference table needed for this app's single-NITKU-per-account scope).
+- **No "Dokumen Referensi" section at all** — confirmed by the full field
+  list ending at NITKU, directly followed by Submit/Simpan Konsep. Unlike
+  every other bukti type built so far (BPU/BP21/BP26/BPA1 all require
+  Jenis Dokumen/Nomor Dokumen/Tanggal Dokumen), BPA2 needs none of it.
+
+**Build status**: BPA2 shipped locally this session (schema, `resolveBpa2Tax`
+reusing BPA1's PTKP/Biaya-Jabatan helpers, full CRUD, detail form, nav link,
+"Bukti Potong Saya" recap union) and smoke-tested end-to-end against the
+same reference scenario as BPA1 (8-month period, K/0, 200,000,000 gaji) —
+matched exactly through Simpan Konsep → Submit → Terbitkan: biaya jabatan
+4,000,000, PTKP 58,500,000, PKP 137,500,000, Tarif 15%, PPh Terutang
+14,625,000, Kurang/Lebih Desember 14,625,000 (PPh yang Telah Dipotong
+always 0, same as BPA1's zero-prior-withholding case).
+
+**Not explored this pass**: BPNR, Penyetoran Sendiri, Pemotongan Secara
+Digunggung, Dokumen yang Dipersamakan, and the referencedata API's full
+Nama Objek Pajak catalog beyond what's already been pulled for BPU/BP21/
+BP26/BPA1/BPA2's own object codes (only those specific codes were
+fetched per-type via `fetch-reference-data.mjs`, not the entire shared
+catalog in one pull).
