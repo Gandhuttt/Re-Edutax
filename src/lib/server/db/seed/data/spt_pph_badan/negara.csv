@@ -2,7 +2,6 @@ kode,nama
 aruba,Aruba
 afganistan,Afganistan
 angola,Angola
-anguilla,Anguilla
 kepulauan_aland,Kepulauan Aland
 albania,Albania
 andorra,Andorra
@@ -27,7 +26,7 @@ bahrain,Bahrain
 bahama,Bahama
 bosnia_dan_herzegovina,Bosnia dan Herzegovina
 santo_barthelemy,Santo Barthelemy
-belarus,Belarus
+belarus,Belarusia
 belize,Belize
 bermuda,Bermuda
 negara_majemuk_bolivia,Negara Majemuk Bolivia
@@ -42,7 +41,7 @@ kanada,Kanada
 kepulauan_cocos_keeling,Kepulauan Cocos (Keeling)
 swiss,Swiss
 cile,Cile
-cina,Cina
+cina,Tiongkok
 pantai_gading,Pantai Gading
 kamerun,Kamerun
 republik_demokratik_kongo,Republik Demokratik Kongo
@@ -54,7 +53,7 @@ cabo_verde,Cabo Verde
 kosta_rika,Kosta Rika
 kuba,Kuba
 curacao,Curacao
-pulau_christmas,Pulau Christmas
+pulau_christmas,Pulau Natal
 siprus,Siprus
 kepulauan_cayman,Kepulauan Cayman
 republik_ceko,Republik Ceko
@@ -87,9 +86,9 @@ guinea,Guinea
 guadeloupe,Guadeloupe
 gambia,Gambia
 guinea_bissau,Guinea-Bissau
-guinea_ekuator,Guinea Ekuator
+guinea_ekuator,Ekuator Guinea
 yunani,Yunani
-grenada,Grenada
+grenada,Granada
 greenland,Greenland
 georgia_selatan_dan_kepulauan_sandwich_selatan,Georgia Selatan dan Kepulauan Sandwich Selatan
 guatemala,Guatemala
@@ -117,9 +116,9 @@ jamaika,Jamaika
 jersey,Jersey
 yordania,Yordania
 jepang,Jepang
-kazakhstan,Kazakhstan
+kazakhstan,Kazakstan
 kenya,Kenya
-kyrgyzstan,Kyrgyzstan
+kyrgyzstan,Kirgistan
 kamboja,Kamboja
 kiribati,Kiribati
 saint_kitts_dan_nevis,Saint Kitts dan Nevis
@@ -134,7 +133,7 @@ santa_lucia,Santa Lucia
 liechtenstein,Liechtenstein
 tanpa_kewarganegaraan,Tanpa kewarganegaraan
 sri_lanka,Sri Lanka
-lesotho,Lesotho
+lesotho,Lesoto
 lithuania,Lithuania
 luksemburg,Luksemburg
 latvia,Latvia
@@ -210,7 +209,7 @@ serbia,Serbia
 sudan_selatan,Sudan Selatan
 sao_tome_dan_principe,Sao Tome dan Principe
 suriname,Suriname
-slovakia,Slovakia
+slovakia,Slowakia
 slovenia,Slovenia
 swedia,Swedia
 swaziland,Swaziland
@@ -253,3 +252,14 @@ mayotte,Mayotte
 afrika_selatan,Afrika Selatan
 zambia,Zambia
 zimbabwe,Zimbabwe
+belanda_kerajaan,Belanda - Kerajaan
+rumania_new_code,Rumania (New Code)
+united_nations_agency,United Nations Agency
+pengungsi_konvensi_pasal_1_1951,"Pengungsi (Konvensi Pasal 1, 1951)"
+eswatini,Eswatini
+palestine_legacy,Palestine
+timor_leste_democratic_republic,Timor Leste Democratic Republic
+perancis,Perancis
+korea_sth_republic,"Korea (Sth), Republic"
+korea_nth_democratic_peoples,Korea (Nth) - Democratic Peoples
+slovak_republic,Slovak Republic

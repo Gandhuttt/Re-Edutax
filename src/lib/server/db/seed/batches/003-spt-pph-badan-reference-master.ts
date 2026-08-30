@@ -2,6 +2,7 @@ import { fileURLToPath } from 'node:url';
 import { negara_spt_pph_badan, opini_auditor_spt_pph_badan, sektor_usaha_spt_pph_badan } from '../../schema';
 import type { SeedContext } from '../context';
 import { batchInsert, readCsv } from '../helpers';
+import { eq } from 'drizzle-orm';
 
 const negaraCsvPath = fileURLToPath(
 	new URL('../data/spt_pph_badan/negara.csv', import.meta.url)
@@ -103,6 +104,19 @@ export const run = async ({ db }: SeedContext) => {
 				})
 		)
 	);
+
+	// Anguilla was in the original seed but isn't in Coretax's live
+	// COUNTRY_CODE reference-data list (confirmed 2026-08-30 via
+	// docs/coretax-api/fetch-reference-data.mjs --types COUNTRY_CODE) --
+	// removed from negara.csv but deactivated here rather than deleted, to
+	// preserve any existing FK reference (kode stays stable at
+	// `negara-anguilla`; the CSV-driven upsert above only ever sets
+	// aktif:true for rows still present in the CSV, so this needs its own
+	// statement to actually take it out of circulation).
+	await db
+		.update(negara_spt_pph_badan)
+		.set({ aktif: false })
+		.where(eq(negara_spt_pph_badan.kode, 'anguilla'));
 
 	console.log(`Seeded SPT PPh Badan references: ${auditorOptions.length} auditor opinions`);
 	console.log(`Seeded SPT PPh Badan references: ${sektorUsahaOptions.length} business sectors`);

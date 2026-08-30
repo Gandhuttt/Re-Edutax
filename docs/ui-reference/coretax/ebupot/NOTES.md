@@ -588,25 +588,73 @@ reduced rate, so it just unlocks manual entry instead.
 Pajak*/Status* (recipient fields live under "Penghitungan Pajak
 Penghasilan" instead, unlike BPU/BP21's "Informasi Umum" placement): Nama
 Fasilitas* (before identity fields), Nomor Identitas WP* (foreign TIN, no
-format check observed), Nama* (**plain typed, not derived** -- confirmed no
-DJP/local taxpayer-master lookup, correct for non-resident), Alamat*,
-Negara Asal* (select, full country reference-data list), Tanggal Lahir/
-Tempat Lahir/Nomor Paspor/Nomor KITAS-KITAP (all optional, no asterisk),
-Nama Objek Pajak*, Jenis Pajak*/Kode Objek Pajak*/Sifat Pajak Penghasilan*
-(readonly), Penghasilan Bruto*, DPP%*, Tarif%*, Pajak Penghasilan*, KAP*
-(single field like BPU, not KAP-KJS). Dokumen Referensi same 4 fields as
-BPU/BP21 but **no recipient-side NITKU at all** (correct -- non-resident,
-no Indonesian sub-unit concept), only the withholder's own NITKU.
+format check observed), Nama* (**plain typed when the WP lookup misses** --
+see correction below), Alamat*, Negara Asal* (select, full country
+reference-data list), Tanggal Lahir/Tempat Lahir/Nomor Paspor/Nomor
+KITAS-KITAP (all optional, no asterisk), Nama Objek Pajak*, Jenis
+Pajak*/Kode Objek Pajak*/Sifat Pajak Penghasilan* (readonly), Penghasilan
+Bruto*, DPP%*, Tarif%*, Pajak Penghasilan*, KAP* (single field like BPU,
+not KAP-KJS). Dokumen Referensi same 4 fields as BPU/BP21 but **no
+recipient-side NITKU at all** (correct -- non-resident, no Indonesian
+sub-unit concept), only the withholder's own NITKU.
 
-Nama Objek Pajak/Fasilitas unlock as soon as Masa Pajak + Nomor Identitas
-WP are filled -- no async DJP-facility-registry wait like BP21's
-`validateListFacilityRegister` (makes sense: no domestic registry entry to
-check for a non-resident).
+**Correction, source-grounded 2026-08-30** (grepped the withholding-slips-
+portal bundle directly, not just live UI): Nomor Identitas WP *does*
+attempt a DJP taxpayer-master lookup (`getTaxPayerName()` on blur). If it
+resolves to a registered -- even previously-deleted -- domestic NPWP,
+Address/CountryOfOrigin/DOB/BirthCityCode/PassportNumber/KITASNumber get
+hidden+disabled and Name is presumably derived; only on "not found" (the
+`else` branch, which shows a "NPWP telah dihapus" warning if the number
+was a now-deleted NPWP) does it fall into the manual non-resident branch
+this app implements. Since this app has no DJP taxpayer-master access, it
+always takes the "not found" branch -- which is the only branch a real
+foreign TIN would ever hit anyway -- so no behavior change, just a more
+accurate description.
+
+Also source-confirmed in the same pass: **no async DJP-facility-registry
+check exists for BP26 at all** -- `checkListFacilityRegister` doesn't
+appear anywhere in BP26's bundle chunk (unlike BP21's
+`validateListFacilityRegister`). Fasilitas unlocks unconditionally on Masa
+Pajak *blur* (`setDisabled(TaxCertificateCode, false)`), not gated on
+Nomor Identitas WP as this doc previously assumed from UI timing alone.
+And Nama Objek Pajak does **not** reset when Fasilitas changes (confirmed:
+`TaxObjectReferenceCode` is only re-enabled on Fasilitas change, never
+nulled) -- this app's non-resetting `Select`s are correct as-is.
+
+The `ManualDeemedRate`/`ManualTaxRate`/`ManualIncomeTaxWithheld` -> DPP%/
+Tarif%/Pajak-Penghasilan unlock mechanism (already established for
+BPU/BP21) is directly present in BP26's own bundle chunk too:
+`setDisabled(DeemedNetIncome.name, "TRUE"!=upperCase(T.ManualDeemedRate))`
+etc. -- confirms `resolveBp26.ts`'s implementation byte-for-byte, not just
+by pattern-carryover from the other two bukti types.
+
+**Country reference list corrected 2026-08-30**: diffed
+`negara_spt_pph_badan` (originally 254 active rows, seeded independently
+for SPT PPh Badan) against Coretax's live `COUNTRY_CODE` reference-data
+type (265 rows, fetched via `docs/coretax-api/fetch-reference-data.mjs
+--types COUNTRY_CODE`) and found real drift: ~8 same-country spelling
+mismatches (Belarus/Belarusia, Cina/Tiongkok, Grenada/Granada, Guinea
+Ekuator/Ekuator Guinea, Kazakhstan/Kazakstan, Kyrgyzstan/Kirgistan,
+Lesotho/Lesoto, Pulau Christmas/Pulau Natal -- renamed in place, same
+`kode`) plus **Coretax genuinely carrying legacy *and* modern codes as
+separate selectable entries** for several countries (Palestine has both
+`PSE:PALESTINE` and `PS:Negara Palestina`; similarly Eswatini/Swaziland,
+Timor Leste/"Timor Leste Democratic Republic", Perancis/Prancis, four
+distinct Korea entries, Slowakia/"Slovak Republic") -- added as new rows
+rather than merged, to match Coretax's own duplicate-code behavior exactly.
+"Anguilla" existed in the old seed with no Coretax counterpart at all --
+deactivated (`aktif=false`) rather than deleted, to preserve any existing
+FK. Fixed in `src/lib/server/db/seed/data/spt_pph_badan/negara.csv` (now
+264 rows) and `003-spt-pph-badan-reference-master.ts` (explicit
+deactivation step, since the CSV-driven upsert only ever sets
+`aktif=true`). Post-fix diff against Coretax's live list: 263/263 exact
+match, zero remaining discrepancies. This also affects SPT PPh Badan's own
+country dropdowns (Lampiran 2/10A/10C), which share the same table.
 
 Implemented in `src/lib/server/ebupot/resolveBp26.ts`,
 `src/routes/ebupot/bp26/*`. Negara Asal reuses the country reference table
-already seeded for SPT PPh Badan (`negara_spt_pph_badan`, 255 rows) rather
-than duplicating it -- it's a generic country list, not actually
+already seeded for SPT PPh Badan (`negara_spt_pph_badan`) rather than
+duplicating it -- it's a generic country list, not actually
 SPT-Badan-specific data. Reference data (`kode_objek_pajak_pph`,
 `jenisBuktiPotong='bp26'`) was already fully seeded via migration
 `0025_reference_data.sql` -- only the new `bukti_potong_bp26` schema
