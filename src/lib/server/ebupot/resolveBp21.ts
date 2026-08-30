@@ -15,6 +15,16 @@ export type ResolvedBp21 = {
 	// Callers use this directly when present instead of deriving PPh from
 	// dppPercent/tarif.
 	pajakPenghasilanOverride?: number;
+	// Coretax's own client-side ceiling on Penghasilan Bruto for this
+	// object+facility combo: max(...band.Max) / (dppPercent/100), taken from
+	// the resolved item's Rates array. Undefined when the item has no bands
+	// (flat/exempt-manual branches -- no ceiling). For most objects the top
+	// band runs to 9,999,999,999,999 so this is effectively a no-op; it only
+	// bites on objects like 21-100-24/21-100-29 (daily wage) where the
+	// bracket table genuinely doesn't extend past the object's real-world
+	// ceiling. See docs/ui-reference/coretax/ebupot/NOTES.md "BP21: bracket
+	// ceiling validation".
+	maxBruto?: number;
 };
 
 const bandContains = (band: KodeObjekPajakTarifBand, amount: number) =>
@@ -58,6 +68,15 @@ export const resolveBp21 = (
 	const manualIncomeTax = item.ManualIncomeTaxWithheld?.toUpperCase() === 'TRUE';
 	const dppPercent = item.DeemedRate ?? 100;
 
+	// Coretax's own max-bruto validator, generic across all bracket shapes:
+	// max(...band.Max) / (dppPercent/100). Live-verified on 21-100-24 (top
+	// band Max=2,500,000, dppPercent=100 -> maxBruto=2,500,000; entering
+	// more triggers Coretax's "Gross Income exceed the maximum value
+	// allowed for this tax object" error).
+	const maxBruto = item.Rates?.length
+		? Math.max(...item.Rates.map((band) => band.Max)) / (dppPercent / 100)
+		: undefined;
+
 	const cumulativeBands = item.Rates?.filter((band) => band.Minus !== undefined) ?? [];
 	if (cumulativeBands.length > 0) {
 		const total = brutoSebelumnya + bruto;
@@ -69,7 +88,8 @@ export const resolveBp21 = (
 			manualDpp,
 			manualTarif,
 			manualIncomeTax,
-			pajakPenghasilanOverride: Math.round(taxOnTotal - taxOnPrevious)
+			pajakPenghasilanOverride: Math.round(taxOnTotal - taxOnPrevious),
+			maxBruto
 		};
 	}
 
@@ -77,7 +97,7 @@ export const resolveBp21 = (
 	if (terBands.length > 0) {
 		const applicable = terBands.filter((band) => band.TaxExemptionStatus?.includes(statusPtkp));
 		const band = applicable.find((b) => bandContains(b, bruto));
-		return { dppPercent, tarif: band?.Rate ?? 0, manualDpp, manualTarif, manualIncomeTax };
+		return { dppPercent, tarif: band?.Rate ?? 0, manualDpp, manualTarif, manualIncomeTax, maxBruto };
 	}
 
 	// Plain bruto-only bracket -- bands with neither TaxExemptionStatus nor
@@ -88,7 +108,7 @@ export const resolveBp21 = (
 	const plainBands = item.Rates ?? [];
 	if (plainBands.length > 0) {
 		const band = plainBands.find((b) => bandContains(b, bruto));
-		return { dppPercent, tarif: band?.Rate ?? 0, manualDpp, manualTarif, manualIncomeTax };
+		return { dppPercent, tarif: band?.Rate ?? 0, manualDpp, manualTarif, manualIncomeTax, maxBruto };
 	}
 
 	if (typeof item.Rate === 'number') {

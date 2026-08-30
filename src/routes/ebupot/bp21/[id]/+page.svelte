@@ -6,6 +6,7 @@
 	import Select from '$lib/components/Select.svelte';
 	import { formatMonth } from '$lib/helpers/date';
 	import { ptkpEbupotOptions } from '$lib/helpers/ptkp-ebupot';
+	import { formatRupiah } from '$lib/helpers/rupiahInput';
 	import { getContext, untrack } from 'svelte';
 	import { getFasilitasPajakBp21 } from '../../fasilitasPajak.remote';
 	import { getJenisDokumenEbupot } from '../../jenisDokumen.remote';
@@ -76,6 +77,13 @@
 		const manualIncomeTax = item.ManualIncomeTaxWithheld?.toUpperCase() === 'TRUE';
 		const dppPercent = item.DeemedRate ?? 100;
 
+		// Coretax's own max-bruto validator, mirrored from resolveBp21.ts --
+		// see docs/ui-reference/coretax/ebupot/NOTES.md "BP21: bracket ceiling
+		// validation". Server is the source of truth; this is display-only.
+		const maxBruto = item.Rates?.length
+			? Math.max(...item.Rates.map((band) => band.Max)) / (dppPercent / 100)
+			: undefined;
+
 		const cumulativeBands = item.Rates?.filter((band) => band.Minus !== undefined) ?? [];
 		if (cumulativeBands.length > 0) {
 			const total = pendapatanBrutoSebelumnyaState + penghasilanBrutoState;
@@ -90,7 +98,8 @@
 				manualDpp,
 				manualTarif,
 				manualIncomeTax,
-				pajakPenghasilanOverride: Math.round(taxOnTotal - taxOnPrevious)
+				pajakPenghasilanOverride: Math.round(taxOnTotal - taxOnPrevious),
+				maxBruto
 			};
 		}
 
@@ -106,7 +115,8 @@
 				manualDpp,
 				manualTarif,
 				manualIncomeTax,
-				pajakPenghasilanOverride: undefined
+				pajakPenghasilanOverride: undefined,
+				maxBruto
 			};
 		}
 
@@ -122,7 +132,8 @@
 				manualDpp,
 				manualTarif,
 				manualIncomeTax,
-				pajakPenghasilanOverride: undefined
+				pajakPenghasilanOverride: undefined,
+				maxBruto
 			};
 		}
 
@@ -133,7 +144,8 @@
 				manualDpp,
 				manualTarif,
 				manualIncomeTax,
-				pajakPenghasilanOverride: undefined
+				pajakPenghasilanOverride: undefined,
+				maxBruto: undefined
 			};
 		}
 
@@ -143,7 +155,8 @@
 			manualDpp,
 			manualTarif,
 			manualIncomeTax,
-			pajakPenghasilanOverride: undefined
+			pajakPenghasilanOverride: undefined,
+			maxBruto: undefined
 		};
 	});
 
@@ -393,6 +406,13 @@
 							disabled={!bp21.canEdit}
 						/>
 					</Label>
+					{#if resolvedBp21?.maxBruto !== undefined && penghasilanBrutoState > resolvedBp21.maxBruto}
+						<p class="tw:text-sm tw:text-red-600">
+							Penghasilan Bruto melebihi nilai maksimum untuk objek pajak ini (Rp{formatRupiah(
+								resolvedBp21.maxBruto
+							)}).
+						</p>
+					{/if}
 					<Label>
 						<span>DPP (%)</span>
 						{#if resolvedBp21?.manualDpp}

@@ -497,11 +497,33 @@ override, regardless of the real bracket. **Live-verified and fixed**:
 (same bruto) -> **identical** Tarif/PPh, confirming this bracket is genuinely
 PTKP-independent. Also confirmed live: entering a bruto above this object's
 own max (2,500,000) triggers Coretax's own "Gross Income exceed the maximum
-value allowed for this tax object" validation error -- this app doesn't
-replicate that per-object max validation (only the bracket lookup itself),
-which is a minor known gap, not incorrect computation. `resolveBp21.ts` and
+value allowed for this tax object" validation error. `resolveBp21.ts` and
 its client-side mirror in `bp21/[id]/+page.svelte` now check for this plain
 band shape between the TER and flat branches.
+
+## BP21: bracket ceiling validation -- source-grounded and fixed
+
+Found the exact mechanism in `main.03469c0b8e38345f.js` while investigating
+the plain-bracket bug above: `o=Math.max(...bands.map(b=>b.Max))`, then
+`form.controls[TaxBase.name].setValidators([required, max(o/(DeemedNetIncome/100))])`.
+Coretax caps Penghasilan Bruto at the highest `Max` across the resolved
+item's `Rates` bands, scaled by `100/DPP%`. For TER/cumulative objects the
+top band runs to `9,999,999,999,999` so this is a no-op; it only bites on
+plain-bracket objects like `21-100-24`/`21-100-29` where the real ceiling
+(2,500,000) means the object code genuinely doesn't apply above it -- a
+different object code exists for ">Rp2.500.000 Sehari".
+
+This mattered more than a missing error message: without the cap, entering
+a bruto above an object's ceiling made the resolver's bracket lookup return
+no matching band, silently defaulting Tarif=0/PPh=0 -- a wrong-object-code
+mistake would produce a valid-looking Rp0 bukti potong instead of being
+blocked. Fixed by adding `maxBruto` to `ResolvedBp21` (computed the same way
+as Coretax's own validator) and enforcing it server-side in
+`updateBp21.remote.ts` (blocks the save with Coretax's own error wording)
+plus a client-side inline warning. Live-verified end-to-end: submitting
+`21-100-24` with bruto=10,000,000 is rejected with "Penghasilan Bruto
+melebihi nilai maksimum untuk objek pajak ini (Rp2.500.000)"; bruto=2,000,000
+(within the cap) saves normally (Tarif 0.5%, PPh 10,000).
 
 **Fasilitas Pajak restricted to codes 4/8/9/10** (DTP, Fasilitas Lainnya,
 Tanpa Fasilitas, SKB Pasal 21) across all 36 `EBUPOTBP21_TAX_OBJECT` rows --

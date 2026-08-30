@@ -1,6 +1,7 @@
 import { form, getRequestEvent } from '$app/server';
 import { decimalString, isRealIsoDate, requiredString, rupiahString } from '$lib/helpers/valibot-schema';
 import { ptkpEbupotValues } from '$lib/helpers/ptkp-ebupot';
+import { formatRupiah } from '$lib/helpers/rupiahInput';
 import { db } from '$lib/server/db';
 import { bukti_potong_bp21, fasilitas_pajak_ebupot, jenis_dokumen_ebupot, kode_objek_pajak_pph } from '$lib/server/db/schema';
 import { resolveBp21 } from '$lib/server/ebupot/resolveBp21';
@@ -129,6 +130,17 @@ export const updateBp21 = form(UpdateBp21Schema, async (input) => {
 		);
 	} catch (err) {
 		error(400, err instanceof Error ? err.message : 'Tarif tidak dapat dihitung');
+	}
+
+	// Mirrors Coretax's own max-bruto validator (see resolveBp21.ts) --
+	// live-verified: entering more than an object's bracket ceiling (e.g.
+	// 2,500,000 on 21-100-24) triggers Coretax's "Gross Income exceed the
+	// maximum value allowed for this tax object" error and blocks the save.
+	if (resolved.maxBruto !== undefined && penghasilanBruto > resolved.maxBruto) {
+		error(
+			400,
+			`Penghasilan Bruto melebihi nilai maksimum untuk objek pajak ini (Rp${formatRupiah(resolved.maxBruto)})`
+		);
 	}
 
 	if (resolved.manualDpp && !input.dppManual) {
