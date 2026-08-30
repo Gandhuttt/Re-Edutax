@@ -561,6 +561,57 @@ Implemented in `src/lib/server/ebupot/resolveBp21.ts`,
 `0025_reference_data.sql` from earlier session work -- no new reference
 migration was needed, only the new `bukti_potong_bp21` schema migration.
 
+## BP26: single object code, flat 20%, non-resident identity fields -- live-verified 2026-08-30
+
+Re-verified live before implementing (the earlier first-pass field list --
+see "BP26 create form" above -- was missing several fields entirely). This
+pass also settled an old open question from the first pass ("BP26 draws
+from BPNR live?" -- no, they're unrelated document types despite both being
+Pasal 26).
+
+**One object code only**, confirmed both from `EBUPOTBP26_TAX_OBJECT` (1
+row: `27-100-99`) and live (Nama Objek Pajak dropdown showed exactly that
+one option). **Flat 20% formula**: Tanpa Fasilitas/DTP -> DPP 100%, Tarif
+20% regardless of anything else (`Rates: [{Min:0, Max:1e18, Rate:20}]` --
+effectively unbounded). Bruto 100,000,000 -> PPh 20,000,000, live-verified
+exact.
+
+**SKD (Surat Keterangan Domisili) / Fasilitas Lainnya unlock manual DPP and
+Tarif** (`ManualDeemedRate`/`ManualTaxRate: "TRUE"`) -- live-verified:
+selecting SKD flips Tarif from grey/derived to white/editable; typed 100%
+computed PPh = bruto x 100% exactly. `ManualIncomeTaxWithheld: "FALSE"` --
+Pajak Penghasilan always stays auto-computed from DPP x Tarif, matching the
+real-world reasoning that DJP can't pre-encode every bilateral tax treaty's
+reduced rate, so it just unlocks manual entry instead.
+
+**Full field list, live-verified** -- Informasi Umum has only Masa
+Pajak*/Status* (recipient fields live under "Penghitungan Pajak
+Penghasilan" instead, unlike BPU/BP21's "Informasi Umum" placement): Nama
+Fasilitas* (before identity fields), Nomor Identitas WP* (foreign TIN, no
+format check observed), Nama* (**plain typed, not derived** -- confirmed no
+DJP/local taxpayer-master lookup, correct for non-resident), Alamat*,
+Negara Asal* (select, full country reference-data list), Tanggal Lahir/
+Tempat Lahir/Nomor Paspor/Nomor KITAS-KITAP (all optional, no asterisk),
+Nama Objek Pajak*, Jenis Pajak*/Kode Objek Pajak*/Sifat Pajak Penghasilan*
+(readonly), Penghasilan Bruto*, DPP%*, Tarif%*, Pajak Penghasilan*, KAP*
+(single field like BPU, not KAP-KJS). Dokumen Referensi same 4 fields as
+BPU/BP21 but **no recipient-side NITKU at all** (correct -- non-resident,
+no Indonesian sub-unit concept), only the withholder's own NITKU.
+
+Nama Objek Pajak/Fasilitas unlock as soon as Masa Pajak + Nomor Identitas
+WP are filled -- no async DJP-facility-registry wait like BP21's
+`validateListFacilityRegister` (makes sense: no domestic registry entry to
+check for a non-resident).
+
+Implemented in `src/lib/server/ebupot/resolveBp26.ts`,
+`src/routes/ebupot/bp26/*`. Negara Asal reuses the country reference table
+already seeded for SPT PPh Badan (`negara_spt_pph_badan`, 255 rows) rather
+than duplicating it -- it's a generic country list, not actually
+SPT-Badan-specific data. Reference data (`kode_objek_pajak_pph`,
+`jenisBuktiPotong='bp26'`) was already fully seeded via migration
+`0025_reference_data.sql` -- only the new `bukti_potong_bp26` schema
+migration was needed.
+
 ## Not yet explored this pass
 
 BPNR, Penyetoran Sendiri, Pemotongan Secara Digunggung, Dokumen yang

@@ -54,3 +54,22 @@ export const getFasilitasPajakBp21 = prerender(
 	},
 	{ dynamic: true }
 );
+
+// Live-verified (see docs/ui-reference/coretax/ebupot/NOTES.md "BP26"):
+// BP26's single object code (27-100-99) references TaxCertificateCode 4
+// (DTP), 7 (Surat Keterangan Domisili/SKD), 8 (Fasilitas Lainnya), 9
+// (Tanpa Fasilitas) -- confirmed live, dropdown showed exactly these 4.
+const bp26FasilitasKode = ['4', '7', '8', '9'];
+
+export const getFasilitasPajakBp26 = prerender(
+	async () => {
+		const rows = await db
+			.select()
+			.from(fasilitas_pajak_ebupot)
+			.where(and(eq(fasilitas_pajak_ebupot.aktif, true), inArray(fasilitas_pajak_ebupot.kode, bp26FasilitasKode)))
+			.orderBy(asc(fasilitas_pajak_ebupot.kode));
+
+		return rows;
+	},
+	{ dynamic: true }
+);
