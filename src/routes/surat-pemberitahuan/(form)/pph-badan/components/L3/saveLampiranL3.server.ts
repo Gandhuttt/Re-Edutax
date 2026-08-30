@@ -35,7 +35,13 @@ export const L3Schema = v.object({
 			dpp: decimalInput('DPP'),
 			pph: decimalInput('Pajak penghasilan'),
 			nomorBukti: requiredString('Nomor bukti pemotongan/SSP/SSPCP'),
-			tanggalBukti: requiredString('Tanggal bukti pemotongan/SSP/SSPCP')
+			tanggalBukti: requiredString('Tanggal bukti pemotongan/SSP/SSPCP'),
+			// Present only on rows pulled in via "Impor dari eBupot" (see
+			// _L3.svelte's simpanImporB) -- absent for manually-typed rows.
+			sumberBuktiPotongJenis: v.optional(
+				v.picklist(['BPU', 'BP21', 'BP26', 'BPA1', 'BPA2', 'MP'])
+			),
+			sumberBuktiPotongId: v.optional(v.string())
 		})
 	)
 });
@@ -143,7 +149,9 @@ export async function saveLampiranL3(sptPphBadanId: string, input: L3Input): Pro
 				dpp: Number(row.dpp),
 				pph: Number(row.pph),
 				nomorBukti: row.nomorBukti,
-				tanggalBukti: row.tanggalBukti
+				tanggalBukti: row.tanggalBukti,
+				sumberBuktiPotongJenis: row.sumberBuktiPotongJenis ?? null,
+				sumberBuktiPotongId: row.sumberBuktiPotongId ?? null
 			})
 		);
 	}

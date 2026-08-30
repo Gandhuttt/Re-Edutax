@@ -169,7 +169,16 @@ export function saveLampiranL1(sptId: string, input: L1Input) {
 				tanggalBukti: teks(row.tanggalBukti),
 				jenisPajak: teks(row.jenisPajak),
 				penghasilanBruto: angka(row.penghasilanBruto),
-				pphDipotong: angka(row.pphDipotong)
+				pphDipotong: angka(row.pphDipotong),
+				// Present only on rows pulled in via "Impor dari eBupot"
+				// (see E.svelte's simpanImpor) -- undefined/null for manual
+				// rows. Carried through so the dedup check in
+				// listBuktiPotongForImport.remote.ts stays correct across
+				// save/reload cycles.
+				sumberBuktiPotongJenis: (row.sumberBuktiPotongJenis as
+					| 'BPU' | 'BP21' | 'BP26' | 'BPA1' | 'BPA2' | 'MP'
+					| undefined) ?? null,
+				sumberBuktiPotongId: (row.sumberBuktiPotongId as string | undefined) ?? null
 			})
 		);
 	}

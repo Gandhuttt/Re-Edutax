@@ -100,6 +100,14 @@ export const spt_pph_orang_pribadi_lampiran_1_bukti_potong = sqliteTable(
 		tanggalBukti: text('tanggal_bukti').notNull().default(''),
 		jenisPajak: text('jenis_pajak').notNull().default(''),
 		penghasilanBruto: integer('penghasilan_bruto').notNull().default(0),
-		pphDipotong: integer('pph_dipotong').notNull().default(0)
+		pphDipotong: integer('pph_dipotong').notNull().default(0),
+
+		// Set only when this row was pulled in via "Impor dari eBupot" -- null
+		// for manually-typed rows. Same provenance pair as
+		// spt_pph_badan_lampiran_3_pph_dipotong; see that table's comment.
+		sumberBuktiPotongJenis: text('sumber_bukti_potong_jenis', {
+			enum: ['BPU', 'BP21', 'BP26', 'BPA1', 'BPA2', 'MP']
+		}),
+		sumberBuktiPotongId: text('sumber_bukti_potong_id')
 	}
 );

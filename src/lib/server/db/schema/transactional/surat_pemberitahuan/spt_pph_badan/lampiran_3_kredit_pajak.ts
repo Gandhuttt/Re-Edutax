@@ -53,6 +53,17 @@ export const spt_pph_badan_lampiran_3_pph_dipotong = sqliteTable(
 		pph: integer('pph').notNull().default(0),
 		nomorBukti: text('nomor_bukti').notNull().default(''),
 		tanggalBukti: text('tanggal_bukti').notNull().default(''),
-		keterangan: text('keterangan').notNull().default('')
+		keterangan: text('keterangan').notNull().default(''),
+
+		// Set only when this row was pulled in via "Impor dari eBupot" --
+		// null for manually-typed rows. sumberBuktiPotongId spans 6 different
+		// bukti_potong_* tables (BPU/BP21/BP26/BPA1/BPA2/MP), so no single FK
+		// target exists; sumberBuktiPotongJenis disambiguates which table it
+		// points into. Used for the import picker's dedup check (a bukti
+		// already imported into this SPT shouldn't be offered again).
+		sumberBuktiPotongJenis: text('sumber_bukti_potong_jenis', {
+			enum: ['BPU', 'BP21', 'BP26', 'BPA1', 'BPA2', 'MP']
+		}),
+		sumberBuktiPotongId: text('sumber_bukti_potong_id')
 	}
 );

@@ -53,7 +53,9 @@ export async function getLampiranL3(sptPphBadanId: string, pengembalianPengurang
 				dpp: spt_pph_badan_lampiran_3_pph_dipotong.dpp,
 				pph: spt_pph_badan_lampiran_3_pph_dipotong.pph,
 				nomorBukti: spt_pph_badan_lampiran_3_pph_dipotong.nomorBukti,
-				tanggalBukti: spt_pph_badan_lampiran_3_pph_dipotong.tanggalBukti
+				tanggalBukti: spt_pph_badan_lampiran_3_pph_dipotong.tanggalBukti,
+				sumberBuktiPotongJenis: spt_pph_badan_lampiran_3_pph_dipotong.sumberBuktiPotongJenis,
+				sumberBuktiPotongId: spt_pph_badan_lampiran_3_pph_dipotong.sumberBuktiPotongId
 			})
 			.from(spt_pph_badan_lampiran_3_pph_dipotong)
 			.leftJoin(

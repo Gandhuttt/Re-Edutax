@@ -6,6 +6,7 @@
         data,
         openModal,
         deleteItem,
+        openImportModal,
         kreditPajakLuarNegeri = 0
     }: {
         data: Array<{
@@ -17,9 +18,11 @@
             pph: number;
             nomorBukti: string;
             tanggalBukti: string;
+            sumberBuktiPotongId?: string | null;
         }>;
         openModal: (item: unknown) => void;
         deleteItem: (id: string | number) => void;
+        openImportModal: () => void;
         kreditPajakLuarNegeri?: number;
     } = $props();
 
@@ -29,7 +32,10 @@
 </script>
 
 <div class="tw:p-5 tw:flex tw:flex-col tw:gap-1">
-    <Button type="button" class={"tw:text-white tw:w-30"} color={"#1c398e"} onclick={() => openModal(null)} data-bs-toggle="modal" data-bs-target="#modalL3B">Tambah</Button>
+    <div class="tw:flex tw:gap-1">
+        <Button type="button" class={"tw:text-white"} color={"#1c398e"} onclick={openImportModal} data-bs-toggle="modal" data-bs-target="#modalL3BImpor">Impor dari eBupot</Button>
+        <Button type="button" class={"tw:text-white tw:w-30"} color={"#1c398e"} onclick={() => openModal(null)} data-bs-toggle="modal" data-bs-target="#modalL3B">Tambah</Button>
+    </div>
     <div class="tw:overflow-scroll">
         <Table class={"tw:w-full"}>
             {#snippet head()}
@@ -62,7 +68,10 @@
                         <Button type="button" class={"tw:min-w-15!"} onclick={() => deleteItem(item.id)}>Hapus</Button>
                     </td>
                     <td>{i + 1}</td>
-                    <td>{item.namaPemotongPemungut}</td>
+                    <td>
+                        {item.namaPemotongPemungut}
+                        {#if item.sumberBuktiPotongId}<span class="badge-impor">Diimpor</span>{/if}
+                    </td>
                     <td>{item.npwp}</td>
                     <td>{item.jenisPajak}</td>
                     <td>{Number(item.dpp || 0).toLocaleString('id-ID')}</td>
@@ -115,5 +124,16 @@ td {
     padding: .5rem 1rem;
     word-wrap: break-word;
     font-size: .8rem;
+}
+
+.badge-impor {
+    display: inline-block;
+    margin-left: 0.4rem;
+    padding: 0.05rem 0.4rem;
+    font-size: 0.65rem;
+    font-weight: bold;
+    color: white;
+    background-color: var(--color-secondary);
+    border-radius: 0.25rem;
 }
 </style>

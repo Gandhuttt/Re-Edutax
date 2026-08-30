@@ -131,4 +131,9 @@ export interface BarisBuktiPotong {
 	jenisPajak: string;
 	penghasilanBruto: number;
 	pphDipotong: number;
+	// Set only when this row was pulled in via "Impor dari eBupot" -- undefined
+	// for manually-typed rows. Powers the dedup check in the import picker
+	// (an already-imported bukti isn't offered again) and the "Diimpor" badge.
+	sumberBuktiPotongJenis?: 'BPU' | 'BP21' | 'BP26' | 'BPA1' | 'BPA2' | 'MP' | null;
+	sumberBuktiPotongId?: string | null;
 }

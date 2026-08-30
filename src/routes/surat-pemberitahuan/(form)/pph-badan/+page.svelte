@@ -188,7 +188,9 @@
 			dpp: row.dpp,
 			pph: row.pph,
 			nomorBukti: row.nomorBukti,
-			tanggalBukti: row.tanggalBukti
+			tanggalBukti: row.tanggalBukti,
+			sumberBuktiPotongJenis: row.sumberBuktiPotongJenis,
+			sumberBuktiPotongId: row.sumberBuktiPotongId
 		}))
 	);
 
