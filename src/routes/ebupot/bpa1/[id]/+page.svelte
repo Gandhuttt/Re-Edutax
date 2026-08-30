@@ -127,6 +127,17 @@
 	let pphDipotongSebelumnyaState = $state(bpa1.pphPasal21DipotongSebelumnya);
 	const pphTerutangPadaIni = $derived(pphPasal21Terutang - pphDipotongSebelumnyaState);
 
+	// Fasilitas code 11 = PPh Pasal 21 DTP -- moves this bukti's tax to
+	// "Ditanggung Pemerintah" instead of the employee's own credit.
+	const pphDitanggungPemerintah = $derived.by(() => {
+		const fasilitas = fasilitasOptions.find((f) => f.id === fasilitasPajakIdState);
+		return fasilitas?.kode === '11' ? pphTerutangPadaIni : 0;
+	});
+	// Live-verified on Coretax: with no prior monthly Bukti Pemotongan
+	// Bulanan Pegawai Tetap recorded, this equals PPh Terutang pada Ini
+	// minus PPh Ditanggung Pemerintah -- see updateBpa1.remote.ts.
+	const pphKurangLebihDesember = $derived(pphTerutangPadaIni - pphDitanggungPemerintah);
+
 	async function cariNpwpPenerima() {
 		const wp = await getWajibPajak({ npwp: nomorIdentitasWpState });
 		if (wp) namaState = wp.nama;
@@ -516,6 +527,14 @@
 						<Input type="rupiah" id={getContext('id')} value={pphTerutangPadaIni} disabled />
 					</Label>
 					<Label>
+						<span>PPh Pasal 21 yang Dipotong/Ditanggung Pemerintah (Rp)</span>
+						<Input type="rupiah" id={getContext('id')} value={pphDitanggungPemerintah} disabled />
+					</Label>
+					<Label>
+						<span>PPh Pasal 21 Kurang (Lebih) Dipotong pada Masa Pajak Desember / Masa Pajak Terakhir (Rp)</span>
+						<Input type="rupiah" id={getContext('id')} value={pphKurangLebihDesember} disabled />
+					</Label>
+					<Label>
 						<span>Jenis Fasilitas pada Masa Pajak Desember/Masa Pajak Terakhir</span>
 						<Select
 							name="fasilitasPajakId"
@@ -540,9 +559,11 @@
 					<p class="tw:text-sm tw:text-gray-500">
 						Jenis Fasilitas "PPh Pasal 21 Ditanggung Pemerintah (DTP)" memindahkan PPh Terutang
 						pada Bukti Potong ini ke "Ditanggung Pemerintah" alih-alih dipotong dari penerima.
-						"Kurang (Lebih) Dipotong pada Masa Pajak Desember" belum dihitung otomatis di aplikasi
-						ini karena memerlukan riwayat pemotongan bulanan (Bukti Pemotongan Bulanan Pegawai
-						Tetap) yang belum tersedia.
+						"Kurang (Lebih) Dipotong pada Masa Pajak Desember" dihitung sebagai PPh Terutang pada
+						Bukti Ini dikurangi PPh Ditanggung Pemerintah -- aplikasi ini belum memiliki riwayat
+						pemotongan bulanan (Bukti Pemotongan Bulanan Pegawai Tetap), sehingga jika penerima
+						sudah dipotong PPh 21 bulanan sepanjang tahun berjalan, angka pada aplikasi ini akan
+						lebih tinggi dari yang sebenarnya di Coretax.
 					</p>
 				</div>
 			{/snippet}

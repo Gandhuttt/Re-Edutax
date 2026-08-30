@@ -201,12 +201,20 @@ export const updateBpa1 = form(UpdateBpa1Schema, async (input) => {
 	const pphPasal21TerutangPadaIni = pphPasal21Terutang - pphPasal21DipotongSebelumnya;
 
 	// Fasilitas code 11 = PPh Pasal 21 Ditanggung Pemerintah (DTP) -- the
-	// government bears this bukti's tax instead of the employee. This app
-	// has no monthly-MP withholding-history feature to true up against, so
-	// "Kurang (Lebih) Dipotong pada Masa Pajak Desember" is left at 0 --
-	// deferred, same as other cross-feature integrations this session.
+	// government bears this bukti's tax instead of the employee.
 	const pphDipotongDitanggungPemerintah = fasilitas.kode === '11' ? pphPasal21TerutangPadaIni : 0;
-	const pphKurangLebihDipotongDesember = 0;
+
+	// Live-verified on Coretax: with no prior monthly Bukti Pemotongan
+	// Bulanan Pegawai Tetap recorded, "Kurang (Lebih) Dipotong pada Masa
+	// Pajak Desember" equals PPh Terutang pada Bukti Ini minus PPh
+	// Ditanggung Pemerintah -- it is NOT always 0 (PKP 137,500,000 case:
+	// PPh Terutang pada Ini 14,625,000, DTP 0 -> Kurang/Lebih 14,625,000,
+	// confirmed exact live). This app has no monthly-withholding-history
+	// feature to subtract a "sudah dipotong bulanan" term, so this mirrors
+	// the zero-prior-withholding case exactly; a taxpayer with real monthly
+	// BP Bulanan history would see a smaller (or negative/"lebih") value on
+	// real Coretax that this app cannot compute.
+	const pphKurangLebihDipotongDesember = pphPasal21TerutangPadaIni - pphDipotongDitanggungPemerintah;
 
 	await db
 		.update(bukti_potong_bpa1)

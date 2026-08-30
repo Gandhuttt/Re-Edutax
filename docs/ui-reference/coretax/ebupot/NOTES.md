@@ -257,13 +257,15 @@ Much larger form than the others — this is the annual 1721-A1-equivalent.
   Minus` cumulative-bracket mechanism as BP21's pesangon objects. Live-
   verified exact: PKP 137,500,000 → PPh 14,625,000 (Tarif 15%).
 - **Jenis Pemotongan** — 3 options: `Kurang dari Setahun`, `Kurang dari
-  setahun yang penghasilannya disetahunkan`, `Setahun Penuh`. Only
-  "Setahun Penuh" was live-verified (no annualization adjustment needed —
-  `penghasilanNetoSetahunDisetahunkan` passes the combined Neto straight
-  through). The "disetahunkan" annualize/de-annualize formula
+  setahun yang penghasilannya disetahunkan`, `Setahun Penuh`. **Both**
+  "Setahun Penuh" and plain "Kurang dari Setahun" are now live-verified
+  identical (same 8-month period, K/0, 200,000,000 bruto → PPh 14,625,000
+  both times) — neither annualizes; `penghasilanNetoSetahunDisetahunkan`
+  correctly passes the combined Neto straight through for both. Only the
+  "disetahunkan" variant's actual annualize/de-annualize formula
   (`× 12 / monthCount` then de-annualize the resulting tax back by
-  `× monthCount / 12`) is implemented per standard Indonesian payroll
-  technique but was **not** independently live-verified this pass.
+  `× monthCount / 12`) remains **not** independently live-verified — it's
+  implemented per standard Indonesian payroll technique, not confirmed.
 - **Jenis Fasilitas** (BPA1's own facility field, distinct from other
   bukti types' Fasilitas Pajak) — 3 options mapping to `EBUPOT_TAX_
   CERTIFICATE` codes: `8` (Fasilitas Lainnya), `9` (Tanpa Fasilitas), `11`
@@ -280,9 +282,29 @@ Much larger form than the others — this is the annual 1721-A1-equivalent.
   "not doable" precedent from BPU/BP21.
 - Gross Up checkbox exists on the live form but was deliberately scoped
   out of this build (deferred, not implemented).
-- "PPh Pasal 21 Kurang (Lebih) Dipotong pada Masa Pajak Desember" is left
-  at 0 — computing it for real requires a monthly Bukti Pemotongan
-  Bulanan Pegawai Tetap withholding-history feature this app doesn't have.
+- **"PPh Pasal 21 Kurang (Lebih) Dipotong pada Masa Pajak Desember" is
+  NOT always 0** — corrected after live testing. Live Coretax: with no
+  prior monthly Bukti Pemotongan Bulanan Pegawai Tetap recorded, this
+  field equals `PPh Terutang pada Bukti Ini − PPh Ditanggung Pemerintah`
+  (live-verified exact: 14,625,000 − 0 = 14,625,000, not 0 as this app
+  originally computed). This app still has no monthly-withholding-history
+  feature to subtract a "sudah dipotong bulanan" term, so it always
+  mirrors the zero-prior-withholding case — a taxpayer with real monthly
+  BP Bulanan filings would see a smaller (or "lebih"/negative) figure on
+  real Coretax that this app cannot reproduce. Fixed in
+  `updateBpa1.remote.ts`; both this field and "PPh Pasal 21 yang
+  Dipotong/Ditanggung Pemerintah" were also missing entirely from the
+  detail page's display and have been added.
+- **BPA1's `Nama Objek Pajak` dropdown legacy entries are period-gated**:
+  live Coretax for a 2026 filing showed only 3 objects (`21-100-01`,
+  `21-100-02`, `21-100-32`) — the `9999`/`9998` legacy pre-2022-bracket
+  codes seen in the public reference-data pull did not appear, consistent
+  with them being retained only for older/amended filing periods rather
+  than being true duplicates. See the `EBUPOTBPA1_TAX_OBJECT` reference
+  data: codes `1`/`9999` share `TaxObjectCode: "21-100-01"` but carry
+  different bracket schedules (current 5-bracket UU HPP table vs. the old
+  4-bracket pre-2022 table with a 50,000,000 first breakpoint instead of
+  60,000,000).
 
 **Build status**: BPA1 shipped locally this session (schema, resolver,
 full CRUD, detail form, nav link, "Bukti Potong Saya" recap union) and
