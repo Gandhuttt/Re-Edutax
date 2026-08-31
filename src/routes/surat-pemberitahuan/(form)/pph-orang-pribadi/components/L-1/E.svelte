@@ -3,7 +3,6 @@
     import { closeBsModal } from "$lib/helpers/bsModal";
     import Table from "$lib/components/Table.svelte";
     import { applyRupiahInput, formatRupiah, formatRupiahDerived } from "$lib/helpers/rupiahInput";
-    import { listBuktiPotongForImport } from "./listBuktiPotongForImport.remote";
     import type { BarisBuktiPotong } from "./types";
 
     // E. DAFTAR BUKTI PEMOTONGAN/PEMUNGUTAN PPh. Feeds Induk 10a.
@@ -12,6 +11,14 @@
     // PAJAK ATAS PENGHASILAN LUAR NEGERI row imported from L-2 C, then JUMLAH
     // BAGIAN E as their sum. It is that last figure the Induk reads, which is why
     // 10a aggregates two lampiran rather than one.
+    //
+    // Rows with sumberBuktiPotongId set were pulled in automatically by
+    // "Posting SPT" (see ../../postSptPphOrangPribadi.remote.ts, which
+    // bulk-imports every eligible eBupot bukti potong for this taxpayer/year
+    // -- there is no manual per-row import UI here). They get a "Diimpor"
+    // badge and can still be edited/removed by hand like any other row, but
+    // a subsequent Posting will recompute and overwrite them back to the
+    // live eBupot value.
     interface Props {
         rows: BarisBuktiPotong[];
         referensi: Record<string, string[]>;
@@ -77,60 +84,11 @@
     function hapusSemua() {
         if (rows.length > 0 && confirm(`Hapus semua ${rows.length} baris pada Bagian E?`)) rows = [];
     }
-
-    // "Impor dari eBupot" -- pulls in already-issued withholding slips this
-    // taxpayer received (as recipient) instead of retyping every field.
-    // Nothing is written to the database here: imported rows are appended to
-    // the same bound `rows` array a manual Tambah would push into, and only
-    // persist when the user clicks the SPT form's own Simpan Konsep, same as
-    // every other row on this grid.
-    let calonImpor = $state<Awaited<ReturnType<typeof listBuktiPotongForImport>>>([]);
-    let dipilihImpor = $state<Set<string>>(new Set());
-    let mengambilImpor = $state(false);
-
-    async function bukaImpor() {
-        mengambilImpor = true;
-        dipilihImpor = new Set();
-        try {
-            const sudahDiimpor = new Set(rows.map((r) => r.sumberBuktiPotongId).filter(Boolean));
-            const semua = await listBuktiPotongForImport();
-            calonImpor = semua.filter((row) => !sudahDiimpor.has(row.id));
-        } finally {
-            mengambilImpor = false;
-        }
-    }
-
-    function toggleImpor(id: string) {
-        const next = new Set(dipilihImpor);
-        if (next.has(id)) next.delete(id);
-        else next.add(id);
-        dipilihImpor = next;
-    }
-
-    function simpanImpor() {
-        const terpilih = calonImpor.filter((row) => dipilihImpor.has(row.id));
-        const baris: BarisBuktiPotong[] = terpilih.map((row) => ({
-            namaPemotong: row.namaPemotong,
-            npwpPemotong: row.npwpPemotong,
-            nomorBukti: row.nomorPemotongan ?? '',
-            tanggalBukti: row.tanggalBukti,
-            jenisPajak: `PPh ${row.pasal ?? ''}`.trim(),
-            penghasilanBruto: row.penghasilanBruto,
-            pphDipotong: row.pajakPenghasilan,
-            sumberBuktiPotongJenis: row.jenis,
-            sumberBuktiPotongId: row.id
-        }));
-        rows = [...rows, ...baris];
-        closeBsModal('modalOpL1EImpor');
-    }
 </script>
 
 <div class="tw:mb-6">
     {#if bisaEdit}
         <div class="tw:mb-2 tw:flex tw:justify-end tw:gap-2">
-            <Button type="button" onclick={bukaImpor} data-bs-toggle="modal" data-bs-target="#modalOpL1EImpor">
-                Impor dari eBupot
-            </Button>
             <Button type="button" onclick={bukaTambah} data-bs-toggle="modal" data-bs-target="#modalOpL1E">Tambah</Button>
             <Button type="button" onclick={hapusSemua}>Hapus Semua</Button>
         </div>
@@ -264,71 +222,6 @@
       <div class="modal-footer" style="justify-content: flex-end;">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
         <button type="button" class="btn btn-primary" style="background-color: #1c398e; color: white;" onclick={simpanModal}>Simpan</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="modal fade" id="modalOpL1EImpor" tabindex="-1" aria-labelledby="modalOpL1EImporLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h1 class="modal-title fs-5" id="modalOpL1EImporLabel" style="font-weight: bold; text-transform: uppercase;">
-          Impor dari eBupot
-        </h1>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
-      </div>
-      <div class="modal-body">
-        {#if mengambilImpor}
-          <p>Memuat bukti potong...</p>
-        {:else if calonImpor.length === 0}
-          <p>Tidak ada bukti potong yang dapat diimpor (semua sudah diimpor, atau belum ada bukti potong yang diterbitkan atas NPWP Anda).</p>
-        {:else}
-          <div class="tw:overflow-x-auto">
-            <Table class="tw:min-w-full">
-              {#snippet head()}
-                <tr>
-                  <th class="tw:w-[3rem]"></th>
-                  <th>JENIS</th>
-                  <th>MASA PAJAK</th>
-                  <th>NAMA PEMOTONG</th>
-                  <th>NOMOR BUKTI</th>
-                  <th class="tw:text-end">PPh DIPOTONG</th>
-                </tr>
-              {/snippet}
-              {#snippet body()}
-                {#each calonImpor as row (row.id)}
-                  <tr>
-                    <td>
-                      <input
-                        type="checkbox"
-                        checked={dipilihImpor.has(row.id)}
-                        onchange={() => toggleImpor(row.id)}
-                      />
-                    </td>
-                    <td>{row.jenis}</td>
-                    <td>{row.masaPajak}/{row.tahun}</td>
-                    <td>{row.namaPemotong}</td>
-                    <td>{row.nomorPemotongan}</td>
-                    <td class="tw:text-end">{formatRupiahDerived(row.pajakPenghasilan)}</td>
-                  </tr>
-                {/each}
-              {/snippet}
-            </Table>
-          </div>
-        {/if}
-      </div>
-      <div class="modal-footer" style="justify-content: flex-end;">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-        <button
-          type="button"
-          class="btn btn-primary"
-          style="background-color: #1c398e; color: white;"
-          disabled={dipilihImpor.size === 0}
-          onclick={simpanImpor}
-        >
-          Impor ({dipilihImpor.size})
-        </button>
       </div>
     </div>
   </div>

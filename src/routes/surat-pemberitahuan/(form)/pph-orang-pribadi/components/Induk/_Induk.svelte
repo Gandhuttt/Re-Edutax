@@ -22,6 +22,7 @@
         spt: OpInterface['spt'];
         identitas: OpInterface['identitas'];
         readonly: boolean;
+        postFormId?: string;
         computed: ReturnType<typeof hitungInduk>;
 
         metodePembukuan: string;
@@ -102,6 +103,7 @@
         spt,
         identitas,
         readonly,
+        postFormId,
         computed,
         metodePembukuan = $bindable(),
         periodeBulanMulai = $bindable(),
@@ -193,6 +195,7 @@
                 bind:periodeBulanSelesai
                 bind:sumberPenghasilan
                 {readonly}
+                {postFormId}
             />
         </Accordion>
         <Accordion item={"A. IDENTITAS WAJIB PAJAK"}>

@@ -18,6 +18,7 @@
 	import { getSptPphOrangPribadi } from './getSptPphOrangPribadi.remote';
 	import { getReferensiLampiran } from './getReferensiLampiran.remote';
 	import { saveSptPphOrangPribadi } from './saveSptPphOrangPribadi.remote';
+	import { postSptPphOrangPribadi } from './postSptPphOrangPribadi.remote';
 	import {
 		hitungInduk,
 		hitungLampiranL3A4BagianA,
@@ -76,6 +77,8 @@
 	} = await getSptPphOrangPribadi();
 	const { daftar: referensi, kode: kodeReferensi } = await getReferensiLampiran();
 	const saveForm = saveSptPphOrangPribadi.for(spt.id);
+	const postForm = postSptPphOrangPribadi.for(spt.id);
+	const postFormId = 'spt-post-form-op';
 
 	let metodePembukuan = $state(spt.metodePembukuan);
 	let periodeBulanMulai = $state(spt.periodeBulanMulai);
@@ -250,6 +253,12 @@
 	let l1Keluarga = $state<BarisKeluarga[]>(lampiran1.keluarga.map((row) => ({ ...row })));
 	let l1Pekerjaan = $state<BarisPekerjaan[]>(lampiran1.pekerjaan.map((row) => ({ ...row })));
 	let l1BuktiPotong = $state<BarisBuktiPotong[]>(lampiran1.buktiPotong.map((row) => ({ ...row })));
+
+	$effect(() => {
+		if (postForm.result) {
+			l1BuktiPotong = postForm.result.l1BuktiPotong.map((row) => ({ ...row }));
+		}
+	});
 
 	function jumlah<T>(rows: T[], key: keyof T): number {
 		return rows.reduce((sum, row) => sum + Number(row[key] || 0), 0);
@@ -780,6 +789,7 @@
 				{spt}
 				{identitas}
 				{readonly}
+				{postFormId}
 				{computed}
 				bind:metodePembukuan
 				bind:periodeBulanMulai
@@ -994,5 +1004,6 @@
 				</div>
 			{/if}
 		</form>
+		<form {...postForm} id={postFormId}></form>
 	{/snippet}
 </Card>

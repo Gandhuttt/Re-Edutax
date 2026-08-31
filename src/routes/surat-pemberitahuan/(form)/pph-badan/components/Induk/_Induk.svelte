@@ -23,6 +23,7 @@
         };
         spt: sptType;
         readonly: boolean;
+        postFormId?: string;
         sektorUsaha: string;
         menerimaPenghasilanPp23: boolean;
         hanyaPenghasilanPp23: boolean;
@@ -62,6 +63,7 @@
         currentTab = $bindable(),
         spt,
         readonly,
+        postFormId,
         sektorUsaha = $bindable(),
         menerimaPenghasilanPp23 = $bindable(),
         hanyaPenghasilanPp23 = $bindable(),
@@ -102,7 +104,7 @@
 
 <div class="{currentTab.tab === "Induk" ? "" : "tw:hidden"}">
     <div class="accordion">
-        <Accordion item={"HEADER"}><Header data={spt} {readonly} /></Accordion>
+        <Accordion item={"HEADER"}><Header data={spt} {readonly} {postFormId} /></Accordion>
         <Accordion item={"A. IDENTITAS WAJIB PAJAK"}><A data={spt} {readonly}/></Accordion>
         <Accordion item={"B. INFORMASI LAPORAN KEUANGAN"} ><B data={spt} {readonly} bind:sektorUsaha/></Accordion>
         <Accordion item={"C. PENGHASILAN YANG DIKENAKAN PPh YANG BERSIFAT FINAL DAN TIDAK TERMASUK OBJEK PAJAK"}>

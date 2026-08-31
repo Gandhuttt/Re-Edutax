@@ -13,9 +13,10 @@
             metodePembukuan: "akrual" | "kas";
         }
         readonly: boolean
+        postFormId?: string
     }
 
-    let { data, readonly }: Props = $props();
+    let { data, readonly, postFormId }: Props = $props();
 
     const periodeMulai = $derived(new Date(`${data.periodePembukuanMulai}T00:00:00`).getMonth() + 1);
 	const periodeSelesai = $derived(new Date(`${data.periodePembukuanSelesai}T00:00:00`).getMonth() + 1);
@@ -64,7 +65,7 @@
     </Table>
     <div class="tw:flex tw:flex-row tw:my-2">
         <div class="tw:mr-5">
-            <button class="btn btn-success" name="action" value="Post" disabled={readonly}>Prefill SPT</button>
+            <button class="btn btn-success" form={postFormId} name="action" value="Post" disabled={readonly}>Prefill SPT</button>
         </div>
         <p class="tw:hidden">Posting belum pernah dilakukan</p>
     </div>

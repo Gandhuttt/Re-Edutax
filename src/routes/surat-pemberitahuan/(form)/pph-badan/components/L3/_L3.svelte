@@ -2,10 +2,8 @@
 	import Accordion from "$lib/components/AccordionItem.svelte";
     import ModalEditA from "./_ModalEditA.svelte";
     import ModalEditB from "./_ModalEditB.svelte";
-    import ModalImportEbupotB from "./_ModalImportEbupotB.svelte";
 	import A from "./A.svelte";
     import B from "./B.svelte";
-    import { listBuktiPotongBpuForImport } from "./listBuktiPotongBpuForImport.remote";
 
     interface Props {
         currentTab: {
@@ -102,61 +100,6 @@
     function deleteItemB(id: string | number) {
         pphDipotong = pphDipotong.filter(item => item.id !== id);
     }
-
-    // "Impor dari eBupot" -- pulls in already-issued BPU withholding slips
-    // this taxpayer received (as recipient) instead of retyping every
-    // field. Nothing is written to the database here: imported rows are
-    // appended to the same bound pphDipotong array Tambah pushes into, and
-    // only persist when the user clicks the SPT form's own Simpan Konsep,
-    // same as every other row on this grid.
-    //
-    // jenis_pajak_dipotong_dipungut_spt_pph_badan only has rows for Pasal
-    // 15/22/23/26 (no Pasal 4(2) -- final tax isn't creditable here, see
-    // listBuktiPotongBpuForImport.remote.ts), so the map only needs to
-    // cover those four.
-    const pasalKeKodeJenisPajak: Record<string, string> = {
-        'Pasal 15': 'pph_pasal_15',
-        'Pasal 22': 'pph_pasal_22',
-        'Pasal 23': 'pph_pasal_23',
-        'Pasal 26': 'pph_pasal_26'
-    };
-
-    let calonImporB = $state<Awaited<ReturnType<typeof listBuktiPotongBpuForImport>>>([]);
-    let mengambilImporB = $state(false);
-
-    async function bukaImportB() {
-        mengambilImporB = true;
-        try {
-            const sudahDiimpor = new Set(pphDipotong.map((r) => r.sumberBuktiPotongId).filter(Boolean));
-            const semua = await listBuktiPotongBpuForImport();
-            calonImporB = semua.filter((row) => !sudahDiimpor.has(row.id));
-        } finally {
-            mengambilImporB = false;
-        }
-    }
-
-    function simpanImporB(dipilih: string[]) {
-        const terpilih = calonImporB.filter((row) => dipilih.includes(row.id));
-        const baris = terpilih
-            .map((row) => {
-                const kode = row.pasal ? pasalKeKodeJenisPajak[row.pasal] : undefined;
-                if (!kode) return null;
-                return {
-                    id: `import-${row.id}`,
-                    namaPemotongPemungut: row.namaPemotong,
-                    npwp: row.npwpPemotong,
-                    jenisPajak: kode,
-                    dpp: row.dasarPengenaanPajak,
-                    pph: row.pajakPenghasilan,
-                    nomorBukti: row.nomorPemotongan ?? '',
-                    tanggalBukti: row.tanggalDokumen ?? '',
-                    sumberBuktiPotongJenis: 'BPU' as const,
-                    sumberBuktiPotongId: row.id
-                };
-            })
-            .filter((row) => row !== null);
-        pphDipotong = [...pphDipotong, ...baris];
-    }
 </script>
 
 <div class="{currentTab.tab === "L3" ? "" : "tw:hidden"}">
@@ -165,11 +108,10 @@
             <A data={penghasilanLuarNegeri} openModal={openModalA} deleteItem={deleteItemA} bind:pengembalianPengurangan={l3aPengembalianPengurangan}></A>
         </Accordion>
         <Accordion item={"B. PPh YANG DIPOTONG/DIPUNGUT PIHAK LAIN"}>
-            <B data={pphDipotong} openModal={openModalB} deleteItem={deleteItemB} openImportModal={bukaImportB} kreditPajakLuarNegeri={jumlahKreditPajakLuarNegeriDapatDiperhitungkan}></B>
+            <B data={pphDipotong} openModal={openModalB} deleteItem={deleteItemB} kreditPajakLuarNegeri={jumlahKreditPajakLuarNegeriDapatDiperhitungkan}></B>
         </Accordion>
     </div>
 </div>
 
 <ModalEditA bind:data={editingA} saveItem={saveItemA} {negaraOptions} {jenisPenghasilanOptions} {mataUangOptions} />
 <ModalEditB bind:data={editingB} saveItem={saveItemB} {jenisPajakOptions} />
-<ModalImportEbupotB calon={calonImporB} mengambil={mengambilImporB} simpanImpor={simpanImporB} />

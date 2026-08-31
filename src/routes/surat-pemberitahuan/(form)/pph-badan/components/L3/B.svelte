@@ -6,7 +6,6 @@
         data,
         openModal,
         deleteItem,
-        openImportModal,
         kreditPajakLuarNegeri = 0
     }: {
         data: Array<{
@@ -22,7 +21,6 @@
         }>;
         openModal: (item: unknown) => void;
         deleteItem: (id: string | number) => void;
-        openImportModal: () => void;
         kreditPajakLuarNegeri?: number;
     } = $props();
 
@@ -32,10 +30,7 @@
 </script>
 
 <div class="tw:p-5 tw:flex tw:flex-col tw:gap-1">
-    <div class="tw:flex tw:gap-1">
-        <Button type="button" class={"tw:text-white"} color={"#1c398e"} onclick={openImportModal} data-bs-toggle="modal" data-bs-target="#modalL3BImpor">Impor dari eBupot</Button>
-        <Button type="button" class={"tw:text-white tw:w-30"} color={"#1c398e"} onclick={() => openModal(null)} data-bs-toggle="modal" data-bs-target="#modalL3B">Tambah</Button>
-    </div>
+    <Button type="button" class={"tw:text-white tw:w-30"} color={"#1c398e"} onclick={() => openModal(null)} data-bs-toggle="modal" data-bs-target="#modalL3B">Tambah</Button>
     <div class="tw:overflow-scroll">
         <Table class={"tw:w-full"}>
             {#snippet head()}

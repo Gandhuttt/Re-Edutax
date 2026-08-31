@@ -81,7 +81,7 @@ async function getMataUangId(kode: string) {
 	return mataUang.id;
 }
 
-async function getJenisPajakDipotongDipungutId(kode: string) {
+export async function getJenisPajakDipotongDipungutId(kode: string) {
 	const [jenisPajak] = await db
 		.select({ id: jenis_pajak_dipotong_dipungut_spt_pph_badan.id })
 		.from(jenis_pajak_dipotong_dipungut_spt_pph_badan)

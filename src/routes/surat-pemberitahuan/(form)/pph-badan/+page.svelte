@@ -51,6 +51,7 @@
 	import { getJenisTransaksi } from './components/L10-A/getJenisTransaksi.remote';
 	import { getMetodeHargaTransfer } from './components/L10-A/getMetodeHargaTransfer.remote';
 	import { saveSptPphBadan } from './saveSptPphBadan.remote';
+	import { postSptPphBadan } from './postSptPphBadan.remote';
 
 	const {
 		readonly,
@@ -87,6 +88,8 @@
 	const jenisTransaksiOptions = await getJenisTransaksi();
 	const metodeHargaTransferOptions = await getMetodeHargaTransfer();
 	const saveForm = saveSptPphBadan.for(spt.id);
+	const postForm = postSptPphBadan.for(spt.id);
+	const postFormId = 'spt-post-form-badan';
 
 	const lampiran1LabaRugiTemplatesBySektor = new Map<
 		string,
@@ -193,6 +196,23 @@
 			sumberBuktiPotongId: row.sumberBuktiPotongId
 		}))
 	);
+
+	$effect(() => {
+		if (postForm.result) {
+			l3b = postForm.result.pphDipotong.map((row) => ({
+				id: row.id,
+				namaPemotongPemungut: row.namaPemotongPemungut,
+				npwp: row.npwp,
+				jenisPajak: row.jenisPajakKode,
+				dpp: row.dpp,
+				pph: row.pph,
+				nomorBukti: row.nomorBukti,
+				tanggalBukti: row.tanggalBukti,
+				sumberBuktiPotongJenis: row.sumberBuktiPotongJenis,
+				sumberBuktiPotongId: row.sumberBuktiPotongId
+			}));
+		}
+	});
 
 	let l4a = $state(
 		lampiran4.penghasilanFinal.map((row) => ({
@@ -689,6 +709,7 @@
 				bind:currentTab
 				{spt}
 				{readonly}
+				{postFormId}
 				bind:sektorUsaha
 				bind:menerimaPenghasilanPp23
 				bind:hanyaPenghasilanPp23
@@ -895,6 +916,7 @@
 				</div>
 			{/if}
 		</form>
+		<form {...postForm} id={postFormId}></form>
 	{/snippet}
 </Card>
 

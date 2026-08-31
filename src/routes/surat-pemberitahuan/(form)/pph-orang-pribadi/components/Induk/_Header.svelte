@@ -12,6 +12,7 @@
         periodeBulanSelesai: number;
         sumberPenghasilan: string[];
         readonly?: boolean;
+        postFormId?: string;
     }
 
     let {
@@ -21,7 +22,8 @@
         periodeBulanMulai = $bindable(),
         periodeBulanSelesai = $bindable(),
         sumberPenghasilan = $bindable(),
-        readonly = false
+        readonly = false,
+        postFormId
     }: Props = $props();
 
     // Three values, not the two the label implies: Pembukuan splits into akrual
@@ -92,6 +94,11 @@
             </tr>
         {/snippet}
     </Table>
+    <div class="tw:flex tw:flex-row tw:my-2">
+        <div class="tw:mr-5">
+            <button class="btn btn-success" form={postFormId} name="action" value="Post" disabled={readonly}>Prefill SPT</button>
+        </div>
+    </div>
 </div>
 
 <style>
