@@ -78,7 +78,17 @@
 
 	async function cariNpwpPenerima() {
 		const wp = await getWajibPajak({ npwp: nomorIdentitasWpState });
-		if (wp) namaPenerimaState = wp.nama;
+		if (wp) {
+			namaPenerimaState = wp.nama;
+		} else if (
+			nomorIdentitasWpState &&
+			confirm(
+				`TIN ${nomorIdentitasWpState} saat ini belum terdaftar dalam sistem. Sistem akan otomatis menggunakan TIN 9990000000999000 sebagai TIN penerima penghasilan.`
+			)
+		) {
+			namaPenerimaState = `PENERIMA PENGHASILAN#${nomorIdentitasWpState}`;
+			nomorIdentitasWpState = '9990000000999000';
+		}
 	}
 
 	const months = Array.from({ length: 12 }, (_, i) => i + 1);
