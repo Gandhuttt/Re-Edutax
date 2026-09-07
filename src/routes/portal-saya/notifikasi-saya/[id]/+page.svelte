@@ -24,10 +24,10 @@
 					<label for="content">Isi</label>
 					<div id="content" class="message-content">{notification.content}</div>
 				</div>
-				<div class="actions"><a href="/profile/notifikasi-saya">Pergi ke notifikasi</a></div>
+				<div class="actions"><a href="/portal-saya/notifikasi-saya">Pergi ke notifikasi</a></div>
 			{:else}
 				<p>Notifikasi tidak ditemukan.</p>
-				<div class="actions"><a href="/profile/notifikasi-saya">Kembali</a></div>
+				<div class="actions"><a href="/portal-saya/notifikasi-saya">Kembali</a></div>
 			{/if}
 		</div>
 	</section>

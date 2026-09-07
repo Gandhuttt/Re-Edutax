@@ -17,7 +17,6 @@
 				'Notifikasi Saya',
 				'Kasus Saya',
 				'Kasus Berjalan Saya',
-				'Profil Saya',
 				'Pengukuhan PKP',
 				'Pendaftaran Objek Pajak PBB P5L',
 				'Penghapusan & Pencabutan'
@@ -48,35 +47,79 @@
 				'Lembaga Keuangan Pelapor - Perubahan Data',
 				'Penambahan Status Sebagai Wajib Pajak GloBE'
 			]
+		},
+		{
+			label: 'Profil Saya',
+			items: [
+				'Ikhtisar Profil Wajib Pajak',
+				'Informasi Umum',
+				'Alamat',
+				'Detail Kontak',
+				'Pihak Terkait',
+				'Objek Pajak Bumi dan Bangunan (PBB)',
+				'Klasifikasi Lapangan Usaha (KLU)',
+				'Detail Bank',
+				'Data Unit Keluarga',
+				'Tempat Kegiatan Usaha/Sub Unit',
+				'Nomor Identifikasi Eksternal',
+				'Jenis Pajak',
+				'Wakil/Kuasa Saya',
+				'Wajib Pajak yang Diwakili',
+				'Verifikasi Dua Langkah',
+				'Permohonan Tertunda',
+				'Semua Permintaan'
+			]
 		}
 	];
 
 	const portalRoutes: Record<string, string> = {
-		'Dokumen Saya': '/profile/dokumen-saya',
-		'Notifikasi Saya': '/profile/notifikasi-saya',
-		'Kasus Saya': '/profile/kasus-saya',
-		'Kasus Berjalan Saya': '/profile/kasus-berjalan-saya',
-		'Profil Saya': '/profile',
-		'Pengukuhan PKP': '/profile/pengukuhan-pkp',
-		'Pendaftaran Objek Pajak PBB P5L': '/profile/pendaftaran-objek-pajak-pbb-p5l',
-		'Penghapusan & Pencabutan': '/profile/penghapusan-pencabutan',
-		'Identitas Wajib Pajak': '/profile/identitas-wajib-pajak',
-		'Perubahan Alamat Utama': '/profile/perubahan-alamat-utama',
-		'Perubahan Data Objek Pajak PBB P5L': '/profile/perubahan-data-objek-pajak-pbb-p5l',
-		'Perubahan Data Pemungut PPN PMSE dengan Kepdirjen': '/profile/perubahan-data-pemungut-ppn-pmse',
-		'Penetapan Wajib Pajak Nonaktif': '/profile/penetapan-wajib-pajak-nonaktif',
-		'Pengaktifan Kembali Wajib Pajak Nonaktif': '/profile/pengaktifan-kembali-wajib-pajak-nonaktif',
-		'Penunjukan Pemungut PMSE Dalam Negeri': '/profile/penunjukan-pemungut-pmse-dalam-negeri',
-		'Penetapan Pemungut Bea Meterai': '/profile/penetapan-pemungut-bea-meterai',
-		'Pencabutan Pemungut Bea Meterai': '/profile/pencabutan-pemungut-bea-meterai',
-		'Penunjukan Pemotong atau Pemungut PPh/PPN': '/profile/penunjukan-pemotong-pemungut-pph-ppn',
-		'Pencabutan Pemotong atau Pemungut PPh/PPN': '/profile/pencabutan-pemotong-pemungut-pph-ppn',
-		'Pencabutan Pemungut PPN PMSE': '/profile/pencabutan-pemungut-ppn-pmse',
-		'Lembaga Keuangan Pelapor - Penetapan': '/profile/lembaga-keuangan-pelapor-penetapan',
-		'Lembaga Keuangan Pelapor - Pencabutan': '/profile/lembaga-keuangan-pelapor-pencabutan',
-		'Lembaga Keuangan Pelapor - Perubahan Data': '/profile/lembaga-keuangan-pelapor-perubahan-data',
-		'Penambahan Status Sebagai Wajib Pajak GloBE': '/profile/penambahan-status-wajib-pajak-globe'
+		'Dokumen Saya': '/portal-saya/dokumen-saya',
+		'Notifikasi Saya': '/portal-saya/notifikasi-saya',
+		'Kasus Saya': '/portal-saya/kasus-saya',
+		'Kasus Berjalan Saya': '/portal-saya/kasus-berjalan-saya',
+		'Ikhtisar Profil Wajib Pajak': '/profile',
+		'Informasi Umum': '/profile/informasi-umum',
+		Alamat: '/profile/alamat',
+		'Detail Kontak': '/profile/detail-kontak',
+		'Pihak Terkait': '/profile/pihak-terkait',
+		'Objek Pajak Bumi dan Bangunan (PBB)': '/profile/objek-pajak-pbb',
+		'Klasifikasi Lapangan Usaha (KLU)': '/profile/klasifikasi-lapangan-usaha',
+		'Detail Bank': '/profile/detail-bank',
+		'Data Unit Keluarga': '/profile/data-unit-keluarga',
+		'Tempat Kegiatan Usaha/Sub Unit': '/profile/tempat-kegiatan-usaha',
+		'Nomor Identifikasi Eksternal': '/profile/nomor-identifikasi-eksternal',
+		'Jenis Pajak': '/profile/jenis-pajak',
+		'Wakil/Kuasa Saya': '/profile/wakil-kuasa-saya',
+		'Wajib Pajak yang Diwakili': '/profile/wajib-pajak-yang-diwakili',
+		'Verifikasi Dua Langkah': '/profile/verifikasi-dua-langkah',
+		'Permohonan Tertunda': '/profile/permohonan-tertunda',
+		'Semua Permintaan': '/profile/semua-permintaan',
+		'Pengukuhan PKP': '/portal-saya/pengukuhan-pkp',
+		'Pendaftaran Objek Pajak PBB P5L': '/portal-saya/pendaftaran-objek-pajak-pbb-p5l',
+		'Penghapusan & Pencabutan': '/portal-saya/penghapusan-pencabutan',
+		'Identitas Wajib Pajak': '/perubahan-data/identitas-wajib-pajak',
+		'Perubahan Alamat Utama': '/perubahan-data/perubahan-alamat-utama',
+		'Perubahan Data Objek Pajak PBB P5L': '/perubahan-data/perubahan-data-objek-pajak-pbb-p5l',
+		'Perubahan Data Pemungut PPN PMSE dengan Kepdirjen': '/perubahan-data/perubahan-data-pemungut-ppn-pmse',
+		'Penetapan Wajib Pajak Nonaktif': '/perubahan-status/penetapan-wajib-pajak-nonaktif',
+		'Pengaktifan Kembali Wajib Pajak Nonaktif': '/perubahan-status/pengaktifan-kembali-wajib-pajak-nonaktif',
+		'Penunjukan Pemungut PMSE Dalam Negeri': '/perubahan-status/penunjukan-pemungut-pmse-dalam-negeri',
+		'Penetapan Pemungut Bea Meterai': '/perubahan-status/penetapan-pemungut-bea-meterai',
+		'Pencabutan Pemungut Bea Meterai': '/perubahan-status/pencabutan-pemungut-bea-meterai',
+		'Penunjukan Pemotong atau Pemungut PPh/PPN': '/perubahan-status/penunjukan-pemotong-pemungut-pph-ppn',
+		'Pencabutan Pemotong atau Pemungut PPh/PPN': '/perubahan-status/pencabutan-pemotong-pemungut-pph-ppn',
+		'Pencabutan Pemungut PPN PMSE': '/perubahan-status/pencabutan-pemungut-ppn-pmse',
+		'Lembaga Keuangan Pelapor - Penetapan': '/perubahan-status/lembaga-keuangan-pelapor-penetapan',
+		'Lembaga Keuangan Pelapor - Pencabutan': '/perubahan-status/lembaga-keuangan-pelapor-pencabutan',
+		'Lembaga Keuangan Pelapor - Perubahan Data': '/perubahan-status/lembaga-keuangan-pelapor-perubahan-data',
+		'Penambahan Status Sebagai Wajib Pajak GloBE': '/perubahan-status/penambahan-status-wajib-pajak-globe'
 	};
+
+	const portalMenuActive = $derived(
+		['/portal-saya', '/perubahan-data', '/perubahan-status', '/profile'].some((prefix) =>
+			page.url.pathname.startsWith(prefix)
+		)
+	);
 </script>
 
 <header>
@@ -131,7 +174,7 @@
 				{#if authenticated && !isAdmin}
 					<li
 						class="dropdown portal-dropdown"
-						aria-current={page.url.pathname === '/profile' ? 'page' : undefined}
+						aria-current={portalMenuActive ? 'page' : undefined}
 					>
 						<button
 							class="dropdown-toggle tw:w-auto tw:text-base tw:text-[.8em] tw:overflow-clip"
@@ -295,7 +338,7 @@
 	}
 
 	.portal-menu {
-		width: min(60rem, calc(100vw - 2rem));
+		width: min(72rem, calc(100vw - 2rem));
 		max-width: calc(100vw - 2rem);
 		max-height: calc(100vh - 4rem);
 		overflow-x: hidden;
@@ -305,7 +348,7 @@
 
 	.portal-menu.show {
 		display: grid;
-		grid-template-columns: repeat(3, minmax(14rem, 1fr));
+		grid-template-columns: repeat(4, minmax(13rem, 1fr));
 		gap: 0.75rem;
 	}
 
@@ -338,6 +381,17 @@
 		padding: 0.55rem 1rem;
 		white-space: normal;
 		overflow-wrap: anywhere;
+	}
+
+	@media (max-width: 1200px) {
+		.portal-menu.show {
+			grid-template-columns: repeat(2, minmax(13rem, 1fr));
+			width: min(40rem, calc(100vw - 2rem));
+		}
+
+		.portal-section:nth-child(odd) {
+			border-left: 0;
+		}
 	}
 
 	@media (max-width: 800px) {

@@ -69,7 +69,7 @@
 					<tbody>
 						{#each visibleNotifications as item}
 							<tr class:unread={!item.read}>
-								<td><a class="button view-link" href="/profile/notifikasi-saya/{item.id}">Lihat</a></td>
+								<td><a class="button view-link" href="/portal-saya/notifikasi-saya/{item.id}">Lihat</a></td>
 								<td>{item.sender}</td><td>{item.subject}</td><td>{item.sentAt}</td><td>{item.priority}</td>
 							</tr>
 						{:else}
