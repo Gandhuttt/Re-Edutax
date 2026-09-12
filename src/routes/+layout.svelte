@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { onNavigate } from '$app/navigation';
+	import { page } from '$app/state';
 	import '../app.css';
 	import '../app.scss';
 	import Header from './Header.svelte';
@@ -8,6 +9,12 @@
 	import { dismissBsModalsForNavigation } from '$lib/helpers/bsModal';
 
 	let { data, children }: LayoutProps = $props();
+	const isDevUi = $derived(
+		page.url.pathname === '/dev/ui' || page.url.pathname.startsWith('/dev/ui/')
+	);
+	const usesReUiShell = $derived(
+		isDevUi || Boolean((page.data as { reUi?: boolean }).reUi)
+	);
 
 	onMount(() => {
 		void import('bootstrap/dist/js/bootstrap.bundle.min.js');
@@ -27,16 +34,39 @@
 <svelte:head>
 </svelte:head>
 
-<div class="app">
-	<Header
-		authenticated={!!data.user}
-		loggedUsername={data.user?.name ?? 'guest'}
-		isAdmin={data.isAdmin ?? false}
-	/>
-
-	<main>
+{#if isDevUi}
+	<div class="dev-ui-canvas">
 		{@render children()}
-	</main>
+	</div>
+{:else if usesReUiShell}
+	<div class="re-ui-canvas">
+		{@render children()}
+	</div>
+{:else}
+	<div class="app">
+		<Header
+			authenticated={!!data.user}
+			loggedUsername={data.user?.name ?? 'guest'}
+			isAdmin={data.isAdmin ?? false}
+		/>
 
-	<footer></footer>
-</div>
+		<main>
+			{@render children()}
+		</main>
+
+		<footer></footer>
+	</div>
+{/if}
+
+<style>
+	.dev-ui-canvas {
+		position: fixed;
+		inset: 0;
+		z-index: 1000;
+		overflow: auto;
+		background: #fff;
+	}
+	.re-ui-canvas {
+		min-height: 100vh;
+	}
+</style>

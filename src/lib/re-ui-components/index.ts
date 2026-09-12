@@ -4,6 +4,7 @@ export { default as AnnouncementBar } from "./AnnouncementBar.svelte";
 export { default as AppHeader } from "./AppHeader.svelte";
 export { default as Breadcrumbs } from "./Breadcrumbs.svelte";
 export { default as CheckboxField } from "./CheckboxField.svelte";
+export { default as CollapsiblePanel } from "./CollapsiblePanel.svelte";
 export { default as ConditionalField } from "./ConditionalField.svelte";
 export { default as ContentSection } from "./ContentSection.svelte";
 export { default as DataTableViewport } from "./DataTableViewport.svelte";
@@ -30,6 +31,7 @@ export { default as NavDropdown } from "./NavDropdown.svelte";
 export { default as NavLink } from "./NavLink.svelte";
 export { default as PageHeading } from "./PageHeading.svelte";
 export { default as PageLayout } from "./PageLayout.svelte";
+export { default as PaginationBar } from "./PaginationBar.svelte";
 export { default as PanelHeading } from "./PanelHeading.svelte";
 export { default as ProcessWorkbench } from "./ProcessWorkbench.svelte";
 export { default as ProfileMenu } from "./ProfileMenu.svelte";
@@ -52,6 +54,7 @@ export type { ActionButtonProps, ActionButtonTone } from "./ActionButton.svelte"
 export type { ActionShowcaseGroup } from "./ActionShowcase.svelte";
 export type { BreadcrumbItem, BreadcrumbsProps } from "./Breadcrumbs.svelte";
 export type { CheckboxFieldProps } from "./CheckboxField.svelte";
+export type { CollapsiblePanelProps } from "./CollapsiblePanel.svelte";
 export type { ConditionalFieldProps } from "./ConditionalField.svelte";
 export type { ContentSectionProps } from "./ContentSection.svelte";
 export type { DateFieldProps } from "./DateField.svelte";
@@ -69,6 +72,10 @@ export type {
 } from "./FormIssueSummary.svelte";
 export type { FoundationSwatch } from "./FoundationPanel.svelte";
 export type { InlineAlertProps, InlineAlertTone } from "./InlineAlert.svelte";
+export type {
+	InstitutionalModalProps,
+	InstitutionalModalSize,
+} from "./InstitutionalModal.svelte";
 export type { KeyValueItem } from "./KeyValueGrid.svelte";
 export type { LookupFieldProps } from "./LookupField.svelte";
 export type {
@@ -82,6 +89,7 @@ export type {
 } from "./NavDropdown.svelte";
 export type { PageHeadingProps } from "./PageHeading.svelte";
 export type { PageLayoutProps } from "./PageLayout.svelte";
+export type { PaginationBarProps } from "./PaginationBar.svelte";
 export type { PanelHeadingProps } from "./PanelHeading.svelte";
 export type {
 	ProcessWorkbenchHelp,

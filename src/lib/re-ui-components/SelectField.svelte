@@ -20,6 +20,7 @@
 		error?: string;
 		required?: boolean;
 		disabled?: boolean;
+		layout?: "stacked" | "inline";
 		searchable?: boolean;
 		searchPlaceholder?: string;
 		searchLabel?: string;
@@ -45,6 +46,7 @@
 		error = "",
 		required = false,
 		disabled = false,
+		layout = "stacked",
 		searchable = false,
 		searchPlaceholder = "Cari pilihan...",
 		searchLabel = `Cari ${label}`,
@@ -179,7 +181,13 @@
 </script>
 
 <svelte:window onclick={handleOutsideClick} />
-<div class="field" class:error={Boolean(resolvedError)} class:disabled bind:this={root}>
+<div
+	class="field"
+	class:inline={layout === "inline"}
+	class:error={Boolean(resolvedError)}
+	class:disabled
+	bind:this={root}
+>
 	{#if resolvedName}<input type="hidden" name={resolvedName} value={resolvedValue} />{/if}
 	<span class="field-label" id="{id}-label"
 		>{label}{#if required}<em aria-hidden="true">*</em>{/if}</span
@@ -263,6 +271,25 @@
 		margin-left: 3px;
 		color: #9b2f28;
 		font-style: normal;
+	}
+	.field.inline {
+		grid-template-columns: max-content minmax(68px, 1fr);
+		align-items: center;
+		gap: 8px;
+	}
+	.inline .field-label {
+		color: var(--ui-muted);
+		font-size: 10px;
+		white-space: nowrap;
+	}
+	.inline .select-trigger {
+		height: 34px;
+		padding: 0 9px;
+		font-size: 11px;
+	}
+	.inline .message,
+	.inline .hint {
+		grid-column: 1/-1;
 	}
 	.select-trigger {
 		width: 100%;

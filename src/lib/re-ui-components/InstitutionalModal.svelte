@@ -1,29 +1,37 @@
-<script lang="ts">
+<script module lang="ts">
 	import type { Snippet } from "svelte";
 	import type { HTMLDialogAttributes } from "svelte/elements";
 
-	type Props = {
+	export type InstitutionalModalSize = "regular" | "wide" | "large";
+
+	export type InstitutionalModalProps = {
 		open?: boolean;
 		eyebrow?: string;
 		title: string;
 		closeLabel?: string;
+		size?: InstitutionalModalSize;
+		scrollable?: boolean;
 		children: Snippet;
 		actions?: Snippet;
 	} & Omit<
 		HTMLDialogAttributes,
 		"open" | "title" | "children" | "onclose" | "oncancel" | "onclick"
 	>;
+</script>
 
+<script lang="ts">
 	let {
 		open = $bindable(false),
 		eyebrow = "KONFIRMASI TINDAKAN",
 		title,
 		closeLabel = "Tutup dialog",
+		size = "regular",
+		scrollable = false,
 		children,
 		actions,
 		class: className,
 		...dialogProps
-	}: Props = $props();
+	}: InstitutionalModalProps = $props();
 
 	const id = $props.id();
 	let dialog = $state<HTMLDialogElement>();
@@ -62,6 +70,9 @@
 	bind:this={dialog}
 	class="{className ?? ""}"
 	class:closing
+	class:wide={size === "wide"}
+	class:large={size === "large"}
+	class:scrollable
 	aria-labelledby="{id}-title"
 	onclose={() => {
 		open = false;
@@ -100,13 +111,22 @@
 		max-height: calc(100dvh - 32px);
 		margin: auto;
 		padding: 0;
-		overflow: auto;
+		overflow: visible;
 		border: 0;
 		border-radius: 3px;
 		background: transparent;
 		color: var(--ui-ink);
 		box-shadow: 0 24px 70px rgba(8, 20, 34, 0.32);
 		animation: dialog-arrive 210ms cubic-bezier(0.2, 0.8, 0.2, 1);
+	}
+	dialog.wide {
+		width: min(780px, calc(100vw - 32px));
+	}
+	dialog.large {
+		width: min(980px, calc(100vw - 32px));
+	}
+	dialog.scrollable {
+		overflow: auto;
 	}
 	dialog::backdrop {
 		background: rgba(10, 25, 42, 0.62);
@@ -221,6 +241,11 @@
 		dialog.closing,
 		dialog.closing::backdrop {
 			animation: none;
+		}
+	}
+	@media (max-height: 520px) {
+		dialog {
+			overflow: auto;
 		}
 	}
 </style>
