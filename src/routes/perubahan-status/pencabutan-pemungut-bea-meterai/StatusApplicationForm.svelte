@@ -1,14 +1,21 @@
-<script lang="ts">
+<script module lang="ts">
 	export type FormField = {
 		name: string;
 		label: string;
-		type?: 'text' | 'date' | 'number' | 'email' | 'select' | 'textarea' | 'file';
+		type?: 'text' | 'date' | 'number' | 'email' | 'url' | 'tel' | 'select' | 'textarea' | 'file';
 		placeholder?: string;
 		options?: string[];
 		required?: boolean;
+		disabled?: boolean;
 		full?: boolean;
 		help?: string;
 		accept?: string;
+		value?: string;
+		min?: string;
+		step?: string;
+		inputMode?: 'none' | 'text' | 'tel' | 'url' | 'email' | 'numeric' | 'decimal' | 'search';
+		maxLength?: number;
+		rows?: number;
 	};
 
 	export type FormSection = {
@@ -19,140 +26,287 @@
 
 	export type StatusFormConfig = {
 		title: string;
-		intro: string;
+		intro?: string;
+		identityFields?: FormField[];
 		sections: FormSection[];
+		representativeLabel?: string;
+		representativeIdLabel?: string;
+		representativeIdPlaceholder?: string;
+		representativeTaxIdLabel?: string;
+		representativeDetailsPlaceholder?: string;
+		declaration?: string;
+		successMessage?: string;
 	};
+</script>
+
+<script lang="ts">
+	import {
+		ActionButton,
+		Breadcrumbs,
+		CheckboxField,
+		DateField,
+		FieldGrid,
+		FileUploadField,
+		FormActions,
+		FormField as ReFormField,
+		FormSection as ReFormSection,
+		InlineAlert,
+		PageHeading,
+		PageLayout,
+		SelectField,
+		Stack,
+		TextAreaField,
+		type SelectFieldValue,
+	} from '$lib/re-ui-components';
 
 	let { config }: { config: StatusFormConfig } = $props();
 	let represented = $state(false);
+	let representativeId = $state('');
 	let agreed = $state(false);
 	let saved = $state(false);
+	let error = $state('');
+	let values = $state<Record<string, string>>({});
+	let files = $state<Record<string, FileList | undefined>>({});
+	let fieldErrors = $state<Record<string, string>>({});
 
 	const today = new Intl.DateTimeFormat('en-CA').format(new Date());
+	const defaultIdentityFields: FormField[] = [
+		{
+			name: 'taxpayer-id',
+			label: 'NIK/NPWP',
+			placeholder: 'Sesuai akun Wajib Pajak',
+			required: true,
+			disabled: true,
+		},
+		{
+			name: 'taxpayer-name',
+			label: 'Nama Wajib Pajak',
+			placeholder: 'Sesuai akun Wajib Pajak',
+			disabled: true,
+		},
+		{
+			name: 'registered-address',
+			label: 'Alamat Terdaftar',
+			type: 'textarea',
+			rows: 2,
+			placeholder: 'Sesuai profil Wajib Pajak',
+			disabled: true,
+			full: true,
+		},
+	];
 
-	function save(event: SubmitEvent) {
+	const identityFields = $derived(config.identityFields ?? defaultIdentityFields);
+	const declaration = $derived(
+		config.declaration ??
+			'Dengan menyadari sepenuhnya akan segala akibatnya termasuk sanksi sesuai ketentuan yang berlaku, saya menyatakan bahwa data dan dokumen yang disampaikan adalah benar, lengkap, dan dapat dipertanggungjawabkan.',
+	);
+
+	function clearFeedback(name?: string) {
+		saved = false;
+		error = '';
+		if (name) fieldErrors[name] = '';
+	}
+
+	function setValue(name: string, value: string | SelectFieldValue) {
+		values[name] = String(value);
+		clearFeedback(name);
+	}
+
+	function isFullField(field: FormField) {
+		return field.full ?? (field.type === 'textarea' || field.type === 'file');
+	}
+
+	function validateConfiguredFields() {
+		let valid = true;
+		for (const section of config.sections) {
+			for (const field of section.fields) {
+				if (!field.required || field.disabled) continue;
+				const present = field.type === 'file' ? Boolean(files[field.name]?.length) : Boolean(values[field.name]?.trim());
+				fieldErrors[field.name] = present ? '' : `${field.label} wajib diisi.`;
+				valid = present && valid;
+			}
+		}
+		return valid;
+	}
+
+	function submit(event: SubmitEvent) {
 		event.preventDefault();
+		const form = event.currentTarget as HTMLFormElement;
+		const configuredFieldsValid = validateConfiguredFields();
+		if (!form.checkValidity() || !configuredFieldsValid || !agreed) {
+			error = 'Lengkapi seluruh data dan pernyataan yang wajib diisi.';
+			saved = false;
+			form.reportValidity();
+			return;
+		}
+		error = '';
 		saved = true;
 	}
 </script>
 
 <svelte:head><title>{config.title}</title></svelte:head>
 
-<div class="page-shell">
-	<section class="card">
-		<header class="card-header"><h1>{config.title}</h1></header>
-		<form
-			class="card-body"
-			onsubmit={save}
-			oninput={() => {
-				saved = false;
-			}}
-		>
-			<p class="intro">{config.intro}</p>
+{#snippet renderField(field: FormField)}
+	{#if field.type === 'select'}
+		<SelectField
+			label={field.label}
+			name={field.name}
+			value={values[field.name] ?? field.value ?? ''}
+			options={[
+				{ value: '', label: 'Silakan Pilih' },
+				...(field.options ?? []).map((option) => ({ value: option, label: option })),
+			]}
+			required={field.required}
+			disabled={field.disabled}
+			hint={field.help}
+			error={fieldErrors[field.name]}
+			onchange={(value) => setValue(field.name, value)}
+		/>
+	{:else if field.type === 'date'}
+		<DateField
+			label={field.label}
+			name={field.name}
+			value={values[field.name] ?? field.value ?? ''}
+			required={field.required}
+			disabled={field.disabled}
+			hint={field.help}
+			error={fieldErrors[field.name]}
+			min={field.min}
+			onchange={(value) => setValue(field.name, value)}
+		/>
+	{:else if field.type === 'textarea'}
+		<TextAreaField
+			label={field.label}
+			name={field.name}
+			value={values[field.name] ?? field.value ?? ''}
+			rows={field.rows ?? 3}
+			maxLength={field.maxLength}
+			placeholder={field.placeholder}
+			required={field.required}
+			disabled={field.disabled}
+			hint={field.help}
+			error={fieldErrors[field.name]}
+			oninput={(event) => setValue(field.name, event.currentTarget.value)}
+		/>
+	{:else if field.type === 'file'}
+		<FileUploadField
+			label={field.label}
+			name={field.name}
+			accept={field.accept}
+			required={field.required}
+			disabled={field.disabled}
+			hint={field.help}
+			error={fieldErrors[field.name]}
+			bind:files={files[field.name]}
+			onchange={() => clearFeedback(field.name)}
+		/>
+	{:else}
+		<ReFormField
+			label={field.label}
+			name={field.name}
+			type={field.type ?? 'text'}
+			value={values[field.name] ?? field.value ?? ''}
+			placeholder={field.placeholder}
+			required={field.required}
+			disabled={field.disabled}
+			hint={field.help}
+			error={fieldErrors[field.name]}
+			min={field.min ?? (field.type === 'number' ? '0' : undefined)}
+			step={field.step}
+			inputmode={field.inputMode}
+			oninput={(event) => setValue(field.name, event.currentTarget.value)}
+		/>
+	{/if}
+{/snippet}
 
-			<fieldset>
-				<legend>Manajemen Kasus</legend>
-				<div class="form-grid">
-					<label>Kanal *<input value="Daring (Portal Wajib Pajak)" disabled /></label>
-					<label>Tanggal Permohonan<input type="date" value={today} disabled /></label>
-				</div>
-			</fieldset>
+<PageLayout contentWidth="1180px">
+	<Breadcrumbs items={[{ label: 'Perubahan Status' }, { label: config.title }]} />
+	<PageHeading eyebrow="Perubahan Status" title={config.title} description={config.intro} />
 
-			<fieldset>
-				<legend>Kuasa Wajib Pajak</legend>
-				<label class="check-row">
-					<input type="checkbox" bind:checked={represented} /> Diisi oleh wakil atau kuasa Wajib Pajak?
-				</label>
-				<div class="form-grid">
-					<label>
-						ID Penunjukan Wakil/Kuasa{represented ? ' *' : ''}
-						<input name="representative-id" required={represented} disabled={!represented} placeholder="Masukkan ID penunjukan" />
-					</label>
-					<label>NIK/NPWP Wakil/Kuasa<input disabled placeholder="Terisi setelah ID diverifikasi" /></label>
-					<label>Nama Wakil/Kuasa<input disabled placeholder="Terisi setelah ID diverifikasi" /></label>
-				</div>
-			</fieldset>
+	<form onsubmit={submit} oninput={() => clearFeedback()} novalidate>
+		<Stack gap="18px">
+			<ReFormSection number="01" title="Manajemen Kasus" bordered>
+				<FieldGrid columns={2}>
+					<ReFormField label="Kanal" value="Daring (Portal Wajib Pajak)" required disabled />
+					<DateField label="Tanggal Permohonan" value={today} disabled />
+				</FieldGrid>
+			</ReFormSection>
 
-			<fieldset>
-				<legend>Identitas Wajib Pajak</legend>
-				<div class="form-grid">
-					<label>NIK/NPWP *<input disabled placeholder="Sesuai akun Wajib Pajak" /></label>
-					<label>Nama Wajib Pajak<input disabled placeholder="Sesuai akun Wajib Pajak" /></label>
-					<label class="full">Alamat Terdaftar<textarea rows="2" disabled placeholder="Sesuai profil Wajib Pajak"></textarea></label>
-				</div>
-			</fieldset>
+			<ReFormSection number="02" title="Kuasa Wajib Pajak" bordered>
+				<Stack gap="18px">
+					<CheckboxField
+						label={config.representativeLabel ?? 'Diisi oleh wakil atau kuasa Wajib Pajak?'}
+						bind:checked={represented}
+						onchange={() => clearFeedback('representative-id')}
+					/>
+					<FieldGrid columns={2}>
+						<ReFormField
+							label={config.representativeIdLabel ?? 'ID Penunjukan Wakil/Kuasa'}
+							name="representative-id"
+							bind:value={representativeId}
+							required={represented}
+							disabled={!represented}
+							placeholder={config.representativeIdPlaceholder ?? 'Masukkan ID penunjukan'}
+						/>
+						<ReFormField label={config.representativeTaxIdLabel ?? 'NIK/NPWP Wakil/Kuasa'} disabled placeholder={config.representativeDetailsPlaceholder ?? 'Terisi setelah ID diverifikasi'} />
+						<ReFormField label="Nama Wakil/Kuasa" disabled placeholder={config.representativeDetailsPlaceholder ?? 'Terisi setelah ID diverifikasi'} />
+					</FieldGrid>
+				</Stack>
+			</ReFormSection>
 
-			{#each config.sections as section}
-				<fieldset>
-					<legend>{section.title}</legend>
-					{#if section.description}<p class="section-description">{section.description}</p>{/if}
-					<div class="form-grid">
+			<ReFormSection number="03" title="Identitas Wajib Pajak" bordered>
+				<FieldGrid columns={2}>
+					{#each identityFields as field}
+						<div class:full-row={isFullField(field)}>
+							{@render renderField(field)}
+						</div>
+					{/each}
+				</FieldGrid>
+			</ReFormSection>
+
+			{#each config.sections as section, index}
+				<ReFormSection number={String(index + 4).padStart(2, '0')} title={section.title} description={section.description} bordered>
+					<FieldGrid columns={2}>
 						{#each section.fields as field}
-							<label class:full={field.full || field.type === 'textarea' || field.type === 'file'}>
-								<span>{field.label}{field.required ? ' *' : ''}</span>
-								{#if field.type === 'select'}
-									<select name={field.name} required={field.required ?? false}>
-										<option value="">Silakan Pilih</option>
-										{#each field.options ?? [] as option}<option value={option}>{option}</option>{/each}
-									</select>
-								{:else if field.type === 'textarea'}
-									<textarea name={field.name} rows="3" placeholder={field.placeholder} required={field.required ?? false}></textarea>
-								{:else if field.type === 'file'}
-									<input name={field.name} type="file" accept={field.accept} required={field.required ?? false} />
-								{:else}
-									<input
-										name={field.name}
-										type={field.type ?? 'text'}
-										placeholder={field.placeholder}
-										required={field.required ?? false}
-										min={field.type === 'number' ? '0' : undefined}
-									/>
-								{/if}
-								{#if field.help}<small>{field.help}</small>{/if}
-							</label>
+							<div class:full-row={isFullField(field)}>
+								{@render renderField(field)}
+							</div>
 						{/each}
-					</div>
-				</fieldset>
+					</FieldGrid>
+				</ReFormSection>
 			{/each}
 
-			<fieldset>
-				<legend>Pernyataan Wajib Pajak</legend>
-				<label class="check-row declaration">
-					<input type="checkbox" bind:checked={agreed} required />
-					<span>Dengan menyadari sepenuhnya akan segala akibatnya termasuk sanksi sesuai ketentuan yang berlaku, saya menyatakan bahwa data dan dokumen yang disampaikan adalah benar, lengkap, dan dapat dipertanggungjawabkan.</span>
-				</label>
-			</fieldset>
+			<ReFormSection number={String(config.sections.length + 4).padStart(2, '0')} title="Pernyataan Wajib Pajak" bordered>
+				<CheckboxField
+					label={declaration}
+					bind:checked={agreed}
+					required
+					onchange={() => clearFeedback()}
+				/>
+			</ReFormSection>
 
-			{#if saved}<p class="success" role="status">Data permohonan telah disimpan.</p>{/if}
-			<div class="actions"><button type="submit" disabled={!agreed}>Simpan</button></div>
-		</form>
-	</section>
-</div>
+			{#if error}
+				<InlineAlert tone="error" title="Permohonan belum lengkap" message={error} />
+			{/if}
+			{#if saved}
+				<InlineAlert tone="success" title="Permohonan tersimpan" message={config.successMessage ?? 'Data permohonan telah disimpan.'} />
+			{/if}
+
+			<FormActions message="Lengkapi seluruh kolom wajib sebelum menyimpan.">
+				<ActionButton type="submit" disabled={!agreed}>Simpan</ActionButton>
+			</FormActions>
+		</Stack>
+	</form>
+</PageLayout>
 
 <style>
-	.page-shell { width: 100%; padding: 6.25rem; color: var(--color-text); }
-	.card { overflow: hidden; border: 1px solid #a9a9a9; border-radius: 2px; background: #f3f4f6; }
-	.card-header { min-height: 4.25rem; display: flex; align-items: center; padding: .5rem .75rem; border-bottom: 1px solid #a9a9a9; background: #e5e7eb; }
-	h1 { margin: 0; font-size: 1.5rem; font-weight: 400; }
-	.card-body { padding: .75rem; }
-	.intro { margin: 0 0 1.25rem; line-height: 1.5; }
-	fieldset { margin: 0 0 1.25rem; padding: 1rem; border: 1px solid #a9a9a9; }
-	legend { width: auto; margin: 0; padding: 0 .5rem; font-size: 1.1rem; font-weight: 700; }
-	.section-description { margin: 0 0 1rem; color: #4b5563; }
-	.form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .9rem 1.5rem; }
-	label { display: flex; flex-direction: column; gap: .35rem; font-weight: 700; }
-	label.full { grid-column: 1 / -1; }
-	input, select, textarea { width: 100%; min-height: 2.5rem; border: 1px solid var(--color-input-secondary); border-radius: 5px; background: var(--color-input-primary); padding: .5rem; font: inherit; font-weight: 400; }
-	textarea { resize: vertical; }
-	input:disabled, textarea:disabled { background: var(--color-disabled); }
-	input:focus, select:focus, textarea:focus { outline: 2px solid color-mix(in srgb, var(--color-primary) 45%, transparent); outline-offset: 1px; }
-	.check-row { flex-direction: row; align-items: flex-start; margin-bottom: 1rem; font-weight: 400; }
-	.check-row input { width: 1.25rem; min-height: 1.25rem; flex: 0 0 auto; }
-	.declaration { margin: 0; line-height: 1.5; }
-	small { color: #4b5563; font-weight: 400; line-height: 1.35; }
-	.actions { display: flex; justify-content: flex-end; }
-	button { min-width: 6rem; padding: .5rem .9rem; border: 0; border-radius: 5px; background: var(--color-primary); color: var(--color-text); }
-	button:disabled { filter: grayscale(.7); opacity: .6; }
-	.success { margin: 0 0 1rem; padding: .75rem; border: 1px solid #15803d; background: #dcfce7; color: #166534; }
-	@media (max-width: 720px) { .page-shell { padding: 2rem; } .form-grid { grid-template-columns: 1fr; } label.full { grid-column: auto; } }
+	.full-row {
+		grid-column: 1 / -1;
+	}
+
+	@media (max-width: 700px) {
+		.full-row {
+			grid-column: auto;
+		}
+	}
 </style>

@@ -1,123 +1,125 @@
 <script lang="ts">
+	import {
+		ActionButton,
+		Breadcrumbs,
+		CheckboxField,
+		DateField,
+		FileUploadField,
+		FormActions,
+		FormField,
+		FormSection,
+		InlineAlert,
+		PageHeading,
+		PageLayout,
+		ResponsiveGrid,
+		SelectField,
+		Stack,
+		type SelectFieldOption,
+		type SelectFieldValue,
+	} from "$lib/re-ui-components";
+
 	let represented = $state(false);
 	let agreed = $state(false);
 	let saved = $state(false);
+	let submitted = $state(false);
+	let identityType = $state<SelectFieldValue>("");
+	let citizenship = $state<SelectFieldValue>("");
 
-	const today = new Intl.DateTimeFormat('en-CA').format(new Date());
+	const today = new Intl.DateTimeFormat("en-CA").format(new Date());
 	const identityChanges = [
-		'Nama Wajib Pajak',
-		'Nomor Identitas',
-		'Tempat dan Tanggal Lahir',
-		'Status Perkawinan',
-		'Kewarganegaraan',
-		'Nomor Telepon dan Email'
+		"Nama Wajib Pajak",
+		"Nomor Identitas",
+		"Tempat dan Tanggal Lahir",
+		"Status Perkawinan",
+		"Kewarganegaraan",
+		"Nomor Telepon dan Email",
 	];
+	const option = (value: string): SelectFieldOption => ({ value, label: value || "Silakan Pilih" });
+	const identityTypes = ["", "NIK", "Paspor", "Nomor Identitas Lain"].map(option);
+	const genders = ["", "Laki-laki", "Perempuan"].map(option);
+	const maritalStatuses = ["", "Belum Kawin", "Kawin", "Cerai"].map(option);
+	const citizenships = ["", "Indonesia", "Asing"].map(option);
+	const countries = ["", "Indonesia", "Negara Lain"].map(option);
+
+	function save(event: SubmitEvent) {
+		event.preventDefault();
+		submitted = true;
+		if (!identityType || !citizenship) return;
+		saved = true;
+	}
 </script>
 
 <svelte:head><title>Perubahan Identitas Wajib Pajak</title></svelte:head>
 
-<div class="page-shell">
-	<section class="card">
-		<header class="card-header"><h1>Perubahan Identitas Wajib Pajak</h1></header>
-		<form class="card-body" onsubmit={(event) => { event.preventDefault(); saved = true; }}>
-			<fieldset>
-				<legend>Manajemen Kasus</legend>
-				<div class="form-grid">
-					<label>Kanal *<input value="Daring (Portal Wajib Pajak)" disabled /></label>
-					<label>Tanggal Permohonan<input type="date" value={today} disabled /></label>
-				</div>
-			</fieldset>
+<PageLayout contentWidth="1320px">
+	<Breadcrumbs items={[{ label: "Perubahan Data", href: "/" }, { label: "Identitas Wajib Pajak" }]} />
+	<PageHeading eyebrow="Perubahan Data" title="Perubahan Identitas Wajib Pajak" />
 
-			<fieldset>
-				<legend>Kuasa Wajib Pajak</legend>
-				<label class="check-row"><input type="checkbox" bind:checked={represented} /> Diisi oleh perwakilan Wajib Pajak?</label>
-				<div class="form-grid">
-					<label>ID Penunjukan Wakil Wajib Pajak<input placeholder="Masukkan ID penunjukan" /></label>
-					<label>NIK/NPWP Perwakilan<input placeholder="Masukkan NIK/NPWP" /></label>
-					<label>Nama Wakil/Kuasa<input placeholder="Nama akan ditampilkan setelah verifikasi" disabled /></label>
-				</div>
-			</fieldset>
+	<form onsubmit={save}>
+		<Stack gap="18px">
+			<FormSection number="01" title="Manajemen Kasus" bordered>
+				<ResponsiveGrid columns={2}>
+					<FormField label="Kanal" value="Daring (Portal Wajib Pajak)" disabled required />
+					<DateField label="Tanggal Permohonan" value={today} disabled />
+				</ResponsiveGrid>
+			</FormSection>
 
-			<fieldset>
-				<legend>Identitas Wajib Pajak</legend>
-				<div class="form-grid">
-					<label>NIK/TIN *<input placeholder="NIK/NPWP Wajib Pajak" disabled /></label>
-					<label>Nama Wajib Pajak<input placeholder="Nama terdaftar" disabled /></label>
-					<label>Jenis Wajib Pajak<input placeholder="Jenis Wajib Pajak" disabled /></label>
-					<label>Status Wajib Pajak<input placeholder="Status terdaftar" disabled /></label>
-				</div>
-			</fieldset>
+			<FormSection number="02" title="Kuasa Wajib Pajak" bordered>
+				<Stack gap="16px">
+					<CheckboxField label="Diisi oleh perwakilan Wajib Pajak?" bind:checked={represented} />
+					<ResponsiveGrid columns={2}>
+						<FormField label="ID Penunjukan Wakil Wajib Pajak" placeholder="Masukkan ID penunjukan" />
+						<FormField label="NIK/NPWP Perwakilan" placeholder="Masukkan NIK/NPWP" />
+						<FormField label="Nama Wakil/Kuasa" placeholder="Nama akan ditampilkan setelah verifikasi" disabled />
+					</ResponsiveGrid>
+				</Stack>
+			</FormSection>
 
-			<fieldset>
-				<legend>Data yang Akan Diubah</legend>
-				<p class="hint">Pilih data identitas yang menjadi bagian dari permohonan perubahan.</p>
-				<div class="choice-grid">
-					{#each identityChanges as item}
-						<label class="check-row"><input type="checkbox" /> {item}</label>
-					{/each}
-				</div>
-			</fieldset>
+			<FormSection number="03" title="Identitas Wajib Pajak" bordered>
+				<ResponsiveGrid columns={2}>
+					<FormField label="NIK/TIN" placeholder="NIK/NPWP Wajib Pajak" disabled required />
+					<FormField label="Nama Wajib Pajak" placeholder="Nama terdaftar" disabled />
+					<FormField label="Jenis Wajib Pajak" placeholder="Jenis Wajib Pajak" disabled />
+					<FormField label="Status Wajib Pajak" placeholder="Status terdaftar" disabled />
+				</ResponsiveGrid>
+			</FormSection>
 
-			<fieldset>
-				<legend>Identitas Baru</legend>
-				<div class="form-grid">
-					<label>Nama Lengkap / Nama Badan *<input required placeholder="Masukkan nama sesuai dokumen" /></label>
-					<label>Jenis Identitas *
-						<select required><option value="">Silakan Pilih</option><option>NIK</option><option>Paspor</option><option>Nomor Identitas Lain</option></select>
-					</label>
-					<label>Nomor Identitas *<input required inputmode="numeric" /></label>
-					<label>Nomor Kartu Keluarga<input inputmode="numeric" /></label>
-					<label>Tempat Lahir / Tempat Pendirian<input /></label>
-					<label>Tanggal Lahir / Tanggal Pendirian<input type="date" /></label>
-					<label>Jenis Kelamin<select><option value="">Silakan Pilih</option><option>Laki-laki</option><option>Perempuan</option></select></label>
-					<label>Status Perkawinan<select><option value="">Silakan Pilih</option><option>Belum Kawin</option><option>Kawin</option><option>Cerai</option></select></label>
-					<label>Kewarganegaraan *<select required><option value="">Silakan Pilih</option><option>Indonesia</option><option>Asing</option></select></label>
-					<label>Negara Asal<select><option value="">Silakan Pilih</option><option>Indonesia</option><option>Negara Lain</option></select></label>
-					<label>Nomor Telepon<input type="tel" placeholder="Contoh: 081234567890" /></label>
-					<label>Alamat Email<input type="email" placeholder="nama@contoh.id" /></label>
-				</div>
-			</fieldset>
+			<FormSection number="04" title="Data yang Akan Diubah" description="Pilih data identitas yang menjadi bagian dari permohonan perubahan." bordered>
+				<ResponsiveGrid columns={2} gap="8px 22px">
+					{#each identityChanges as item}<CheckboxField label={item} compact />{/each}
+				</ResponsiveGrid>
+			</FormSection>
 
-			<fieldset>
-				<legend>Dokumen Pendukung</legend>
-				<div class="upload-grid">
-					<label>Dokumen Identitas *<input type="file" required accept=".pdf,.jpg,.jpeg,.png" /></label>
-					<label>Dokumen Pendukung Perubahan<input type="file" accept=".pdf,.jpg,.jpeg,.png" /></label>
-				</div>
-				<p class="hint">Format berkas PDF, JPG, JPEG, atau PNG.</p>
-			</fieldset>
+			<FormSection number="05" title="Identitas Baru" bordered>
+				<ResponsiveGrid columns={2}>
+					<FormField label="Nama Lengkap / Nama Badan" placeholder="Masukkan nama sesuai dokumen" required />
+					<SelectField label="Jenis Identitas" bind:value={identityType} options={identityTypes} error={submitted && !identityType ? "Wajib dipilih." : ""} required />
+					<FormField label="Nomor Identitas" inputmode="numeric" required />
+					<FormField label="Nomor Kartu Keluarga" inputmode="numeric" />
+					<FormField label="Tempat Lahir / Tempat Pendirian" />
+					<DateField label="Tanggal Lahir / Tanggal Pendirian" />
+					<SelectField label="Jenis Kelamin" options={genders} />
+					<SelectField label="Status Perkawinan" options={maritalStatuses} />
+					<SelectField label="Kewarganegaraan" bind:value={citizenship} options={citizenships} error={submitted && !citizenship ? "Wajib dipilih." : ""} required />
+					<SelectField label="Negara Asal" options={countries} />
+					<FormField label="Nomor Telepon" type="tel" placeholder="Contoh: 081234567890" />
+					<FormField label="Alamat Email" type="email" placeholder="nama@contoh.id" />
+				</ResponsiveGrid>
+			</FormSection>
 
-			<fieldset>
-				<legend>Pernyataan Wajib Pajak</legend>
-				<label class="check-row declaration"><input type="checkbox" bind:checked={agreed} required /> Dengan menyadari sepenuhnya akan segala akibatnya termasuk sanksi sesuai ketentuan peraturan perundang-undangan, saya menyatakan bahwa data yang saya sampaikan adalah benar dan lengkap.</label>
-			</fieldset>
+			<FormSection number="06" title="Dokumen Pendukung" description="Format berkas PDF, JPG, JPEG, atau PNG." bordered>
+				<ResponsiveGrid columns={2}>
+					<FileUploadField label="Dokumen Identitas" accept=".pdf,.jpg,.jpeg,.png" required />
+					<FileUploadField label="Dokumen Pendukung Perubahan" accept=".pdf,.jpg,.jpeg,.png" />
+				</ResponsiveGrid>
+			</FormSection>
 
-			{#if saved}<p class="success" role="status">Permohonan perubahan identitas telah disimpan.</p>{/if}
-			<div class="actions"><button type="submit" disabled={!agreed}>Simpan</button></div>
-		</form>
-	</section>
-</div>
+			<FormSection number="07" title="Pernyataan Wajib Pajak" bordered>
+				<CheckboxField label="Dengan menyadari sepenuhnya akan segala akibatnya termasuk sanksi sesuai ketentuan peraturan perundang-undangan, saya menyatakan bahwa data yang saya sampaikan adalah benar dan lengkap." bind:checked={agreed} required />
+			</FormSection>
 
-<style>
-	.page-shell { width: 100%; padding: 6.25rem; color: var(--color-text); }
-	.card { overflow: hidden; border: 1px solid #a9a9a9; border-radius: 2px; background: #f3f4f6; }
-	.card-header { min-height: 4.25rem; display: flex; align-items: center; padding: .5rem .75rem; border-bottom: 1px solid #a9a9a9; background: #e5e7eb; }
-	h1 { margin: 0; font-size: 1.5rem; font-weight: 400; }
-	.card-body { padding: .75rem; }
-	fieldset { margin: 0 0 1.5rem; padding: 1rem; border: 1px solid #a9a9a9; }
-	legend { width: auto; margin: 0; padding: 0 .5rem; font-size: 1.15rem; font-weight: 700; }
-	.form-grid, .upload-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem 1.5rem; }
-	.choice-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .25rem 1.5rem; }
-	label { display: flex; flex-direction: column; gap: .35rem; font-weight: 700; }
-	input, select { width: 100%; min-height: 2.5rem; border: 1px solid var(--color-input-secondary); border-radius: 5px; background: var(--color-input-primary); padding: .5rem; font-weight: 400; }
-	input:disabled, select:disabled { background: var(--color-disabled); }
-	.check-row { flex-direction: row; align-items: flex-start; margin-bottom: .75rem; font-weight: 400; }
-	.check-row input { width: 1.25rem; min-height: 1.25rem; flex: 0 0 auto; }
-	.declaration { line-height: 1.5; }
-	.hint { margin: 0 0 .75rem; color: #52525b; font-size: .9rem; }
-	.actions { display: flex; justify-content: flex-end; }
-	button { min-width: 6rem; padding: .5rem; border: 0; border-radius: 5px; background: var(--color-primary); color: var(--color-text); }
-	button:disabled { filter: grayscale(.7); opacity: .6; }
-	.success { padding: .75rem; border: 1px solid #15803d; background: #dcfce7; color: #166534; }
-	@media (max-width: 720px) { .page-shell { padding: 2rem; } .form-grid, .upload-grid, .choice-grid { grid-template-columns: 1fr; } }
-</style>
+			{#if saved}<InlineAlert tone="success" message="Permohonan perubahan identitas telah disimpan." />{/if}
+			<FormActions><ActionButton type="submit" disabled={!agreed}>Simpan</ActionButton></FormActions>
+		</Stack>
+	</form>
+</PageLayout>

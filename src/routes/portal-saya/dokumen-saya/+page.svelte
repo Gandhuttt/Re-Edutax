@@ -1,8 +1,6 @@
 <script lang="ts">
-	import { page as routePage } from "$app/state";
 	import {
 		ActionButton,
-		AppHeader,
 		Breadcrumbs,
 		CheckboxField,
 		CollapsiblePanel,
@@ -12,22 +10,15 @@
 		FormSection,
 		InlineAlert,
 		InstitutionalModal,
-		NavDropdown,
-		NavLink,
 		PageHeading,
 		PageLayout,
 		PaginationBar,
-		ProfileMenu,
-		ReUiRoot,
 		ResponsiveGrid,
 		SelectField,
 		Stack,
 		SummaryStrip,
 		TableActions,
-		type NavDropdownSection,
-		type ProfileMenuGroup,
 	} from "$lib/re-ui-components";
-	import { logout } from "../../auth/logout/logout.remote";
 
 	type DocumentRow = {
 		number: string;
@@ -49,116 +40,6 @@
 		{ key: "caseNumber", label: "Nomor kasus" },
 		{ key: "createdDate", label: "Tanggal pembuatan" },
 		{ key: "createdBy", label: "Pengguna pembuatan" },
-	];
-
-	const fakturMenu: NavDropdownSection[] = [
-		{
-			heading: "Faktur Pajak",
-			items: [
-				{
-					label: "Faktur Pajak Masukan",
-					description: "Dokumen pajak dari pemasok",
-					href: "/faktur-pajak/masukan",
-				},
-				{
-					label: "Faktur Pajak Keluaran",
-					description: "Buat dan kelola faktur penjualan",
-					href: "/faktur-pajak/keluaran",
-				},
-			],
-		},
-	];
-
-	const sptMenu: NavDropdownSection[] = [
-		{
-			heading: "Surat Pemberitahuan",
-			items: [
-				{
-					label: "Konsep SPT",
-					description: "Lanjutkan dokumen yang belum dilaporkan",
-					href: "/surat-pemberitahuan/konsep",
-				},
-				{
-					label: "Menunggu Pembayaran",
-					description: "SPT yang masih memiliki kewajiban pembayaran",
-					href: "/surat-pemberitahuan/pembayaran",
-				},
-				{
-					label: "SPT Dilaporkan",
-					description: "Riwayat dokumen dan bukti penerimaan",
-					href: "/surat-pemberitahuan/laporan",
-				},
-			],
-		},
-	];
-
-	const ebupotMenu: NavDropdownSection[] = [
-		{
-			heading: "Dokumen Saya",
-			items: [
-				{
-					label: "Bukti Potong Saya",
-					description: "Dokumen yang diterima sebagai penerima penghasilan",
-					href: "/ebupot/bukti-potong-saya",
-				},
-				{ label: "BPU", description: "Bukti potong unifikasi", href: "/ebupot/bpu" },
-				{ label: "BP21", description: "Pemotongan PPh Pasal 21", href: "/ebupot/bp21" },
-			],
-		},
-		{
-			heading: "Dokumen Lainnya",
-			items: [
-				{ label: "BP26", description: "Pemotongan PPh Pasal 26", href: "/ebupot/bp26" },
-				{ label: "BPA1", description: "Bukti potong formulir A1", href: "/ebupot/bpa1" },
-				{ label: "BPA2", description: "Bukti potong formulir A2", href: "/ebupot/bpa2" },
-				{ label: "MP", description: "Dokumen pemotongan masa", href: "/ebupot/mp" },
-			],
-		},
-	];
-
-	const profileGroups: ProfileMenuGroup[] = [
-		{
-			label: "Portal Saya",
-			items: [
-				{ label: "Dokumen Saya", href: "/portal-saya/dokumen-saya" },
-				{ label: "Notifikasi Saya", href: "/portal-saya/notifikasi-saya" },
-				{ label: "Kasus Saya", href: "/portal-saya/kasus-saya" },
-				{ label: "Kasus Berjalan Saya", href: "/portal-saya/kasus-berjalan-saya" },
-				{ label: "Pengukuhan PKP", href: "/portal-saya/pengukuhan-pkp" },
-				{
-					label: "Pendaftaran Objek Pajak PBB P5L",
-					href: "/portal-saya/pendaftaran-objek-pajak-pbb-p5l",
-				},
-			],
-		},
-		{
-			label: "Profil Saya",
-			items: [
-				{ label: "Ikhtisar Profil", href: "/profile" },
-				{ label: "Informasi Umum", href: "/profile/informasi-umum" },
-				{ label: "Alamat", href: "/profile/alamat" },
-				{ label: "Detail Kontak", href: "/profile/detail-kontak" },
-				{ label: "Pihak Terkait", href: "/profile/pihak-terkait" },
-				{ label: "Detail Bank", href: "/profile/detail-bank" },
-			],
-		},
-		{
-			label: "Perubahan Data",
-			items: [
-				{
-					label: "Identitas Wajib Pajak",
-					href: "/perubahan-data/identitas-wajib-pajak",
-				},
-				{
-					label: "Perubahan Alamat Utama",
-					href: "/perubahan-data/perubahan-alamat-utama",
-				},
-				{
-					label: "Data Objek Pajak PBB P5L",
-					href: "/perubahan-data/perubahan-data-objek-pajak-pbb-p5l",
-				},
-			],
-		},
 	];
 
 	let documents = $state<DocumentRow[]>([
@@ -226,7 +107,6 @@
 	let creatorFilter = $state<string | number>("");
 	let page = $state(1);
 	let pageSize = $state(10);
-	let logoutForm = $state<HTMLFormElement>();
 	let uploadInput = $state<HTMLInputElement>();
 	let uploadedFiles = $state<FileList>();
 	let notice = $state("");
@@ -243,21 +123,6 @@
 		createdDate: true,
 		createdBy: true,
 	});
-	const accountName = $derived(
-		String(routePage.data.user?.name ?? "Wajib Pajak").replaceAll("'", ""),
-	);
-	const accountNpwp = $derived(
-		String(routePage.data.user?.username ?? "NPWP tidak tersedia"),
-	);
-	const accountInitials = $derived(
-		accountName
-			.split(/\s+/)
-			.filter(Boolean)
-			.slice(0, 2)
-			.map((word) => word[0]?.toUpperCase())
-			.join("") || "WP",
-	);
-
 	const documentTypes = [
 		"Surat Tagihan Pajak Pertambahan Nilai",
 		"Dokumen Lain-Lain dari Wajib Pajak",
@@ -388,35 +253,7 @@
 	</Stack>
 {/snippet}
 
-<ReUiRoot>
-	<form {...logout} bind:this={logoutForm} hidden></form>
-
-	<AppHeader
-		brand="EduTax"
-		subtitle="Layanan Administrasi Perpajakan"
-		mark="ET"
-		homeHref="/"
-		homeLabel="Beranda EduTax"
-		contentWidth="1500px"
-	>
-		{#snippet navigation()}
-			<NavLink href="/">Beranda</NavLink>
-			<NavDropdown label="Faktur" sections={fakturMenu} columns={1} />
-			<NavDropdown label="SPT" sections={sptMenu} columns={1} />
-			<NavDropdown label="eBupot" sections={ebupotMenu} />
-		{/snippet}
-		{#snippet account()}
-			<ProfileMenu
-				name={accountName}
-				role={accountNpwp}
-				initials={accountInitials}
-				groups={profileGroups}
-				onlogout={() => logoutForm?.requestSubmit()}
-			/>
-		{/snippet}
-	</AppHeader>
-
-	<input
+<input
 		bind:this={uploadInput}
 		bind:files={uploadedFiles}
 		type="file"
@@ -424,7 +261,7 @@
 		onchange={handleUpload}
 	/>
 
-	<PageLayout contentWidth="1500px">
+<PageLayout contentWidth="1500px">
 		<Breadcrumbs
 			items={[
 				{ label: "Portal Saya", href: "/" },
@@ -550,9 +387,9 @@
 				/>
 			</FormSection>
 		</Stack>
-	</PageLayout>
+</PageLayout>
 
-	<InstitutionalModal
+<InstitutionalModal
 		bind:open={columnDialogOpen}
 		eyebrow="PREFERENSI TABEL"
 		title="Atur Kolom"
@@ -573,9 +410,9 @@
 			<ActionButton tone="quiet" onclick={restoreColumns}>Tampilkan Semua</ActionButton>
 			<ActionButton onclick={() => (columnDialogOpen = false)}>Selesai</ActionButton>
 		{/snippet}
-	</InstitutionalModal>
+</InstitutionalModal>
 
-	<InstitutionalModal
+<InstitutionalModal
 		bind:open={generateDialogOpen}
 		eyebrow="DOKUMEN BARU"
 		title="Hasilkan Dokumen"
@@ -601,5 +438,4 @@
 			<ActionButton tone="quiet" onclick={() => (generateDialogOpen = false)}>Batal</ActionButton>
 			<ActionButton onclick={generateDocument}>Hasilkan</ActionButton>
 		{/snippet}
-	</InstitutionalModal>
-</ReUiRoot>
+</InstitutionalModal>

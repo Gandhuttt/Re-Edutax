@@ -1,11 +1,18 @@
 import { drizzle, type DrizzleD1Database } from 'drizzle-orm/d1';
 import type { BatchItem } from 'drizzle-orm/batch';
+import { createTableRelationsHelpers, extractTablesRelationalConfig } from 'drizzle-orm/relations';
 import { getRequestEvent } from '$app/server';
 import * as schema from './schema';
 
 type Schema = typeof schema;
 
 const instances = new WeakMap<D1Database, DrizzleD1Database<Schema>>();
+const relationalSchema = extractTablesRelationalConfig(schema, createTableRelationsHelpers);
+const metadata = {
+	schema: relationalSchema.tables,
+	fullSchema: schema,
+	tableNamesMap: relationalSchema.tableNamesMap
+} as DrizzleD1Database<Schema>['_'];
 
 function resolveDb(): DrizzleD1Database<Schema> {
 	const { platform } = getRequestEvent();
@@ -23,6 +30,11 @@ function resolveDb(): DrizzleD1Database<Schema> {
 
 export const db: DrizzleD1Database<Schema> = new Proxy({} as DrizzleD1Database<Schema>, {
 	get(_target, prop, _receiver) {
+		// Better Auth inspects Drizzle's relation metadata while the auth module is
+		// initialized. That happens outside a request, so resolving the D1 binding here
+		// would make getRequestEvent() throw before SvelteKit can start handling requests.
+		if (prop === '_') return metadata;
+
 		const instance = resolveDb();
 		const value = Reflect.get(instance, prop, instance);
 		return typeof value === 'function' ? value.bind(instance) : value;

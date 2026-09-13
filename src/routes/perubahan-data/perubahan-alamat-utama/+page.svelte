@@ -1,118 +1,133 @@
 <script lang="ts">
+	import {
+		ActionButton,
+		Breadcrumbs,
+		CheckboxField,
+		DateField,
+		FileUploadField,
+		FormActions,
+		FormField,
+		FormSection,
+		InlineAlert,
+		PageHeading,
+		PageLayout,
+		ResponsiveGrid,
+		SelectField,
+		Stack,
+		TextAreaField,
+		type SelectFieldOption,
+		type SelectFieldValue,
+	} from "$lib/re-ui-components";
+
 	let represented = $state(false);
 	let agreed = $state(false);
 	let saved = $state(false);
+	let submitted = $state(false);
+	let addressType = $state<SelectFieldValue>("");
+	let province = $state<SelectFieldValue>("");
+	let city = $state<SelectFieldValue>("");
+	let district = $state<SelectFieldValue>("");
+	let village = $state<SelectFieldValue>("");
+	const today = new Intl.DateTimeFormat("en-CA").format(new Date());
+	const option = (value: string): SelectFieldOption => ({ value, label: value || "Silakan Pilih" });
+	const addressTypes = ["", "Tempat Tinggal", "Tempat Kedudukan", "Tempat Kegiatan Usaha"].map(option);
+	const provinces = ["", "DKI Jakarta", "Jawa Barat", "Provinsi Lain"].map(option);
+	const emptyOptions = [""].map(option);
 
-	const today = new Intl.DateTimeFormat('en-CA').format(new Date());
-	const addressTypes = ['Tempat Tinggal', 'Tempat Kedudukan', 'Tempat Kegiatan Usaha'];
+	function save(event: SubmitEvent) {
+		event.preventDefault();
+		submitted = true;
+		if (!addressType || !province || !city || !district || !village) return;
+		saved = true;
+	}
 </script>
 
 <svelte:head><title>Perubahan Alamat Utama</title></svelte:head>
 
-<div class="page-shell">
-	<section class="card">
-		<header class="card-header"><h1>Perubahan Alamat Utama</h1></header>
-		<form class="card-body" onsubmit={(event) => { event.preventDefault(); saved = true; }}>
-			<fieldset>
-				<legend>Manajemen Kasus</legend>
-				<div class="form-grid">
-					<label>Kanal *<input value="Daring (Portal Wajib Pajak)" disabled /></label>
-					<label>Tanggal Permohonan<input type="date" value={today} disabled /></label>
-				</div>
-			</fieldset>
+<PageLayout contentWidth="1320px">
+	<Breadcrumbs items={[{ label: "Perubahan Data", href: "/" }, { label: "Perubahan Alamat Utama" }]} />
+	<PageHeading eyebrow="Perubahan Data" title="Perubahan Alamat Utama" />
 
-			<fieldset>
-				<legend>Kuasa Wajib Pajak</legend>
-				<label class="check-row"><input type="checkbox" bind:checked={represented} /> Diisi oleh perwakilan Wajib Pajak?</label>
-				<div class="form-grid">
-					<label>ID Penunjukan Wakil Wajib Pajak<input placeholder="Masukkan ID penunjukan" /></label>
-					<label>NIK/NPWP Perwakilan<input placeholder="Masukkan NIK/NPWP" /></label>
-					<label>Nama Wakil/Kuasa<input placeholder="Nama akan ditampilkan setelah verifikasi" disabled /></label>
-				</div>
-			</fieldset>
+	<form onsubmit={save}>
+		<Stack gap="18px">
+			<FormSection number="01" title="Manajemen Kasus" bordered>
+				<ResponsiveGrid columns={2}>
+					<FormField label="Kanal" value="Daring (Portal Wajib Pajak)" disabled required />
+					<DateField label="Tanggal Permohonan" value={today} disabled />
+				</ResponsiveGrid>
+			</FormSection>
 
-			<fieldset>
-				<legend>Identitas Wajib Pajak</legend>
-				<div class="form-grid">
-					<label>NIK/TIN *<input placeholder="NIK/NPWP Wajib Pajak" disabled /></label>
-					<label>Nama Wajib Pajak<input placeholder="Nama terdaftar" disabled /></label>
-				</div>
-			</fieldset>
+			<FormSection number="02" title="Kuasa Wajib Pajak" bordered>
+				<Stack gap="16px">
+					<CheckboxField label="Diisi oleh perwakilan Wajib Pajak?" bind:checked={represented} />
+					<ResponsiveGrid columns={2}>
+						<FormField label="ID Penunjukan Wakil Wajib Pajak" placeholder="Masukkan ID penunjukan" />
+						<FormField label="NIK/NPWP Perwakilan" placeholder="Masukkan NIK/NPWP" />
+						<FormField label="Nama Wakil/Kuasa" placeholder="Nama akan ditampilkan setelah verifikasi" disabled />
+					</ResponsiveGrid>
+				</Stack>
+			</FormSection>
 
-			<fieldset>
-				<legend>Alamat Utama Saat Ini</legend>
-				<div class="form-grid">
-					<label>Jenis Alamat<input value="Alamat Utama" disabled /></label>
-					<label>Kode KPP<input placeholder="KPP terdaftar" disabled /></label>
-					<label class="full">Detail Alamat<textarea rows="3" placeholder="Alamat terdaftar" disabled></textarea></label>
-					<label>Provinsi<input disabled /></label><label>Kabupaten/Kota<input disabled /></label>
-					<label>Kecamatan<input disabled /></label><label>Kelurahan/Desa<input disabled /></label>
-					<label>RT/RW<input disabled /></label><label>Kode Pos<input disabled /></label>
-				</div>
-			</fieldset>
+			<FormSection number="03" title="Identitas Wajib Pajak" bordered>
+				<ResponsiveGrid columns={2}>
+					<FormField label="NIK/TIN" placeholder="NIK/NPWP Wajib Pajak" disabled required />
+					<FormField label="Nama Wajib Pajak" placeholder="Nama terdaftar" disabled />
+				</ResponsiveGrid>
+			</FormSection>
 
-			<fieldset>
-				<legend>Alamat Utama Baru</legend>
-				<div class="form-grid">
-					<label>Jenis Alamat *<select required><option value="">Silakan Pilih</option>{#each addressTypes as type}<option>{type}</option>{/each}</select></label>
-					<label>Nama Jalan / Blok *<input required /></label>
-					<label class="full">Detail Alamat *<textarea rows="3" required placeholder="Nama gedung, nomor rumah, dan keterangan alamat"></textarea></label>
-					<label>Provinsi *<select required><option value="">Silakan Pilih</option><option>DKI Jakarta</option><option>Jawa Barat</option><option>Provinsi Lain</option></select></label>
-					<label>Kabupaten/Kota *<select required><option value="">Silakan Pilih</option></select></label>
-					<label>Kecamatan *<select required><option value="">Silakan Pilih</option></select></label>
-					<label>Kelurahan/Desa *<select required><option value="">Silakan Pilih</option></select></label>
-					<label>RT<input inputmode="numeric" maxlength="3" placeholder="000" /></label>
-					<label>RW<input inputmode="numeric" maxlength="3" placeholder="000" /></label>
-					<label>Kode Pos *<input required inputmode="numeric" maxlength="5" /></label>
-					<label>Nomor Telepon<input type="tel" /></label>
-					<label>Data Geometri<input placeholder="Diisi setelah alamat ditandai" disabled /></label>
-					<div class="field-action"><button type="button" class="secondary">Tandai Alamat</button></div>
-				</div>
-			</fieldset>
+			<FormSection number="04" title="Alamat Utama Saat Ini" bordered>
+				<Stack gap="18px">
+					<ResponsiveGrid columns={2}>
+						<FormField label="Jenis Alamat" value="Alamat Utama" disabled />
+						<FormField label="Kode KPP" placeholder="KPP terdaftar" disabled />
+					</ResponsiveGrid>
+					<TextAreaField label="Detail Alamat" rows={3} placeholder="Alamat terdaftar" disabled />
+					<ResponsiveGrid columns={2}>
+						<FormField label="Provinsi" disabled />
+						<FormField label="Kabupaten/Kota" disabled />
+						<FormField label="Kecamatan" disabled />
+						<FormField label="Kelurahan/Desa" disabled />
+						<FormField label="RT/RW" disabled />
+						<FormField label="Kode Pos" disabled />
+					</ResponsiveGrid>
+				</Stack>
+			</FormSection>
 
-			<fieldset>
-				<legend>Dokumen Pendukung</legend>
-				<div class="upload-grid">
-					<label>Bukti Kepemilikan/Penguasaan Tempat *<input type="file" required accept=".pdf,.jpg,.jpeg,.png" /></label>
-					<label>Dokumen Pendukung Lainnya<input type="file" accept=".pdf,.jpg,.jpeg,.png" /></label>
-				</div>
-				<p class="hint">Format berkas PDF, JPG, JPEG, atau PNG.</p>
-			</fieldset>
+			<FormSection number="05" title="Alamat Utama Baru" bordered>
+				<Stack gap="18px">
+					<ResponsiveGrid columns={2}>
+						<SelectField label="Jenis Alamat" bind:value={addressType} options={addressTypes} error={submitted && !addressType ? "Wajib dipilih." : ""} required />
+						<FormField label="Nama Jalan / Blok" required />
+					</ResponsiveGrid>
+					<TextAreaField label="Detail Alamat" rows={3} placeholder="Nama gedung, nomor rumah, dan keterangan alamat" required />
+					<ResponsiveGrid columns={2}>
+						<SelectField label="Provinsi" bind:value={province} options={provinces} error={submitted && !province ? "Wajib dipilih." : ""} required />
+						<SelectField label="Kabupaten/Kota" bind:value={city} options={emptyOptions} error={submitted && !city ? "Wajib dipilih." : ""} required />
+						<SelectField label="Kecamatan" bind:value={district} options={emptyOptions} error={submitted && !district ? "Wajib dipilih." : ""} required />
+						<SelectField label="Kelurahan/Desa" bind:value={village} options={emptyOptions} error={submitted && !village ? "Wajib dipilih." : ""} required />
+						<FormField label="RT" inputmode="numeric" maxlength={3} placeholder="000" />
+						<FormField label="RW" inputmode="numeric" maxlength={3} placeholder="000" />
+						<FormField label="Kode Pos" inputmode="numeric" maxlength={5} required />
+						<FormField label="Nomor Telepon" type="tel" />
+						<FormField label="Data Geometri" placeholder="Diisi setelah alamat ditandai" disabled />
+						<Stack align="end"><ActionButton tone="secondary">Tandai Alamat</ActionButton></Stack>
+					</ResponsiveGrid>
+				</Stack>
+			</FormSection>
 
-			<fieldset>
-				<legend>Pernyataan Wajib Pajak</legend>
-				<label class="check-row declaration"><input type="checkbox" bind:checked={agreed} required /> Saya menyatakan bahwa alamat dan dokumen yang saya sampaikan adalah benar, lengkap, dan dapat dipertanggungjawabkan sesuai ketentuan yang berlaku.</label>
-			</fieldset>
+			<FormSection number="06" title="Dokumen Pendukung" description="Format berkas PDF, JPG, JPEG, atau PNG." bordered>
+				<ResponsiveGrid columns={2}>
+					<FileUploadField label="Bukti Kepemilikan/Penguasaan Tempat" accept=".pdf,.jpg,.jpeg,.png" required />
+					<FileUploadField label="Dokumen Pendukung Lainnya" accept=".pdf,.jpg,.jpeg,.png" />
+				</ResponsiveGrid>
+			</FormSection>
 
-			{#if saved}<p class="success" role="status">Permohonan perubahan alamat utama telah disimpan.</p>{/if}
-			<div class="actions"><button type="submit" disabled={!agreed}>Simpan</button></div>
-		</form>
-	</section>
-</div>
+			<FormSection number="07" title="Pernyataan Wajib Pajak" bordered>
+				<CheckboxField label="Saya menyatakan bahwa alamat dan dokumen yang saya sampaikan adalah benar, lengkap, dan dapat dipertanggungjawabkan sesuai ketentuan yang berlaku." bind:checked={agreed} required />
+			</FormSection>
 
-<style>
-	.page-shell { width: 100%; padding: 6.25rem; color: var(--color-text); }
-	.card { overflow: hidden; border: 1px solid #a9a9a9; border-radius: 2px; background: #f3f4f6; }
-	.card-header { min-height: 4.25rem; display: flex; align-items: center; padding: .5rem .75rem; border-bottom: 1px solid #a9a9a9; background: #e5e7eb; }
-	h1 { margin: 0; font-size: 1.5rem; font-weight: 400; }
-	.card-body { padding: .75rem; }
-	fieldset { margin: 0 0 1.5rem; padding: 1rem; border: 1px solid #a9a9a9; }
-	legend { width: auto; margin: 0; padding: 0 .5rem; font-size: 1.15rem; font-weight: 700; }
-	.form-grid, .upload-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem 1.5rem; }
-	label { display: flex; flex-direction: column; gap: .35rem; font-weight: 700; }
-	label.full { grid-column: 1 / -1; }
-	input, select, textarea { width: 100%; min-height: 2.5rem; border: 1px solid var(--color-input-secondary); border-radius: 5px; background: var(--color-input-primary); padding: .5rem; font-weight: 400; }
-	textarea { resize: vertical; }
-	input:disabled, select:disabled, textarea:disabled { background: var(--color-disabled); }
-	.check-row { flex-direction: row; align-items: flex-start; margin-bottom: .75rem; font-weight: 400; }
-	.check-row input { width: 1.25rem; min-height: 1.25rem; flex: 0 0 auto; }
-	.declaration { line-height: 1.5; }
-	.field-action { display: flex; align-items: flex-end; }
-	.hint { margin: .75rem 0 0; color: #52525b; font-size: .9rem; }
-	.actions { display: flex; justify-content: flex-end; }
-	button { min-width: 6rem; padding: .5rem; border: 0; border-radius: 5px; background: var(--color-primary); color: var(--color-text); }
-	button.secondary { border: 1px solid #a9a9a9; background: #e5e7eb; }
-	button:disabled { filter: grayscale(.7); opacity: .6; }
-	.success { padding: .75rem; border: 1px solid #15803d; background: #dcfce7; color: #166534; }
-	@media (max-width: 720px) { .page-shell { padding: 2rem; } .form-grid, .upload-grid { grid-template-columns: 1fr; } label.full { grid-column: auto; } }
-</style>
+			{#if saved}<InlineAlert tone="success" message="Permohonan perubahan alamat utama telah disimpan." />{/if}
+			<FormActions><ActionButton type="submit" disabled={!agreed}>Simpan</ActionButton></FormActions>
+		</Stack>
+	</form>
+</PageLayout>

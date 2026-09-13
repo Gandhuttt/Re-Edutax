@@ -1,119 +1,50 @@
 <script lang="ts">
-	let represented = $state(false);
-	let agreed = $state(false);
-	let saved = $state(false);
-	let error = $state('');
+	import StatusApplicationForm, { type StatusFormConfig } from '../pencabutan-pemungut-bea-meterai/StatusApplicationForm.svelte';
 
-	const today = new Intl.DateTimeFormat('en-CA').format(new Date());
-	const reasons = [
-		'Tidak lagi melakukan kegiatan usaha atau pekerjaan bebas',
-		'Tidak memenuhi persyaratan subjektif dan/atau objektif',
-		'Tinggal atau berada di luar Indonesia lebih dari 183 hari',
-		'Alasan lainnya'
-	];
-
-	function submit(event: SubmitEvent) {
-		event.preventDefault();
-		const form = event.currentTarget as HTMLFormElement;
-		if (!form.checkValidity() || !agreed) {
-			error = 'Lengkapi seluruh data dan pernyataan yang wajib diisi.';
-			saved = false;
-			form.reportValidity();
-			return;
-		}
-		error = '';
-		saved = true;
-	}
+	const config: StatusFormConfig = {
+		title: 'Penetapan Wajib Pajak Nonaktif',
+		representativeLabel: 'Diisi oleh perwakilan Wajib Pajak?',
+		representativeIdLabel: 'ID Penunjukan Wakil Wajib Pajak',
+		representativeIdPlaceholder: '',
+		representativeTaxIdLabel: 'NIK/NPWP Perwakilan',
+		representativeDetailsPlaceholder: '',
+		identityFields: [
+			{ name: 'taxpayer-id', label: 'NIK/TIN', placeholder: 'NIK/NPWP Wajib Pajak', required: true, disabled: true },
+			{ name: 'taxpayer-name', label: 'Nama Wajib Pajak', disabled: true },
+			{ name: 'current-status', label: 'Status Saat Ini', value: 'Aktif', disabled: true },
+			{ name: 'address', label: 'Alamat', type: 'textarea', rows: 2, disabled: true, full: true },
+		],
+		sections: [
+			{
+				title: 'Data Penetapan Wajib Pajak Nonaktif',
+				fields: [
+					{
+						name: 'reason',
+						label: 'Alasan Penetapan',
+						type: 'select',
+						required: true,
+						options: [
+							'Tidak lagi melakukan kegiatan usaha atau pekerjaan bebas',
+							'Tidak memenuhi persyaratan subjektif dan/atau objektif',
+							'Tinggal atau berada di luar Indonesia lebih dari 183 hari',
+							'Alasan lainnya',
+						],
+					},
+					{ name: 'inactive-start-date', label: 'Tanggal Mulai Nonaktif yang Diajukan', type: 'date', required: true },
+					{ name: 'reason-explanation', label: 'Penjelasan Alasan', type: 'textarea', rows: 4, maxLength: 1000, placeholder: 'Jelaskan alasan pengajuan status nonaktif', required: true, full: true },
+				],
+			},
+			{
+				title: 'Dokumen Persyaratan',
+				description: 'Unggah dokumen pendukung yang membuktikan alasan permohonan.',
+				fields: [
+					{ name: 'supporting-document', label: 'Dokumen Pendukung', type: 'file', accept: '.pdf,.jpg,.jpeg,.png', help: 'Format PDF, JPG, JPEG, atau PNG.', required: true },
+				],
+			},
+		],
+		declaration: 'Dengan menyadari sepenuhnya segala akibat termasuk sanksi sesuai ketentuan yang berlaku, saya menyatakan bahwa data dan dokumen yang disampaikan adalah benar dan lengkap.',
+		successMessage: 'Permohonan penetapan Wajib Pajak nonaktif telah disimpan.',
+	};
 </script>
 
-<svelte:head><title>Penetapan Wajib Pajak Nonaktif</title></svelte:head>
-
-<div class="page-shell">
-	<section class="card">
-		<header class="card-header"><h1>Penetapan Wajib Pajak Nonaktif</h1></header>
-		<form class="card-body" onsubmit={submit} oninput={() => { saved = false; error = ''; }} novalidate>
-			<fieldset>
-				<legend>Manajemen Kasus</legend>
-				<div class="form-grid">
-					<label>Kanal *<input value="Daring (Portal Wajib Pajak)" disabled /></label>
-					<label>Tanggal Permohonan<input type="date" value={today} disabled /></label>
-				</div>
-			</fieldset>
-
-			<fieldset>
-				<legend>Kuasa Wajib Pajak</legend>
-				<label class="check-row"><input type="checkbox" bind:checked={represented} /> Diisi oleh perwakilan Wajib Pajak?</label>
-				<div class="form-grid">
-					<label>ID Penunjukan Wakil Wajib Pajak {represented ? '*' : ''}<input required={represented} disabled={!represented} /></label>
-					<label>NIK/NPWP Perwakilan<input disabled /></label>
-					<label>Nama Wakil/Kuasa<input disabled /></label>
-				</div>
-			</fieldset>
-
-			<fieldset>
-				<legend>Identitas Wajib Pajak</legend>
-				<div class="form-grid">
-					<label>NIK/TIN *<input placeholder="NIK/NPWP Wajib Pajak" disabled /></label>
-					<label>Nama Wajib Pajak<input disabled /></label>
-					<label>Status Saat Ini<input value="Aktif" disabled /></label>
-					<label class="full">Alamat<textarea rows="2" disabled></textarea></label>
-				</div>
-			</fieldset>
-
-			<fieldset>
-				<legend>Data Penetapan Wajib Pajak Nonaktif</legend>
-				<div class="form-grid">
-					<label>Alasan Penetapan *
-						<select required><option value="">Silakan Pilih</option>{#each reasons as reason}<option>{reason}</option>{/each}</select>
-					</label>
-					<label>Tanggal Mulai Nonaktif yang Diajukan *<input type="date" required /></label>
-					<label class="full">Penjelasan Alasan *<textarea rows="4" maxlength="1000" required placeholder="Jelaskan alasan pengajuan status nonaktif"></textarea></label>
-				</div>
-			</fieldset>
-
-			<fieldset>
-				<legend>Dokumen Persyaratan</legend>
-				<p>Unggah dokumen pendukung yang membuktikan alasan permohonan.</p>
-				<label>Dokumen Pendukung *<input type="file" accept=".pdf,.jpg,.jpeg,.png" required /></label>
-				<small>Format PDF, JPG, JPEG, atau PNG.</small>
-			</fieldset>
-
-			<fieldset>
-				<legend>Pernyataan Wajib Pajak</legend>
-				<label class="check-row declaration"><input type="checkbox" bind:checked={agreed} required /> Dengan menyadari sepenuhnya segala akibat termasuk sanksi sesuai ketentuan yang berlaku, saya menyatakan bahwa data dan dokumen yang disampaikan adalah benar dan lengkap.</label>
-			</fieldset>
-
-			{#if error}<p class="message error" role="alert">{error}</p>{/if}
-			{#if saved}<p class="message success" role="status">Permohonan penetapan Wajib Pajak nonaktif telah disimpan.</p>{/if}
-			<div class="actions"><button type="submit" disabled={!agreed}>Simpan</button></div>
-		</form>
-	</section>
-</div>
-
-<style>
-	.page-shell { width: 100%; padding: 6.25rem; color: var(--color-text); }
-	.card { overflow: hidden; border: 1px solid #a9a9a9; border-radius: 2px; background: #f3f4f6; }
-	.card-header { min-height: 4.25rem; display: flex; align-items: center; padding: .5rem .75rem; border-bottom: 1px solid #a9a9a9; background: #e5e7eb; }
-	h1 { margin: 0; font-size: 1.5rem; font-weight: 400; }
-	.card-body { padding: .75rem; }
-	fieldset { margin: 0 0 1.25rem; padding: 1rem; border: 1px solid #a9a9a9; }
-	legend { width: auto; margin: 0; padding: 0 .5rem; font-size: 1.15rem; font-weight: 700; }
-	.form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .9rem 1.5rem; }
-	label { display: flex; flex-direction: column; gap: .35rem; font-weight: 700; }
-	label.full { grid-column: 1 / -1; }
-	input, select, textarea { width: 100%; min-height: 2.5rem; border: 1px solid var(--color-input-secondary); border-radius: 5px; background: var(--color-input-primary); padding: .5rem; font-weight: 400; }
-	textarea { resize: vertical; }
-	input:disabled, select:disabled, textarea:disabled { background: var(--color-disabled); }
-	.check-row { flex-direction: row; align-items: flex-start; margin-bottom: 1rem; font-weight: 400; }
-	.check-row input { width: 1.25rem; min-height: 1.25rem; flex: 0 0 auto; }
-	.declaration { line-height: 1.5; }
-	p { margin: 0 0 .75rem; }
-	small { display: block; margin-top: .35rem; color: #5f6368; }
-	.actions { display: flex; justify-content: flex-end; }
-	button { min-width: 6rem; padding: .5rem; border: 0; border-radius: 5px; background: var(--color-primary); color: var(--color-text); }
-	button:disabled { filter: grayscale(.7); opacity: .6; }
-	.message { padding: .75rem; border: 1px solid; }
-	.success { border-color: #15803d; background: #dcfce7; color: #166534; }
-	.error { border-color: #b91c1c; background: #fee2e2; color: #991b1b; }
-	@media (max-width: 720px) { .page-shell { padding: 2rem; } .form-grid { grid-template-columns: 1fr; } label.full { grid-column: auto; } }
-</style>
+<StatusApplicationForm {config} />

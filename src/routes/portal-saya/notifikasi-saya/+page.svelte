@@ -1,33 +1,96 @@
 <script lang="ts">
-	import { notificationData, type Notification } from './notifications';
+	import {
+		ActionButton,
+		Breadcrumbs,
+		CheckboxField,
+		CollapsiblePanel,
+		DataTableViewport,
+		FormField,
+		FormSection,
+		InlineAlert,
+		InstitutionalModal,
+		PageHeading,
+		PageLayout,
+		PaginationBar,
+		ResponsiveGrid,
+		Stack,
+		StatusBadge,
+		SummaryStrip,
+		TabbedSection,
+		TableActions,
+	} from "$lib/re-ui-components";
+	import { notificationData, type Notification } from "./notifications";
+
+	type NotificationTab = "all" | "read" | "unread";
+	type ColumnKey = "sender" | "subject" | "sentAt" | "priority";
+
+	const columnOptions: { key: ColumnKey; label: string }[] = [
+		{ key: "sender", label: "Pengirim" },
+		{ key: "subject", label: "Subjek" },
+		{ key: "sentAt", label: "Tanggal Terkirim" },
+		{ key: "priority", label: "Prioritas" },
+	];
 
 	let notifications = $state<Notification[]>(notificationData.map((item) => ({ ...item })));
-
-	let activeTab = $state<'all' | 'read' | 'unread'>('all');
+	let activeTab = $state<NotificationTab>("all");
 	let filterOpen = $state(false);
-	let query = $state('');
+	let columnDialogOpen = $state(false);
+	let query = $state("");
+	let page = $state(1);
+	let pageSize = $state(10);
+	let notice = $state("");
+	let visibleColumns = $state<Record<ColumnKey, boolean>>({
+		sender: true,
+		subject: true,
+		sentAt: true,
+		priority: true,
+	});
 
-	const visibleNotifications = $derived(
-		notifications.filter((item) => {
-			const matchesTab = activeTab === 'all' || (activeTab === 'read' ? item.read : !item.read);
-			const search = query.toLowerCase();
-			return matchesTab && (item.sender.toLowerCase().includes(search) || item.subject.toLowerCase().includes(search));
-		})
+	const readCount = $derived(notifications.filter((item) => item.read).length);
+	const unreadCount = $derived(notifications.length - readCount);
+	const visibleNotifications = $derived.by(() => {
+		const search = query.trim().toLocaleLowerCase("id-ID");
+		return notifications.filter((item) => {
+			const matchesTab = activeTab === "all" || (activeTab === "read" ? item.read : !item.read);
+			const matchesSearch =
+				!search ||
+				item.sender.toLocaleLowerCase("id-ID").includes(search) ||
+				item.subject.toLocaleLowerCase("id-ID").includes(search);
+			return matchesTab && matchesSearch;
+		});
+	});
+	const pagedNotifications = $derived(
+		visibleNotifications.slice((page - 1) * pageSize, page * pageSize),
+	);
+	const visibleColumnCount = $derived(
+		1 + columnOptions.filter((column) => visibleColumns[column.key]).length,
 	);
 
 	function markAllRead() {
 		notifications = notifications.map((item) => ({ ...item, read: true }));
+		notice = "Semua notifikasi telah ditandai sebagai telah dibaca pada sesi ini.";
+	}
+
+	function reloadNotifications() {
+		notifications = notificationData.map((item) => ({ ...item }));
+		query = "";
+		page = 1;
+		notice = "Kotak masuk telah dimuat ulang dari data lokal.";
+	}
+
+	function restoreColumns() {
+		for (const column of columnOptions) visibleColumns[column.key] = true;
 	}
 
 	function exportNotifications() {
 		const rows = visibleNotifications.map((item) => [item.sender, item.subject, item.sentAt, item.priority]);
-		const csv = [['Pengirim', 'Subjek', 'Tanggal Terkirim', 'Prioritas'], ...rows]
-			.map((row) => row.map((cell) => `"${cell.replaceAll('"', '""')}"`).join(','))
-			.join('\n');
-		const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
-		const link = document.createElement('a');
+		const csv = [["Pengirim", "Subjek", "Tanggal Terkirim", "Prioritas"], ...rows]
+			.map((row) => row.map((cell) => `"${cell.replaceAll('"', '""')}"`).join(","))
+			.join("\n");
+		const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
+		const link = document.createElement("a");
 		link.href = url;
-		link.download = 'notifikasi-saya.csv';
+		link.download = "notifikasi-saya.csv";
 		link.click();
 		URL.revokeObjectURL(url);
 	}
@@ -35,82 +98,125 @@
 
 <svelte:head><title>Notifikasi Saya</title></svelte:head>
 
-<div class="notification-page">
-	<section class="card">
-		<header class="card-header">
-			<h1>Kotak Masuk</h1>
-			<button class="button secondary" type="button" onclick={markAllRead}>Tandai Semua Telah Dibaca</button>
-		</header>
+{#snippet inboxActions()}
+	<ActionButton tone="secondary" onclick={markAllRead} disabled={unreadCount === 0}>
+		Tandai Semua Telah Dibaca
+	</ActionButton>
+{/snippet}
 
-		<div class="card-body">
-			<div class="tabs" role="tablist" aria-label="Status notifikasi">
-				<button class:active={activeTab === 'all'} type="button" onclick={() => (activeTab = 'all')}>Semua</button>
-				<button class:active={activeTab === 'read'} type="button" onclick={() => (activeTab = 'read')}>Baca</button>
-				<button class:active={activeTab === 'unread'} type="button" onclick={() => (activeTab = 'unread')}>Belum dibaca</button>
-			</div>
+{#snippet tableTools()}
+	<Stack direction="horizontal" gap="7px" align="center" wrap>
+		<ActionButton tone="quiet" onclick={reloadNotifications}>Muat Ulang</ActionButton>
+		<ActionButton
+			tone={filterOpen ? "secondary" : "quiet"}
+			aria-expanded={filterOpen}
+			aria-controls="notification-filters"
+			onclick={() => (filterOpen = !filterOpen)}
+		>Filter</ActionButton>
+		<ActionButton tone="quiet" onclick={() => (columnDialogOpen = true)}>Atur Kolom</ActionButton>
+		<ActionButton tone="quiet" onclick={exportNotifications}>Ekspor CSV</ActionButton>
+	</Stack>
+{/snippet}
 
-			<div class="toolbar">
-				<button class="button" type="button">Muat Ulang</button>
-				<button class:active={filterOpen} class="button" type="button" onclick={() => (filterOpen = !filterOpen)}>Filter</button>
-				<button class="button" type="button">Atur Kolom</button>
-				<button class="button" type="button" onclick={exportNotifications}>Export</button>
-			</div>
+<PageLayout contentWidth="1500px">
+	<Breadcrumbs items={[{ label: "Portal Saya", href: "/" }, { label: "Notifikasi Saya" }]} />
+	<PageHeading
+		eyebrow="Portal Saya"
+		title="Notifikasi Saya"
+		description="Lihat pemberitahuan sistem dan pembaruan dokumen perpajakan Anda."
+	/>
 
-			{#if filterOpen}
-				<div class="filter-row">
-					<label for="notification-filter">Cari notifikasi</label>
-					<input id="notification-filter" bind:value={query} placeholder="Pengirim atau subjek" />
-				</div>
-			{/if}
+	<Stack gap="18px">
+		{#if notice}
+			<InlineAlert
+				tone="success"
+				title="Informasi notifikasi"
+				message={notice}
+				dismissible
+				ondismiss={() => (notice = "")}
+			/>
+		{/if}
 
-			<div class="table-scroll">
-				<table>
-					<thead><tr><th>AKSI</th><th>PENGIRIM</th><th>SUBJEK</th><th>TANGGAL TERKIRIM</th><th>PRIORITAS</th></tr></thead>
-					<tbody>
-						{#each visibleNotifications as item}
-							<tr class:unread={!item.read}>
-								<td><a class="button view-link" href="/portal-saya/notifikasi-saya/{item.id}">Lihat</a></td>
-								<td>{item.sender}</td><td>{item.subject}</td><td>{item.sentAt}</td><td>{item.priority}</td>
-							</tr>
-						{:else}
-							<tr><td class="empty" colspan="5">Tidak ada notifikasi yang ditemukan.</td></tr>
-						{/each}
-					</tbody>
-				</table>
-			</div>
+		<FormSection title="Kotak Masuk" actions={inboxActions} bordered padded={false}>
+			<TabbedSection
+				tabs={[
+					{ label: `Semua (${notifications.length})`, value: "all" },
+					{ label: `Baca (${readCount})`, value: "read" },
+					{ label: `Belum dibaca (${unreadCount})`, value: "unread" },
+				]}
+				bind:active={activeTab}
+				ariaLabel="Status notifikasi"
+				onchange={() => (page = 1)}
+			>
+				{#snippet children()}
+					<Stack gap="0">
+						<div class="table-tools">{@render tableTools()}</div>
+						<CollapsiblePanel open={filterOpen} id="notification-filters" label="Filter notifikasi">
+							<ResponsiveGrid columns={2} gap="16px">
+								<FormField
+									label="Cari notifikasi"
+									bind:value={query}
+									placeholder="Pengirim atau subjek"
+									oninput={() => (page = 1)}
+								/>
+							</ResponsiveGrid>
+						</CollapsiblePanel>
+						<SummaryStrip
+							columns={3}
+							items={[
+								{ label: "Seluruh notifikasi", value: notifications.length },
+								{ label: "Belum dibaca", value: unreadCount },
+								{ label: "Hasil ditemukan", value: visibleNotifications.length },
+							]}
+						/>
+						<DataTableViewport label="Daftar notifikasi saya" minWidth="960px" framed={false} headerTone="navy" stickyFirstColumn>
+							<table>
+								<thead>
+									<tr>
+										<th scope="col">Aksi</th>
+										{#if visibleColumns.sender}<th scope="col">Pengirim</th>{/if}
+										{#if visibleColumns.subject}<th scope="col">Subjek</th>{/if}
+										{#if visibleColumns.sentAt}<th scope="col">Tanggal Terkirim</th>{/if}
+										{#if visibleColumns.priority}<th scope="col">Prioritas</th>{/if}
+									</tr>
+								</thead>
+								<tbody>
+									{#each pagedNotifications as item}
+										<tr class:unread={!item.read}>
+											<td class="action-cell"><TableActions visibleCount={1} actions={[{ label: "Lihat", ariaLabel: `Lihat ${item.subject}`, href: `/portal-saya/notifikasi-saya/${item.id}` }]} /></td>
+											{#if visibleColumns.sender}<td>{item.sender}</td>{/if}
+											{#if visibleColumns.subject}<td><strong>{item.subject}</strong></td>{/if}
+											{#if visibleColumns.sentAt}<td class="number">{item.sentAt}</td>{/if}
+											{#if visibleColumns.priority}<td><StatusBadge label={item.priority} tone={item.priority === "HIGH" ? "attention" : "neutral"} /></td>{/if}
+										</tr>
+									{:else}
+										<tr><td class="empty" colspan={visibleColumnCount}>Tidak ada notifikasi yang ditemukan.</td></tr>
+									{/each}
+								</tbody>
+							</table>
+						</DataTableViewport>
+						<PaginationBar bind:page bind:pageSize totalItems={visibleNotifications.length} itemLabel="notifikasi" />
+					</Stack>
+				{/snippet}
+			</TabbedSection>
+		</FormSection>
+	</Stack>
+</PageLayout>
 
-			<footer class="pagination"><button type="button" disabled>Sebelumnya</button><button class="current" type="button">1</button><button type="button" disabled>Berikutnya</button><select aria-label="Jumlah baris"><option>10</option><option>25</option><option>50</option></select></footer>
-		</div>
-	</section>
-</div>
+<InstitutionalModal bind:open={columnDialogOpen} eyebrow="PREFERENSI TABEL" title="Atur Kolom">
+	<Stack gap="8px">
+		{#each columnOptions as column}
+			<CheckboxField label={column.label} checked={visibleColumns[column.key]} compact onchange={(event) => (visibleColumns[column.key] = event.currentTarget.checked)} />
+		{/each}
+	</Stack>
+	{#snippet actions()}
+		<ActionButton tone="quiet" onclick={restoreColumns}>Tampilkan Semua</ActionButton>
+		<ActionButton onclick={() => (columnDialogOpen = false)}>Selesai</ActionButton>
+	{/snippet}
+</InstitutionalModal>
 
 <style>
-	.notification-page { width: 100%; min-height: calc(100vh - 3rem); padding: 6.25rem; color: var(--color-text); }
-	.card { overflow: hidden; border: 1px solid #a9a9a9; border-radius: 2px; background: #f3f4f6; }
-	.card-header { min-height: 4.25rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .5rem .75rem; border-bottom: 1px solid #a9a9a9; background: #e5e7eb; }
-	h1 { height: 2.5rem; display: flex; align-items: center; margin: 0; font-size: 1.5rem; font-weight: 400; }
-	.card-body { min-height: 25rem; padding: .75rem; }
-	.button { min-width: 5rem; padding: .5rem; border: 0; border-radius: 5px; background: var(--color-primary); color: var(--color-text); }
-	.view-link { display: inline-block; text-align: center; text-decoration: none; }
-	.button:hover { filter: brightness(.95); }
-	.button.secondary, .button.active { background: var(--color-secondary); color: #fff; }
-	.tabs { display: flex; gap: .25rem; border-bottom: 1px solid #a9a9a9; }
-	.tabs button { padding: .65rem 1rem; border: 0; border-bottom: 3px solid transparent; background: transparent; color: var(--color-text); }
-	.tabs button.active { border-bottom-color: var(--color-secondary); font-weight: 700; }
-	.toolbar { min-height: 4rem; display: flex; align-items: center; justify-content: flex-end; gap: .75rem; }
-	.filter-row { display: grid; grid-template-columns: auto minmax(15rem, 32rem); align-items: center; gap: 1rem; padding-bottom: .75rem; }
-	.filter-row label { font-weight: 700; }
-	.filter-row input, select { height: 2.5rem; border: 1px solid var(--color-input-secondary); border-radius: 5px; background: var(--color-input-primary); padding: .5rem; }
-	.table-scroll { overflow-x: auto; }
-	table { width: 100%; min-width: 65rem; border-collapse: collapse; table-layout: fixed; }
-	th, td { padding: .5rem 1rem; text-align: left; vertical-align: top; }
-	th:first-child { width: 8rem; } th:nth-child(2) { width: 13rem; } th:nth-child(4) { width: 14rem; } th:last-child { width: 9rem; }
-	tr.unread { background: rgb(255 210 48 / .13); font-weight: 700; }
-	tbody tr:hover { background: rgb(255 255 255 / .45); }
-	.empty { padding: 3rem; text-align: center; }
-	.pagination { min-height: 4rem; display: flex; align-items: center; justify-content: center; gap: 1rem; }
-	.pagination button { min-width: 2.5rem; height: 2.5rem; padding: 0 .5rem; border: 0; border-radius: 5px; background: transparent; }
-	.pagination .current { background: var(--color-secondary); color: #fff; }
-	.pagination select { width: 6rem; }
-	@media (max-width: 720px) { .notification-page { padding: 2rem; } .card-header { align-items: flex-start; flex-direction: column; } .toolbar { justify-content: flex-start; flex-wrap: wrap; } .filter-row { grid-template-columns: 1fr; } }
+	.table-tools { padding: 0 0 14px; display: flex; justify-content: flex-end; }
+	tr.unread td { background: #fff9e7; }
+	@media (max-width: 700px) { .table-tools { justify-content: flex-start; } }
 </style>

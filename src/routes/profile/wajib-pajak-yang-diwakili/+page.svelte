@@ -1,41 +1,261 @@
 <script lang="ts">
-	type Taxpayer = { npwp: string; name: string; type: string; authority: string; startDate: string; status: string };
+	import {
+		ActionButton,
+		Breadcrumbs,
+		CheckboxField,
+		CollapsiblePanel,
+		DataTableViewport,
+		FormField,
+		FormSection,
+		InlineAlert,
+		InstitutionalModal,
+		PageHeading,
+		PageLayout,
+		PaginationBar,
+		ResponsiveGrid,
+		SelectField,
+		Stack,
+		StatusBadge,
+		SummaryStrip,
+		TableActions,
+	} from "$lib/re-ui-components";
+
+	type Taxpayer = {
+		npwp: string;
+		name: string;
+		type: string;
+		authority: string;
+		startDate: string;
+		status: string;
+	};
+	type ColumnKey = keyof Taxpayer;
+
 	const taxpayers: Taxpayer[] = [
-		{ npwp: '00.000.000.0-000.010', name: 'PT Contoh Sentosa', type: 'Badan', authority: 'Pelaporan dan pembayaran', startDate: '10/02/2026', status: 'Aktif' },
-		{ npwp: '00.000.000.0-000.011', name: 'Usaha Demo Mandiri', type: 'Orang Pribadi', authority: 'Pelaporan', startDate: '20/05/2026', status: 'Aktif' }
+		{
+			npwp: "00.000.000.0-000.010",
+			name: "PT Contoh Sentosa",
+			type: "Badan",
+			authority: "Pelaporan dan pembayaran",
+			startDate: "10/02/2026",
+			status: "Aktif",
+		},
+		{
+			npwp: "00.000.000.0-000.011",
+			name: "Usaha Demo Mandiri",
+			type: "Orang Pribadi",
+			authority: "Pelaporan",
+			startDate: "20/05/2026",
+			status: "Aktif",
+		},
 	];
+	const columnOptions: { key: ColumnKey; label: string }[] = [
+		{ key: "npwp", label: "NPWP" },
+		{ key: "name", label: "Nama Wajib Pajak" },
+		{ key: "type", label: "Jenis Wajib Pajak" },
+		{ key: "authority", label: "Lingkup Kewenangan" },
+		{ key: "startDate", label: "Tanggal Mulai" },
+		{ key: "status", label: "Status" },
+	];
+
 	let filterOpen = $state(false);
-	let query = $state('');
-	let type = $state('');
+	let query = $state("");
+	let type = $state<string | number>("");
 	let historyOpen = $state(false);
-	const rows = $derived(taxpayers.filter((item) => (!query || `${item.npwp} ${item.name} ${item.authority}`.toLowerCase().includes(query.toLowerCase())) && (!type || item.type === type)));
+	let columnDialogOpen = $state(false);
+	let page = $state(1);
+	let pageSize = $state(10);
+	let notice = $state("");
+	let visibleColumns = $state<Record<ColumnKey, boolean>>({
+		npwp: true,
+		name: true,
+		type: true,
+		authority: true,
+		startDate: true,
+		status: true,
+	});
+
+	const rows = $derived(
+		taxpayers.filter(
+			(item) =>
+				(!query ||
+					`${item.npwp} ${item.name} ${item.authority}`
+						.toLocaleLowerCase("id-ID")
+						.includes(query.toLocaleLowerCase("id-ID"))) &&
+				(!type || item.type === type),
+		),
+	);
+	const pagedRows = $derived(rows.slice((page - 1) * pageSize, page * pageSize));
+	const visibleColumnCount = $derived(
+		1 + columnOptions.filter((column) => visibleColumns[column.key]).length,
+	);
+
+	function clearFilters() {
+		query = "";
+		type = "";
+		page = 1;
+	}
+
+	function reload() {
+		clearFilters();
+		notice = "Daftar wajib pajak telah dimuat ulang dari data lokal.";
+	}
+
+	function restoreColumns() {
+		for (const column of columnOptions) visibleColumns[column.key] = true;
+	}
+
+	function exportTaxpayers() {
+		const headings = columnOptions.map((column) => column.label);
+		const values = rows.map((item) => columnOptions.map((column) => item[column.key]));
+		const csv = [headings, ...values]
+			.map((row) => row.map((cell) => `"${cell.replaceAll('"', '""')}"`).join(","))
+			.join("\n");
+		const url = URL.createObjectURL(new Blob([csv], { type: "text/csv;charset=utf-8" }));
+		const link = document.createElement("a");
+		link.href = url;
+		link.download = "wajib-pajak-yang-diwakili.csv";
+		link.click();
+		URL.revokeObjectURL(url);
+	}
 </script>
 
 <svelte:head><title>Wajib Pajak yang Diwakili</title></svelte:head>
-<div class="page-shell">
-	<section class="card">
-		<header class="card-header"><div><h1>Wajib Pajak yang Diwakili</h1><p>Daftar wajib pajak yang memberikan akses perwakilan kepada akun ini.</p></div><button class="primary" type="button">Ajukan Perwakilan</button></header>
-		<div class="card-body">
-			<div class="toolbar"><button type="button">Muat Ulang</button><button class:active={filterOpen} type="button" onclick={() => (filterOpen = !filterOpen)}>Filter</button><button type="button">Atur Kolom</button><button type="button">Export</button><button type="button" onclick={() => (historyOpen = !historyOpen)}>{historyOpen ? 'Tutup Riwayat' : 'Riwayat'}</button></div>
-			{#if filterOpen}<div class="filters"><label>Cari<input bind:value={query} placeholder="NPWP, nama, atau kewenangan" /></label><label>Jenis Wajib Pajak<select bind:value={type}><option value="">Semua jenis</option><option>Badan</option><option>Orang Pribadi</option></select></label><button type="button" onclick={() => { query = ''; type = ''; }}>Hapus Filter</button></div>{/if}
-			{#if historyOpen}<div class="history"><strong>Riwayat akses</strong><span>Tidak ada perubahan akses dalam 30 hari terakhir.</span></div>{/if}
-			<div class="table-scroll"><table><thead><tr><th>NPWP</th><th>NAMA WAJIB PAJAK</th><th>JENIS WAJIB PAJAK</th><th>LINGKUP KEWENANGAN</th><th>TANGGAL MULAI</th><th>STATUS</th><th>AKSI</th></tr></thead><tbody>
-				{#each rows as item}<tr><td>{item.npwp}</td><td>{item.name}</td><td>{item.type}</td><td>{item.authority}</td><td>{item.startDate}</td><td><span class="status">{item.status}</span></td><td><button class="row-action" type="button">Pilih</button></td></tr>{:else}<tr><td class="empty" colspan="7"><strong>Tidak ada wajib pajak yang ditemukan.</strong><span>Ubah filter atau ajukan akses perwakilan baru.</span></td></tr>{/each}
-			</tbody></table></div>
-			<footer class="pagination"><span>Menampilkan {rows.length ? `1–${rows.length} dari ${rows.length}` : '0–0 dari 0'}</span><div><button disabled type="button">Sebelumnya</button><button class="current" type="button">1</button><button disabled type="button">Berikutnya</button><select aria-label="Jumlah baris"><option>10</option><option>25</option></select></div></footer>
-		</div>
-	</section>
-</div>
+
+{#snippet pageActions()}
+	<ActionButton
+		tone="secondary"
+		onclick={() => (notice = "Pengajuan perwakilan baru tersedia sebagai simulasi lokal.")}
+	>
+		Ajukan Perwakilan
+	</ActionButton>
+{/snippet}
+
+{#snippet tableTools()}
+	<Stack direction="horizontal" gap="7px" align="center" wrap>
+		<ActionButton tone="quiet" onclick={reload}>Muat Ulang</ActionButton>
+		<ActionButton
+			tone={filterOpen ? "secondary" : "quiet"}
+			aria-expanded={filterOpen}
+			aria-controls="represented-taxpayer-filters"
+			onclick={() => (filterOpen = !filterOpen)}
+		>Filter</ActionButton>
+		<ActionButton tone="quiet" onclick={() => (columnDialogOpen = true)}>Atur Kolom</ActionButton>
+		<ActionButton tone="quiet" onclick={exportTaxpayers}>Ekspor CSV</ActionButton>
+		<ActionButton tone={historyOpen ? "secondary" : "quiet"} onclick={() => (historyOpen = !historyOpen)}>
+			{historyOpen ? "Tutup Riwayat" : "Riwayat"}
+		</ActionButton>
+	</Stack>
+{/snippet}
+
+<PageLayout contentWidth="1500px">
+	<Breadcrumbs
+		items={[
+			{ label: "Profil Saya", href: "/profile" },
+			{ label: "Wajib Pajak yang Diwakili" },
+		]}
+	/>
+	<PageHeading
+		eyebrow="Profil Saya"
+		title="Wajib Pajak yang Diwakili"
+		description="Daftar wajib pajak yang memberikan akses perwakilan kepada akun ini."
+		actions={pageActions}
+	/>
+
+	<Stack gap="18px">
+		{#if notice}
+			<InlineAlert
+				tone="info"
+				title="Informasi perwakilan"
+				message={notice}
+				dismissible
+				ondismiss={() => (notice = "")}
+			/>
+		{/if}
+		{#if historyOpen}
+			<InlineAlert
+				tone="info"
+				title="Riwayat akses"
+				message="Tidak ada perubahan akses dalam 30 hari terakhir."
+			/>
+		{/if}
+
+		<FormSection title="Daftar Wajib Pajak" actions={tableTools} bordered padded={false}>
+			<CollapsiblePanel open={filterOpen} id="represented-taxpayer-filters" label="Filter wajib pajak">
+				<ResponsiveGrid columns={3} gap="16px">
+					<FormField
+						label="Cari"
+						bind:value={query}
+						placeholder="NPWP, nama, atau kewenangan"
+						oninput={() => (page = 1)}
+					/>
+					<SelectField
+						label="Jenis Wajib Pajak"
+						bind:value={type}
+						options={[
+							{ value: "", label: "Semua jenis" },
+							{ value: "Badan", label: "Badan" },
+							{ value: "Orang Pribadi", label: "Orang Pribadi" },
+						]}
+						onchange={() => (page = 1)}
+					/>
+					<div class="filter-action"><ActionButton tone="quiet" onclick={clearFilters}>Hapus Filter</ActionButton></div>
+				</ResponsiveGrid>
+			</CollapsiblePanel>
+
+			<SummaryStrip
+				columns={3}
+				items={[
+					{ label: "Seluruh wajib pajak", value: taxpayers.length },
+					{ label: "Status aktif", value: taxpayers.filter((item) => item.status === "Aktif").length },
+					{ label: "Hasil ditemukan", value: rows.length },
+				]}
+			/>
+
+			<DataTableViewport label="Wajib pajak yang diwakili" minWidth="1120px" framed={false} headerTone="navy">
+				<table>
+					<thead><tr>
+						{#if visibleColumns.npwp}<th scope="col">NPWP</th>{/if}
+						{#if visibleColumns.name}<th scope="col">Nama Wajib Pajak</th>{/if}
+						{#if visibleColumns.type}<th scope="col">Jenis Wajib Pajak</th>{/if}
+						{#if visibleColumns.authority}<th scope="col">Lingkup Kewenangan</th>{/if}
+						{#if visibleColumns.startDate}<th scope="col">Tanggal Mulai</th>{/if}
+						{#if visibleColumns.status}<th scope="col">Status</th>{/if}
+						<th scope="col">Aksi</th>
+					</tr></thead>
+					<tbody>
+						{#each pagedRows as item}
+							<tr>
+								{#if visibleColumns.npwp}<td><code>{item.npwp}</code></td>{/if}
+								{#if visibleColumns.name}<td><strong>{item.name}</strong></td>{/if}
+								{#if visibleColumns.type}<td>{item.type}</td>{/if}
+								{#if visibleColumns.authority}<td>{item.authority}</td>{/if}
+								{#if visibleColumns.startDate}<td class="number">{item.startDate}</td>{/if}
+								{#if visibleColumns.status}<td><StatusBadge label={item.status} tone="success" /></td>{/if}
+								<td class="action-cell"><TableActions visibleCount={1} actions={[{ label: "Pilih", ariaLabel: `Pilih ${item.name}`, onclick: () => (notice = `${item.name} dipilih sebagai wajib pajak yang diwakili.`) }]} /></td>
+							</tr>
+						{:else}
+							<tr><td class="empty" colspan={visibleColumnCount}><strong>Tidak ada wajib pajak yang ditemukan.</strong><br />Ubah filter atau ajukan akses perwakilan baru.</td></tr>
+						{/each}
+					</tbody>
+				</table>
+			</DataTableViewport>
+			<PaginationBar bind:page bind:pageSize totalItems={rows.length} pageSizeOptions={[10, 25]} itemLabel="wajib pajak" />
+		</FormSection>
+	</Stack>
+</PageLayout>
+
+<InstitutionalModal bind:open={columnDialogOpen} eyebrow="PREFERENSI TABEL" title="Atur Kolom">
+	<Stack gap="8px">
+		{#each columnOptions as column}
+			<CheckboxField label={column.label} checked={visibleColumns[column.key]} compact onchange={(event) => (visibleColumns[column.key] = event.currentTarget.checked)} />
+		{/each}
+	</Stack>
+	{#snippet actions()}
+		<ActionButton tone="quiet" onclick={restoreColumns}>Tampilkan Semua</ActionButton>
+		<ActionButton onclick={() => (columnDialogOpen = false)}>Selesai</ActionButton>
+	{/snippet}
+</InstitutionalModal>
 
 <style>
-	.page-shell { width: 100%; min-height: calc(100vh - 3rem); padding: 6.25rem; color: var(--color-text); } .card { overflow: hidden; border: 1px solid #a9a9a9; border-radius: 2px; background: #f3f4f6; }
-	.card-header { min-height: 4.25rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .65rem .75rem; border-bottom: 1px solid #a9a9a9; background: #e5e7eb; } h1 { margin: 0; font-size: 1.5rem; font-weight: 400; } .card-header p { margin: .2rem 0 0; color: #4b5563; font-size: .88rem; }
-	.card-body { min-height: 25rem; padding: .75rem; } button { min-height: 2.5rem; min-width: 5rem; padding: .45rem .7rem; border: 0; border-radius: 5px; background: var(--color-primary); color: var(--color-text); } button:hover:not(:disabled) { filter: brightness(.95); } button.primary, button.active, button.current { background: var(--color-secondary); color: #fff; }
-	.toolbar { min-height: 3.75rem; display: flex; justify-content: flex-end; align-items: center; gap: .6rem; flex-wrap: wrap; } .filters { display: grid; grid-template-columns: minmax(15rem, 2fr) minmax(11rem, 1fr) auto; align-items: end; gap: .75rem; padding: .75rem; border: 1px solid #b8b8b8; background: #e5e7eb; }
-	label { display: flex; flex-direction: column; gap: .3rem; font-size: .82rem; font-weight: 700; } input, select { width: 100%; height: 2.5rem; border: 1px solid var(--color-input-secondary); border-radius: 5px; background: var(--color-input-primary); padding: .45rem .55rem; color: var(--color-text); }
-	.history { display: flex; gap: 1rem; margin-top: .75rem; padding: .75rem; border-left: 3px solid #858585; background: #e5e7eb; } .history span { color: #4b5563; }
-	.table-scroll { margin-top: .75rem; overflow-x: auto; } table { width: 100%; min-width: 76rem; border-collapse: collapse; } th, td { padding: .65rem .8rem; border-bottom: 1px solid #d1d5db; text-align: left; vertical-align: middle; } th { font-size: .78rem; white-space: nowrap; } tbody tr:hover { background: rgb(255 255 255 / .5); }
-	.status { display: inline-block; padding: .2rem .55rem; border: 1px solid #868686; border-radius: 1rem; background: #e5e7eb; font-size: .78rem; } .row-action { min-height: 2rem; padding: .25rem .55rem; } .empty { height: 9rem; text-align: center; } .empty strong, .empty span { display: block; } .empty span { margin-top: .35rem; color: #6b7280; font-weight: 400; }
-	.pagination { min-height: 4rem; display: flex; justify-content: space-between; align-items: center; gap: 1rem; color: #4b5563; font-size: .85rem; } .pagination div { display: flex; align-items: center; gap: .5rem; } .pagination select { width: 5rem; } .pagination button:disabled { opacity: .45; }
-	@media (max-width: 720px) { .page-shell { padding: 2rem; } .card-header { align-items: flex-start; flex-direction: column; } .toolbar { justify-content: flex-start; } .filters { grid-template-columns: 1fr; } .pagination { align-items: flex-start; flex-direction: column; padding-top: 1rem; } }
+	.filter-action { display: flex; align-items: flex-end; }
 </style>

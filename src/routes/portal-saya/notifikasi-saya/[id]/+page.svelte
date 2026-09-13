@@ -1,52 +1,90 @@
 <script lang="ts">
-	import { page } from '$app/state';
-	import { notificationData } from '../notifications';
+	import { page } from "$app/state";
+	import {
+		Breadcrumbs,
+		FormSection,
+		InlineAlert,
+		KeyValueGrid,
+		PageHeading,
+		PageLayout,
+		Stack,
+		StatusBadge,
+		TableActions,
+		TextBlock,
+	} from "$lib/re-ui-components";
+	import { notificationData } from "../notifications";
 
-	const notification = $derived(notificationData.find((item) => item.id === Number(page.params.id)));
+	const notification = $derived(
+		notificationData.find((item) => item.id === Number(page.params.id)),
+	);
 </script>
 
 <svelte:head><title>Detail Pesan</title></svelte:head>
 
-<div class="detail-page">
-	<section class="card">
-		<header class="card-header"><h1>Detail Pesan</h1></header>
-		<div class="card-body">
-			{#if notification}
-				<div class="field">
-					<label for="sender">Pengirim</label>
-					<input id="sender" value={notification.sender} disabled />
+{#snippet pageActions()}
+	<TableActions
+		visibleCount={1}
+		actions={[
+			{
+				label: "Kembali ke Notifikasi",
+				href: "/portal-saya/notifikasi-saya",
+			},
+		]}
+	/>
+{/snippet}
+
+<PageLayout contentWidth="1200px">
+	<Breadcrumbs
+		items={[
+			{ label: "Portal Saya", href: "/" },
+			{ label: "Notifikasi Saya", href: "/portal-saya/notifikasi-saya" },
+			{ label: "Detail Pesan" },
+		]}
+	/>
+	<PageHeading
+		eyebrow="Portal Saya"
+		title="Detail Pesan"
+		description="Rincian pemberitahuan yang diterima pada akun Anda."
+		actions={pageActions}
+	/>
+
+	{#if notification}
+		<FormSection title="Informasi Pesan" bordered>
+			<Stack gap="18px">
+				<KeyValueGrid
+					columns={2}
+					items={[
+						{ label: "Pengirim", value: notification.sender },
+						{ label: "Tanggal terkirim", value: notification.sentAt },
+						{ label: "Subjek", value: notification.subject },
+						{ label: "Status", value: notification.read ? "Telah dibaca" : "Belum dibaca" },
+					]}
+				/>
+				<div class="priority-row">
+					<span>Prioritas</span>
+					<StatusBadge
+						label={notification.priority}
+						tone={notification.priority === "HIGH" ? "attention" : "neutral"}
+					/>
 				</div>
-				<div class="field">
-					<label for="subject">Subjek</label>
-					<input id="subject" value={notification.subject} disabled />
-				</div>
-				<div class="field">
-					<label for="content">Isi</label>
-					<div id="content" class="message-content">{notification.content}</div>
-				</div>
-				<div class="actions"><a href="/portal-saya/notifikasi-saya">Pergi ke notifikasi</a></div>
-			{:else}
-				<p>Notifikasi tidak ditemukan.</p>
-				<div class="actions"><a href="/portal-saya/notifikasi-saya">Kembali</a></div>
-			{/if}
-		</div>
-	</section>
-</div>
+				<section class="message-content" aria-labelledby="message-content-heading">
+					<h2 id="message-content-heading">Isi pesan</h2>
+					<TextBlock>{notification.content}</TextBlock>
+				</section>
+			</Stack>
+		</FormSection>
+	{:else}
+		<InlineAlert
+			tone="warning"
+			title="Notifikasi tidak ditemukan"
+			message="Pesan yang Anda cari tidak tersedia pada data lokal."
+		/>
+	{/if}
+</PageLayout>
 
 <style>
-	.detail-page { width: 100%; min-height: calc(100vh - 3rem); padding: 6.25rem; color: var(--color-text); }
-	.card { overflow: hidden; border: 1px solid #a9a9a9; border-radius: 2px; background: #f3f4f6; }
-	.card-header { min-height: 4.25rem; display: flex; align-items: center; padding: .5rem .75rem; border-bottom: 1px solid #a9a9a9; background: #e5e7eb; }
-	h1 { height: 2.5rem; display: flex; align-items: center; margin: 0; font-size: 1.5rem; font-weight: 400; }
-	.card-body { min-height: 25rem; padding: 1.5rem; }
-	.field { display: grid; grid-template-columns: 12rem minmax(0, 1fr); align-items: start; gap: 1rem; margin-bottom: 1rem; }
-	label { padding-top: .6rem; font-weight: 700; }
-	input, .message-content { width: 100%; border: 1px solid var(--color-input-secondary); border-radius: 5px; background: var(--color-input-primary); padding: .6rem .75rem; color: var(--color-text); }
-	input { height: 2.75rem; }
-	input:disabled { background: var(--color-disabled); opacity: 1; }
-	.message-content { min-height: 12rem; white-space: pre-wrap; }
-	.actions { display: flex; justify-content: flex-end; margin-top: 1.5rem; }
-	.actions a { min-width: 10rem; padding: .6rem .75rem; border-radius: 5px; background: var(--color-primary); color: var(--color-text); text-align: center; text-decoration: none; }
-	.actions a:hover { filter: brightness(.95); }
-	@media (max-width: 720px) { .detail-page { padding: 2rem; } .field { grid-template-columns: 1fr; gap: .25rem; } label { padding-top: 0; } }
+	.priority-row { display: flex; align-items: center; gap: 12px; }
+	.priority-row > span { color: var(--ui-muted); font-size: 10px; font-weight: 800; letter-spacing: .07em; text-transform: uppercase; }
+	.message-content { min-height: 180px; padding: 20px; border: 1px solid var(--ui-line); background: #fffefa; }
+	.message-content h2 { margin: 0 0 12px; color: var(--ui-navy); font-family: var(--ui-font-display); font-size: 15px; }
 </style>

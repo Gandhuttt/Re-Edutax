@@ -5,6 +5,7 @@
 	import '../app.css';
 	import '../app.scss';
 	import Header from './Header.svelte';
+	import ReUiAppShell from './ReUiAppShell.svelte';
 	import type { LayoutProps } from './$types';
 	import { dismissBsModalsForNavigation } from '$lib/helpers/bsModal';
 
@@ -40,7 +41,9 @@
 	</div>
 {:else if usesReUiShell}
 	<div class="re-ui-canvas">
-		{@render children()}
+		<ReUiAppShell user={data.user}>
+			{@render children()}
+		</ReUiAppShell>
 	</div>
 {:else}
 	<div class="app">
