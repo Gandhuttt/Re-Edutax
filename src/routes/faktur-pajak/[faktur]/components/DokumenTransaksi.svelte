@@ -9,7 +9,7 @@
 		SelectField,
 		Stack
 	} from '$lib/re-ui-components';
-	import { updateFaktur } from '../updateFaktur.remote';
+	import type { UpdateFakturFields } from '../updateFaktur.remote';
 	import { untrack } from 'svelte';
 
 	type TransactionCodeOption = { id: string; key: number; value: string };
@@ -24,7 +24,7 @@
 	let {
 		canEdit, uangMuka, pelunasan, nomorFaktur, kodeTransaksi, tanggalFaktur,
 		jenisFaktur, referensi, alamat, idtku, informasiTambahan, dokumenPendukung,
-		transactionCodeOptions, additionalInfoOptions
+		transactionCodeOptions, additionalInfoOptions, formFields
 	}: {
 		canEdit: boolean;
 		uangMuka: boolean;
@@ -40,9 +40,9 @@
 		dokumenPendukung: string | undefined;
 		transactionCodeOptions: TransactionCodeOption[];
 		additionalInfoOptions: AdditionalInfoOption[];
+		formFields: UpdateFakturFields['dokumenTransaksi'];
 	} = $props();
 
-	const formFields = updateFaktur.fields.dokumenTransaksi;
 	let kodeTransaksiState = $state<number>(untrack(() => kodeTransaksi));
 	let informasiTambahanState = $state<number | string>(
 		untrack(() => informasiTambahan ?? '')

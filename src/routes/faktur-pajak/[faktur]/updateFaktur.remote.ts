@@ -242,3 +242,5 @@ export const updateFaktur = form(UpdateFakturSchema, async (input, issue) => {
 
 	redirect(303, '/faktur-pajak/keluaran');
 });
+
+export type UpdateFakturFields = typeof updateFaktur.fields;

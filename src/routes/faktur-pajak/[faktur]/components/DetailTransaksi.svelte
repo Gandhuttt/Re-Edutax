@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { DataTableBody, DataTableViewport, TableActions } from '$lib/re-ui-components';
-	import { updateFaktur } from '../updateFaktur.remote';
+	import type { UpdateFakturFields } from '../updateFaktur.remote';
 
 	type FakturTransaksi = {
 		id: string;
@@ -24,12 +24,14 @@
 		requestDelete,
 		requestEdit,
 		values,
-		canEdit
+		canEdit,
+		transactionFields
 	}: {
 		requestEdit: (index: number) => void;
 		requestDelete: (index: number) => void;
 		values: FakturTransaksi[];
 		canEdit: boolean;
+		transactionFields: UpdateFakturFields['transaksi'];
 	} = $props();
 
 	const number = new Intl.NumberFormat('id-ID', { maximumFractionDigits: 2 });
@@ -70,7 +72,7 @@
 			emptyText="Belum ada transaksi pada faktur ini."
 		>
 			{#snippet row(value, index)}
-				{@const transaksiFields = updateFaktur.fields.transaksi[index]}
+				{@const transaksiFields = transactionFields[index]}
 				{@const hargaTotal = value.kuantitas * value.hargaSatuan}
 				{@const dpp = hargaTotal - value.hargaPotongan}
 				{@const ppn = ((value.dppNilaiLain > 0 ? value.dppNilaiLain : dpp) * value.tarifPPN) / 100}

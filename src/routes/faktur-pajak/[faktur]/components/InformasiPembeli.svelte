@@ -1,17 +1,18 @@
 <script lang="ts">
 	import { FieldGrid, FormField, LookupField, RadioGroup, Stack } from '$lib/re-ui-components';
 	import { getWajibPajak } from '../../../getWajibPajak.remote';
-	import { updateFaktur } from '../updateFaktur.remote';
+	import type { UpdateFakturFields } from '../updateFaktur.remote';
 
 	let {
 		canEdit,
-		npwpPembeli = $bindable('')
+		npwpPembeli = $bindable(''),
+		formFields
 	}: {
 		canEdit: boolean;
 		npwpPembeli: string;
+		formFields: UpdateFakturFields['informasiPembeli'];
 	} = $props();
 
-	const formFields = updateFaktur.fields.informasiPembeli;
 	let wpPembeli = $state(await getWajibPajak({ npwp: npwpPembeli }));
 
 	async function lookupBuyer() {

@@ -22,6 +22,7 @@
 	import { updateFaktur } from './updateFaktur.remote';
 
 	const faktur = await getFaktur();
+	const updateFakturForm = updateFaktur.for(faktur.id);
 	const [transactionCodeOptions, additionalInfoOptions, itemCodeOptions, unitOptions] =
 		await Promise.all([
 			getKodeTransaksiFaktur(),
@@ -85,7 +86,7 @@
 <svelte:head><title>{documentKind}</title></svelte:head>
 
 {#snippet formSummary()}
-	<FormIssueSummary source={updateFaktur.fields} />
+	<FormIssueSummary source={updateFakturForm.fields} />
 {/snippet}
 
 {#snippet documentFields()}
@@ -104,11 +105,16 @@
 		dokumenPendukung={faktur.extradata?.dokumenPendukung}
 		{transactionCodeOptions}
 		{additionalInfoOptions}
+		formFields={updateFakturForm.fields.dokumenTransaksi}
 	/>
 {/snippet}
 
 {#snippet buyerFields()}
-	<InformasiPembeli canEdit={faktur.canEdit} npwpPembeli={faktur.npwpPembeli} />
+	<InformasiPembeli
+		canEdit={faktur.canEdit}
+		npwpPembeli={faktur.npwpPembeli}
+		formFields={updateFakturForm.fields.informasiPembeli}
+	/>
 {/snippet}
 
 {#snippet ledgerActions()}
@@ -123,6 +129,7 @@
 		values={transaksi}
 		requestEdit={editTransaction}
 		requestDelete={(index) => transaksi.splice(index, 1)}
+		transactionFields={updateFakturForm.fields.transaksi}
 	/>
 {/snippet}
 
@@ -170,7 +177,7 @@
 			]}
 		>
 			<DocumentForm
-				remote={faktur.canEdit ? updateFaktur : undefined}
+				remote={faktur.canEdit ? updateFakturForm : undefined}
 				eyebrow={faktur.nomorFaktur ? `Nomor ${faktur.nomorFaktur}` : 'Dokumen belum diterbitkan'}
 				title={documentKind}
 				status={documentStatus}
