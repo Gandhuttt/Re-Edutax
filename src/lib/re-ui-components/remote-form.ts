@@ -1,16 +1,66 @@
 import type {
-	RemoteForm,
 	RemoteFormField,
 	RemoteFormFieldValue,
 	RemoteFormIssue,
 } from "@sveltejs/kit";
+import { isHttpError } from "@sveltejs/kit";
 
 export type ReUiRemoteField<
 	Value extends RemoteFormFieldValue = RemoteFormFieldValue,
 > = RemoteFormField<Value>;
 
-/** Accepts both a root remote form and an instance returned by `form.for(id)`. */
-export type ReUiRemoteForm = Omit<RemoteForm<any, any>, "for">;
+export type ReUiRemoteFormEnhanceInstance = {
+	readonly element: HTMLFormElement;
+	submit(): Promise<boolean>;
+};
+
+/** The form element attributes and pending state shared by root and `.for(id)` remote forms. */
+export type ReUiRemoteForm = {
+	method: "POST";
+	action: string;
+	readonly pending: number;
+	enhance(
+		callback: (
+			form: ReUiRemoteFormEnhanceInstance,
+		) => void | PromiseLike<void>,
+	): {
+		method: "POST";
+		action: string;
+		[attachment: symbol]: (node: HTMLFormElement) => void;
+	};
+	[attachment: symbol]: (node: HTMLFormElement) => void;
+};
+
+export type ReUiRemoteFailure = {
+	message: string;
+	status?: number;
+	referenceId?: string;
+};
+
+const defaultFailureMessage =
+	"Layanan sedang mengalami gangguan. Coba simpan kembali beberapa saat lagi.";
+
+/** Converts a rejected remote submission into safe, displayable form feedback. */
+export function remoteFailureFrom(
+	cause: unknown,
+	fallbackMessage = defaultFailureMessage,
+): ReUiRemoteFailure {
+	if (!isHttpError(cause)) return { message: fallbackMessage };
+
+	const body = cause.body as App.Error;
+	const referenceId =
+		typeof body.referenceId === "string" ? body.referenceId : undefined;
+	return {
+		message:
+			cause.status < 500 &&
+			typeof body.message === "string" &&
+			body.message.trim()
+				? body.message
+				: fallbackMessage,
+		status: cause.status,
+		referenceId,
+	};
+}
 
 export function firstRemoteIssue(
 	field?: ReUiRemoteField<any>,

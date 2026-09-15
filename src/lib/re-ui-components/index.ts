@@ -1,4 +1,5 @@
 export { default as ActionButton } from "./ActionButton.svelte";
+export { default as ActionMenu } from "./ActionMenu.svelte";
 export { default as ActionShowcase } from "./ActionShowcase.svelte";
 export { default as AnnouncementBar } from "./AnnouncementBar.svelte";
 export { default as AppHeader } from "./AppHeader.svelte";
@@ -9,6 +10,8 @@ export { default as ConditionalField } from "./ConditionalField.svelte";
 export { default as ContentSection } from "./ContentSection.svelte";
 export { default as DataTableViewport } from "./DataTableViewport.svelte";
 export { default as DataTable } from "./DataTableViewport.svelte";
+export { default as DataTableBody } from "./DataTableBody.svelte";
+export { default as DataWorkspace } from "./DataWorkspace.svelte";
 export { default as DateField } from "./DateField.svelte";
 export { default as DisclosureItem } from "./DisclosureItem.svelte";
 export { default as DocumentTabs } from "./DocumentTabs.svelte";
@@ -40,23 +43,29 @@ export { default as ReUiRoot } from "./ReUiRoot.svelte";
 export { default as ResponsiveGrid } from "./ResponsiveGrid.svelte";
 export { default as RupiahField } from "./RupiahField.svelte";
 export { default as SectionHeading } from "./SectionHeading.svelte";
+export { default as ServiceWorkspace } from "./ServiceWorkspace.svelte";
 export { default as SelectField } from "./SelectField.svelte";
 export { default as SideHintField } from "./SideHintField.svelte";
 export { default as Stack } from "./Stack.svelte";
 export { default as StatusBadge } from "./StatusBadge.svelte";
 export { default as SummaryStrip } from "./SummaryStrip.svelte";
 export { default as TableActions } from "./TableActions.svelte";
+export { default as TableFilterField } from "./TableFilterField.svelte";
 export { default as TabbedSection } from "./TabbedSection.svelte";
 export { default as TextAreaField } from "./TextAreaField.svelte";
 export { default as TextBlock } from "./TextBlock.svelte";
 
 export type { ActionButtonProps, ActionButtonTone } from "./ActionButton.svelte";
+export type { ActionMenuItem, ActionMenuProps, ActionMenuTone } from "./ActionMenu.svelte";
 export type { ActionShowcaseGroup } from "./ActionShowcase.svelte";
 export type { BreadcrumbItem, BreadcrumbsProps } from "./Breadcrumbs.svelte";
 export type { CheckboxFieldProps } from "./CheckboxField.svelte";
 export type { CollapsiblePanelProps } from "./CollapsiblePanel.svelte";
 export type { ConditionalFieldProps } from "./ConditionalField.svelte";
 export type { ContentSectionProps } from "./ContentSection.svelte";
+export type { DataTableViewportProps } from "./DataTableViewport.svelte";
+export type { DataTableBodyProps } from "./DataTableBody.svelte";
+export type { DataWorkspaceProps } from "./DataWorkspace.svelte";
 export type { DateFieldProps } from "./DateField.svelte";
 export type { DocumentTab } from "./DocumentTabs.svelte";
 export type {
@@ -102,7 +111,13 @@ export type {
 	ProfileMenuProps,
 } from "./ProfileMenu.svelte";
 export type { RadioGroupOption, RadioGroupProps } from "./RadioGroup.svelte";
-export type { ReUiRemoteField, ReUiRemoteForm } from "./remote-form";
+export type {
+	ReUiRemoteFailure,
+	ReUiRemoteField,
+	ReUiRemoteForm,
+	ReUiRemoteFormEnhanceInstance,
+} from "./remote-form";
+export { remoteFailureFrom } from "./remote-form";
 export type { RupiahFieldProps } from "./RupiahField.svelte";
 export type {
 	SelectFieldOption,
@@ -110,10 +125,17 @@ export type {
 	SelectFieldValue,
 } from "./SelectField.svelte";
 export type { SectionHeadingProps } from "./SectionHeading.svelte";
+export type {
+	ServiceWorkspaceGroup,
+	ServiceWorkspaceIdentity,
+	ServiceWorkspaceLink,
+	ServiceWorkspaceProps,
+} from "./ServiceWorkspace.svelte";
 export type { StackAlignment, StackDirection } from "./Stack.svelte";
 export type { StatusBadgeProps, StatusBadgeTone } from "./StatusBadge.svelte";
 export type { SummaryStripItem, SummaryStripProps } from "./SummaryStrip.svelte";
 export type { TableAction, TableActionsProps } from "./TableActions.svelte";
+export type { TableFilterFieldProps } from "./TableFilterField.svelte";
 export type {
 	TabbedSectionProps,
 	TabbedSectionTab,

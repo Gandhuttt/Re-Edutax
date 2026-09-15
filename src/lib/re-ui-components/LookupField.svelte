@@ -7,6 +7,7 @@
 		value?: string;
 		field?: ReUiRemoteField<string>;
 		buttonLabel?: string;
+		buttonVisible?: boolean;
 		hint?: string;
 		error?: string;
 		onlookup?: () => void;
@@ -24,6 +25,7 @@
 		value = $bindable(""),
 		field,
 		buttonLabel = "Cari",
+		buttonVisible = true,
 		hint = "",
 		error,
 		onlookup,
@@ -55,7 +57,7 @@
 	}
 </script>
 
-<label class="lookup-field {className ?? ""}" for={id}>
+<label class="lookup-field {className ?? ""}" class:without-button={!buttonVisible} for={id}>
 	<span>{label}</span>
 	<div>
 		<input
@@ -67,7 +69,7 @@
 			aria-describedby={resolvedError || hint ? messageId : undefined}
 			oninput={handleInput}
 		/>
-		<button type="button" onclick={onlookup}>{buttonLabel}</button>
+		{#if buttonVisible}<button type="button" onclick={onlookup}>{buttonLabel}</button>{/if}
 	</div>
 	{#if resolvedError}
 		<small class="message" id={messageId} role="alert">{resolvedError}</small>
@@ -108,6 +110,10 @@
 	input:focus {
 		border-color: var(--ui-navy);
 		outline: 3px solid var(--ui-yellow-soft);
+	}
+
+	.without-button input {
+		border-radius: 3px;
 	}
 
 	button {

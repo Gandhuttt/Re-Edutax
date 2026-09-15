@@ -11,6 +11,7 @@
 		closeLabel?: string;
 		size?: InstitutionalModalSize;
 		scrollable?: boolean;
+		onafterclose?: () => void;
 		children: Snippet;
 		actions?: Snippet;
 	} & Omit<
@@ -27,6 +28,7 @@
 		closeLabel = "Tutup dialog",
 		size = "regular",
 		scrollable = false,
+		onafterclose,
 		children,
 		actions,
 		class: className,
@@ -77,6 +79,7 @@
 	onclose={() => {
 		open = false;
 		closing = false;
+		onafterclose?.();
 	}}
 	oncancel={(event) => {
 		event.preventDefault();

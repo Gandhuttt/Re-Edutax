@@ -20,7 +20,7 @@
 </script>
 
 <script lang="ts">
-	import { onDestroy, tick } from "svelte";
+	import { onDestroy, onMount, tick } from "svelte";
 
 	let {
 		actions = [],
@@ -32,20 +32,69 @@
 
 	let root = $state<HTMLDivElement>();
 	let trigger = $state<HTMLButtonElement>();
+	let menu = $state<HTMLDivElement>();
 	let open = $state(false);
 	let closing = $state(false);
 	let closeTimer: ReturnType<typeof setTimeout> | undefined;
+	let menuTop = $state(0);
+	let menuLeft = $state(0);
 	const splitAt = $derived(Math.max(0, Math.min(visibleCount, actions.length)));
 	const visibleActions = $derived(actions.slice(0, splitAt));
 	const overflowActions = $derived(actions.slice(splitAt));
 	const expanded = $derived(open && !closing);
 
+	function fixedContainingBlockOrigin() {
+		let current = trigger?.parentElement;
+		while (current) {
+			const style = getComputedStyle(current);
+			if (
+				style.transform !== "none" ||
+				style.perspective !== "none" ||
+				style.filter !== "none" ||
+				style.contain !== "none" ||
+				style.willChange.includes("transform")
+			) {
+				const rect = current.getBoundingClientRect();
+				return { left: rect.left, top: rect.top };
+			}
+			current = current.parentElement;
+		}
+		return { left: 0, top: 0 };
+	}
+
+	function positionMenu() {
+		if (!trigger) return;
+		const margin = 8;
+		const gap = 5;
+		const triggerRect = trigger.getBoundingClientRect();
+		const menuWidth = menu?.offsetWidth || 148;
+		const menuHeight = menu?.offsetHeight || 90;
+		const spaceBelow = window.innerHeight - triggerRect.bottom - margin;
+		const spaceAbove = triggerRect.top - margin;
+		const opensAbove = spaceBelow < menuHeight && spaceAbove > spaceBelow;
+		const origin = fixedContainingBlockOrigin();
+		const viewportLeft = Math.min(
+			Math.max(margin, triggerRect.right - menuWidth),
+			window.innerWidth - menuWidth - margin,
+		);
+		const viewportTop = opensAbove
+			? Math.max(margin, triggerRect.top - menuHeight - gap)
+			: Math.min(
+					triggerRect.bottom + gap,
+					window.innerHeight - menuHeight - margin,
+				);
+
+		menuLeft = viewportLeft - origin.left;
+		menuTop = viewportTop - origin.top;
+	}
+
 	async function openMenu(focusFirst = false) {
 		clearTimeout(closeTimer);
 		closing = false;
 		open = true;
+		await tick();
+		positionMenu();
 		if (focusFirst) {
-			await tick();
 			menuItems()[0]?.focus();
 		}
 	}
@@ -124,6 +173,14 @@
 		if (expanded && root && !root.contains(event.target as Node)) closeMenu();
 	}
 
+	function handleDocumentScroll(event: Event) {
+		if (expanded && root && !root.contains(event.target as Node)) positionMenu();
+	}
+
+	onMount(() => {
+		document.addEventListener("scroll", handleDocumentScroll, true);
+		return () => document.removeEventListener("scroll", handleDocumentScroll, true);
+	});
 	onDestroy(() => clearTimeout(closeTimer));
 </script>
 
@@ -131,6 +188,9 @@
 	onclick={handleOutsideClick}
 	onkeydown={handleWindowKeydown}
 	onfocusin={handleWindowFocus}
+	onresize={() => {
+		if (expanded) positionMenu();
+	}}
 />
 
 <div class="table-actions" bind:this={root} role="group" aria-label={ariaLabel}>
@@ -171,7 +231,16 @@
 				{moreLabel}<span aria-hidden="true">⌄</span>
 			</button>
 			{#if open}
-				<div class="menu" class:closing role="menu" tabindex="-1" onkeydown={handleMenuKeydown}>
+				<div
+					bind:this={menu}
+					class="menu"
+					class:closing
+					role="menu"
+					tabindex="-1"
+					style:--menu-top={`${menuTop}px`}
+					style:--menu-left={`${menuLeft}px`}
+					onkeydown={handleMenuKeydown}
+				>
 					{#each overflowActions as action, index (`menu-${index}-${action.label}`)}
 						{#if action.href}
 							<a
@@ -269,10 +338,10 @@
 		transform: translateY(2px);
 	}
 	.menu {
-		position: absolute;
-		z-index: 35;
-		top: calc(100% + 5px);
-		right: 0;
+		position: fixed;
+		z-index: 90;
+		top: var(--menu-top);
+		left: var(--menu-left);
 		min-width: 148px;
 		padding: 5px;
 		display: grid;

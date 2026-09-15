@@ -11,7 +11,7 @@ import {
 	satuan_ukur_transaksi_faktur,
 	transaksi_faktur_pajak
 } from '$lib/server/db/schema';
-import { error, redirect } from '@sveltejs/kit';
+import { error, invalid, redirect } from '@sveltejs/kit';
 import { and, eq, isNull } from 'drizzle-orm';
 import * as v from 'valibot';
 
@@ -51,7 +51,7 @@ const UpdateFakturSchema = v.object({
 	)
 });
 
-export const updateFaktur = form(UpdateFakturSchema, async (input) => {
+export const updateFaktur = form(UpdateFakturSchema, async (input, issue) => {
 	const event = getRequestEvent();
 	const activeNpwp = event.locals.user?.username;
 	const fakturId = event.params.faktur;
@@ -92,7 +92,7 @@ export const updateFaktur = form(UpdateFakturSchema, async (input) => {
 		.limit(1);
 
 	if (!kodeTransaksi) {
-		error(400, 'Kode transaksi tidak valid');
+		invalid(issue.dokumenTransaksi.kodeTransaksi('Kode transaksi tidak valid'));
 	}
 
 	const tanggalFaktur = input.dokumenTransaksi.tanggalFaktur;
@@ -105,7 +105,9 @@ export const updateFaktur = form(UpdateFakturSchema, async (input) => {
 
 	if (isAdditionalInfoCode) {
 		if (input.dokumenTransaksi.kodeInformasiTambahan === undefined) {
-			error(400, 'Informasi tambahan harus dipilih');
+			invalid(
+				issue.dokumenTransaksi.kodeInformasiTambahan('Informasi tambahan harus dipilih')
+			);
 		}
 
 		const [row] = await db
@@ -128,11 +130,13 @@ export const updateFaktur = form(UpdateFakturSchema, async (input) => {
 			.limit(1);
 
 		if (!row) {
-			error(400, 'Informasi tambahan tidak valid');
+			invalid(
+				issue.dokumenTransaksi.kodeInformasiTambahan('Informasi tambahan tidak valid')
+			);
 		}
 
 		if (row.butuhDokumenPendukung && !input.dokumenTransaksi.dokumenPendukung?.trim()) {
-			error(400, 'Dokumen pendukung harus diisi');
+			invalid(issue.dokumenTransaksi.dokumenPendukung('Dokumen pendukung harus diisi'));
 		}
 
 		jenisInformasiTambahan = row;
@@ -172,11 +176,15 @@ export const updateFaktur = form(UpdateFakturSchema, async (input) => {
 			]);
 
 			if (!kodeItem) {
-				error(400, `Kode item transaksi ke-${index + 1} tidak valid`);
+				invalid(issue.transaksi[index].kodeItem(`Kode item transaksi ke-${index + 1} tidak valid`));
 			}
 
 			if (!satuanUkur) {
-				error(400, `Satuan ukur transaksi ke-${index + 1} tidak valid`);
+				invalid(
+					issue.transaksi[index].satuanUkur(
+						`Satuan ukur transaksi ke-${index + 1} tidak valid`
+					)
+				);
 			}
 
 			return {

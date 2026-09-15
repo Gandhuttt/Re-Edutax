@@ -1,9 +1,5 @@
 <script lang="ts">
-	import Button from '$lib/components/Button.svelte';
-	import Card from '$lib/components/Card.svelte';
-	import Input from '$lib/components/Input.svelte';
-	import Label from '$lib/components/Label.svelte';
-	import { getContext } from 'svelte';
+	import { FieldGrid, FormField, LookupField, RadioGroup, Stack } from '$lib/re-ui-components';
 	import { getWajibPajak } from '../../../getWajibPajak.remote';
 	import { updateFaktur } from '../updateFaktur.remote';
 
@@ -17,57 +13,35 @@
 
 	const formFields = updateFaktur.fields.informasiPembeli;
 	let wpPembeli = $state(await getWajibPajak({ npwp: npwpPembeli }));
+
+	async function lookupBuyer() {
+		wpPembeli = await getWajibPajak({ npwp: npwpPembeli });
+	}
 </script>
 
-<Card>
-	{#snippet head()}
-		<span class="tw:text-xl">Informasi Pembeli</span>
-	{/snippet}
-	{#snippet body()}
-		<div class="tw:flex tw:flex-col tw:gap-3 tw:px-3">
-			<Label>
-				<span>NPWP Pembeli</span>
-				<div class="tw:flex tw:flex-row tw:bg-amber-50">
-					<Input
-						class={canEdit ? 'tw:rounded-e-none! tw:border-e-0' : ''}
-						name={formFields.npwpPembeli.as('text').name}
-						type="text"
-						id={getContext('id')}
-						bind:value={npwpPembeli}
-						disabled={!canEdit}
-					/>
-					{#if canEdit}
-						<Button
-							color="#FFD230"
-							class="tw:rounded-s-none! tw:w-30"
-							type="button"
-							onclick={async () => (wpPembeli = await getWajibPajak({ npwp: npwpPembeli }))}
-						>
-							Cari NPWP
-						</Button>
-					{/if}
-				</div>
-			</Label>
-			<Label class="tw:flex! tw:items-center tw:gap-2">
-				<Input type="radio" checked />
-				<span>NPWP</span>
-			</Label>
-			<Label>
-				<span>Negara</span>
-				<Input type="text" id={getContext('id')} value={wpPembeli?.negara} disabled />
-			</Label>
-			<Label>
-				<span>Nomor Dokumen</span>
-				<Input type="text" id={getContext('id')} disabled />
-			</Label>
-			<Label>
-				<span>Nama</span>
-				<Input type="text" id={getContext('id')} value={wpPembeli?.nama} disabled />
-			</Label>
-			<Label>
-				<span>Email</span>
-				<Input type="text" id={getContext('id')} value={wpPembeli?.email} disabled />
-			</Label>
-		</div>
-	{/snippet}
-</Card>
+<Stack gap="16px">
+	<LookupField
+		label="NPWP pembeli"
+		field={canEdit ? formFields.npwpPembeli : undefined}
+		bind:value={npwpPembeli}
+		buttonLabel="Cari NPWP"
+		buttonVisible={canEdit}
+		disabled={!canEdit}
+		inputmode="numeric"
+		onlookup={lookupBuyer}
+		onvaluechange={(value) => (npwpPembeli = value)}
+	/>
+
+	<RadioGroup
+		label="Jenis identitas"
+		value="npwp"
+		options={[{ value: 'npwp', label: 'NPWP' }]}
+	/>
+
+	<FieldGrid gap="14px 16px">
+		<FormField label="Negara" value={wpPembeli?.negara ?? ''} disabled />
+		<FormField label="Nomor dokumen" value="" disabled />
+		<FormField label="Nama" value={wpPembeli?.nama ?? ''} disabled />
+		<FormField label="Email" value={wpPembeli?.email ?? ''} disabled />
+	</FieldGrid>
+</Stack>

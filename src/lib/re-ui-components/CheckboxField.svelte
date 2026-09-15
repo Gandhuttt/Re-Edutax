@@ -9,6 +9,7 @@
 		description?: string;
 		error?: string;
 		compact?: boolean;
+		labelHidden?: boolean;
 	} & Omit<HTMLInputAttributes, "type" | "checked">;
 </script>
 
@@ -25,6 +26,7 @@
 		error,
 		disabled = false,
 		compact = false,
+		labelHidden = false,
 		name,
 		onchange,
 		id = generatedId,
@@ -65,6 +67,7 @@
 	class:checked={resolvedChecked}
 	class:disabled
 	class:compact
+	class:label-hidden={labelHidden}
 	class:error={Boolean(resolvedError)}
 	for={id}
 >
@@ -132,6 +135,31 @@
 	label.compact.checked {
 		border-color: #d7c985;
 		background: var(--ui-yellow-soft);
+	}
+	label.label-hidden {
+		width: 32px;
+		min-height: 32px;
+		padding: 6px;
+		display: inline-grid;
+		grid-template-columns: 18px;
+		gap: 0;
+	}
+	label.label-hidden.checked {
+		padding: 6px;
+	}
+	.label-hidden .box {
+		margin-top: 0;
+	}
+	.label-hidden .copy {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		padding: 0;
+		margin: -1px;
+		overflow: hidden;
+		clip: rect(0, 0, 0, 0);
+		white-space: nowrap;
+		border: 0;
 	}
 	label.error {
 		border-color: #c7847f;

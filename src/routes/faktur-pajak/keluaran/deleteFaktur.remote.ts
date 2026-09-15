@@ -1,9 +1,10 @@
 import { form, getRequestEvent } from '$app/server';
 import { db } from '$lib/server/db';
 import { faktur_pajak } from '$lib/server/db/schema';
-import { error, redirect } from '@sveltejs/kit';
+import { error } from '@sveltejs/kit';
 import { and, eq } from 'drizzle-orm';
 import * as v from 'valibot';
+import { listFaktur } from './listFaktur.remote';
 
 const FakturIdSchema = v.object({
 	id: v.string()
@@ -27,5 +28,5 @@ export const deleteFaktur = form(FakturIdSchema, async ({ id }) => {
 			)
 		);
 
-	redirect(303, '/faktur-pajak/keluaran');
+	await listFaktur().refresh();
 });

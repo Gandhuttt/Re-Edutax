@@ -1,7 +1,14 @@
 <script lang="ts">
-	import Button from '$lib/components/Button.svelte';
-	import Label from '$lib/components/Label.svelte';
-	import SvelteSelect from 'svelte-select';
+	import {
+		ActionButton,
+		CheckboxField,
+		FieldGrid,
+		FormField,
+		InstitutionalModal,
+		RupiahField,
+		SelectField,
+		Stack
+	} from '$lib/re-ui-components';
 
 	type FakturTransaksi = {
 		id: string;
@@ -38,17 +45,15 @@
 	};
 
 	let {
-		id,
+		open = $bindable(false),
 		canEdit,
-		isUploaded,
 		value,
 		itemCodeOptions,
 		unitOptions,
 		requestSave
 	}: {
-		id: string;
+		open: boolean;
 		canEdit: boolean;
-		isUploaded: boolean;
 		value: FakturTransaksi | null;
 		itemCodeOptions: ItemOption[];
 		unitOptions: UnitOption[];
@@ -57,7 +62,7 @@
 
 	let gunakanDppNilaiLain = $state(false);
 	let nama = $state('');
-	let satuanUkur = $state('000024');
+	let satuanUkur = $state('');
 	let hargaSatuan = $state(0);
 	let kuantitas = $state(0);
 	let hargaPotongan = $state(0);
@@ -65,54 +70,58 @@
 	let tarifPPN = $state(12);
 	let tarifPPnBM = $state(0);
 	let kodeItem = $state('');
-	let tipe = $state(0);
+	let tipe = $state<number | string>(0);
+	let pendingSave = $state<FakturTransaksi | null>(null);
 
+	const kodeOptions = $derived(
+		itemCodeOptions.filter((option) => option.tipe === (Number(tipe) === 0 ? 'Barang' : 'Jasa'))
+	);
+	const satuanOptions = $derived(unitOptions.filter((option) => option.tipe === Number(tipe)));
 	const hargaTotal = $derived(hargaSatuan * kuantitas);
 	const dpp = $derived(hargaTotal - hargaPotongan);
 	const ppn = $derived(((gunakanDppNilaiLain ? dppNilaiLain : dpp) * tarifPPN) / 100);
 	const ppnBM = $derived((dpp * tarifPPnBM) / 100);
-	const kodeOptions = $derived(itemCodeOptions.filter((option) => option.tipe === (tipe === 0 ? 'Barang' : 'Jasa')));
-	const satuanOptions = $derived(unitOptions.filter((option) => option.tipe === tipe));
-	let selectedOption = $state<ItemOption | null>(null);
 
 	$effect(() => {
-		if (!value) {
+		if (!open) return;
+		const current = value;
+		if (!current) {
 			gunakanDppNilaiLain = false;
 			nama = '';
-			satuanUkur = '000024';
+			tipe = 0;
+			kodeItem = '';
+			satuanUkur = unitOptions.find((option) => option.tipe === 0)?.index ?? '';
 			hargaSatuan = 0;
 			kuantitas = 0;
 			hargaPotongan = 0;
 			dppNilaiLain = 0;
 			tarifPPN = 12;
 			tarifPPnBM = 0;
-			kodeItem = '';
-			tipe = 0;
-			selectedOption = null;
 			return;
 		}
 
-		gunakanDppNilaiLain = value.dppNilaiLain !== 0;
-		nama = value.nama;
-		satuanUkur = value.satuanUkur;
-		hargaSatuan = value.hargaSatuan;
-		kuantitas = value.kuantitas;
-		hargaPotongan = value.hargaPotongan;
-		dppNilaiLain = value.dppNilaiLain;
-		tarifPPN = value.tarifPPN;
-		tarifPPnBM = value.tarifPPnBM;
-		kodeItem = value.kodeItem;
-		tipe = value.tipe;
-		selectedOption = itemCodeOptions.find((option) => option.kodeItem === value.kodeItem) ?? null;
+		gunakanDppNilaiLain = current.dppNilaiLain !== 0;
+		nama = current.nama;
+		tipe = current.tipe;
+		kodeItem = current.kodeItem;
+		satuanUkur = current.satuanUkur;
+		hargaSatuan = current.hargaSatuan;
+		kuantitas = current.kuantitas;
+		hargaPotongan = current.hargaPotongan;
+		dppNilaiLain = current.dppNilaiLain;
+		tarifPPN = current.tarifPPN;
+		tarifPPnBM = current.tarifPPnBM;
 	});
 
-	$effect(() => {
-		kodeItem = selectedOption?.kodeItem ?? '';
-	});
+	function changeType(nextValue: string | number) {
+		tipe = Number(nextValue);
+		kodeItem = '';
+		satuanUkur = unitOptions.find((option) => option.tipe === Number(nextValue))?.index ?? '';
+	}
 
 	function save() {
-		requestSave({
-			id: value?.id ?? `transaksi-draft-${Date.now()}`,
+		pendingSave = {
+			id: value?.id ?? `transaksi-draft-${crypto.randomUUID()}`,
 			nama,
 			kodeItem,
 			satuanUkur,
@@ -122,123 +131,92 @@
 			dppNilaiLain: gunakanDppNilaiLain ? dppNilaiLain : 0,
 			tarifPPN,
 			tarifPPnBM,
-			tipe,
+			tipe: Number(tipe),
 			hargaTotal,
 			DPP: dpp,
 			PPN: ppn,
 			PPnBM: ppnBM
-		});
+		};
+		open = false;
+	}
+
+	function finishClose() {
+		if (!pendingSave) return;
+		requestSave(pendingSave);
+		pendingSave = null;
 	}
 </script>
 
-<div class="modal fade" {id} tabindex="-1" aria-labelledby="transaksiModalLabel">
-	<div class="modal-dialog modal-dialog-centered" style="min-width: 75%;">
-		<div class="modal-content">
-			<div class="modal-header">
-				<h1 class="modal-title fs-5" id="transaksiModalLabel">Tambah Transaksi</h1>
-				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-			</div>
-			<div class="modal-body">
-				<div class="tw:flex tw:w-full tw:flex-row tw:gap-4">
-					<div class="tw:flex tw:basis-1/2 tw:flex-col tw:gap-4">
-						<Label>
-							<span>Tipe</span>
-							<select bind:value={tipe} disabled={!canEdit}>
-								<option value={0}>Barang</option>
-								<option value={1}>Jasa</option>
-							</select>
-						</Label>
-						<Label>
-							<span>Kode</span>
-							<SvelteSelect
-								items={kodeOptions}
-								bind:value={selectedOption}
-								itemId="kodeItem"
-								label="labelIndonesia"
-								placeholder="Search..."
-								disabled={!canEdit}
-							/>
-						</Label>
-						<Label>
-							<span>Nama</span>
-							<input type="text" bind:value={nama} disabled={!canEdit} />
-						</Label>
-						<Label>
-							<span>Satuan</span>
-							<select bind:value={satuanUkur} disabled={!canEdit}>
-								{#each satuanOptions as option}
-									<option value={option.index}>{option.label}</option>
-								{/each}
-							</select>
-						</Label>
-						<Label>
-							<span>Harga Satuan</span>
-							<input type="number" bind:value={hargaSatuan} disabled={!canEdit} />
-						</Label>
-						<Label>
-							<span>Kuantitas</span>
-							<input type="number" bind:value={kuantitas} disabled={!canEdit} />
-						</Label>
-						<Label>
-							<span>Total Harga</span>
-							<input type="number" value={hargaTotal} disabled />
-						</Label>
-						<Label>
-							<span>Potongan Harga</span>
-							<input type="number" bind:value={hargaPotongan} disabled={!canEdit} />
-						</Label>
-					</div>
+{#snippet actions()}
+	<ActionButton tone="quiet" onclick={() => (open = false)}>Tutup</ActionButton>
+	{#if canEdit}
+		<ActionButton tone="secondary" onclick={save}>Simpan transaksi</ActionButton>
+	{/if}
+{/snippet}
 
-					<div class="tw:flex tw:basis-1/2 tw:flex-col tw:gap-4">
-						<Label>
-							<span>DPP</span>
-							<input type="number" disabled value={dpp} />
-						</Label>
-						<Label>
-							<div class="tw:flex tw:items-center tw:justify-end tw:gap-2">
-								<span>DPP Nilai Lain/DPP</span>
-								<input type="checkbox" bind:checked={gunakanDppNilaiLain} disabled={!canEdit} />
-							</div>
-						</Label>
-						<input type="number" bind:value={dppNilaiLain} disabled={!gunakanDppNilaiLain || !canEdit} />
-						<Label>
-							<span>Tarif PPN (%)</span>
-							<input type="number" disabled bind:value={tarifPPN} />
-						</Label>
-						<Label>
-							<span>PPN</span>
-							<input type="number" disabled value={ppn} />
-						</Label>
-						<Label>
-							<span>Tarif PPnBM (%)</span>
-							<input type="number" bind:value={tarifPPnBM} disabled={!canEdit} />
-						</Label>
-						<Label>
-							<span>PPnBM</span>
-							<input type="number" disabled value={ppnBM} />
-						</Label>
-					</div>
-				</div>
-			</div>
-			<div class="modal-footer">
-				{#if !isUploaded}
-					<Button color="#FFD230" data-bs-dismiss="modal" type="button" onclick={save}>
-						<span>Simpan</span>
-					</Button>
-				{/if}
-			</div>
-		</div>
-	</div>
-</div>
-
-<style>
-	input[type='text'],
-	input[type='number'],
-	select {
-		height: 2.5rem;
-		width: 100%;
-		border-color: var(--color-input-secondary);
-		border-radius: 4px;
-		background: var(--color-input-primary);
-	}
-</style>
+<InstitutionalModal
+	bind:open
+	eyebrow={canEdit ? 'Rincian faktur' : 'Informasi transaksi'}
+	title={value ? (canEdit ? 'Ubah transaksi' : 'Detail transaksi') : 'Tambah transaksi'}
+	size="large"
+	scrollable
+	onafterclose={finishClose}
+	{actions}
+>
+	<Stack gap="18px">
+		<FieldGrid gap="14px 16px">
+			<SelectField
+				label="Tipe"
+				value={tipe}
+				disabled={!canEdit}
+				floatingPanel
+				options={[
+					{ value: 0, label: 'Barang' },
+					{ value: 1, label: 'Jasa' }
+				]}
+				onchange={changeType}
+			/>
+			<SelectField
+				label="Kode"
+				bind:value={kodeItem}
+				disabled={!canEdit}
+				searchable
+				floatingPanel
+				searchPlaceholder="Cari kode atau nama item"
+				options={[
+					{ value: '', label: 'Pilih kode barang atau jasa' },
+					...kodeOptions.map((option) => ({
+						value: option.kodeItem,
+						label: `${option.kodeItem} — ${option.labelIndonesia}`,
+						searchText: option.labelInggris
+					}))
+				]}
+			/>
+			<FormField label="Nama" bind:value={nama} disabled={!canEdit} />
+			<SelectField
+				label="Satuan ukur"
+				bind:value={satuanUkur}
+				disabled={!canEdit}
+				searchable
+				floatingPanel
+				options={satuanOptions.map((option) => ({
+					value: option.index,
+					label: `${option.index} — ${option.label}`
+				}))}
+			/>
+			<RupiahField label="Harga satuan" bind:value={hargaSatuan} disabled={!canEdit} />
+			<FormField label="Kuantitas" type="number" min="0" step="1" bind:value={() => String(kuantitas), (value) => (kuantitas = Number(value))} disabled={!canEdit} />
+			<RupiahField label="Total harga" value={hargaTotal} disabled />
+			<RupiahField label="Potongan harga" bind:value={hargaPotongan} disabled={!canEdit} />
+			<RupiahField label="DPP" value={dpp} disabled />
+			<Stack gap="8px">
+				<CheckboxField label="Gunakan DPP nilai lain" bind:checked={gunakanDppNilaiLain} disabled={!canEdit} compact />
+				<RupiahField label="DPP nilai lain" bind:value={dppNilaiLain} disabled={!gunakanDppNilaiLain || !canEdit} />
+			</Stack>
+			<FormField label="Tarif PPN (%)" type="number" value={String(tarifPPN)} disabled />
+			<RupiahField label="PPN" value={ppn} disabled />
+			<FormField label="Tarif PPnBM (%)" type="number" min="0" step="1" bind:value={() => String(tarifPPnBM), (value) => (tarifPPnBM = Number(value))} disabled={!canEdit} />
+			<RupiahField label="PPnBM" value={ppnBM} disabled />
+		</FieldGrid>
+	</Stack>
+</InstitutionalModal>

@@ -1,17 +1,19 @@
-<script lang="ts">
+<script module lang="ts">
 	import type { Snippet } from "svelte";
 	import type { HTMLAttributes } from "svelte/elements";
 
-	type Props = {
+	export type DataTableViewportProps = {
 		label?: string;
 		minWidth?: string;
 		framed?: boolean;
-		headerTone?: "paper" | "navy";
+		headerTone?: "paper" | "navy" | "yellow";
 		density?: "regular" | "compact";
 		stickyFirstColumn?: boolean;
 		children: Snippet;
 	} & Omit<HTMLAttributes<HTMLDivElement>, "children">;
+</script>
 
+<script lang="ts">
 	let {
 		label = "Tabel data",
 		minWidth = "760px",
@@ -23,7 +25,7 @@
 		class: className,
 		tabindex = 0,
 		...props
-	}: Props = $props();
+	}: DataTableViewportProps = $props();
 </script>
 
 <!-- svelte-ignore a11y_no_noninteractive_tabindex (keyboard users need to scroll overflowing tables) -->
@@ -32,6 +34,7 @@
 	class="table-viewport {className ?? ""}"
 	class:framed
 	class:navy-header={headerTone === "navy"}
+	class:yellow-header={headerTone === "yellow"}
 	class:compact={density === "compact"}
 	class:sticky-first={stickyFirstColumn}
 	style:--table-min-width={minWidth}
@@ -117,9 +120,19 @@
 		width: 1%;
 		white-space: nowrap;
 	}
-	.table-viewport.navy-header :global(th) {
+	.table-viewport.navy-header :global(thead > tr:first-child > th) {
 		background: var(--ui-navy);
 		color: white;
+	}
+	.table-viewport.yellow-header :global(thead > tr:first-child > th) {
+		background: var(--ui-yellow);
+		color: var(--ui-navy-strong);
+	}
+	.table-viewport :global(thead > tr:not(:first-child) > th) {
+		background: var(--ui-paper);
+		color: var(--ui-ink);
+		letter-spacing: normal;
+		text-transform: none;
 	}
 	.table-viewport.compact :global(th) {
 		padding: 9px 10px;

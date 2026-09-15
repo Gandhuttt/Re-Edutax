@@ -8,7 +8,10 @@ type AuthUser = typeof auth.$Infer.Session.user;
 
 declare global {
 	namespace App {
-		// interface Error {}
+		interface Error {
+			message: string;
+			referenceId?: string;
+		}
 		interface Locals {
 			session: AuthSession | null;
 			user: AuthUser | null;

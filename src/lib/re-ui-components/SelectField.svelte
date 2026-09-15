@@ -21,6 +21,8 @@
 		required?: boolean;
 		disabled?: boolean;
 		layout?: "stacked" | "inline";
+		labelHidden?: boolean;
+		floatingPanel?: boolean;
 		searchable?: boolean;
 		searchPlaceholder?: string;
 		searchLabel?: string;
@@ -32,7 +34,7 @@
 </script>
 
 <script lang="ts">
-	import { onDestroy, tick } from "svelte";
+	import { onDestroy, onMount, tick } from "svelte";
 	import { firstRemoteIssue, remoteFieldName } from "./remote-form";
 
 	let {
@@ -47,6 +49,8 @@
 		required = false,
 		disabled = false,
 		layout = "stacked",
+		labelHidden = false,
+		floatingPanel = false,
 		searchable = false,
 		searchPlaceholder = "Cari pilihan...",
 		searchLabel = `Cari ${label}`,
@@ -62,8 +66,13 @@
 	let query = $state("");
 	let root = $state<HTMLDivElement>();
 	let trigger = $state<HTMLButtonElement>();
+	let optionPanel = $state<HTMLDivElement>();
 	let searchInput = $state<HTMLInputElement>();
 	let closeTimer: ReturnType<typeof setTimeout> | undefined;
+	let floatingTop = $state(0);
+	let floatingLeft = $state(0);
+	let floatingWidth = $state(0);
+	let floatingListHeight = $state(230);
 	const resolvedValue = $derived.by(() => {
 		if (!field) return value;
 		const remoteValue = field.value();
@@ -89,6 +98,58 @@
 		);
 	});
 	const expanded = $derived(open && !closing);
+	function fixedContainingBlockOrigin() {
+		let current = trigger?.parentElement;
+		while (current) {
+			const style = getComputedStyle(current);
+			if (
+				style.transform !== "none" ||
+				style.perspective !== "none" ||
+				style.filter !== "none" ||
+				style.contain !== "none" ||
+				style.willChange.includes("transform")
+			) {
+				const rect = current.getBoundingClientRect();
+				return { left: rect.left, top: rect.top };
+			}
+			current = current.parentElement;
+		}
+		return { left: 0, top: 0 };
+	}
+	function positionFloatingPanel() {
+		if (!floatingPanel || !trigger) return;
+		const margin = 8;
+		const gap = 5;
+		const triggerRect = trigger.getBoundingClientRect();
+		const width = Math.min(
+			Math.max(triggerRect.width, 180),
+			window.innerWidth - margin * 2,
+		);
+		const panelHeight = optionPanel?.offsetHeight || 240;
+		const origin = fixedContainingBlockOrigin();
+		const spaceBelow = window.innerHeight - triggerRect.bottom - margin;
+		const spaceAbove = triggerRect.top - margin;
+		const opensAbove = spaceBelow < Math.min(panelHeight, 180) && spaceAbove > spaceBelow;
+		const availableHeight = Math.max(
+			90,
+			(opensAbove ? spaceAbove : spaceBelow) - gap,
+		);
+
+		floatingWidth = width;
+		floatingLeft =
+			Math.min(
+				Math.max(margin, triggerRect.left),
+				window.innerWidth - width - margin,
+			) - origin.left;
+		floatingListHeight = Math.min(230, availableHeight - (searchable ? 52 : 0));
+		floatingTop =
+			(opensAbove
+				? Math.max(
+						margin,
+						triggerRect.top - Math.min(panelHeight, availableHeight) - gap,
+					)
+				: triggerRect.bottom + gap) - origin.top;
+	}
 	async function openPanel() {
 		clearTimeout(closeTimer);
 		query = "";
@@ -99,6 +160,7 @@
 		closing = false;
 		open = true;
 		await tick();
+		positionFloatingPanel();
 		if (searchable) searchInput?.focus();
 	}
 	function closePanel() {
@@ -177,15 +239,35 @@
 		if (expanded && root && !root.contains(event.target as Node))
 			closePanel();
 	}
+	function handleDocumentScroll(event: Event) {
+		if (
+			floatingPanel &&
+			expanded &&
+			root &&
+			!root.contains(event.target as Node)
+		) {
+			positionFloatingPanel();
+		}
+	}
+	onMount(() => {
+		document.addEventListener("scroll", handleDocumentScroll, true);
+		return () => document.removeEventListener("scroll", handleDocumentScroll, true);
+	});
 	onDestroy(() => clearTimeout(closeTimer));
 </script>
 
-<svelte:window onclick={handleOutsideClick} />
+<svelte:window
+	onclick={handleOutsideClick}
+	onresize={() => {
+		if (expanded) positionFloatingPanel();
+	}}
+/>
 <div
 	class="field"
 	class:inline={layout === "inline"}
 	class:error={Boolean(resolvedError)}
 	class:disabled
+	class:label-hidden={labelHidden}
 	bind:this={root}
 >
 	{#if resolvedName}<input type="hidden" name={resolvedName} value={resolvedValue} />{/if}
@@ -213,11 +295,17 @@
 	>
 	{#if open}
 		<div
+			bind:this={optionPanel}
 			class="option-panel"
 			class:closing
+			class:floating={floatingPanel}
 			id="{id}-listbox"
 			role="listbox"
 			aria-labelledby="{id}-label"
+			style:--floating-top={`${floatingTop}px`}
+			style:--floating-left={`${floatingLeft}px`}
+			style:--floating-width={`${floatingWidth}px`}
+			style:--floating-list-height={`${floatingListHeight}px`}
 		>
 			{#if searchable}<div class="option-search">
 					<span aria-hidden="true">⌕</span><input
@@ -266,6 +354,28 @@
 	.field-label {
 		font-size: 12px;
 		font-weight: 700;
+	}
+	.label-hidden {
+		gap: 0;
+	}
+	.label-hidden .field-label {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		padding: 0;
+		margin: -1px;
+		overflow: hidden;
+		clip: rect(0, 0, 0, 0);
+		white-space: nowrap;
+		border: 0;
+	}
+	.label-hidden .select-trigger {
+		height: 30px;
+		padding: 0 8px;
+		font-size: 10px;
+	}
+	.label-hidden .option-panel {
+		top: 35px;
 	}
 	.field-label em {
 		margin-left: 3px;
@@ -355,6 +465,17 @@
 	.option-panel.closing {
 		pointer-events: none;
 		animation: panel-leave 140ms ease-in forwards;
+	}
+	.option-panel.floating {
+		position: fixed;
+		z-index: 80;
+		top: var(--floating-top);
+		left: var(--floating-left);
+		right: auto;
+		width: var(--floating-width);
+	}
+	.option-panel.floating .option-list {
+		max-height: var(--floating-list-height);
 	}
 	.option-search {
 		padding: 7px;

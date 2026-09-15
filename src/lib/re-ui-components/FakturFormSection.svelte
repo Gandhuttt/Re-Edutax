@@ -1,9 +1,8 @@
 <script lang="ts">
-	import { flip } from "svelte/animate";
-	import { fly } from "svelte/transition";
 	import ActionButton from "./ActionButton.svelte";
 	import CheckboxField from "./CheckboxField.svelte";
 	import ConditionalField from "./ConditionalField.svelte";
+	import DataTableBody from "./DataTableBody.svelte";
 	import DataTableViewport from "./DataTableViewport.svelte";
 	import DateField from "./DateField.svelte";
 	import DocumentForm from "./DocumentForm.svelte";
@@ -226,69 +225,59 @@
 						></tr
 					></thead
 				>
-				<tbody>
-					{#each rows as row (row.id)}
-						<tr
-							animate:flip={{ duration: 190 }}
-							in:fly={{ x: -10, duration: 180 }}
-							out:fly={{ x: 10, duration: 140 }}
-							><td class="action-cell"
-								><TableActions
-									ariaLabel={`Tindakan untuk ${row.name}`}
-									visibleCount={2}
-									moreLabel="Lainnya"
-									actions={[
-										{
-											label: "Lihat",
-											ariaLabel: `Lihat ${row.name}`,
-										},
-										{
-											label: "Ubah",
-											ariaLabel: `Ubah ${row.name}`,
-										},
-										{
-											label: "Salin",
-											ariaLabel: `Salin ${row.name}`,
-										},
-										{
-											label: "Hapus",
-											ariaLabel: `Hapus ${row.name}`,
-											danger: true,
-											onclick: () =>
-												(rows = rows.filter(
-													(entry) => entry.id !== row.id,
-												)),
-										},
-									]}
-								/></td
-							><td>{row.kind}</td><td><code>{row.code}</code></td
-							><td><strong>{row.name}</strong></td><td
-								>{row.unit}</td
-							><td class="number">{row.quantity}</td><td
-								class="number"
-								>Rp {rupiah.format(row.unitPrice)}</td
-							><td class="number"
-								>Rp {rupiah.format(
-									row.quantity * row.unitPrice - row.discount,
-								)}</td
-							><td class="number"
-								>Rp {rupiah.format(
-									((row.quantity * row.unitPrice -
-										row.discount) *
-										row.vatRate) /
-										100,
-								)}</td
-							></tr
-						>
-					{:else}
-						<tr
-							><td class="empty" colspan="9"
-								>Belum ada transaksi. Tambahkan barang atau jasa
-								untuk memulai.</td
-							></tr
-						>
-					{/each}
-				</tbody>
+				<DataTableBody
+					items={rows}
+					getKey={(item) => item.id}
+					emptyColspan={9}
+					emptyText="Belum ada transaksi. Tambahkan barang atau jasa untuk memulai."
+				>
+					{#snippet row(item)}
+						<td class="action-cell">
+							<TableActions
+								ariaLabel={`Tindakan untuk ${item.name}`}
+								visibleCount={2}
+								moreLabel="Lainnya"
+								actions={[
+									{
+										label: "Lihat",
+										ariaLabel: `Lihat ${item.name}`,
+									},
+									{
+										label: "Ubah",
+										ariaLabel: `Ubah ${item.name}`,
+									},
+									{
+										label: "Salin",
+										ariaLabel: `Salin ${item.name}`,
+									},
+									{
+										label: "Hapus",
+										ariaLabel: `Hapus ${item.name}`,
+										danger: true,
+										onclick: () =>
+											(rows = rows.filter(
+												(entry) => entry.id !== item.id,
+											)),
+									},
+								]}
+							/>
+						</td>
+						<td>{item.kind}</td>
+						<td><code>{item.code}</code></td>
+						<td><strong>{item.name}</strong></td>
+						<td>{item.unit}</td>
+						<td class="number">{item.quantity}</td>
+						<td class="number">Rp {rupiah.format(item.unitPrice)}</td>
+						<td class="number">
+							Rp {rupiah.format(item.quantity * item.unitPrice - item.discount)}
+						</td>
+						<td class="number">
+							Rp {rupiah.format(
+								((item.quantity * item.unitPrice - item.discount) * item.vatRate) / 100,
+							)}
+						</td>
+					{/snippet}
+				</DataTableBody>
 			</table>
 		</DataTableViewport>
 	{/snippet}

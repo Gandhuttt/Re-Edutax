@@ -27,12 +27,19 @@
 		secondary: Snippet;
 		ledger: Snippet;
 		ledgerActions?: Snippet;
+		summary?: Snippet;
+		failureTitle?: string;
+		failureMessage?: string;
 		totals?: readonly DocumentFormTotal[];
 		footer?: Snippet<[boolean]>;
 	} & Omit<HTMLFormAttributes, "title" | "children" | "action" | "method">;
 </script>
 
 <script lang="ts">
+	import { tick } from "svelte";
+	import InlineAlert from "./InlineAlert.svelte";
+	import { remoteFailureFrom, type ReUiRemoteFailure } from "./remote-form";
+
 	let {
 		remote,
 		eyebrow = "",
@@ -46,13 +53,34 @@
 		secondary,
 		ledger,
 		ledgerActions,
+		summary,
+		failureTitle = "Data belum dapat disimpan",
+		failureMessage =
+			"Layanan sedang mengalami gangguan. Coba simpan kembali beberapa saat lagi.",
 		totals = [],
 		footer,
 		class: className,
 		...props
 	}: DocumentFormProps = $props();
 
-	const remoteAttributes = $derived(remote ?? {});
+	let remoteFailure = $state<ReUiRemoteFailure | null>(null);
+
+	const remoteAttributes = $derived(
+		remote?.enhance
+			? remote.enhance(async (form) => {
+					remoteFailure = null;
+
+					try {
+						if (await form.submit()) {
+							await tick();
+							HTMLFormElement.prototype.reset.call(form.element);
+						}
+					} catch (cause) {
+						remoteFailure = remoteFailureFrom(cause, failureMessage);
+					}
+				})
+			: (remote ?? {}),
+	);
 	const pending = $derived(Boolean(remote?.pending));
 </script>
 
@@ -69,6 +97,19 @@
 			</div>
 		{/if}
 	</header>
+	{#if remoteFailure || summary}
+		<div class="form-summary">
+			{#if remoteFailure}
+				<InlineAlert tone="error" title={failureTitle}>
+					<p>{remoteFailure.message}</p>
+					{#if remoteFailure.referenceId}
+						<p class="error-reference">Kode referensi: <code>{remoteFailure.referenceId}</code></p>
+					{/if}
+				</InlineAlert>
+			{/if}
+			{#if summary}{@render summary()}{/if}
+		</div>
+	{/if}
 
 	<div class="paired-sections">
 		<section class="form-card">
@@ -152,6 +193,23 @@
 	.document-state span,
 	.document-state strong {
 		display: block;
+	}
+
+	.form-summary {
+		padding: 14px 18px 0;
+		display: grid;
+		gap: 10px;
+	}
+
+	.error-reference {
+		margin: 4px 0 0;
+		color: var(--ui-muted);
+		font-size: 11px;
+	}
+
+	.error-reference code {
+		font-family: var(--ui-font-mono);
+		font-size: inherit;
 	}
 
 	.document-state span {

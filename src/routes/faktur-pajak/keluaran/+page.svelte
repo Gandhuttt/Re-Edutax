@@ -1,10 +1,23 @@
 <script lang="ts">
-	import * as XLSX from 'xlsx';
-	import Button from '$lib/components/Button.svelte';
-	import Card from '$lib/components/Card.svelte';
-	import Table from '$lib/components/Table.svelte';
+	import { page as appPage } from '$app/state';
 	import { formatMonth } from '$lib/helpers/date';
-	import { getWajibPajak } from '../../getWajibPajak.remote';
+	import {
+		ActionButton,
+		ActionMenu,
+		Breadcrumbs,
+		DataTableBody,
+		DataTableViewport,
+		DataWorkspace,
+		DateField,
+		PageLayout,
+		PaginationBar,
+		SelectField,
+		ServiceWorkspace,
+		Stack,
+		StatusBadge,
+		TableActions,
+		TableFilterField
+	} from '$lib/re-ui-components';
 	import { getKodeTransaksiFaktur } from '../kodeTransaksi.remote';
 	import { deleteFaktur } from './deleteFaktur.remote';
 	import { importFaktur } from './importFaktur.remote';
@@ -14,11 +27,123 @@
 	import { uploadFaktur } from './uploadFaktur.remote';
 
 	const transactionCodeOptions = await getKodeTransaksiFaktur();
+	const invoices = $derived(await listFaktur());
+	const rupiah = new Intl.NumberFormat('id-ID', { maximumFractionDigits: 0 });
 
 	let fileInputEl: HTMLInputElement | undefined = $state();
+	let sidebarOpen = $state(false);
+	let buyerNpwpFilter = $state('');
+	let buyerNameFilter = $state('');
+	let transactionFilter = $state<string | number>('');
+	let invoiceNumberFilter = $state('');
+	let invoiceDateFilter = $state('');
+	let monthFilter = $state<string | number>('');
+	let yearFilter = $state<string | number>('');
+	let statusFilter = $state<string | number>('');
+	let referenceFilter = $state('');
+	let currentPage = $state(1);
+	let pageSize = $state(50);
+
+	const accountName = $derived(String(appPage.data.user?.name ?? 'Wajib Pajak'));
+	const accountNpwp = $derived(String(appPage.data.user?.username ?? ''));
+	const yearOptions = $derived(
+		[...new Set(invoices.map((invoice) => invoice.tahun))]
+			.sort((left, right) => right - left)
+			.map((year) => ({ value: year, label: String(year) }))
+	);
+	const filtersActive = $derived(
+		Boolean(
+			buyerNpwpFilter ||
+				buyerNameFilter ||
+				transactionFilter ||
+				invoiceNumberFilter ||
+				invoiceDateFilter ||
+				monthFilter ||
+				yearFilter ||
+				statusFilter ||
+				referenceFilter
+		)
+	);
+	const filteredInvoices = $derived.by(() => {
+		const buyerNpwp = buyerNpwpFilter.trim().toLocaleLowerCase('id-ID');
+		const buyerName = buyerNameFilter.trim().toLocaleLowerCase('id-ID');
+		const invoiceNumber = invoiceNumberFilter.trim().toLocaleLowerCase('id-ID');
+		const reference = referenceFilter.trim().toLocaleLowerCase('id-ID');
+
+		return invoices.filter((invoice) => {
+			const status = statusLabel(invoice.diupload, invoice.dikreditkan);
+			return (
+				(!buyerNpwp || String(invoice.npwpPembeli ?? '').toLocaleLowerCase('id-ID').includes(buyerNpwp)) &&
+				(!buyerName || invoice.namaPembeli.toLocaleLowerCase('id-ID').includes(buyerName)) &&
+				(!transactionFilter || String(invoice.kodeTransaksi) === String(transactionFilter)) &&
+				(!invoiceNumber || String(invoice.nomorFaktur ?? '').toLocaleLowerCase('id-ID').includes(invoiceNumber)) &&
+				(!invoiceDateFilter || invoice.tanggalFaktur === invoiceDateFilter) &&
+				(!monthFilter || String(invoice.masaPajak) === String(monthFilter)) &&
+				(!yearFilter || String(invoice.tahun) === String(yearFilter)) &&
+				(!statusFilter || status === statusFilter) &&
+				(!reference || invoice.referensi.toLocaleLowerCase('id-ID').includes(reference))
+			);
+		});
+	});
+	const pagedInvoices = $derived(
+		filteredInvoices.slice((currentPage - 1) * pageSize, currentPage * pageSize)
+	);
+
+	$effect(() => {
+		buyerNpwpFilter;
+		buyerNameFilter;
+		transactionFilter;
+		invoiceNumberFilter;
+		invoiceDateFilter;
+		monthFilter;
+		yearFilter;
+		statusFilter;
+		referenceFilter;
+		currentPage = 1;
+	});
 
 	function submitImport(event: Event) {
 		(event.currentTarget as HTMLInputElement).form?.requestSubmit();
+	}
+
+	function statusLabel(diupload: boolean, dikreditkan: boolean) {
+		if (!diupload) return 'Pending';
+		if (!dikreditkan) return 'Uploaded';
+		return 'Accepted';
+	}
+
+	function statusTone(diupload: boolean, dikreditkan: boolean) {
+		if (!diupload) return 'attention' as const;
+		if (!dikreditkan) return 'neutral' as const;
+		return 'success' as const;
+	}
+
+	function transactionLabel(code: number) {
+		const label = transactionCodeOptions.find((option) => option.key === code)?.value;
+		return `${String(code).padStart(2, '0')}${label ? ` — ${label}` : ''}`;
+	}
+
+	function displayDate(value: string) {
+		const [year, month, day] = value.split('-');
+		return year && month && day ? `${day}/${month}/${year}` : value;
+	}
+
+	function submitForm(id: string) {
+		const form = document.getElementById(id);
+		if (form instanceof HTMLFormElement) form.requestSubmit();
+	}
+
+	function resetFilters() {
+		buyerNpwpFilter = '';
+		buyerNameFilter = '';
+		transactionFilter = '';
+		invoiceNumberFilter = '';
+		invoiceDateFilter = '';
+		monthFilter = '';
+		yearFilter = '';
+		statusFilter = '';
+		referenceFilter = '';
+		currentPage = 1;
 	}
 
 	// Verbatim shape of the template Coretax itself serves from e-invoice-portal
@@ -63,132 +188,15 @@
 		URL.revokeObjectURL(url);
 	}
 
-	// Shape of the real Coretax e-Faktur "Impor Data" Excel template (four
-	// sheets: Faktur/DetailFaktur/REF/Keterangan, confirmed against a real
-	// filled-in export -- see parseFakturBulkXlsx). REF/Keterangan here are
-	// trimmed to what's actually useful to fill the sheet correctly, rather
-	// than reproducing every dropdown list Coretax embeds (satuan ukur and
-	// kode barang/jasa run into the thousands of rows).
 	function downloadXlsxTemplate() {
-		const wb = XLSX.utils.book_new();
-
-		const fakturHeader = [
-			'Baris',
-			'Tanggal Faktur',
-			'Jenis Faktur',
-			'Kode Transaksi',
-			'Keterangan Tambahan',
-			'Dokumen Pendukung',
-			'Period Dok Pendukung',
-			'Referensi',
-			'Cap Fasilitas',
-			'ID TKU Penjual',
-			'NPWP/NIK Pembeli',
-			'Jenis ID Pembeli',
-			'Negara Pembeli',
-			'Nomor Dokumen Pembeli',
-			'Nama Pembeli',
-			'Alamat Pembeli',
-			'Email Pembeli',
-			'ID TKU Pembeli'
-		];
-		const fakturSheet = XLSX.utils.aoa_to_sheet([
-			['NPWP Penjual', null, 'xxxxxxxxxxxxxxxx'],
-			[],
-			fakturHeader,
-			[
-				1,
-				'27/08/2026',
-				'Normal',
-				'01',
-				null,
-				null,
-				null,
-				'Referensi contoh',
-				null,
-				'xxxxxxxxxxxxxxxx000000',
-				'xxxxxxxxxxxxxxxx',
-				'TIN',
-				'IDN',
-				'-',
-				'-',
-				'Contoh Alamat Pembeli',
-				'-',
-				'xxxxxxxxxxxxxxxx000000'
-			],
-			['END']
-		]);
-		XLSX.utils.book_append_sheet(wb, fakturSheet, 'Faktur');
-
-		const detailHeader = [
-			'Baris',
-			'Barang/Jasa',
-			'Kode Barang Jasa',
-			'Nama Barang/Jasa',
-			'Nama Satuan Ukur',
-			'Harga Satuan',
-			'Jumlah Barang Jasa',
-			'Total Diskon',
-			'DPP',
-			'DPP Nilai Lain',
-			'Tarif PPN',
-			'PPN',
-			'Tarif PPnBM',
-			'PPnBM'
-		];
-		const detailSheet = XLSX.utils.aoa_to_sheet([
-			detailHeader,
-			[1, 'A', '000000', 'Contoh Barang', 'UM.0001', 15000, 200, 100000, 2900000, 2900000, 12, 348000, 0, 0],
-			['END']
-		]);
-		XLSX.utils.book_append_sheet(wb, detailSheet, 'DetailFaktur');
-
-		const refSheet = XLSX.utils.aoa_to_sheet([
-			['Kode', 'Keterangan'],
-			['Barang/Jasa', 'A'],
-			[null, 'Barang'],
-			['', 'B'],
-			[null, 'Jasa'],
-			['Kode Transaksi', ''],
-			...transactionCodeOptions.map((option) => [String(option.key).padStart(2, '0'), option.value])
-		]);
-		XLSX.utils.book_append_sheet(wb, refSheet, 'REF');
-
-		const keteranganSheet = XLSX.utils.aoa_to_sheet([
-			['Sheet', 'Kolom', 'Wajib', 'Keterangan'],
-			['Faktur', 'Baris', 'Ya', 'Urut dari angka 1, sama dengan Baris pada sheet DetailFaktur'],
-			['Faktur', 'Tanggal Faktur', 'Ya', 'Format DD/MM/YYYY'],
-			['Faktur', 'Jenis Faktur', 'Ya', 'Selalu diisi: Normal'],
-			['Faktur', 'Kode Transaksi', 'Ya', 'Lihat sheet REF, 2 digit (01-10)'],
-			['Faktur', 'Keterangan Tambahan', 'Tidak', 'Wajib diisi untuk Kode Transaksi 07 atau 08, format "<kode> - <nama>"'],
-			['Faktur', 'Referensi', 'Tidak', ''],
-			['Faktur', 'NPWP/NIK Pembeli', 'Ya', ''],
-			['Faktur', 'Alamat Pembeli', 'Tidak', "Isikan '-' jika tidak ada"],
-			['DetailFaktur', 'Baris', 'Ya', 'Wajib diisi sesuai kolom Baris dari sheet Faktur'],
-			['DetailFaktur', 'Barang/Jasa', 'Ya', 'Lihat sheet REF: A = Barang, B = Jasa'],
-			['DetailFaktur', 'Kode Barang Jasa', 'Ya', 'Kode barang/jasa tanpa awalan A/B, contoh: 000000'],
-			['DetailFaktur', 'Nama Barang/Jasa', 'Ya', ''],
-			['DetailFaktur', 'Nama Satuan Ukur', 'Ya', 'Kode satuan ukur, contoh: UM.0001 (lihat pilihan pada form Buat Faktur)'],
-			['DetailFaktur', 'Harga Satuan', 'Ya', 'Maks 2 digit di belakang koma'],
-			['DetailFaktur', 'Jumlah Barang Jasa', 'Ya', ''],
-			['DetailFaktur', 'Total Diskon', 'Ya', "Isikan 0 jika tidak ada"],
-			['DetailFaktur', 'DPP Nilai Lain', 'Ya', ''],
-			['DetailFaktur', 'Tarif PPN', 'Ya', 'Ikut tarif yang berlaku'],
-			['DetailFaktur', 'Tarif PPnBM', 'Ya', "Isikan 0 jika tidak ada"]
-		]);
-		XLSX.utils.book_append_sheet(wb, keteranganSheet, 'Keterangan');
-
-		const buffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
-		const url = URL.createObjectURL(
-			new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
-		);
 		const link = document.createElement('a');
-		link.href = url;
+		link.href = '/templates/faktur-keluaran-template.xlsx';
 		link.download = 'Impor Data Faktur Keluaran.xlsx';
 		link.click();
-		URL.revokeObjectURL(url);
 	}
 </script>
+
+<svelte:head><title>Pajak Keluaran</title></svelte:head>
 
 <input
 	type="file"
@@ -197,108 +205,253 @@
 	form="import-faktur-form"
 	bind:this={fileInputEl}
 	onchange={submitImport}
-	class="tw:hidden"
+	hidden
 />
-<form {...importFaktur} id="import-faktur-form" enctype="multipart/form-data" class="tw:hidden"
-></form>
+<form {...importFaktur} id="import-faktur-form" enctype="multipart/form-data" hidden></form>
 
-<div class="tw:w-full tw:p-25">
-	<Card>
-		{#snippet head()}
-			<div class="tw:w-full tw:flex tw:flex-row tw:justify-between tw:items-center">
-				<span class="tw:text-2xl tw:h-10 tw:flex tw:items-center">Faktur Keluaran</span>
-				<div class="tw:flex tw:flex-row tw:gap-1">
-					<div class="dropdown">
-						<button
-							type="button"
-							class="btn btn-outline-secondary dropdown-toggle"
-							data-bs-toggle="dropdown"
-							aria-expanded="false">Impor Data</button
-						>
-						<ul class="dropdown-menu">
-							<li>
-								<button type="button" class="dropdown-item" onclick={() => fileInputEl?.click()}
-									>Pilih File</button
-								>
-							</li>
-							<li>
-								<button type="button" class="dropdown-item" onclick={downloadTemplate}
-									>Unduh Format Data (XML)</button
-								>
-							</li>
-							<li>
-								<button type="button" class="dropdown-item" onclick={downloadXlsxTemplate}
-									>Unduh Format Data (Excel)</button
-								>
-							</li>
-						</ul>
-					</div>
-					<form {...newEmpty}>
-						<Button>Buat Faktur</Button>
-					</form>
-				</div>
-			</div>
-		{/snippet}
-		{#snippet body()}
-			<div class="tw:min-h-100 tw:overflow-scroll">
-				<Table class="tw:w-full">
-					{#snippet head()}
-						<tr>
-							<th class="tw:w-[20rem]">Action</th>
-							<th class="tw:w-[15rem]">NPWP Pembeli</th>
-							<th class="tw:w-[15rem]">Nama Pembeli</th>
-							<th class="tw:w-[20rem]">Kode Transaksi</th>
-							<th class="tw:w-[15rem]">Nomor Faktur Pajak</th>
-							<th class="tw:w-[10rem]">Masa Pajak</th>
-							<th class="tw:w-[10rem]">Status</th>
-						</tr>
-					{/snippet}
-					{#snippet body()}
-						{#each await listFaktur() as { id, npwpPembeli, kodeTransaksi, nomorFaktur, masaPajak, dikreditkan, diupload }}
-							{@const delFaktur = deleteFaktur.for(id)}
-							{@const upldFaktur = uploadFaktur.for(id)}
-							{@const undupldFaktur = undoUploadFaktur.for(id)}
+{#snippet workspaceActions()}
+	<form {...newEmpty}>
+		<ActionButton type="submit" pending={newEmpty.pending > 0} pendingLabel="Membuka...">
+			Buat Faktur
+		</ActionButton>
+	</form>
+	<ActionMenu
+		label="Impor Data"
+		tone="quiet"
+		items={[
+			{
+				label: 'Pilih File',
+				onclick: () => fileInputEl?.click()
+			},
+			{ label: 'Unduh Format XML', onclick: downloadTemplate },
+			{ label: 'Unduh Format Excel', onclick: downloadXlsxTemplate }
+		]}
+	/>
+{/snippet}
+
+{#snippet workspaceTools()}
+	<ActionButton tone="quiet" disabled={!filtersActive} onclick={resetFilters}>
+		Bersihkan Filter
+	</ActionButton>
+{/snippet}
+
+<PageLayout contentWidth="1540px">
+	<Stack gap="16px">
+		<Breadcrumbs
+			separator="›"
+			items={[
+				{ label: 'Beranda', href: '/' },
+				{ label: 'e-Faktur' },
+				{ label: 'Pajak Keluaran' }
+			]}
+		/>
+
+		<ServiceWorkspace
+			bind:sidebarOpen
+			identity={{
+				eyebrow: 'Wajib Pajak',
+				name: accountName,
+				identifier: accountNpwp,
+				mark: 'EF'
+			}}
+			groups={[
+				{
+					label: 'e-Faktur',
+					links: [
+						{ label: 'Pajak Keluaran', href: '/faktur-pajak/keluaran', active: true },
+						{ label: 'Pajak Masukan', href: '/faktur-pajak/masukan' }
+					]
+				}
+			]}
+		>
+			<DataWorkspace
+				title="Pajak Keluaran"
+				secondaryActions={workspaceActions}
+				tools={workspaceTools}
+			>
+				<DataTableViewport
+					label="Daftar pajak keluaran"
+					minWidth="2360px"
+					framed={false}
+					headerTone="yellow"
+					density="compact"
+					stickyFirstColumn
+				>
+					<table>
+						<thead>
 							<tr>
-								<td>
-									<div class="tw:flex tw:flex-row tw:gap-1">
-										<a href="/faktur-pajak/{id}" class="tw:text-black!">
-											<Button>{!diupload ? 'Edit' : 'Lihat'}</Button>
-										</a>
-										{#if !diupload}
-											<form {...delFaktur}><Button class={"tw:text-white"} color="var(--color-danger)">Hapus</Button></form>
-											<form {...upldFaktur}><Button class={"tw:text-white"} color="var(--color-secondary)">Upload</Button></form>
-										{:else if diupload && !dikreditkan}
-											<form {...undupldFaktur}><Button class={"tw:text-white"} color="var(--color-danger)">Tarik</Button></form>
-										{/if}
-									</div>
-								</td>
-								<td>{npwpPembeli}</td>
-								<td>{(await getWajibPajak({ npwp: npwpPembeli }))?.nama ?? ''}</td>
-								<td>{transactionCodeOptions.find((option) => option.key === kodeTransaksi)?.value ?? ''}</td>
-								<td>{nomorFaktur}</td>
-								<td>{formatMonth(masaPajak)}</td>
-								<td>
-									{#if !diupload}
-										<span>Pending</span>
-									{:else if diupload && !dikreditkan}
-										<span>Uploaded</span>
-									{:else if diupload && dikreditkan}
-										<span>Accepted</span>
-									{/if}
-								</td>
+								<th style="width: 174px">Aksi</th>
+								<th style="width: 170px">NPWP Pembeli</th>
+								<th style="width: 190px">Nama Pembeli</th>
+								<th style="width: 235px">Kode Transaksi</th>
+								<th style="width: 180px">Nomor Faktur Pajak</th>
+								<th style="width: 130px">Tanggal Faktur</th>
+								<th style="width: 130px">Masa Pajak</th>
+								<th style="width: 90px">Tahun</th>
+								<th style="width: 120px">Status</th>
+								<th class="right" style="width: 140px">DPP</th>
+								<th class="right" style="width: 150px">DPP Nilai Lain</th>
+								<th class="right" style="width: 130px">PPN</th>
+								<th class="right" style="width: 130px">PPnBM</th>
+								<th style="width: 180px">Referensi</th>
 							</tr>
-						{/each}
-					{/snippet}
-				</Table>
-			</div>
-		{/snippet}
-	</Card>
-</div>
-
-<style>
-	th,
-	td {
-		padding-block: 0.5rem;
-		padding-inline: 1rem;
-	}
-</style>
+							<tr>
+								<th><span class="visually-hidden">Filter tabel</span></th>
+								<th>
+									<TableFilterField label="Filter NPWP pembeli" placeholder="Cari NPWP" bind:value={buyerNpwpFilter} />
+								</th>
+								<th>
+									<TableFilterField label="Filter nama pembeli" placeholder="Cari nama" bind:value={buyerNameFilter} />
+								</th>
+								<th>
+									<SelectField
+										label="Filter kode transaksi"
+										labelHidden
+										floatingPanel
+										bind:value={transactionFilter}
+										options={[
+											{ value: '', label: 'Semua kode' },
+											...transactionCodeOptions.map((option) => ({
+												value: option.key,
+												label: String(option.key).padStart(2, '0')
+											}))
+										]}
+									/>
+								</th>
+								<th>
+									<TableFilterField label="Filter nomor faktur" placeholder="Cari nomor" bind:value={invoiceNumberFilter} />
+								</th>
+								<th>
+									<DateField
+										label="Filter tanggal faktur"
+										labelHidden
+										floatingPanel
+										placeholder="Tanggal"
+										bind:value={invoiceDateFilter}
+									/>
+								</th>
+								<th>
+									<SelectField
+										label="Filter masa pajak"
+										labelHidden
+										floatingPanel
+										bind:value={monthFilter}
+										options={[
+											{ value: '', label: 'Semua masa' },
+											...Array.from({ length: 12 }, (_, index) => ({
+												value: index + 1,
+												label: formatMonth(index + 1)
+											}))
+										]}
+									/>
+								</th>
+								<th>
+									<SelectField
+										label="Filter tahun pajak"
+										labelHidden
+										floatingPanel
+										bind:value={yearFilter}
+										options={[{ value: '', label: 'Semua' }, ...yearOptions]}
+									/>
+								</th>
+								<th>
+									<SelectField
+										label="Filter status"
+										labelHidden
+										floatingPanel
+										bind:value={statusFilter}
+										options={[
+											{ value: '', label: 'Semua status' },
+											{ value: 'Pending', label: 'Pending' },
+											{ value: 'Uploaded', label: 'Uploaded' },
+											{ value: 'Accepted', label: 'Accepted' }
+										]}
+									/>
+								</th>
+								<th></th>
+								<th></th>
+								<th></th>
+								<th></th>
+								<th>
+									<TableFilterField label="Filter referensi" placeholder="Cari referensi" bind:value={referenceFilter} />
+								</th>
+							</tr>
+						</thead>
+						<DataTableBody
+							items={pagedInvoices}
+							getKey={(invoice) => invoice.id}
+							emptyColspan={14}
+							emptyText="Tidak ada faktur yang sesuai dengan filter."
+						>
+							{#snippet row(invoice)}
+								{@const delFaktur = deleteFaktur.for(invoice.id)}
+								{@const upldFaktur = uploadFaktur.for(invoice.id)}
+								{@const undupldFaktur = undoUploadFaktur.for(invoice.id)}
+								<td class="action-cell">
+										<form {...delFaktur} id={`delete-faktur-${invoice.id}`} hidden></form>
+										<form {...upldFaktur} id={`upload-faktur-${invoice.id}`} hidden></form>
+										<form {...undupldFaktur} id={`withdraw-faktur-${invoice.id}`} hidden></form>
+										<TableActions
+											visibleCount={4}
+											actions={[
+												{
+													label: invoice.diupload ? 'Lihat' : 'Edit',
+													href: `/faktur-pajak/${invoice.id}`
+												},
+												...(!invoice.diupload
+													? [
+															{
+																label: 'Upload',
+																onclick: () => submitForm(`upload-faktur-${invoice.id}`)
+															},
+															{
+																label: 'Hapus',
+																danger: true,
+																onclick: () => submitForm(`delete-faktur-${invoice.id}`)
+															}
+														]
+													: invoice.diupload && !invoice.dikreditkan
+														? [
+																{
+																	label: 'Tarik',
+																	danger: true,
+																	onclick: () => submitForm(`withdraw-faktur-${invoice.id}`)
+																}
+															]
+														: [])
+											]}
+										/>
+								</td>
+								<td><code>{invoice.npwpPembeli || '—'}</code></td>
+								<td><strong>{invoice.namaPembeli || '—'}</strong></td>
+								<td>{transactionLabel(invoice.kodeTransaksi)}</td>
+								<td><code>{invoice.nomorFaktur || '—'}</code></td>
+								<td class="number">{displayDate(invoice.tanggalFaktur)}</td>
+								<td>{formatMonth(invoice.masaPajak)}</td>
+								<td class="number">{invoice.tahun}</td>
+								<td>
+									<StatusBadge
+										label={statusLabel(invoice.diupload, invoice.dikreditkan)}
+										tone={statusTone(invoice.diupload, invoice.dikreditkan)}
+									/>
+								</td>
+								<td class="right amount">{rupiah.format(invoice.dpp)}</td>
+								<td class="right amount">{rupiah.format(invoice.dppNilaiLain)}</td>
+								<td class="right amount">{rupiah.format(invoice.ppn)}</td>
+								<td class="right amount">{rupiah.format(invoice.ppnbm)}</td>
+								<td>{invoice.referensi || '—'}</td>
+							{/snippet}
+						</DataTableBody>
+					</table>
+				</DataTableViewport>
+				<PaginationBar
+					bind:page={currentPage}
+					bind:pageSize
+					totalItems={filteredInvoices.length}
+					pageSizeOptions={[10, 25, 50, 100]}
+					itemLabel="faktur"
+				/>
+			</DataWorkspace>
+		</ServiceWorkspace>
+	</Stack>
+</PageLayout>

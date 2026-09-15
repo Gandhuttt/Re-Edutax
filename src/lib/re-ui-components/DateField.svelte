@@ -13,6 +13,8 @@
 		max?: string;
 		required?: boolean;
 		disabled?: boolean;
+		labelHidden?: boolean;
+		floatingPanel?: boolean;
 		locale?: string;
 		weekdays?: readonly string[];
 		calendarLabel?: string;
@@ -27,7 +29,7 @@
 </script>
 
 <script lang="ts">
-	import { onDestroy } from "svelte";
+	import { onDestroy, onMount, tick } from "svelte";
 	import { firstRemoteIssue, remoteFieldName } from "./remote-form";
 
 	let {
@@ -42,6 +44,8 @@
 		max = "",
 		required = false,
 		disabled = false,
+		labelHidden = false,
+		floatingPanel = false,
 		locale = "id-ID",
 		weekdays = ["Sen", "Sel", "Rab", "Kam", "Jum", "Sab", "Min"],
 		calendarLabel = `Pilih ${label}`,
@@ -66,7 +70,13 @@
 	let viewYear = $state(today.getFullYear());
 	let viewMonth = $state(today.getMonth());
 	let root = $state<HTMLDivElement>();
+	let trigger = $state<HTMLButtonElement>();
+	let calendarPanel = $state<HTMLDivElement>();
 	let closeTimer: ReturnType<typeof setTimeout> | undefined;
+	let calendarTop = $state(0);
+	let calendarLeft = $state(0);
+	let calendarWidth = $state(310);
+	let opensAbove = $state(false);
 	const resolvedValue = $derived(
 		field ? String(field.value() ?? value) : value,
 	);
@@ -93,6 +103,50 @@
 			...Array.from({ length: days }, (_, index) => index + 1),
 		];
 	});
+	function fixedContainingBlockOrigin() {
+		let current = trigger?.parentElement;
+		while (current) {
+			const style = getComputedStyle(current);
+			if (
+				style.transform !== "none" ||
+				style.perspective !== "none" ||
+				style.filter !== "none" ||
+				style.contain !== "none" ||
+				style.willChange.includes("transform")
+			) {
+				const rect = current.getBoundingClientRect();
+				return { left: rect.left, top: rect.top };
+			}
+			current = current.parentElement;
+		}
+		return { left: 0, top: 0 };
+	}
+	function positionFloatingPanel() {
+		if (!floatingPanel || !trigger) return;
+		const margin = 8;
+		const gap = 5;
+		const triggerRect = trigger.getBoundingClientRect();
+		const width = Math.min(310, window.innerWidth - margin * 2);
+		const panelHeight = calendarPanel?.offsetHeight || 330;
+		const spaceBelow = window.innerHeight - triggerRect.bottom - margin;
+		const spaceAbove = triggerRect.top - margin;
+		const origin = fixedContainingBlockOrigin();
+
+		opensAbove = spaceBelow < panelHeight && spaceAbove > spaceBelow;
+		calendarWidth = width;
+		calendarLeft =
+			Math.min(
+				Math.max(margin, triggerRect.left),
+				window.innerWidth - width - margin,
+			) - origin.left;
+		calendarTop =
+			(opensAbove
+				? Math.max(margin, triggerRect.top - panelHeight - gap)
+				: Math.min(
+						triggerRect.bottom + gap,
+						window.innerHeight - panelHeight - margin,
+					)) - origin.top;
+	}
 	function toIso(year: number, month: number, day: number) {
 		return `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
 	}
@@ -110,7 +164,7 @@
 				}).format(parsed)
 			: date;
 	}
-	function openPanel() {
+	async function openPanel() {
 		if (disabled) return;
 		clearTimeout(closeTimer);
 		const selected = parseDate(resolvedValue) ?? today;
@@ -118,6 +172,8 @@
 		viewMonth = selected.getMonth();
 		closing = false;
 		open = true;
+		await tick();
+		positionFloatingPanel();
 	}
 	function closePanel() {
 		if (!open || closing) return;
@@ -157,6 +213,20 @@
 		if (expanded && root && !root.contains(event.target as Node))
 			closePanel();
 	}
+	function handleDocumentScroll(event: Event) {
+		if (
+			floatingPanel &&
+			expanded &&
+			root &&
+			!root.contains(event.target as Node)
+		) {
+			positionFloatingPanel();
+		}
+	}
+	onMount(() => {
+		document.addEventListener("scroll", handleDocumentScroll, true);
+		return () => document.removeEventListener("scroll", handleDocumentScroll, true);
+	});
 	onDestroy(() => clearTimeout(closeTimer));
 </script>
 
@@ -165,14 +235,24 @@
 	onkeydown={(event) => {
 		if (event.key === "Escape") closePanel();
 	}}
+	onresize={() => {
+		if (expanded) positionFloatingPanel();
+	}}
 />
 
-<div class="date-field" class:error={Boolean(resolvedError)} class:disabled bind:this={root}>
+<div
+	class="date-field"
+	class:error={Boolean(resolvedError)}
+	class:disabled
+	class:label-hidden={labelHidden}
+	bind:this={root}
+>
 	<span class="field-label" id="{id}-label"
 		>{label}{#if required}<em aria-hidden="true">*</em>{/if}</span
 	>
 	{#if resolvedName}<input type="hidden" name={resolvedName} value={resolvedValue} />{/if}
 	<button
+		bind:this={trigger}
 		class="date-trigger"
 		class:placeholder={!resolvedValue}
 		type="button"
@@ -191,12 +271,18 @@
 	</button>
 	{#if open}
 		<div
+			bind:this={calendarPanel}
 			class="calendar-panel"
 			class:closing
+			class:floating={floatingPanel}
+			class:opens-above={opensAbove}
 			id="{id}-calendar"
 			role="dialog"
 			aria-modal="false"
 			aria-label={calendarLabel}
+			style:--calendar-top={`${calendarTop}px`}
+			style:--calendar-left={`${calendarLeft}px`}
+			style:--calendar-width={`${calendarWidth}px`}
 		>
 			<div class="calendar-head">
 				<button
@@ -265,6 +351,32 @@
 		font-size: 12px;
 		font-weight: 700;
 	}
+	.label-hidden {
+		gap: 0;
+	}
+	.label-hidden .field-label {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		padding: 0;
+		margin: -1px;
+		overflow: hidden;
+		clip: rect(0, 0, 0, 0);
+		white-space: nowrap;
+		border: 0;
+	}
+	.label-hidden .date-trigger {
+		height: 30px;
+		padding: 0 6px 0 8px;
+		font-size: 10px;
+	}
+	.label-hidden .calendar-icon {
+		width: 17px;
+		height: 17px;
+	}
+	.label-hidden .calendar-panel {
+		top: 35px;
+	}
 	.field-label em {
 		margin-left: 3px;
 		color: #9b2f28;
@@ -290,6 +402,12 @@
 			border-color 140ms ease,
 			box-shadow 140ms ease,
 			background 140ms ease;
+	}
+	.date-trigger > span:first-child {
+		min-width: 0;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
 	}
 	.date-trigger:hover {
 		border-color: #7e8994;
@@ -359,6 +477,16 @@
 	.calendar-panel.closing {
 		pointer-events: none;
 		animation: calendar-leave 150ms ease-in forwards;
+	}
+	.calendar-panel.floating {
+		position: fixed;
+		z-index: 80;
+		top: var(--calendar-top);
+		left: var(--calendar-left);
+		width: var(--calendar-width);
+	}
+	.calendar-panel.floating.opens-above {
+		transform-origin: bottom;
 	}
 	.calendar-head {
 		min-height: 46px;
