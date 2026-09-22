@@ -1,6 +1,15 @@
 <script lang="ts">
-	import Table from '$lib/components/Table.svelte';
-	import Input from '$lib/components/Input.svelte';
+	import {
+		CheckboxField,
+		DataTableBody,
+		DataTableViewport,
+		FieldGrid,
+		FileUploadField,
+		FormField,
+		FormSection,
+		RadioGroup,
+		Stack
+	} from '$lib/re-ui-components';
 
 	let {
 		sptItem
@@ -21,171 +30,108 @@
 			iiiHRekeningNamaPemilik: string | null;
 		};
 	} = $props();
+
+	const rows = $derived([
+		{ code: 'A.', description: 'Pajak Keluaran yang harus dipungut sendiri (I.A.2 + I.A.3 + I.A.4 + I.A.5)', value: sptItem.iiiA },
+		{ code: 'B.', description: 'PPN disetor di muka dalam masa pajak yang sama', value: sptItem.iiiB },
+		{ code: 'C.', description: 'Pajak Masukan yang dapat diperhitungkan (II.G)', value: sptItem.iiiC },
+		{ code: 'D.', description: 'Kelebihan pemungutan PPN oleh Pemungut PPN', value: sptItem.iiiD },
+		{ code: 'E.', description: 'PPN kurang atau (lebih) bayar (III.A - III.B - III.C - III.D)', value: sptItem.iiiE },
+		{ code: 'F.', description: 'PPN kurang atau (lebih) bayar pada SPT yang dibetulkan sebelumnya', value: sptItem.iiiF },
+		{ code: 'G.', description: 'PPN kurang atau (lebih) bayar karena pembetulan SPT (III.E - III.F)', value: sptItem.iiiG }
+	]);
 </script>
 
-<Table class="tw:table-fixed tw:min-w-full tw:border-collapse" >
-	{#snippet head()}
-		<tr>
-			<th></th>
-			<th></th>
-			<th></th>
-			<th class="inputHead">PPN (Rupiah)</th>
-		</tr>
-	{/snippet}
-	{#snippet body()}
-		<tr>
-			<td class="tw:w-1">A.</td>
-			<td colspan="2">Pajak Keluaran yang harus dipungut sendiri (I.A.2 + I.A.3 + I.A.4 + I.A.5)</td
-			>
-			<td><Input type={'text'} value={sptItem.iiiA} disabled /></td>
-		</tr>
-		<tr>
-			<td class="tw:w-1">B.</td>
-			<td colspan="2">PPN disetor di muka dalam masa pajak yang sama</td>
-			<td><Input type={'text'} value={sptItem.iiiB} disabled /></td>
-		</tr>
-		<tr>
-			<td class="tw:w-1">C.</td>
-			<td colspan="2">Pajak Masukan yang dapat diperhitungkan (II.G)</td>
-			<td><Input type={'text'} value={sptItem.iiiC} disabled /></td>
-		</tr>
-		<tr>
-			<td class="tw:w-1">D.</td>
-			<td colspan="2">Kelebihan pemungutan PPN oleh Pemungut PPN</td>
-			<td><Input type={'text'} value={sptItem.iiiD} disabled /></td>
-		</tr>
-		<tr>
-			<td class="tw:w-1">E.</td>
-			<td colspan="2">PPN kurang atau (lebih) bayar (III.A - III.B - III.C - III.D)</td>
-			<td><Input type={'text'} value={sptItem.iiiE} disabled /></td>
-		</tr>
-		<tr>
-			<td class="tw:w-1">F.</td>
-			<td colspan="2">PPN kurang atau (lebih) bayar pada SPT yang dibetulkan sebelumnya</td>
-			<td><Input type={'text'} value={sptItem.iiiF} disabled /></td>
-		</tr>
-		<tr>
-			<td class="tw:w-1">G.</td>
-			<td colspan="2">PPN kurang atau (lebih) bayar karena pembetulan SPT (III.E - III.F)</td>
-			<td><Input type={'text'} value={sptItem.iiiG} disabled /></td>
-		</tr>
-		<tr>
-			<td class="tw:w-1">H.</td>
-			<td>Diminta untuk</td>
-			<td colspan="2">
-				<div class="tw:flex tw:flex-row tw:justify-center">
-					<div class="tw:mr-5 tw:flex tw:flex-col">
-						<div class="form-check">
-							<Input
-								type={'checkbox'}
-								id={'III-H-1'}
-								name={'check-ganti'}
-								checked={sptItem.iiiHGantiSptSebelumnya ?? false}
-							/>
-							<label class="form-check-label" for="III-H-1">Ganti SPT sebelumnya</label>
-						</div>
-						<div class="form-check">
-							<Input
-								type={'radio'}
-								id={'III-H-2'}
-								name={'radio-ganti'}
-								checked={sptItem.iiiHTindakan === 'dikompensasikan'}
-								value={'dikompensasikan'}
-							/>
-							<label class="form-check-label" for="III-H-2">1. Dikompensasikan</label>
-						</div>
-						<div class="form-check">
-							<Input
-								type={'radio'}
-								id={'III-H-3'}
-								name={'radio-ganti'}
-								checked={sptItem.iiiHTindakan === 'dikembalikan_pendahuluan'}
-								value={'dikembalikan_pendahuluan'}
-							/>
-							<label class="form-check-label" for="III-H-3"
-								>2. Dikembalikan melalui pengembalian pendahuluan</label
-							>
-						</div>
-						<div class="form-check">
-							<Input
-								type={'radio'}
-								id={'III-H-4'}
-								name={'radio-ganti'}
-								checked={sptItem.iiiHTindakan === 'dikembalikan_pemeriksaan'}
-								value={'dikembalikan_pemeriksaan'}
-							/>
-							<label class="form-check-label" for="III-H-4"
-								>3. Dikembalikan melalui pemeriksaan</label
-							>
-						</div>
-					</div>
-					<div>
-						<table>
-							<tbody>
-								<tr style="border: none;">
-									<td class="tw:w-[10rem]"><label for="III-H-5">Pilih Rekening Bank</label></td>
-									<td
-										><Input
-											type={'file'}
-											id={'III-H-5'}
-											value={sptItem.iiiHRekeningPilihBank}
-										/></td
-									>
-								</tr>
-								<tr style="border: none;">
-									<td class="tw:w-[10rem]"><label for="III-H-6">Nomor Rekening</label></td>
-									<td>
-										<Input
-											type={'text'}
-											id={'III-H-6'}
-											name="III_H_rekening_nomor"
-											value={sptItem.iiiHRekeningNomor}
-										/></td
-									>
-								</tr>
-								<tr style="border: none;">
-									<td class="tw:w-[10rem]"><label for="III-H-7">Nama Bank</label></td>
-									<td
-										><Input
-											type={'text'}
-											id={'III-H-7'}
-											name="III_H_rekening_namaBank"
-											value={sptItem.iiiHRekeningNamaBank}
-										/></td
-									>
-								</tr>
-								<tr style="border: none;">
-									<td class="tw:w-[10rem]"><label for="III-H-8">Nama Pemilik Rekening</label></td>
-									<td>
-										<Input
-											type={'text'}
-											id={'III-H-8'}
-											name="III_H_rekening_namaPemilik"
-											value={sptItem.iiiHRekeningNamaPemilik}
-										/></td
-									>
-								</tr>
-							</tbody>
-						</table>
-						<div class="tw:flex">
-							<div class="tw:h-1 tw:w-5"></div>
-						</div>
-					</div>
-				</div>
-			</td>
-		</tr>
-	{/snippet}
-</Table>
+<Stack gap="14px">
+	<div class="amount-table">
+		<DataTableViewport
+			label="Perhitungan PPN kurang bayar atau lebih bayar"
+			minWidth="760px"
+			headerTone="navy"
+			density="compact"
+		>
+		<table>
+			<thead>
+				<tr>
+					<th>Kode</th>
+					<th>Uraian</th>
+					<th class="number">PPN (Rupiah)</th>
+				</tr>
+			</thead>
+			<DataTableBody items={rows} getKey={(row) => row.code} emptyColspan={3} motion={false}>
+				{#snippet row(item)}
+					<td><strong>{item.code}</strong></td>
+					<td>{item.description}</td>
+					<td><FormField label={`PPN ${item.code}`} value={String(item.value)} disabled /></td>
+				{/snippet}
+			</DataTableBody>
+			</table>
+		</DataTableViewport>
+	</div>
+
+	<FormSection
+		number="H."
+		title="Diminta untuk"
+		description="Pilih tindak lanjut atas kelebihan bayar dan lengkapi rekening penerima."
+		bordered
+	>
+		<Stack gap="16px">
+			<CheckboxField
+				label="Ganti SPT sebelumnya"
+				name="check-ganti"
+				checked={sptItem.iiiHGantiSptSebelumnya ?? false}
+			/>
+			<RadioGroup
+				label="Tindakan"
+				name="radio-ganti"
+				value={sptItem.iiiHTindakan ?? ''}
+				options={[
+					{ value: 'dikompensasikan', label: '1. Dikompensasikan' },
+					{ value: 'dikembalikan_pendahuluan', label: '2. Dikembalikan melalui pengembalian pendahuluan' },
+					{ value: 'dikembalikan_pemeriksaan', label: '3. Dikembalikan melalui pemeriksaan' }
+				]}
+			/>
+			<FieldGrid columns={2} gap="14px 16px">
+				<FileUploadField
+					label="Pilih Rekening Bank"
+					hint={sptItem.iiiHRekeningPilihBank ? `Rekening terpilih: ${sptItem.iiiHRekeningPilihBank}` : ''}
+				/>
+				<FormField
+					label="Nomor Rekening"
+					name="III_H_rekening_nomor"
+					value={sptItem.iiiHRekeningNomor ?? ''}
+				/>
+				<FormField
+					label="Nama Bank"
+					name="III_H_rekening_namaBank"
+					value={sptItem.iiiHRekeningNamaBank ?? ''}
+				/>
+				<FormField
+					label="Nama Pemilik Rekening"
+					name="III_H_rekening_namaPemilik"
+					value={sptItem.iiiHRekeningNamaPemilik ?? ''}
+				/>
+			</FieldGrid>
+		</Stack>
+	</FormSection>
+</Stack>
 
 <style>
-	th,
-	td {
-		font-size: 0.9rem;
-		padding: 0.5rem;
+	.amount-table :global(.table-viewport td label .label) {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		padding: 0;
+		margin: -1px;
+		overflow: hidden;
+		clip: rect(0, 0, 0, 0);
+		white-space: nowrap;
+		border: 0;
 	}
-	.inputHead {
-		width: 10rem;
-		text-align: center;
-		vertical-align: middle;
+
+	.amount-table :global(.table-viewport td input) {
+		min-width: 9rem;
+		text-align: right;
+		font-variant-numeric: tabular-nums;
 	}
 </style>

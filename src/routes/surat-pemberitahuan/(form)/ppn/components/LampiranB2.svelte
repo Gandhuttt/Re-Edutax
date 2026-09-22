@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Table from '$lib/components/Table.svelte';
+	import { DataTableBody, DataTableViewport } from '$lib/re-ui-components';
 	import { formatRupiahDerived } from '$lib/helpers/rupiahInput';
 
 	let {
@@ -24,69 +24,54 @@
 	const totalPpnbm = $derived(rows.reduce((total, row) => total + row.ppnbm, 0));
 </script>
 
-<div class="tw:overflow-x-auto">
-	<Table class="tw:min-w-full">
-		{#snippet head()}
+<DataTableViewport
+	label="Lampiran B2 pajak masukan yang dapat dikreditkan"
+	minWidth="1380px"
+	framed={false}
+	headerTone="navy"
+	density="compact"
+>
+	<table>
+		<thead>
 			<tr>
-				<th class="tw:w-[4rem]">NO.</th>
-				<th>LAWAN TRANSAKSI</th>
-				<th>NPWP</th>
-				<th>NOMOR FAKTUR</th>
-				<th>TANGGAL FAKTUR</th>
-				<th class="tw:text-end">HARGA JUAL/DPP (RUPIAH)</th>
-				<th class="tw:text-end">DPP NILAI LAIN (RUPIAH)</th>
-				<th class="tw:text-end">PPN (RUPIAH)</th>
-				<th class="tw:text-end">PPNBM (RUPIAH)</th>
+				<th scope="col">No.</th>
+				<th scope="col">Lawan transaksi</th>
+				<th scope="col">NPWP</th>
+				<th scope="col">Nomor faktur</th>
+				<th scope="col">Tanggal faktur</th>
+				<th scope="col" class="right">Harga jual/DPP (Rupiah)</th>
+				<th scope="col" class="right">DPP nilai lain (Rupiah)</th>
+				<th scope="col" class="right">PPN (Rupiah)</th>
+				<th scope="col" class="right">PPnBM (Rupiah)</th>
 			</tr>
-		{/snippet}
-		{#snippet body()}
-			{#each rows as row, index (row.fakturPajakId)}
-				<tr>
-					<td>{index + 1}</td>
-					<td>{row.namaLawanTransaksi ?? '-'}</td>
-					<td>{row.npwpLawanTransaksi}</td>
-					<td>{row.nomorFaktur}</td>
-					<td>{row.tanggalFaktur}</td>
-					<td class="tw:text-end">{formatRupiahDerived(row.hargaJual)}</td>
-					<td class="tw:text-end">{formatRupiahDerived(row.dppNilaiLain)}</td>
-					<td class="tw:text-end">{formatRupiahDerived(row.ppn)}</td>
-					<td class="tw:text-end">{formatRupiahDerived(row.ppnbm)}</td>
-				</tr>
-			{:else}
-				<tr><td colspan="9" class="tw:text-center">Tidak ada data yang ditemukan.</td></tr>
-			{/each}
-			<tr class="total">
-				<td colspan="5">JUMLAH</td>
-				<td class="tw:text-end">{formatRupiahDerived(totalHargaJual)}</td>
-				<td class="tw:text-end">{formatRupiahDerived(totalDppNilaiLain)}</td>
-				<td class="tw:text-end">{formatRupiahDerived(totalPpn)}</td>
-				<td class="tw:text-end">{formatRupiahDerived(totalPpnbm)}</td>
+		</thead>
+		<DataTableBody
+			items={rows}
+			getKey={(row) => row.fakturPajakId}
+			emptyColspan={9}
+			emptyText="Tidak ada data yang ditemukan."
+			motion={false}
+		>
+			{#snippet row(row, index)}
+				<td>{index + 1}</td>
+				<td>{row.namaLawanTransaksi ?? '-'}</td>
+				<td>{row.npwpLawanTransaksi}</td>
+				<td>{row.nomorFaktur}</td>
+				<td>{row.tanggalFaktur}</td>
+				<td class="number amount">{formatRupiahDerived(row.hargaJual)}</td>
+				<td class="number amount">{formatRupiahDerived(row.dppNilaiLain)}</td>
+				<td class="number amount">{formatRupiahDerived(row.ppn)}</td>
+				<td class="number amount">{formatRupiahDerived(row.ppnbm)}</td>
+			{/snippet}
+		</DataTableBody>
+		<tfoot>
+			<tr>
+				<th scope="row" colspan="5">Jumlah</th>
+				<td class="number amount">{formatRupiahDerived(totalHargaJual)}</td>
+				<td class="number amount">{formatRupiahDerived(totalDppNilaiLain)}</td>
+				<td class="number amount">{formatRupiahDerived(totalPpn)}</td>
+				<td class="number amount">{formatRupiahDerived(totalPpnbm)}</td>
 			</tr>
-		{/snippet}
-	</Table>
-</div>
-
-<style>
-	th {
-		font-size: 0.7rem;
-		font-weight: bold;
-		text-align: center;
-		padding: 0.4rem 0.5rem;
-		white-space: nowrap;
-		background-color: var(--color-primary);
-		border: 1px solid white;
-	}
-	td {
-		font-size: 0.8rem;
-		padding: 0.25rem 0.5rem;
-		border: 1px solid white;
-	}
-	tr:not(.total):nth-child(odd) {
-		background-color: #f9f6ee;
-	}
-	tr.total td {
-		font-weight: bold;
-		background-color: var(--color-primary);
-		border: 1px solid white;
-	}
-</style>
+		</tfoot>
+	</table>
+</DataTableViewport>

@@ -1,231 +1,334 @@
 <script lang="ts">
-	import Button from '$lib/components/Button.svelte';
-	import Card from '$lib/components/Card.svelte';
-	import Select from '$lib/components/Select.svelte';
-	import Table from '$lib/components/Table.svelte';
+	import { page as appPage } from '$app/state';
 	import { formatMonth } from '$lib/helpers/date';
+	import {
+		ActionButton,
+		Breadcrumbs,
+		DataTableBody,
+		DataTableViewport,
+		DataWorkspace,
+		InstitutionalModal,
+		PageLayout,
+		PaginationBar,
+		SelectField,
+		ServiceWorkspace,
+		Stack,
+		StatusBadge,
+		TableActions
+	} from '$lib/re-ui-components';
 	import { listSptPphBadan } from '../listSptPphBadan.remote';
 	import { listSptPphOrangPribadi } from '../listSptPphOrangPribadi.remote';
 	import { listSptPpn } from '../listSptPpn.remote';
+	import { deleteSptPphBadan } from './deleteSptPphBadan.remote';
+	import { deleteSptPphOrangPribadi } from './deleteSptPphOrangPribadi.remote';
 	import { newSptPphBadan } from './newSptPphBadan.remote';
 	import { newSptPphOrangPribadi } from './newSptPphOrangPribadi.remote';
 	import { newSptPpn } from './newSptPpn.remote';
-	import { deleteSptPphBadan } from './deleteSptPphBadan.remote';
-	import { deleteSptPphOrangPribadi } from './deleteSptPphOrangPribadi.remote';
+
+	type JenisSpt = 'ppn' | 'pph-badan' | 'pph-orang-pribadi';
+	type ConceptRow = {
+		id: string;
+		kind: JenisSpt;
+		jenis: string;
+		masaPajak: string;
+		tahun: number;
+		pembetulanKe: number;
+		ppnKeluaran: number | null;
+		ppnMasukan: number | null;
+		kurangLebihBayar: number;
+	};
 
 	const rupiah = new Intl.NumberFormat('id-ID');
-
 	const today = new Date();
-	const months = Array.from({ length: 12 }, (_, i) => i + 1);
-	const years = Array.from({ length: 6 }, (_, i) => today.getFullYear() - 3 + i);
-	// Both SPT PPh implementations follow tax-year-2025 rules specifically (rates, facilities,
-	// thresholds; PTKP and the progressive tariff on the orang pribadi side) - restrict creation
-	// to that year until a future year is verified.
+	const months = Array.from({ length: 12 }, (_, index) => index + 1);
+	const years = Array.from({ length: 6 }, (_, index) => today.getFullYear() - 3 + index);
+	// Both PPh implementations currently follow verified tax-year-2025 rules only.
 	const pphTahunPajakOptions = [2025];
-
-	// Which SPT the "Buat SPT" modal will create. The three creation remotes take
-	// different fields (PPN is a monthly return and needs masa + tahun; both PPh
-	// returns are annual and need only tahunPajak), so the modal swaps the whole
-	// form rather than trying to share one set of inputs.
-	type JenisSpt = 'ppn' | 'pph-badan' | 'pph-orang-pribadi';
-
 	const jenisSptOptions: { value: JenisSpt; label: string }[] = [
 		{ value: 'ppn', label: 'SPT Masa PPN' },
 		{ value: 'pph-badan', label: 'SPT Tahunan PPh Badan' },
 		{ value: 'pph-orang-pribadi', label: 'SPT Tahunan PPh Orang Pribadi' }
 	];
 
+	const [sptPpn, sptPphBadan, sptPphOrangPribadi] = await Promise.all([
+		listSptPpn({ status: 'konsep' }),
+		listSptPphBadan({ status: 'konsep' }),
+		listSptPphOrangPribadi({ status: 'konsep' })
+	]);
+	const rows = $derived.by((): ConceptRow[] => [
+		...sptPpn.map((row) => ({
+			id: row.id,
+			kind: 'ppn' as const,
+			jenis: 'SPT Masa PPN',
+			masaPajak: formatMonth(row.masaPajak),
+			tahun: row.tahun,
+			pembetulanKe: row.pembetulanKe,
+			ppnKeluaran: row.totalPpnKeluaran,
+			ppnMasukan: row.totalPpnMasukan,
+			kurangLebihBayar: row.ppnKurangLebihBayar
+		})),
+		...sptPphBadan.map((row) => ({
+			id: row.id,
+			kind: 'pph-badan' as const,
+			jenis: 'SPT Tahunan PPh Badan',
+			masaPajak: '—',
+			tahun: row.tahunPajak,
+			pembetulanKe: row.pembetulanKe,
+			ppnKeluaran: null,
+			ppnMasukan: null,
+			kurangLebihBayar: row.pphKurangLebihBayar
+		})),
+		...sptPphOrangPribadi.map((row) => ({
+			id: row.id,
+			kind: 'pph-orang-pribadi' as const,
+			jenis: 'SPT Tahunan PPh Orang Pribadi',
+			masaPajak: '—',
+			tahun: row.tahunPajak,
+			pembetulanKe: row.pembetulanKe,
+			ppnKeluaran: null,
+			ppnMasukan: null,
+			kurangLebihBayar: row.pphKurangLebihBayar
+		}))
+	]);
+
+	let sidebarOpen = $state(false);
+	let createDialogOpen = $state(false);
 	let jenisSpt = $state<JenisSpt>('ppn');
+	let masaPajak = $state(today.getMonth() + 1);
+	let tahun = $state(today.getFullYear());
+	let tahunPajakBadan = $state(pphTahunPajakOptions[0]);
+	let tahunPajakOrangPribadi = $state(pphTahunPajakOptions[0]);
+	let currentPage = $state(1);
+	let pageSize = $state(10);
+
+	const accountName = $derived(String(appPage.data.user?.name ?? 'Wajib Pajak'));
+	const accountNpwp = $derived(String(appPage.data.user?.username ?? ''));
+	const pagedRows = $derived(rows.slice((currentPage - 1) * pageSize, currentPage * pageSize));
+	const creationPending = $derived(
+		jenisSpt === 'ppn'
+			? newSptPpn.pending > 0
+			: jenisSpt === 'pph-badan'
+				? newSptPphBadan.pending > 0
+				: newSptPphOrangPribadi.pending > 0
+	);
+
+	function detailHref(row: ConceptRow) {
+		if (row.kind === 'ppn') return `/surat-pemberitahuan/ppn?id=${row.id}`;
+		if (row.kind === 'pph-badan') return `/surat-pemberitahuan/pph-badan?id=${row.id}`;
+		return `/surat-pemberitahuan/pph-orang-pribadi?id=${row.id}`;
+	}
+
+	function submitForm(id: string, confirmation?: string) {
+		if (confirmation && !confirm(confirmation)) return;
+		const form = document.getElementById(id);
+		if (form instanceof HTMLFormElement) form.requestSubmit();
+	}
 </script>
 
-<div class="tw:w-full tw:p-25">
-	<Card>
-		{#snippet head()}
-			<div class="tw:w-full tw:flex tw:flex-row tw:justify-between tw:items-center">
-				<span class="tw:text-2xl tw:h-10 tw:flex tw:items-center">Konsep SPT</span>
-				<Button data-bs-toggle="modal" data-bs-target="#modalBuatSpt">Buat SPT</Button>
-			</div>
-		{/snippet}
-		{#snippet body()}
-			<div class="tw:min-h-100 tw:overflow-scroll">
-				<Table class="tw:w-full">
-					{#snippet head()}
-						<tr>
-							<th class="tw:w-[10rem]">Action</th>
-							<th class="tw:w-[15rem]">Jenis SPT</th>
-							<th class="tw:w-[10rem]">Masa Pajak</th>
-							<th class="tw:w-[8rem]">Tahun</th>
-							<th class="tw:w-[12rem]">Pembetulan</th>
-							<th class="tw:w-[14rem]">PPN Keluaran</th>
-							<th class="tw:w-[14rem]">PPN Masukan</th>
-							<th class="tw:w-[14rem]">Kurang/Lebih Bayar</th>
-						</tr>
-					{/snippet}
-					{#snippet body()}
-						{#each await listSptPpn({ status: 'konsep' }) as row}
+<svelte:head><title>Konsep SPT</title></svelte:head>
+
+{#snippet workspaceActions()}
+	<ActionButton onclick={() => (createDialogOpen = true)}>Buat SPT</ActionButton>
+{/snippet}
+
+<PageLayout contentWidth="1540px">
+	<Stack gap="16px">
+		<Breadcrumbs
+			separator="›"
+			items={[
+				{ label: 'Beranda', href: '/' },
+				{ label: 'Surat Pemberitahuan' },
+				{ label: 'Konsep SPT' }
+			]}
+		/>
+
+		<ServiceWorkspace
+			bind:sidebarOpen
+			identity={{
+				eyebrow: 'Wajib Pajak',
+				name: accountName,
+				identifier: accountNpwp,
+				mark: 'SPT'
+			}}
+			groups={[
+				{
+					label: 'Surat Pemberitahuan',
+					links: [
+						{ label: 'Konsep SPT', href: '/surat-pemberitahuan/konsep', active: true },
+						{ label: 'Menunggu Pembayaran', href: '/surat-pemberitahuan/pembayaran' },
+						{ label: 'SPT Dilaporkan', href: '/surat-pemberitahuan/laporan' }
+					]
+				}
+			]}
+		>
+			<DataWorkspace title="Konsep SPT" primaryActions={workspaceActions}>
+				<DataTableViewport
+					label="Daftar konsep SPT"
+					minWidth="1300px"
+					framed={false}
+					headerTone="yellow"
+					density="compact"
+					stickyFirstColumn
+				>
+					<table>
+						<thead>
 							<tr>
-								<td>
-									<a href="/surat-pemberitahuan/ppn?id={row.id}" class="tw:text-black!">
-										<Button>Buka</Button>
-									</a>
-								</td>
-								<td>SPT Masa PPN</td>
-								<td>{formatMonth(row.masaPajak)}</td>
-								<td>{row.tahun}</td>
-								<td>{row.pembetulanKe}</td>
-								<td>{rupiah.format(row.totalPpnKeluaran ?? 0)}</td>
-								<td>{rupiah.format(row.totalPpnMasukan ?? 0)}</td>
-								<td>{rupiah.format(row.ppnKurangLebihBayar)}</td>
+								<th style="width: 150px">Aksi</th>
+								<th style="width: 130px">Status</th>
+								<th style="width: 230px">Jenis SPT</th>
+								<th style="width: 130px">Masa Pajak</th>
+								<th style="width: 90px">Tahun</th>
+								<th style="width: 110px">Pembetulan</th>
+								<th class="right" style="width: 150px">PPN Keluaran</th>
+								<th class="right" style="width: 150px">PPN Masukan</th>
+								<th class="right" style="width: 180px">Kurang/Lebih Bayar</th>
 							</tr>
-						{/each}
-						{#each await listSptPphBadan({ status: 'konsep' }) as row}
-							<tr>
-								<td class="tw:flex tw:gap-2">
-									<a href="/surat-pemberitahuan/pph-badan?id={row.id}" class="tw:text-black!">
-										<Button>Buka</Button>
-									</a>
-									<form
-										{...deleteSptPphBadan.enhance(async (form) => {
-											if (confirm('Hapus konsep SPT PPh Badan ini?')) await form.submit();
-										})}
-									>
-										<input type="hidden" name="id" value={row.id} />
-										<Button class={"tw:text-white"} color="var(--color-danger)">Hapus</Button>
-									</form>
+						</thead>
+						<DataTableBody
+							items={pagedRows}
+							getKey={(row) => `${row.kind}-${row.id}`}
+							emptyColspan={9}
+							emptyText="Belum ada konsep SPT."
+						>
+							{#snippet row(row)}
+								<td class="action-cell">
+									{#if row.kind === 'pph-badan'}
+										<form {...deleteSptPphBadan} id={`delete-spt-pph-badan-${row.id}`} hidden>
+											<input type="hidden" name="id" value={row.id} />
+										</form>
+									{:else if row.kind === 'pph-orang-pribadi'}
+										<form {...deleteSptPphOrangPribadi} id={`delete-spt-pph-op-${row.id}`} hidden>
+											<input type="hidden" name="id" value={row.id} />
+										</form>
+									{/if}
+									<TableActions
+										visibleCount={2}
+										actions={[
+											{ label: 'Buka', href: detailHref(row) },
+											...(row.kind === 'pph-badan'
+												? [
+														{
+															label: 'Hapus',
+															danger: true,
+															onclick: () =>
+																submitForm(
+																	`delete-spt-pph-badan-${row.id}`,
+																	'Hapus konsep SPT PPh Badan ini?'
+																)
+														}
+													]
+												: row.kind === 'pph-orang-pribadi'
+													? [
+															{
+																label: 'Hapus',
+																danger: true,
+																onclick: () =>
+																	submitForm(
+																		`delete-spt-pph-op-${row.id}`,
+																		'Hapus konsep SPT PPh Orang Pribadi ini?'
+																	)
+															}
+														]
+													: [])
+										]}
+									/>
 								</td>
-								<td>SPT Tahunan PPh Badan</td>
-								<td>-</td>
-								<td>{row.tahunPajak}</td>
-								<td>{row.pembetulanKe}</td>
-								<td>-</td>
-								<td>-</td>
-								<td>{rupiah.format(row.pphKurangLebihBayar)}</td>
-							</tr>
-						{/each}
-						{#each await listSptPphOrangPribadi({ status: 'konsep' }) as row}
-							<tr>
-								<td class="tw:flex tw:gap-2">
-									<a href="/surat-pemberitahuan/pph-orang-pribadi?id={row.id}" class="tw:text-black!">
-										<Button>Buka</Button>
-									</a>
-									<form
-										{...deleteSptPphOrangPribadi.enhance(async (form) => {
-											if (confirm('Hapus konsep SPT PPh Orang Pribadi ini?')) await form.submit();
-										})}
-									>
-										<input type="hidden" name="id" value={row.id} />
-										<Button class={"tw:text-white"} color="var(--color-danger)">Hapus</Button>
-									</form>
-								</td>
-								<td>SPT Tahunan PPh Orang Pribadi</td>
-								<td>-</td>
-								<td>{row.tahunPajak}</td>
-								<td>{row.pembetulanKe}</td>
-								<td>-</td>
-								<td>-</td>
-								<td>{rupiah.format(row.pphKurangLebihBayar)}</td>
-							</tr>
-						{/each}
-					{/snippet}
-				</Table>
-			</div>
-		{/snippet}
-	</Card>
-</div>
+								<td><StatusBadge label="Konsep" tone="attention" /></td>
+								<td><strong>{row.jenis}</strong></td>
+								<td>{row.masaPajak}</td>
+								<td class="number">{row.tahun}</td>
+								<td class="number">{row.pembetulanKe}</td>
+								<td class="right amount">{row.ppnKeluaran === null ? '—' : rupiah.format(row.ppnKeluaran)}</td>
+								<td class="right amount">{row.ppnMasukan === null ? '—' : rupiah.format(row.ppnMasukan)}</td>
+								<td class="right amount">{rupiah.format(row.kurangLebihBayar)}</td>
+							{/snippet}
+						</DataTableBody>
+					</table>
+				</DataTableViewport>
+				<PaginationBar
+					bind:page={currentPage}
+					bind:pageSize
+					totalItems={rows.length}
+					pageSizeOptions={[10, 25, 50]}
+					itemLabel="SPT"
+				/>
+			</DataWorkspace>
+		</ServiceWorkspace>
+	</Stack>
+</PageLayout>
 
+<InstitutionalModal
+	bind:open={createDialogOpen}
+	eyebrow="SURAT PEMBERITAHUAN"
+	title="Buat SPT"
+	size="wide"
+>
+	<Stack gap="17px">
+		<SelectField
+			label="Jenis SPT"
+			value={jenisSpt}
+			onchange={(value) => (jenisSpt = value as JenisSpt)}
+			options={jenisSptOptions}
+			required
+		/>
 
-<!-- Buat SPT. The jenis picker sits outside the form so switching it does not
-     tear down and rebuild the select the user is currently using; each branch
-     renders its own form, and the footer's submit reaches it by id. Only one
-     branch exists at a time, so the shared id is never duplicated. -->
-<div class="modal fade" id="modalBuatSpt" tabindex="-1" aria-labelledby="modalBuatSptLabel" aria-hidden="true">
-	<div class="modal-dialog modal-dialog-centered">
-		<div class="modal-content">
-			<div class="modal-header">
-				<h1 class="modal-title fs-5" id="modalBuatSptLabel" style="font-weight: bold; text-transform: uppercase;">
-					Buat SPT
-				</h1>
-				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
-			</div>
-			<div class="modal-body">
-				<div style="display: flex; flex-direction: column; gap: 10px;">
-					<div style="display: flex; align-items: center;">
-						<label for="modalBuatSpt-jenis" style="width: 180px;">Jenis SPT *</label>
-						<div style="flex: 1;">
-							<Select id="modalBuatSpt-jenis" bind:value={jenisSpt}>
-								{#each jenisSptOptions as opsi}
-									<option value={opsi.value}>{opsi.label}</option>
-								{/each}
-							</Select>
-						</div>
-					</div>
+		{#if jenisSpt === 'ppn'}
+			<form {...newSptPpn} id="form-buat-spt">
+				<Stack gap="17px">
+					<SelectField
+						label="Masa Pajak"
+						name="masaPajak"
+						bind:value={masaPajak}
+						options={months.map((month) => ({ value: month, label: formatMonth(month) }))}
+						required
+					/>
+					<SelectField
+						label="Tahun"
+						name="tahun"
+						bind:value={tahun}
+						options={years.map((yearOption) => ({ value: yearOption, label: String(yearOption) }))}
+						required
+					/>
+				</Stack>
+			</form>
+		{:else if jenisSpt === 'pph-badan'}
+			<form {...newSptPphBadan} id="form-buat-spt">
+				<SelectField
+					label="Tahun Pajak"
+					name="tahunPajak"
+					bind:value={tahunPajakBadan}
+					options={pphTahunPajakOptions.map((yearOption) => ({
+						value: yearOption,
+						label: String(yearOption)
+					}))}
+					required
+				/>
+			</form>
+		{:else}
+			<form {...newSptPphOrangPribadi} id="form-buat-spt">
+				<SelectField
+					label="Tahun Pajak"
+					name="tahunPajak"
+					bind:value={tahunPajakOrangPribadi}
+					options={pphTahunPajakOptions.map((yearOption) => ({
+						value: yearOption,
+						label: String(yearOption)
+					}))}
+					required
+				/>
+			</form>
+		{/if}
+	</Stack>
 
-					{#if jenisSpt === 'ppn'}
-						<form {...newSptPpn} id="formBuatSpt" style="display: contents;">
-							<div style="display: flex; align-items: center;">
-								<label for="modalBuatSpt-masa" style="width: 180px;">Masa Pajak *</label>
-								<div style="flex: 1;">
-									<Select id="modalBuatSpt-masa" name="masaPajak" value={String(today.getMonth() + 1)}>
-										{#each months as month}
-											<option value={String(month)}>{formatMonth(month)}</option>
-										{/each}
-									</Select>
-								</div>
-							</div>
-							<div style="display: flex; align-items: center;">
-								<label for="modalBuatSpt-tahun" style="width: 180px;">Tahun *</label>
-								<div style="flex: 1;">
-									<Select id="modalBuatSpt-tahun" name="tahun" value={String(today.getFullYear())}>
-										{#each years as year}
-											<option value={String(year)}>{year}</option>
-										{/each}
-									</Select>
-								</div>
-							</div>
-						</form>
-					{:else if jenisSpt === 'pph-badan'}
-						<form {...newSptPphBadan} id="formBuatSpt" style="display: contents;">
-							<div style="display: flex; align-items: center;">
-								<label for="modalBuatSpt-tahun-badan" style="width: 180px;">Tahun Pajak *</label>
-								<div style="flex: 1;">
-									<Select id="modalBuatSpt-tahun-badan" name="tahunPajak" value={String(pphTahunPajakOptions[0])}>
-										{#each pphTahunPajakOptions as year}
-											<option value={String(year)}>{year}</option>
-										{/each}
-									</Select>
-								</div>
-							</div>
-						</form>
-					{:else}
-						<form {...newSptPphOrangPribadi} id="formBuatSpt" style="display: contents;">
-							<div style="display: flex; align-items: center;">
-								<label for="modalBuatSpt-tahun-op" style="width: 180px;">Tahun Pajak *</label>
-								<div style="flex: 1;">
-									<Select id="modalBuatSpt-tahun-op" name="tahunPajak" value={String(pphTahunPajakOptions[0])}>
-										{#each pphTahunPajakOptions as year}
-											<option value={String(year)}>{year}</option>
-										{/each}
-									</Select>
-								</div>
-							</div>
-						</form>
-					{/if}
-				</div>
-			</div>
-			<div class="modal-footer" style="justify-content: flex-end;">
-				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-				<button type="submit" form="formBuatSpt" class="btn btn-primary" style="background-color: #1c398e; color: white;">
-					Buat
-				</button>
-			</div>
-		</div>
-	</div>
-</div>
-
-<style>
-	th,
-	td {
-		padding-block: 0.5rem;
-		padding-inline: 1rem;
-	}
-</style>
+	{#snippet actions()}
+		<ActionButton tone="quiet" onclick={() => (createDialogOpen = false)}>Batal</ActionButton>
+		<ActionButton
+			type="submit"
+			form="form-buat-spt"
+			pending={creationPending}
+			pendingLabel="Membuka..."
+		>
+			Buat
+		</ActionButton>
+	{/snippet}
+</InstitutionalModal>

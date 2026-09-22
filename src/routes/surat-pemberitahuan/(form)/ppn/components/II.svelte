@@ -1,6 +1,7 @@
 <script lang="ts">
-	import Table from '$lib/components/Table.svelte';
-	import Input from '$lib/components/Input.svelte';
+	import { DataTableBody, DataTableViewport, FormField } from '$lib/re-ui-components';
+
+	type Row = { code: string; description: string; values: (number | null)[]; total?: boolean };
 
 	let {
 		sptItem
@@ -32,130 +33,85 @@
 			iiJ: number;
 		};
 	} = $props();
+
+	const rows = $derived<Row[]>([
+		{ code: 'A.', description: 'Impor BKP, Pemanfaatan BKP Tidak Berwujud dan/atau JKP dari luar Daerah Pabean di dalam Daerah Pabean yang Pajak Masukannya dapat dikreditkan', values: [sptItem.iiADpp, null, sptItem.iiAPpn, sptItem.iiAPpnbm] },
+		{ code: 'B.', description: 'Perolehan BKP/JKP dari dalam negeri dengan DPP Nilai Lain atau Besaran Tertentu yang Pajak Masukannya dapat dikreditkan (dengan Faktur Pajak Kode 04 dan 05)', values: [sptItem.iiBDpp, sptItem.iiBDppNilaiLain, sptItem.iiBPpn, sptItem.iiBPpnbm] },
+		{ code: 'C.', description: 'Perolehan BKP/JKP dari dalam negeri selain dengan DPP Nilai Lain yang Pajak Masukannya dapat dikreditkan (dengan Faktur Pajak Kode 01, 09, dan 10)', values: [sptItem.iiCDpp, null, sptItem.iiCPpn, sptItem.iiCPpnbm] },
+		{ code: 'D.', description: 'Perolehan BKP/JKP dari dalam negeri sebagai Pemungutan PPN yang Pajak Masukannya dapat dikreditkan (dengan Faktur Pajak Kode 02 dan 03)', values: [sptItem.iiDDpp, sptItem.iiDDppNilaiLain, sptItem.iiDPpn, sptItem.iiDPpnbm] },
+		{ code: 'E.', description: 'Kompensasi kelebihan Pajak Masukan', values: [null, null, sptItem.iiE, null] },
+		{ code: 'F.', description: 'Hasil penghitungan kembali Pajak Masukan yang telah dikreditkan', values: [null, null, sptItem.iiF, null] },
+		{ code: 'G.', description: 'Jumlah Pajak Masukan yang dapat diperhitungkan (II.A + II.B + II.C + II.D + II.F)', values: [sptItem.iiGDpp, null, sptItem.iiGPpn, null], total: true },
+		{ code: 'H.', description: 'Impor atau perolehan BKP/JKP yang Pajak Masukannya tidak dikreditkan dan/atau impor atau perolehan BKP/JKP yang mendapat fasilitas', values: [sptItem.iiHDpp, sptItem.iiHDppNilaiLain, sptItem.iiHPpn, sptItem.iiHPpnbm] },
+		{ code: 'I.', description: 'Impor atau perolehan BKP/JKP dengan Faktur Pajak yang dilaporkan secara digunggung dan barang/jasa yang tidak terutang PPN', values: [sptItem.iiI, null, null, null] },
+		{ code: 'J.', description: 'Jumlah Perolehan (II.A + II.B + II.C + II.H + II.I)', values: [sptItem.iiJ, null, null, null], total: true }
+	]);
+	const valueLabels = ['Harga jual/penggantian/nilai impor/DPP', 'DPP nilai lain/DPP', 'PPN', 'PPnBM'];
 </script>
 
-<Table class="tw:table-fixed tw:min-w-full tw:border-collapse" >
-	{#snippet head()}
-		<tr>
-			<th></th>
-			<th></th>
-			<th class="inputHead">Harga Jual/Penggantian/Nilai Impor/DPP (Rupiah)</th>
-			<th class="inputHead">DPP Nilai Lain/DPP (Rupiah)</th>
-			<th class="inputHead">PPN (Rupiah)</th>
-			<th class="inputHead">PPnBM (Rupiah)</th>
-		</tr>
-	{/snippet}
-	{#snippet body()}
-		<tr>
-			<td>A.</td>
-			<td
-				>Impor BKP, Pemanfaatan BKP Tidak Berwujud dan/atau JKP dari luar Daerah Pabean di dalam
-				Daerah Pabean yang Pajak Masukannya dapat dikreditkan</td
-			>
-			<td><Input type={'text'} value={sptItem.iiADpp} disabled /></td>
-			<td class="tw:text-center">-</td>
-			<td><Input type={'text'} value={sptItem.iiAPpn} disabled /></td>
-			<td><Input type={'text'} value={sptItem.iiAPpnbm} disabled /></td>
-		</tr>
-		<tr>
-			<td>B.</td>
-			<td
-				>Perolehan BKP/JKP dari dalam negeri dengan DPP Nilai Lain atau Besaran Tertentu yang Pajak
-				Masukannya dapat dikreditkan (dengan Faktur Pajak Kode 04 dan 05)</td
-			>
-			<td><Input type={'text'} value={sptItem.iiBDpp} disabled /></td>
-			<td><Input type={'text'} value={sptItem.iiBDppNilaiLain} disabled /></td>
-			<td><Input type={'text'} value={sptItem.iiBPpn} disabled /></td>
-			<td><Input type={'text'} value={sptItem.iiBPpnbm} disabled /></td>
-		</tr>
-		<tr>
-			<td>C.</td>
-			<td
-				>Perolehan BKP/JKP dari dalam negeri selain dengan DPP Nilai Lain yang Pajak Masukannya
-				dapat dikreditkan (dengan Faktur Pajak Kode 01, 09, dan 10)</td
-			>
-			<td><Input type={'text'} value={sptItem.iiCDpp} disabled /></td>
-			<td class="tw:text-center">-</td>
-			<td><Input type={'text'} value={sptItem.iiCPpn} disabled /></td>
-			<td><Input type={'text'} value={sptItem.iiCPpnbm} disabled /></td>
-		</tr>
-		<tr>
-			<td>D.</td>
-			<td
-				>Perolehan BKP/JKP dari dalam negeri sebagai Pemungutan PPN yang Pajak Masukannya dapat
-				dikreditkan (dengan Faktur Pajak Kode 02 dan 03)</td
-			>
-			<td><Input type={'text'} value={sptItem.iiDDpp} disabled /></td>
-			<td><Input type={'text'} value={sptItem.iiDDppNilaiLain} disabled /></td>
-			<td><Input type={'text'} value={sptItem.iiDPpn} disabled /></td>
-			<td><Input type={'text'} value={sptItem.iiDPpnbm} disabled /></td>
-		</tr>
-		<tr>
-			<td>E.</td>
-			<td>Kompensasi kelebihan Pajak Masukan</td>
-			<td class="tw:text-center">-</td>
-			<td class="tw:text-center">-</td>
-			<td><Input type={'text'} value={sptItem.iiE} disabled /></td>
-			<td class="tw:text-center">-</td>
-		</tr>
-		<tr>
-			<td>F.</td>
-			<td>Hasil penghitungan kembali Pajak Masukan yang telah dikreditkan</td>
-			<td class="tw:text-center">-</td>
-			<td class="tw:text-center">-</td>
-			<td><Input type={'text'} value={sptItem.iiF} disabled /></td>
-			<td class="tw:text-center">-</td>
-		</tr>
-		<tr>
-			<td>G.</td>
-			<td>Jumlah Pajak Masukan yang dapat diperhitungkan (II.A + II.B + II.C + II.D + II.F)</td>
-			<td><Input type={'text'} value={sptItem.iiGDpp} disabled /></td>
-			<td class="tw:text-center">-</td>
-			<td><Input type={'text'} value={sptItem.iiGPpn} disabled /></td>
-			<td class="tw:text-center">-</td>
-		</tr>
-		<tr>
-			<td>H.</td>
-			<td
-				>Impor atau perolehan BKP/JKP yang Pajak Masukannya tidak dikreditkan dan/atau impor atau
-				perolehan BKP/JKP yang mendapat fasilitas</td
-			>
-			<td><Input type={'text'} value={sptItem.iiHDpp} disabled /></td>
-			<td><Input type={'text'} value={sptItem.iiHDppNilaiLain} disabled /></td>
-			<td><Input type={'text'} value={sptItem.iiHPpn} disabled /></td>
-			<td><Input type={'text'} value={sptItem.iiHPpnbm} disabled /></td>
-		</tr>
-		<tr>
-			<td>I.</td>
-			<td
-				>Impor atau perolehan BKP/JKP dengan Faktur Pajak yang dilaporkan secara digunggung dan barang/jasa
-				yang tidak terutang PPN</td
-			>
-			<td><Input type={'text'} value={sptItem.iiI} disabled /></td>
-			<td class="tw:text-center">-</td>
-			<td class="tw:text-center">-</td>
-			<td class="tw:text-center">-</td>
-		</tr>
-		<tr>
-			<td>J.</td>
-			<td>Jumlah Perolehan (II.A + II.B + II.C + II.H + II.I)</td>
-			<td><Input type={'text'} value={sptItem.iiJ} disabled /></td>
-			<td class="tw:text-center">-</td>
-			<td class="tw:text-center">-</td>
-			<td class="tw:text-center">-</td>
-		</tr>
-	{/snippet}
-</Table>
+<div class="amount-table">
+	<DataTableViewport
+		label="Perolehan barang dan jasa"
+		minWidth="1260px"
+		headerTone="navy"
+		density="compact"
+	>
+	<table>
+		<thead>
+			<tr>
+				<th>Kode</th>
+				<th>Uraian</th>
+				<th class="number">Harga Jual/Penggantian/Nilai Impor/DPP (Rupiah)</th>
+				<th class="number">DPP Nilai Lain/DPP (Rupiah)</th>
+				<th class="number">PPN (Rupiah)</th>
+				<th class="number">PPnBM (Rupiah)</th>
+			</tr>
+		</thead>
+		<DataTableBody items={rows} getKey={(row) => row.code} emptyColspan={6} motion={false}>
+			{#snippet row(item)}
+				<td><strong>{item.code}</strong></td>
+				<td class:total-copy={item.total}>{item.description}</td>
+				{#each item.values as value, index}
+					<td class:dash={value === null}>
+						{#if value === null}
+							<span aria-label="Tidak berlaku">—</span>
+						{:else}
+							<FormField label={`${valueLabels[index]} ${item.code}`} value={String(value)} disabled />
+						{/if}
+					</td>
+				{/each}
+			{/snippet}
+		</DataTableBody>
+		</table>
+	</DataTableViewport>
+</div>
 
 <style>
-	th,
-	td {
-		font-size: 0.9rem;
-		padding: 0.5rem;
+	.total-copy {
+		font-weight: 800;
 	}
-	.inputHead {
-		width: 10%;
+
+	.dash {
 		text-align: center;
-		vertical-align: middle;
+		color: var(--ui-muted);
+		font-weight: 800;
+	}
+
+	.amount-table :global(.table-viewport td label .label) {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		padding: 0;
+		margin: -1px;
+		overflow: hidden;
+		clip: rect(0, 0, 0, 0);
+		white-space: nowrap;
+		border: 0;
+	}
+
+	.amount-table :global(.table-viewport td input) {
+		min-width: 8.5rem;
+		text-align: right;
+		font-variant-numeric: tabular-nums;
 	}
 </style>

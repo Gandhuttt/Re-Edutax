@@ -1,7 +1,12 @@
 <script lang="ts">
-    import Input from "$lib/components/Input.svelte";
+	import {
+		CheckboxField,
+		DataTableBody,
+		DataTableViewport,
+		FormField
+	} from '$lib/re-ui-components';
 
-    let {
+	let {
 		sptItem
 	}: {
 		sptItem: {
@@ -20,68 +25,75 @@
 			viiiD: boolean | null;
 		};
 	} = $props();
+
+	const rows = $derived([
+		{ code: 'A.', description: 'Jumlah PPN dan PPnBM yang dipungut', values: [sptItem.viiiADpp, sptItem.viiiADppNilaiLain, sptItem.viiiAPpn, sptItem.viiiAPpnbm] },
+		{ code: 'B.', description: 'PPN dan PPnBM kurang atau (lebih) bayar pada SPT yang dibetulkan sebelumnya', values: [sptItem.viiiBDpp, sptItem.viiiBDppNilaiLain, sptItem.viiiBPpn, sptItem.viiiBPpnbm] },
+		{ code: 'C.', description: 'PPN dan PPnBM kurang atau (lebih) byar karena pembetulan SPT (VII.A - VII.B)', values: [sptItem.viiiCDpp, sptItem.viiiCDppNilaiLain, sptItem.viiiCPpn, sptItem.viiiCPpnbm] }
+	]);
+	const valueLabels = ['Harga jual/penggantian/DPP', 'DPP nilai lain/DPP', 'PPN', 'PPnBM'];
 </script>
 
-<table class="table table-hover align-middle">
-    <thead>
-        <tr>
-            <th></th>
-            <th></th>
-            <th class="inputHead">HARGA JUAL/PENGGANTIAN/DPP (Rupiah)</th>
-            <th class="inputHead">DPP NILAI LAIN/DPP (Rupiah)</th>
-            <th class="inputHead">PPN (Rupiah)</th>
-            <th class="inputHead">PPNBM (Rupiah)</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td class="tw:w-1">A.</td>
-            <td>Jumlah PPN dan PPnBM yang dipungut</td>
-            <td><Input type={'text'} value={sptItem.viiiADpp} disabled/></td>
-            <td><Input type={'text'} value={sptItem.viiiADppNilaiLain} disabled/></td>
-            <td><Input type={'text'} value={sptItem.viiiAPpn} disabled/></td>
-            <td><Input type={'text'} value={sptItem.viiiAPpnbm} disabled/></td>
-        </tr>
-        <tr>
-            <td class="tw:w-1">B.</td>
-            <td>PPN dan PPnBM kurang atau (lebih) bayar pada SPT yang dibetulkan sebelumnya</td>
-            <td><Input type={'text'} value={sptItem.viiiBDpp} disabled/></td>
-            <td><Input type={'text'} value={sptItem.viiiBDppNilaiLain} disabled/></td>
-            <td><Input type={'text'} value={sptItem.viiiBPpn} disabled/></td>
-            <td><Input type={'text'} value={sptItem.viiiBPpnbm} disabled/></td>
-        </tr>
-        <tr>
-            <td class="tw:w-1">C.</td>
-            <td>PPN dan PPnBM kurang atau (lebih) byar karena pembetulan SPT (VII.A - VII.B)</td>
-            <td><Input type={'text'} value={sptItem.viiiCDpp} disabled/></td>
-            <td><Input type={'text'} value={sptItem.viiiCDppNilaiLain} disabled/></td>
-            <td><Input type={'text'} value={sptItem.viiiCPpn} disabled/></td>
-            <td><Input type={'text'} value={sptItem.viiiCPpnbm} disabled/></td>
-        </tr>
-        <tr>
-            <td class="tw:w-1">D.</td>
-            <td class="tw:pt-5">
-                <Input type={"checkbox"} checked={sptItem.viiiD ?? false} id={"VIII-D"} disabled/>
-                <label for="VIII-D">Diminta pengembalian pajak yang tidak seharusnya terutang</label>
-            </td>
-            <td></td>
-            <td></td>
-            <td></td>
-            <td></td>
-        </tr>
-    </tbody>
-</table>
+<div class="amount-table">
+	<DataTableViewport
+		label="Pemungutan PPN atau PPN dan PPnBM oleh pihak lain"
+		minWidth="1120px"
+		headerTone="navy"
+		density="compact"
+	>
+	<table>
+		<thead>
+			<tr>
+				<th>Kode</th>
+				<th>Uraian</th>
+				<th class="number">Harga Jual/Penggantian/DPP (Rupiah)</th>
+				<th class="number">DPP Nilai Lain/DPP (Rupiah)</th>
+				<th class="number">PPN (Rupiah)</th>
+				<th class="number">PPnBM (Rupiah)</th>
+			</tr>
+		</thead>
+		<DataTableBody items={rows} getKey={(row) => row.code} emptyColspan={6} motion={false}>
+			{#snippet row(item)}
+				<td><strong>{item.code}</strong></td>
+				<td>{item.description}</td>
+				{#each item.values as value, index}
+					<td><FormField label={`${valueLabels[index]} ${item.code}`} value={String(value)} disabled /></td>
+				{/each}
+			{/snippet}
+		</DataTableBody>
+		<tbody>
+			<tr>
+				<td><strong>D.</strong></td>
+				<td colspan="5">
+					<CheckboxField
+						label="Diminta pengembalian pajak yang tidak seharusnya terutang"
+						checked={sptItem.viiiD ?? false}
+						id="VIII-D"
+						disabled
+					/>
+				</td>
+			</tr>
+		</tbody>
+		</table>
+	</DataTableViewport>
+</div>
 
 <style>
-    table{
-        margin: 0;
-    }
-    th, td, label {
-        font-size: .9rem;
-    }
-    .inputHead {
-        width: 10rem;
-        text-align: center;
-        vertical-align: middle;
-    }
+	.amount-table :global(.table-viewport td label .label) {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		padding: 0;
+		margin: -1px;
+		overflow: hidden;
+		clip: rect(0, 0, 0, 0);
+		white-space: nowrap;
+		border: 0;
+	}
+
+	.amount-table :global(.table-viewport td input:not([type='checkbox'])) {
+		min-width: 8.5rem;
+		text-align: right;
+		font-variant-numeric: tabular-nums;
+	}
 </style>

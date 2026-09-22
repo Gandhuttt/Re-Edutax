@@ -1,99 +1,215 @@
 <script lang="ts">
-	import Button from '$lib/components/Button.svelte';
-	import Card from '$lib/components/Card.svelte';
-	import Table from '$lib/components/Table.svelte';
+	import { page as appPage } from '$app/state';
 	import { formatMonth } from '$lib/helpers/date';
+	import {
+		Breadcrumbs,
+		DataTableBody,
+		DataTableViewport,
+		DataWorkspace,
+		PageLayout,
+		PaginationBar,
+		ServiceWorkspace,
+		Stack,
+		StatusBadge,
+		TableActions
+	} from '$lib/re-ui-components';
+	import { newPembetulanSptPphBadan } from '../konsep/newPembetulanSptPphBadan.remote';
+	import { newPembetulanSptPphOrangPribadi } from '../konsep/newPembetulanSptPphOrangPribadi.remote';
 	import { listSptPphBadan } from '../listSptPphBadan.remote';
 	import { listSptPphOrangPribadi } from '../listSptPphOrangPribadi.remote';
 	import { listSptPpn } from '../listSptPpn.remote';
-	import { newPembetulanSptPphBadan } from '../konsep/newPembetulanSptPphBadan.remote';
-	import { newPembetulanSptPphOrangPribadi } from '../konsep/newPembetulanSptPphOrangPribadi.remote';
+
+	type JenisSpt = 'ppn' | 'pph-badan' | 'pph-orang-pribadi';
+	type ReportedRow = {
+		id: string;
+		kind: JenisSpt;
+		jenis: string;
+		masaPajak: string;
+		tahun: number;
+		pembetulanKe: number;
+		kurangLebihBayar: number;
+		tanggalDilaporkan: Date | null;
+	};
 
 	const rupiah = new Intl.NumberFormat('id-ID');
+	const [sptPpn, sptPphBadan, sptPphOrangPribadi] = await Promise.all([
+		listSptPpn({ status: 'dilaporkan' }),
+		listSptPphBadan({ status: 'dilaporkan' }),
+		listSptPphOrangPribadi({ status: 'dilaporkan' })
+	]);
+	const rows = $derived.by((): ReportedRow[] => [
+		...sptPpn.map((row) => ({
+			id: row.id,
+			kind: 'ppn' as const,
+			jenis: 'SPT Masa PPN',
+			masaPajak: formatMonth(row.masaPajak),
+			tahun: row.tahun,
+			pembetulanKe: row.pembetulanKe,
+			kurangLebihBayar: row.ppnKurangLebihBayar,
+			tanggalDilaporkan: row.tanggalDilaporkan
+		})),
+		...sptPphBadan.map((row) => ({
+			id: row.id,
+			kind: 'pph-badan' as const,
+			jenis: 'SPT Tahunan PPh Badan',
+			masaPajak: '—',
+			tahun: row.tahunPajak,
+			pembetulanKe: row.pembetulanKe,
+			kurangLebihBayar: row.pphKurangLebihBayar,
+			tanggalDilaporkan: row.tanggalDilaporkan
+		})),
+		...sptPphOrangPribadi.map((row) => ({
+			id: row.id,
+			kind: 'pph-orang-pribadi' as const,
+			jenis: 'SPT Tahunan PPh Orang Pribadi',
+			masaPajak: '—',
+			tahun: row.tahunPajak,
+			pembetulanKe: row.pembetulanKe,
+			kurangLebihBayar: row.pphKurangLebihBayar,
+			tanggalDilaporkan: row.tanggalDilaporkan
+		}))
+	]);
+
+	let sidebarOpen = $state(false);
+	let currentPage = $state(1);
+	let pageSize = $state(10);
+
+	const accountName = $derived(String(appPage.data.user?.name ?? 'Wajib Pajak'));
+	const accountNpwp = $derived(String(appPage.data.user?.username ?? ''));
+	const pagedRows = $derived(rows.slice((currentPage - 1) * pageSize, currentPage * pageSize));
+
+	function detailHref(row: ReportedRow) {
+		if (row.kind === 'ppn') return `/surat-pemberitahuan/ppn?id=${row.id}`;
+		if (row.kind === 'pph-badan') return `/surat-pemberitahuan/pph-badan?id=${row.id}`;
+		return `/surat-pemberitahuan/pph-orang-pribadi?id=${row.id}`;
+	}
+
+	function submitForm(id: string) {
+		const form = document.getElementById(id);
+		if (form instanceof HTMLFormElement) form.requestSubmit();
+	}
 </script>
 
-<div class="tw:w-full tw:p-25">
-	<Card>
-		{#snippet head()}<span class="tw:text-2xl">SPT Dilaporkan</span>{/snippet}
-		{#snippet body()}
-			<div class="tw:min-h-100 tw:overflow-scroll">
-				<Table class="tw:w-full">
-					{#snippet head()}
-						<tr>
-							<th class="tw:w-[10rem]">Action</th>
-							<th class="tw:w-[15rem]">Jenis SPT</th>
-							<th class="tw:w-[10rem]">Masa Pajak</th>
-							<th class="tw:w-[8rem]">Tahun</th>
-							<th class="tw:w-[12rem]">Pembetulan</th>
-							<th class="tw:w-[14rem]">Kurang/Lebih Bayar</th>
-							<th class="tw:w-[14rem]">Tanggal Lapor</th>
-						</tr>
-					{/snippet}
-					{#snippet body()}
-						{#each await listSptPpn({ status: 'dilaporkan' }) as row}
-							<tr>
-								<td>
-									<a href="/surat-pemberitahuan/ppn?id={row.id}" class="tw:text-black!">
-										<Button>Lihat</Button>
-									</a>
-								</td>
-								<td>SPT Masa PPN</td>
-								<td>{formatMonth(row.masaPajak)}</td>
-								<td>{row.tahun}</td>
-								<td>{row.pembetulanKe}</td>
-								<td>{rupiah.format(row.ppnKurangLebihBayar)}</td>
-								<td>{row.tanggalDilaporkan?.toLocaleDateString('id-ID') ?? ''}</td>
-							</tr>
-						{/each}
-						{#each await listSptPphBadan({ status: 'dilaporkan' }) as row}
-							<tr>
-								<td class="tw:flex tw:gap-2">
-									<a href="/surat-pemberitahuan/pph-badan?id={row.id}" class="tw:text-black!">
-										<Button>Lihat</Button>
-									</a>
-									<form {...newPembetulanSptPphBadan}>
-										<input type="hidden" name="id" value={row.id} />
-										<Button>Buat Pembetulan</Button>
-									</form>
-								</td>
-								<td>SPT Tahunan PPh Badan</td>
-								<td>-</td>
-								<td>{row.tahunPajak}</td>
-								<td>{row.pembetulanKe}</td>
-								<td>{rupiah.format(row.pphKurangLebihBayar)}</td>
-								<td>{row.tanggalDilaporkan?.toLocaleDateString('id-ID') ?? ''}</td>
-							</tr>
-						{/each}
-						{#each await listSptPphOrangPribadi({ status: 'dilaporkan' }) as row}
-							<tr>
-								<td class="tw:flex tw:gap-2">
-									<a href="/surat-pemberitahuan/pph-orang-pribadi?id={row.id}" class="tw:text-black!">
-										<Button>Lihat</Button>
-									</a>
-									<form {...newPembetulanSptPphOrangPribadi}>
-										<input type="hidden" name="id" value={row.id} />
-										<Button>Buat Pembetulan</Button>
-									</form>
-								</td>
-								<td>SPT Tahunan PPh Orang Pribadi</td>
-								<td>-</td>
-								<td>{row.tahunPajak}</td>
-								<td>{row.pembetulanKe}</td>
-								<td>{rupiah.format(row.pphKurangLebihBayar)}</td>
-								<td>{row.tanggalDilaporkan?.toLocaleDateString('id-ID') ?? ''}</td>
-							</tr>
-						{/each}
-					{/snippet}
-				</Table>
-			</div>
-		{/snippet}
-	</Card>
-</div>
+<svelte:head><title>SPT Dilaporkan</title></svelte:head>
 
-<style>
-	th,
-	td {
-		padding-block: 0.5rem;
-		padding-inline: 1rem;
-	}
-</style>
+<PageLayout contentWidth="1480px">
+	<Stack gap="16px">
+		<Breadcrumbs
+			separator="›"
+			items={[
+				{ label: 'Beranda', href: '/' },
+				{ label: 'Surat Pemberitahuan' },
+				{ label: 'SPT Dilaporkan' }
+			]}
+		/>
+
+		<ServiceWorkspace
+			bind:sidebarOpen
+			identity={{
+				eyebrow: 'Wajib Pajak',
+				name: accountName,
+				identifier: accountNpwp,
+				mark: 'SPT'
+			}}
+			groups={[
+				{
+					label: 'Surat Pemberitahuan',
+					links: [
+						{ label: 'Konsep SPT', href: '/surat-pemberitahuan/konsep' },
+						{ label: 'Menunggu Pembayaran', href: '/surat-pemberitahuan/pembayaran' },
+						{
+							label: 'SPT Dilaporkan',
+							href: '/surat-pemberitahuan/laporan',
+							active: true
+						}
+					]
+				}
+			]}
+		>
+			<DataWorkspace title="SPT Dilaporkan">
+				<DataTableViewport
+					label="Daftar SPT dilaporkan"
+					minWidth="1120px"
+					framed={false}
+					headerTone="yellow"
+					density="compact"
+					stickyFirstColumn
+				>
+					<table>
+						<thead>
+							<tr>
+								<th style="width: 190px">Aksi</th>
+								<th style="width: 130px">Status</th>
+								<th style="width: 240px">Jenis SPT</th>
+								<th style="width: 130px">Masa Pajak</th>
+								<th style="width: 90px">Tahun</th>
+								<th style="width: 110px">Pembetulan</th>
+								<th class="right" style="width: 180px">Kurang/Lebih Bayar</th>
+								<th style="width: 150px">Tanggal Lapor</th>
+							</tr>
+						</thead>
+						<DataTableBody
+							items={pagedRows}
+							getKey={(row) => `${row.kind}-${row.id}`}
+							emptyColspan={8}
+							emptyText="Belum ada SPT yang dilaporkan."
+						>
+							{#snippet row(row)}
+								<td class="action-cell">
+									{#if row.kind === 'pph-badan'}
+										<form {...newPembetulanSptPphBadan} id={`correct-spt-pph-badan-${row.id}`} hidden>
+											<input type="hidden" name="id" value={row.id} />
+										</form>
+									{:else if row.kind === 'pph-orang-pribadi'}
+										<form
+											{...newPembetulanSptPphOrangPribadi}
+											id={`correct-spt-pph-op-${row.id}`}
+											hidden
+										>
+											<input type="hidden" name="id" value={row.id} />
+										</form>
+									{/if}
+									<TableActions
+										visibleCount={2}
+										actions={[
+											{ label: 'Lihat', href: detailHref(row) },
+											...(row.kind === 'pph-badan'
+												? [
+														{
+															label: 'Buat Pembetulan',
+															onclick: () => submitForm(`correct-spt-pph-badan-${row.id}`)
+														}
+													]
+												: row.kind === 'pph-orang-pribadi'
+													? [
+															{
+																label: 'Buat Pembetulan',
+																onclick: () => submitForm(`correct-spt-pph-op-${row.id}`)
+															}
+														]
+													: [])
+										]}
+									/>
+								</td>
+								<td><StatusBadge label="Dilaporkan" tone="success" /></td>
+								<td><strong>{row.jenis}</strong></td>
+								<td>{row.masaPajak}</td>
+								<td class="number">{row.tahun}</td>
+								<td class="number">{row.pembetulanKe}</td>
+								<td class="right amount">{rupiah.format(row.kurangLebihBayar)}</td>
+								<td class="number">{row.tanggalDilaporkan?.toLocaleDateString('id-ID') ?? '—'}</td>
+							{/snippet}
+						</DataTableBody>
+					</table>
+				</DataTableViewport>
+				<PaginationBar
+					bind:page={currentPage}
+					bind:pageSize
+					totalItems={rows.length}
+					pageSizeOptions={[10, 25, 50]}
+					itemLabel="SPT"
+				/>
+			</DataWorkspace>
+		</ServiceWorkspace>
+	</Stack>
+</PageLayout>

@@ -4,7 +4,7 @@
 	// no import/customs-document tracking anywhere in this app yet. Building
 	// it requires a new document-entry flow, scoped out of the A-2/B-2/C round
 	// (see project memory ppn-normalization-and-xml-upload).
-	import Table from '$lib/components/Table.svelte';
+	import { DataTableBody, DataTableViewport } from '$lib/re-ui-components';
 	import { formatRupiahDerived } from '$lib/helpers/rupiahInput';
 
 	const rows: {
@@ -24,69 +24,54 @@
 	const totalPpnbm = $derived(rows.reduce((total, row) => total + row.ppnbm, 0));
 </script>
 
-<div class="tw:overflow-x-auto">
-	<Table class="tw:min-w-full">
-		{#snippet head()}
+<DataTableViewport
+	label="Lampiran B3 pajak masukan atas impor dan pemanfaatan dari luar daerah pabean"
+	minWidth="1390px"
+	framed={false}
+	headerTone="navy"
+	density="compact"
+>
+	<table>
+		<thead>
 			<tr>
-				<th class="tw:w-[4rem]">NO.</th>
-				<th>PENJUAL/PEMASOK</th>
-				<th>NEGARA ASAL</th>
-				<th>NOMOR DOKUMEN</th>
-				<th>TANGGAL DOKUMEN</th>
-				<th class="tw:text-end">DPP/NILAI IMPOR (RUPIAH)</th>
-				<th class="tw:text-end">DPP NILAI LAIN (RUPIAH)</th>
-				<th class="tw:text-end">PPN (RUPIAH)</th>
-				<th class="tw:text-end">PPNBM (RUPIAH)</th>
+				<th scope="col">No.</th>
+				<th scope="col">Penjual/pemasok</th>
+				<th scope="col">Negara asal</th>
+				<th scope="col">Nomor dokumen</th>
+				<th scope="col">Tanggal dokumen</th>
+				<th scope="col" class="right">DPP/nilai impor (Rupiah)</th>
+				<th scope="col" class="right">DPP nilai lain (Rupiah)</th>
+				<th scope="col" class="right">PPN (Rupiah)</th>
+				<th scope="col" class="right">PPnBM (Rupiah)</th>
 			</tr>
-		{/snippet}
-		{#snippet body()}
-			{#each rows as row, index (row.nomorDokumen)}
-				<tr>
-					<td>{index + 1}</td>
-					<td>{row.namaPenjual}</td>
-					<td>{row.negaraAsal}</td>
-					<td>{row.nomorDokumen}</td>
-					<td>{row.tanggalDokumen}</td>
-					<td class="tw:text-end">{formatRupiahDerived(row.dpp)}</td>
-					<td class="tw:text-end">{formatRupiahDerived(row.dppNilaiLain)}</td>
-					<td class="tw:text-end">{formatRupiahDerived(row.ppn)}</td>
-					<td class="tw:text-end">{formatRupiahDerived(row.ppnbm)}</td>
-				</tr>
-			{:else}
-				<tr><td colspan="9" class="tw:text-center">Tidak ada data yang ditemukan.</td></tr>
-			{/each}
-			<tr class="total">
-				<td colspan="5">JUMLAH</td>
-				<td class="tw:text-end">{formatRupiahDerived(totalDpp)}</td>
-				<td class="tw:text-end">{formatRupiahDerived(totalDppNilaiLain)}</td>
-				<td class="tw:text-end">{formatRupiahDerived(totalPpn)}</td>
-				<td class="tw:text-end">{formatRupiahDerived(totalPpnbm)}</td>
+		</thead>
+		<DataTableBody
+			items={rows}
+			getKey={(row) => row.nomorDokumen}
+			emptyColspan={9}
+			emptyText="Tidak ada data yang ditemukan."
+			motion={false}
+		>
+			{#snippet row(row, index)}
+				<td>{index + 1}</td>
+				<td>{row.namaPenjual}</td>
+				<td>{row.negaraAsal}</td>
+				<td>{row.nomorDokumen}</td>
+				<td>{row.tanggalDokumen}</td>
+				<td class="number amount">{formatRupiahDerived(row.dpp)}</td>
+				<td class="number amount">{formatRupiahDerived(row.dppNilaiLain)}</td>
+				<td class="number amount">{formatRupiahDerived(row.ppn)}</td>
+				<td class="number amount">{formatRupiahDerived(row.ppnbm)}</td>
+			{/snippet}
+		</DataTableBody>
+		<tfoot>
+			<tr>
+				<th scope="row" colspan="5">Jumlah</th>
+				<td class="number amount">{formatRupiahDerived(totalDpp)}</td>
+				<td class="number amount">{formatRupiahDerived(totalDppNilaiLain)}</td>
+				<td class="number amount">{formatRupiahDerived(totalPpn)}</td>
+				<td class="number amount">{formatRupiahDerived(totalPpnbm)}</td>
 			</tr>
-		{/snippet}
-	</Table>
-</div>
-
-<style>
-	th {
-		font-size: 0.7rem;
-		font-weight: bold;
-		text-align: center;
-		padding: 0.4rem 0.5rem;
-		white-space: nowrap;
-		background-color: var(--color-primary);
-		border: 1px solid white;
-	}
-	td {
-		font-size: 0.8rem;
-		padding: 0.25rem 0.5rem;
-		border: 1px solid white;
-	}
-	tr:not(.total):nth-child(odd) {
-		background-color: #f9f6ee;
-	}
-	tr.total td {
-		font-weight: bold;
-		background-color: var(--color-primary);
-		border: 1px solid white;
-	}
-</style>
+		</tfoot>
+	</table>
+</DataTableViewport>
