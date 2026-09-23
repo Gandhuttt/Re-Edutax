@@ -58,7 +58,7 @@
 					<th class="number">PPN (Rupiah)</th>
 				</tr>
 			</thead>
-			<DataTableBody items={rows} getKey={(row) => row.code} emptyColspan={3} motion={false}>
+			<DataTableBody items={rows} getKey={(row) => row.code} emptyColspan={3}>
 				{#snippet row(item)}
 					<td><strong>{item.code}</strong></td>
 					<td>{item.description}</td>

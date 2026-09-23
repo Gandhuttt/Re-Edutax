@@ -203,7 +203,7 @@
 				<th class="number">PPnBM (Rupiah)</th>
 			</tr>
 		</thead>
-		<DataTableBody items={rows} getKey={(row, index) => `${index}-${row.code}`} emptyColspan={6} motion={false}>
+		<DataTableBody items={rows} getKey={(row, index) => `${index}-${row.code}`} emptyColspan={6}>
 			{#snippet row(item)}
 				{#if item.group}
 					<td><strong>{item.code}</strong></td>

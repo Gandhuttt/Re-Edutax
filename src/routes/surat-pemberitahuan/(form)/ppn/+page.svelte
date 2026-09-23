@@ -3,6 +3,7 @@
 	import {
 		Breadcrumbs,
 		DisclosureItem,
+		DocumentWorkspace,
 		FormSection,
 		PageHeading,
 		PageLayout,
@@ -122,7 +123,8 @@
 	/>
 
 	<form {...saveForm} id="spt-save-form">
-		<Stack gap="14px">
+		<DocumentWorkspace>
+			<Stack gap="14px">
 				<PpnNavbar {tabs} bind:currentTab />
 
 				<DisclosureItem title="Identitas dan periode pelaporan" meta="Data PKP" bind:open={headerOpen}>
@@ -241,6 +243,8 @@
 				</div>
 
 			<PpnFooter {readonly} saveFormId="spt-save-form" reportFormId="spt-save-form" />
-		</Stack>
+			</Stack>
+		</DocumentWorkspace>
 	</form>
 </PageLayout>
+

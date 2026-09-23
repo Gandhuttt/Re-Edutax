@@ -46,7 +46,6 @@
 			getKey={(row) => row.nomorDokumen}
 			emptyColspan={8}
 			emptyText="Tidak ada data yang ditemukan."
-			motion={false}
 		>
 			{#snippet row(row, index)}
 				<td>{index + 1}</td>

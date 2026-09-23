@@ -16,6 +16,7 @@ export { default as DateField } from "./DateField.svelte";
 export { default as DisclosureItem } from "./DisclosureItem.svelte";
 export { default as DocumentTabs } from "./DocumentTabs.svelte";
 export { default as DocumentForm } from "./DocumentForm.svelte";
+export { default as DocumentWorkspace } from "./DocumentWorkspace.svelte";
 export { default as FieldGrid } from "./FieldGrid.svelte";
 export { default as FakturFormSection } from "./FakturFormSection.svelte";
 export { default as FileUploadField } from "./FileUploadField.svelte";
@@ -73,6 +74,7 @@ export type {
 	DocumentFormSection,
 	DocumentFormTotal,
 } from "./DocumentForm.svelte";
+export type { DocumentWorkspaceProps } from "./DocumentWorkspace.svelte";
 export type { FileUploadFieldProps } from "./FileUploadField.svelte";
 export type { FormFieldProps } from "./FormField.svelte";
 export type {

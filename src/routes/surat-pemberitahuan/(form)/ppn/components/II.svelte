@@ -67,7 +67,7 @@
 				<th class="number">PPnBM (Rupiah)</th>
 			</tr>
 		</thead>
-		<DataTableBody items={rows} getKey={(row) => row.code} emptyColspan={6} motion={false}>
+		<DataTableBody items={rows} getKey={(row) => row.code} emptyColspan={6}>
 			{#snippet row(item)}
 				<td><strong>{item.code}</strong></td>
 				<td class:total-copy={item.total}>{item.description}</td>

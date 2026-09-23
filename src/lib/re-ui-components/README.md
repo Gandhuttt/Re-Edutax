@@ -47,6 +47,9 @@ route supplies only content and state:
 </ReUiRoot>
 ```
 
+`DocumentWorkspace` owns the standard document entrance and active-tab panel
+motion while keeping every panel mounted, so routes do not need page-level CSS.
+
 `FakturFormSection` is the full interactive Faktur composition used by the UI
 lab. Its structure is built from the configurable `DocumentForm`, `LookupField`,
 and `ConditionalField` components rather than Faktur-only CSS. Lower-level
