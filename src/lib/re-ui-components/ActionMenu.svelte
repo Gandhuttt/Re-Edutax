@@ -20,7 +20,7 @@
 </script>
 
 <script lang="ts">
-	import { onDestroy, tick } from "svelte";
+	import { onDestroy, onMount, tick } from "svelte";
 
 	let {
 		label,
@@ -35,10 +35,56 @@
 	const id = $props.id();
 	let root = $state<HTMLDivElement>();
 	let trigger = $state<HTMLButtonElement>();
+	let menu = $state<HTMLDivElement>();
 	let open = $state(false);
 	let closing = $state(false);
 	let closeTimer: ReturnType<typeof setTimeout> | undefined;
+	let menuTop = $state(0);
+	let menuLeft = $state(0);
 	const expanded = $derived(open && !closing);
+
+	function fixedContainingBlockOrigin() {
+		let current = trigger?.parentElement;
+		while (current) {
+			const style = getComputedStyle(current);
+			if (
+				style.transform !== "none" ||
+				style.perspective !== "none" ||
+				style.filter !== "none" ||
+				style.contain !== "none" ||
+				style.willChange.includes("transform")
+			) {
+				const rect = current.getBoundingClientRect();
+				return { left: rect.left, top: rect.top };
+			}
+			current = current.parentElement;
+		}
+		return { left: 0, top: 0 };
+	}
+
+	function positionMenu() {
+		if (!trigger) return;
+		const margin = 8;
+		const gap = 6;
+		const triggerRect = trigger.getBoundingClientRect();
+		const menuWidth = menu?.offsetWidth || 210;
+		const menuHeight = menu?.offsetHeight || 120;
+		const origin = fixedContainingBlockOrigin();
+		const spaceBelow = window.innerHeight - triggerRect.bottom - margin;
+		const spaceAbove = triggerRect.top - margin;
+		const opensAbove = spaceBelow < menuHeight && spaceAbove > spaceBelow;
+		const preferredLeft = align === "end"
+			? triggerRect.right - menuWidth
+			: triggerRect.left;
+		const maxLeft = Math.max(margin, window.innerWidth - menuWidth - margin);
+		const viewportLeft = Math.min(Math.max(margin, preferredLeft), maxLeft);
+		const viewportTop = opensAbove
+			? Math.max(margin, triggerRect.top - menuHeight - gap)
+			: Math.min(triggerRect.bottom + gap, window.innerHeight - menuHeight - margin);
+
+		menuLeft = viewportLeft - origin.left;
+		menuTop = viewportTop - origin.top;
+	}
 
 	function availableItems() {
 		if (!root) return [];
@@ -50,8 +96,9 @@
 		clearTimeout(closeTimer);
 		closing = false;
 		open = true;
+		await tick();
+		positionMenu();
 		if (focus !== "none") {
-			await tick();
 			const entries = availableItems();
 			entries[focus === "first" ? 0 : entries.length - 1]?.focus();
 		}
@@ -124,6 +171,14 @@
 		if (expanded && root && !root.contains(event.target as Node)) closeMenu();
 	}
 
+	function handleDocumentScroll() {
+		if (expanded) positionMenu();
+	}
+
+	onMount(() => {
+		document.addEventListener("scroll", handleDocumentScroll, true);
+		return () => document.removeEventListener("scroll", handleDocumentScroll, true);
+	});
 	onDestroy(() => clearTimeout(closeTimer));
 </script>
 
@@ -131,6 +186,9 @@
 	onclick={handleOutsideClick}
 	onfocusin={handleOutsideFocus}
 	onkeydown={handleWindowKeydown}
+	onresize={() => {
+		if (expanded) positionMenu();
+	}}
 />
 
 <div class="action-menu" class:align-end={align === "end"} bind:this={root}>
@@ -152,12 +210,15 @@
 	</button>
 	{#if open}
 		<div
+			bind:this={menu}
 			class="menu"
 			class:closing
 			id="{id}-menu"
 			role="menu"
 			tabindex="-1"
 			aria-label={menuLabel}
+			style:--menu-top={`${menuTop}px`}
+			style:--menu-left={`${menuLeft}px`}
 			onkeydown={handleMenuKeydown}
 		>
 			{#each items as item, index (`${index}-${item.label}`)}
@@ -224,10 +285,10 @@
 	.navy .chevron { color: var(--ui-yellow); }
 	.trigger[aria-expanded="true"] .chevron { transform: translateY(2px); }
 	.menu {
-		position: absolute;
+		position: fixed;
 		z-index: 45;
-		top: calc(100% + 6px);
-		left: 0;
+		top: var(--menu-top);
+		left: var(--menu-left);
 		min-width: 210px;
 		max-width: min(320px, calc(100vw - 28px));
 		padding: 5px;
@@ -240,7 +301,7 @@
 		transform-origin: top left;
 		animation: menu-enter 170ms cubic-bezier(0.2, 0.8, 0.2, 1);
 	}
-	.align-end .menu { right: 0; left: auto; transform-origin: top right; }
+	.align-end .menu { transform-origin: top right; }
 	.menu.closing { pointer-events: none; animation: menu-leave 140ms ease-in forwards; }
 	.menu button {
 		width: 100%;

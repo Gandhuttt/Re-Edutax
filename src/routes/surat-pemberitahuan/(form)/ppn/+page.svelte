@@ -6,7 +6,6 @@
 		FormSection,
 		PageHeading,
 		PageLayout,
-		ServiceWorkspace,
 		Stack,
 		StatusBadge
 	} from '$lib/re-ui-components';
@@ -53,7 +52,6 @@
 	const displayedLampiranC = $derived(postForm.result?.lampiran.c ?? lampiranC);
 
 	let currentTab = $state('Induk');
-	let sidebarOpen = $state(false);
 	let headerOpen = $state(true);
 	let sectionIOpen = $state(true);
 	let sectionIIOpen = $state(false);
@@ -74,32 +72,6 @@
 		{ tab: 'B-3', visibility: true },
 		{ tab: 'C', visibility: true }
 	];
-	const navigationGroups = [
-		{
-			label: 'Surat Pemberitahuan',
-			links: [
-				{
-					label: 'Konsep SPT',
-					description: 'Dokumen yang masih dapat disunting',
-					href: '/surat-pemberitahuan/konsep',
-					active: status === 'konsep'
-				},
-				{
-					label: 'Menunggu Pembayaran',
-					description: 'Kewajiban yang perlu diselesaikan',
-					href: '/surat-pemberitahuan/pembayaran',
-					active: status === 'menunggu_pembayaran'
-				},
-				{
-					label: 'SPT Dilaporkan',
-					description: 'Riwayat pelaporan',
-					href: '/surat-pemberitahuan/laporan',
-					active: status === 'dilaporkan'
-				}
-			]
-		}
-	];
-
 	let switchMasaPajak = $state(spt.masaPajak);
 	let switchTahun = $state(spt.tahun);
 
@@ -149,19 +121,8 @@
 		actions={headingActions}
 	/>
 
-	<ServiceWorkspace
-		identity={{
-			eyebrow: 'Pengusaha Kena Pajak',
-			name: taxpayer.nama,
-			identifier: taxpayer.npwp,
-			description: `${formatMonth(spt.masaPajak)} ${spt.tahun}`,
-			mark: 'SPT'
-		}}
-		groups={navigationGroups}
-		bind:sidebarOpen
-	>
-		<form {...saveForm} id="spt-save-form">
-			<Stack gap="14px">
+	<form {...saveForm} id="spt-save-form">
+		<Stack gap="14px">
 				<PpnNavbar {tabs} bind:currentTab />
 
 				<DisclosureItem title="Identitas dan periode pelaporan" meta="Data PKP" bind:open={headerOpen}>
@@ -279,8 +240,7 @@
 					</FormSection>
 				</div>
 
-				<PpnFooter {readonly} saveFormId="spt-save-form" reportFormId="spt-save-form" />
-			</Stack>
-		</form>
-	</ServiceWorkspace>
+			<PpnFooter {readonly} saveFormId="spt-save-form" reportFormId="spt-save-form" />
+		</Stack>
+	</form>
 </PageLayout>

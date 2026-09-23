@@ -25,6 +25,23 @@
 		class: className,
 		...props
 	}: Props = $props();
+	let contentSettled = $state(open);
+
+	$effect(() => {
+		if (!open) {
+			contentSettled = false;
+			return;
+		}
+
+		const reduceMotion = window.matchMedia(
+			"(prefers-reduced-motion: reduce)",
+		).matches;
+		const timer = setTimeout(
+			() => (contentSettled = true),
+			reduceMotion ? 0 : 220,
+		);
+		return () => clearTimeout(timer);
+	});
 
 	function toggle() {
 		open = !open;
@@ -46,7 +63,7 @@
 		>
 	</div>
 	<div class="content-grid" id="{id}-content">
-		<div class="content-inner">
+		<div class="content-inner" class:content-settled={open && contentSettled}>
 			<div class="disclosure-body"><div class="body-motion">{@render children()}</div></div>
 		</div>
 	</div>
@@ -169,6 +186,12 @@
 	.content-inner {
 		min-height: 0;
 		overflow: hidden;
+	}
+	.content-inner.content-settled {
+		overflow: visible;
+	}
+	.content-settled .body-motion {
+		transform: none;
 	}
 	.disclosure-body {
 		padding: 16px;
