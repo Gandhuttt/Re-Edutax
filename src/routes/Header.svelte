@@ -159,7 +159,7 @@
 					<button class="dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">eBupot</button>
 					<ul class="dropdown-menu">
 						<li><a class="dropdown-item" href="/ebupot/bukti-potong-saya">Bukti Potong Saya</a></li>
-						<li><a class="dropdown-item" href="/ebupot/bpu">BPU</a></li>
+						<li><a class="dropdown-item" href="/ebupot/bpu">BPPU</a></li>
 						<li><a class="dropdown-item" href="/ebupot/bp21">BP21</a></li>
 						<li><a class="dropdown-item" href="/ebupot/bp26">BP26</a></li>
 						<li><a class="dropdown-item" href="/ebupot/bpa1">BPA1</a></li>

@@ -40,11 +40,11 @@ export const terbitkanBpu = form(TerbitkanBpuSchema, async ({ id }) => {
 		.limit(1);
 
 	if (!existing) {
-		error(404, 'BPU draft tidak ditemukan');
+		error(404, 'BPPU draft tidak ditemukan');
 	}
 
 	if (existing.status !== 'SUBMITTED') {
-		error(400, 'BPU harus di-submit terlebih dahulu sebelum diterbitkan');
+		error(400, 'BPPU harus di-submit terlebih dahulu sebelum diterbitkan');
 	}
 
 	await db

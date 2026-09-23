@@ -56,7 +56,7 @@ export const updateBpu = form(UpdateBpuSchema, async (input) => {
 		.limit(1);
 
 	if (!existing) {
-		error(404, 'BPU draft tidak ditemukan');
+		error(404, 'BPPU draft tidak ditemukan');
 	}
 
 	if (input.nomorIdentitasWp.trim() === activeNpwp) {

@@ -91,7 +91,7 @@
 					description: "Dokumen yang diterima sebagai penerima penghasilan",
 					href: "/ebupot/bukti-potong-saya",
 				},
-				{ label: "BPU", description: "Bukti potong unifikasi", href: "/ebupot/bpu" },
+				{ label: "BPPU", description: "Bukti potong unifikasi", href: "/ebupot/bpu" },
 				{ label: "BP21", description: "Pemotongan PPh Pasal 21", href: "/ebupot/bp21" },
 			],
 		},

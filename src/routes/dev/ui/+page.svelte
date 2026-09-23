@@ -229,7 +229,7 @@
 	];
 	const records = [
 		{
-			id: "BPU-2026-00481",
+			id: "BPPU-2026-00481",
 			name: "PT Sumber Data Nusantara",
 			period: "Agustus 2026",
 			amount: "Rp 12.450.000",
@@ -237,7 +237,7 @@
 			tone: "attention" as const,
 		},
 		{
-			id: "BPU-2026-00480",
+			id: "BPPU-2026-00480",
 			name: "CV Karya Persada",
 			period: "Agustus 2026",
 			amount: "Rp 4.875.000",
@@ -245,7 +245,7 @@
 			tone: "neutral" as const,
 		},
 		{
-			id: "BPU-2026-00479",
+			id: "BPPU-2026-00479",
 			name: "Nadia Putri Lestari",
 			period: "Juli 2026",
 			amount: "Rp 1.250.000",
@@ -329,7 +329,7 @@
 					</PanelHeading>
 					<SummaryStrip
 						items={[
-							{ label: "Nomor dokumen", value: "BPU-2026-00482" },
+							{ label: "Nomor dokumen", value: "BPPU-2026-00482" },
 							{ label: "Masa pajak", value: "September 2026" },
 							{ label: "Status validasi", value: "3 dari 5 bagian" },
 						]}

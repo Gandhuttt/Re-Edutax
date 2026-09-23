@@ -34,7 +34,7 @@ export const submitBpu = form(async () => {
 		.limit(1);
 
 	if (!existing) {
-		error(404, 'BPU draft tidak ditemukan');
+		error(404, 'BPPU draft tidak ditemukan');
 	}
 
 	const missing =

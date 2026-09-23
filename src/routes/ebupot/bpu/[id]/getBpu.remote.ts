@@ -24,7 +24,7 @@ export const getBpu = query(async () => {
 		.limit(1);
 
 	if (!row) {
-		error(404, 'BPU tidak ditemukan');
+		error(404, 'BPPU tidak ditemukan');
 	}
 
 	return { ...row, canEdit: !row.diterbitkan };

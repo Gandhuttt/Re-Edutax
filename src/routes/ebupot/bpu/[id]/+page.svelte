@@ -339,7 +339,7 @@
 {/snippet}
 
 <div class="tw:w-full tw:p-25">
-	<div class="tw:text-2xl tw:mb-5">EBUPOT BPU</div>
+	<div class="tw:text-2xl tw:mb-5">EBUPOT BPPU</div>
 	{#if bpu.canEdit}
 		<form {...updateBpu}>{@render formContent()}</form>
 		<div class="tw:flex tw:flex-row tw:justify-end tw:items-center tw:mt-3 tw:gap-2">
