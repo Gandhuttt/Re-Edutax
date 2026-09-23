@@ -50,18 +50,19 @@
 </script>
 
 <div {...props} {id} class="disclosure {className ?? ""}" class:open>
-	<div class="disclosure-header">
-		<span class="title" id="{id}-title"
-			><strong>{title}</strong>{#if meta}<small>{meta}</small>{/if}</span
-		><button
-			type="button"
-			aria-expanded={open}
-			aria-controls="{id}-content"
-			aria-label={`${open ? collapseLabel : expandLabel}: ${title}`}
-			onclick={toggle}
-			><span class="symbol" aria-hidden="true"></span></button
-		>
-	</div>
+	<button
+		type="button"
+		class="disclosure-header"
+		aria-expanded={open}
+		aria-controls="{id}-content"
+		aria-label={`${open ? collapseLabel : expandLabel}: ${title}`}
+		onclick={toggle}
+	>
+		<span class="title" id="{id}-title">
+			<strong>{title}</strong>{#if meta}<small>{meta}</small>{/if}
+		</span>
+		<span class="symbol" aria-hidden="true"></span>
+	</button>
 	<div class="content-grid" id="{id}-content">
 		<div class="content-inner" class:content-settled={open && contentSettled}>
 			<div class="disclosure-body"><div class="body-motion">{@render children()}</div></div>
@@ -79,12 +80,19 @@
 		border-bottom: 1px solid var(--ui-line);
 	}
 	.disclosure-header {
+		width: 100%;
 		min-height: 48px;
 		padding: 9px 12px 9px 14px;
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
 		gap: 16px;
+		border: 0;
+		background: transparent;
+		color: inherit;
+		font: inherit;
+		text-align: left;
+		cursor: pointer;
 		transition:
 			background 140ms ease,
 			padding-left 180ms cubic-bezier(0.2, 0.8, 0.2, 1);
@@ -98,8 +106,7 @@
 	}
 	.title {
 		flex: 1;
-		user-select: text;
-		cursor: text;
+		user-select: none;
 	}
 	.title strong,
 	.title small {
@@ -114,21 +121,11 @@
 		color: var(--ui-muted);
 		font-size: 10px;
 	}
-	.disclosure-header button {
-		flex: 0 0 auto;
-		width: 29px;
-		height: 29px;
-		padding: 2px;
-		display: grid;
-		place-items: center;
-		border: 0;
-		background: transparent;
-		color: inherit;
-		cursor: pointer;
-	}
-	.disclosure-header button:focus-visible {
+	.disclosure-header:focus-visible {
+		position: relative;
+		z-index: 1;
 		outline: 3px solid var(--ui-yellow);
-		outline-offset: 1px;
+		outline-offset: -3px;
 	}
 	.symbol {
 		position: relative;
