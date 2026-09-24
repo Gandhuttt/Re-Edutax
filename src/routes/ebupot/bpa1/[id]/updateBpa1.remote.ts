@@ -37,6 +37,16 @@ const UpdateBpa1Schema = v.object({
 	kodeObjekPajakId: requiredString('Nama Objek Pajak harus dipilih'),
 	fasilitasPajakId: requiredString('Fasilitas Pajak harus dipilih'),
 	jenisPemotongan: v.picklist(jenisPemotonganValues, 'Jenis Pemotongan harus dipilih'),
+	jumlahBulan: v.optional(
+		v.pipe(
+			v.string(),
+			v.nonEmpty('Number Of Months harus diisi'),
+			v.transform(Number),
+			v.integer('Number Of Months harus berupa bilangan bulat'),
+			v.minValue(1, 'Number Of Months minimal 1'),
+			v.maxValue(12, 'Number Of Months maksimal 12')
+		)
+	),
 	gajiPensiunThtJht: rupiahString('Gaji/Pensiun atau THT/JHT'),
 	tunjanganPph: optionalRupiah('Tunjangan PPh'),
 	tunjanganLainnya: optionalRupiah('Tunjangan Lainnya'),
@@ -96,6 +106,11 @@ export const updateBpa1 = form(UpdateBpa1Schema, async (input) => {
 		(input.tahunAkhir === input.tahunAwal && input.masaPajakAkhir < input.masaPajakAwal)
 	) {
 		error(400, 'Masa Pajak Akhir tidak boleh sebelum Masa Pajak Awal');
+	}
+	const isDisetahunkan = input.jenisPemotongan === 'KURANG_SETAHUN_DISETAHUNKAN';
+	const jumlahBulan = isDisetahunkan ? input.jumlahBulan : null;
+	if (isDisetahunkan && jumlahBulan === undefined) {
+		error(400, 'Number Of Months harus diisi');
 	}
 
 	const [objekPajak] = await db
@@ -160,6 +175,7 @@ export const updateBpa1 = form(UpdateBpa1Schema, async (input) => {
 		input.masaPajakAkhir,
 		input.tahunAkhir
 	);
+	const annualizationMonthCount = jumlahBulan ?? monthCount;
 	const biayaJabatan = calculateBiayaJabatan(penghasilanBruto, monthCount);
 	const iuranPensiun = Number(input.iuranPensiun);
 	const zakat = Number(input.zakat);
@@ -170,14 +186,10 @@ export const updateBpa1 = form(UpdateBpa1Schema, async (input) => {
 	const netoGabungan = penghasilanNeto + penghasilanNetoSebelumnya;
 
 	// "Kurang dari setahun yang disetahunkan": annualize the combined Neto
-	// for bracket lookup (standard PPh 21 technique for a partial-year
-	// employee), then de-annualize the resulting tax back to this period.
-	// Not independently live-verified past the base bracket mechanism --
-	// see docs/ui-reference/coretax/ebupot/NOTES.md "BPA1" for what was and
-	// wasn't confirmed live this pass.
-	const isDisetahunkan = input.jenisPemotongan === 'KURANG_SETAHUN_DISETAHUNKAN';
+	// for bracket lookup using Coretax's explicit Number Of Months value,
+	// then de-annualize the resulting tax back to that period.
 	const penghasilanNetoSetahunDisetahunkan = isDisetahunkan
-		? Math.round((netoGabungan * 12) / monthCount)
+		? Math.round((netoGabungan * 12) / annualizationMonthCount)
 		: netoGabungan;
 
 	const penghasilanTidakKenaPajak = resolvePtkpAmount(input.statusPtkp);
@@ -195,7 +207,7 @@ export const updateBpa1 = form(UpdateBpa1Schema, async (input) => {
 
 	const pphPasal21AtasPkp = resolved.pajakPenghasilan;
 	const pphPasal21Terutang = isDisetahunkan
-		? Math.round((pphPasal21AtasPkp * monthCount) / 12)
+		? Math.round((pphPasal21AtasPkp * annualizationMonthCount) / 12)
 		: pphPasal21AtasPkp;
 	const pphPasal21DipotongSebelumnya = Number(input.pphPasal21DipotongSebelumnya);
 	const pphPasal21TerutangPadaIni = pphPasal21Terutang - pphPasal21DipotongSebelumnya;
@@ -232,6 +244,7 @@ export const updateBpa1 = form(UpdateBpa1Schema, async (input) => {
 			kodeObjekPajakId: objekPajak.id,
 			fasilitasPajakId: fasilitas.id,
 			jenisPemotongan: input.jenisPemotongan,
+			jumlahBulan,
 			gajiPensiunThtJht,
 			tunjanganPph,
 			tunjanganLainnya,

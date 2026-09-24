@@ -231,8 +231,9 @@ Much larger form than the others — this is the annual 1721-A1-equivalent.
 - Status PTKP* (select)
 - Jabatan* (text)
 - Nama Objek Pajak* → Jenis Pajak* / Kode Objek Pajak* (readonly, derived)
-- Jenis Pemotongan* (select — e.g. normal/berhenti/masih bekerja per akhir
-  tahun; exact option list not yet captured)
+- Jenis Pemotongan* (select — `Kurang dari Setahun`, `Kurang dari setahun
+  yang penghasilannya disetahunkan`, `Setahun Penuh`)
+- Number Of Months* (integer 1–12; shown only for the "disetahunkan" variant)
 
 **Penghasilan Bruto**
 - Gaji/Pensiun atau THT/JHT*
@@ -297,15 +298,14 @@ Much larger form than the others — this is the annual 1721-A1-equivalent.
   Minus` cumulative-bracket mechanism as BP21's pesangon objects. Live-
   verified exact: PKP 137,500,000 → PPh 14,625,000 (Tarif 15%).
 - **Jenis Pemotongan** — 3 options: `Kurang dari Setahun`, `Kurang dari
-  setahun yang penghasilannya disetahunkan`, `Setahun Penuh`. **Both**
-  "Setahun Penuh" and plain "Kurang dari Setahun" are now live-verified
-  identical (same 8-month period, K/0, 200,000,000 bruto → PPh 14,625,000
-  both times) — neither annualizes; `penghasilanNetoSetahunDisetahunkan`
-  correctly passes the combined Neto straight through for both. Only the
-  "disetahunkan" variant's actual annualize/de-annualize formula
-  (`× 12 / monthCount` then de-annualize the resulting tax back by
-  `× monthCount / 12`) remains **not** independently live-verified — it's
-  implemented per standard Indonesian payroll technique, not confirmed.
+  setahun yang penghasilannya disetahunkan`, `Setahun Penuh`. The
+  "disetahunkan" variant reveals a required **Number Of Months** field
+  (1–12); the reviewed Coretax example shows 10 for a January–October
+  period. **Both** "Setahun Penuh" and plain "Kurang dari Setahun" are
+  live-verified identical (same 8-month period, K/0, 200,000,000 bruto →
+  PPh 14,625,000 both times) and neither annualizes. The "disetahunkan"
+  formula uses the explicit Number Of Months value: `× 12 / numberOfMonths`,
+  then de-annualizes the resulting tax by `× numberOfMonths / 12`.
 - **Jenis Fasilitas** (BPA1's own facility field, distinct from other
   bukti types' Fasilitas Pajak) — 3 options mapping to `EBUPOT_TAX_
   CERTIFICATE` codes: `8` (Fasilitas Lainnya), `9` (Tanpa Fasilitas), `11`

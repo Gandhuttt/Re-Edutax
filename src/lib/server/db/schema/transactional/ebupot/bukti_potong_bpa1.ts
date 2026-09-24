@@ -56,6 +56,7 @@ export const bukti_potong_bpa1 = sqliteTable('bukti_potong_bpa1', {
 	jenisPemotongan: text('jenis_pemotongan', {
 		enum: ['KURANG_SETAHUN', 'KURANG_SETAHUN_DISETAHUNKAN', 'SETAHUN_PENUH']
 	}),
+	jumlahBulan: integer('jumlah_bulan'),
 
 	// Penghasilan Bruto components -- each a manual input, summed into
 	// penghasilanBruto at save time (see updateBpa1.remote.ts).

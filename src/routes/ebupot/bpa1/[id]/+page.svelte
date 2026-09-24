@@ -59,6 +59,12 @@
 	const monthCount = $derived(
 		(tahunAkhirState - tahunAwalState) * 12 + (masaPajakAkhirState - masaPajakAwalState) + 1
 	);
+	let jumlahBulanState = $state(
+		bpa1.jumlahBulan ??
+			(bpa1.tahunAkhir - bpa1.tahunAwal) * 12 +
+				(bpa1.masaPajakAkhir - bpa1.masaPajakAwal) +
+				1
+	);
 	const biayaJabatan = $derived(
 		Math.min(Math.round(jumlahPenghasilanBruto * 0.05), 500_000 * Math.max(monthCount, 0))
 	);
@@ -76,7 +82,9 @@
 	const netoGabungan = $derived(penghasilanNeto + penghasilanNetoSebelumnyaState);
 	const isDisetahunkan = $derived(jenisPemotonganState === 'KURANG_SETAHUN_DISETAHUNKAN');
 	const penghasilanNetoSetahunDisetahunkan = $derived(
-		isDisetahunkan && monthCount > 0 ? Math.round((netoGabungan * 12) / monthCount) : netoGabungan
+		isDisetahunkan && jumlahBulanState > 0
+			? Math.round((netoGabungan * 12) / jumlahBulanState)
+			: netoGabungan
 	);
 
 	const ptkpAmounts: Record<string, number> = {
@@ -120,8 +128,8 @@
 		};
 	});
 	const pphPasal21Terutang = $derived(
-		isDisetahunkan && monthCount > 0
-			? Math.round((resolvedTax.pajakPenghasilan * monthCount) / 12)
+		isDisetahunkan && jumlahBulanState > 0
+			? Math.round((resolvedTax.pajakPenghasilan * jumlahBulanState) / 12)
 			: resolvedTax.pajakPenghasilan
 	);
 	let pphDipotongSebelumnyaState = $state(bpa1.pphPasal21DipotongSebelumnya);
@@ -337,6 +345,22 @@
 							{/each}
 						</Select>
 					</Label>
+					{#if isDisetahunkan}
+						<Label>
+							<span>Number Of Months</span>
+							<Input
+								name="jumlahBulan"
+								type="number"
+								min="1"
+								max="12"
+								step="1"
+								id={getContext('id')}
+								bind:value={jumlahBulanState}
+								required
+								disabled={!bpa1.canEdit}
+							/>
+						</Label>
+					{/if}
 				</div>
 			{/snippet}
 		</Card>

@@ -42,6 +42,7 @@ export const submitBpa1 = form(async () => {
 		!existing.kodeObjekPajakId ||
 		!existing.fasilitasPajakId ||
 		!existing.jenisPemotongan ||
+		(existing.jenisPemotongan === 'KURANG_SETAHUN_DISETAHUNKAN' && !existing.jumlahBulan) ||
 		!existing.jenisDokumenId ||
 		!existing.nomorDokumen ||
 		!existing.tanggalDokumen ||

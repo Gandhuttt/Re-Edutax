@@ -1,0 +1,1 @@
+ALTER TABLE `bukti_potong_bpa1` ADD `jumlah_bulan` integer;

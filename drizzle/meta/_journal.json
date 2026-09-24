@@ -239,6 +239,13 @@
       "when": 1788084703434,
       "tag": "0033_wide_morbius",
       "breakpoints": true
+    },
+    {
+      "idx": 34,
+      "version": "6",
+      "when": 1790154356566,
+      "tag": "0034_stormy_alex_power",
+      "breakpoints": true
     }
   ]
 }
