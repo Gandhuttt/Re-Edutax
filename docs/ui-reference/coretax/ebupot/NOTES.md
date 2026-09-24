@@ -300,17 +300,20 @@ Much larger form than the others — this is the annual 1721-A1-equivalent.
 - **Jenis Pemotongan** — 3 options: `Kurang dari Setahun`, `Kurang dari
   setahun yang penghasilannya disetahunkan`, `Setahun Penuh`. The
   "disetahunkan" variant reveals a required **Number Of Months** field
-  (1–12); the reviewed Coretax example shows 10 for a January–October
-  period. **Both** "Setahun Penuh" and plain "Kurang dari Setahun" are
-  live-verified identical (same 8-month period, K/0, 200,000,000 bruto →
+  (1–12). It starts blank; downstream annualized values remain `0` until
+  a month count is entered. The reviewed Coretax example uses 10 for a
+  January–October period. **Both** "Setahun Penuh" and plain "Kurang dari
+  Setahun" are live-verified identical (same 8-month period, K/0,
+  200,000,000 bruto →
   PPh 14,625,000 both times) and neither annualizes. The "disetahunkan"
   formula uses the explicit Number Of Months value: `× 12 / numberOfMonths`,
   then de-annualizes the resulting tax by `× numberOfMonths / 12`.
 - **Jenis Fasilitas** (BPA1's own facility field, distinct from other
-  bukti types' Fasilitas Pajak) — 3 options mapping to `EBUPOT_TAX_
-  CERTIFICATE` codes: `8` (Fasilitas Lainnya), `9` (Tanpa Fasilitas), `11`
-  (PPh Pasal 21 Ditanggung Pemerintah/DTP — a Pasal-21-specific DTP code,
-  distinct from BPU's general code `4`).
+  bukti types' Fasilitas Pajak) — defaults to `Tanpa Fasilitas` on a new
+  Coretax BPA1 and offers 3 options mapping to `EBUPOT_TAX_CERTIFICATE`
+  codes: `8` (Fasilitas Lainnya), `9` (Tanpa Fasilitas), `11` (PPh Pasal
+  21 Ditanggung Pemerintah/DTP — a Pasal-21-specific DTP code, distinct
+  from BPU's general code `4`).
 - **Nomor Identitas WP → Nama lookup** confirmed live (same DJP
   taxpayer-master pattern as BP21): NIK `3273010101900001` →
   "INDRA SANJAYA".

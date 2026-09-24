@@ -5,6 +5,7 @@
 	import Label from '$lib/components/Label.svelte';
 	import Select from '$lib/components/Select.svelte';
 	import { formatMonth } from '$lib/helpers/date';
+	import { formatRupiahDerived } from '$lib/helpers/rupiahInput';
 	import { bpa1PtkpOptions } from '$lib/helpers/ptkp-bpa1';
 	import { getContext } from 'svelte';
 	import { getFasilitasPajakBpa1 } from '../../fasilitasPajak.remote';
@@ -34,7 +35,9 @@
 	let statusPtkpState = $state(bpa1.statusPtkp ?? '');
 	let jabatanState = $state(bpa1.jabatan);
 	let kodeObjekPajakIdState = $state(bpa1.kodeObjekPajakId ?? '');
-	let fasilitasPajakIdState = $state(bpa1.fasilitasPajakId ?? '');
+	let fasilitasPajakIdState = $state(
+		bpa1.fasilitasPajakId ?? fasilitasOptions.find((f) => f.kode === '9')?.id ?? ''
+	);
 	let jenisPemotonganState = $state(bpa1.jenisPemotongan ?? '');
 	const selectedObjekPajak = $derived(objekPajakOptions.find((o) => o.id === kodeObjekPajakIdState));
 	const nitkuPemotong = `${bpa1.npwpPemotong}000000`;
@@ -59,12 +62,7 @@
 	const monthCount = $derived(
 		(tahunAkhirState - tahunAwalState) * 12 + (masaPajakAkhirState - masaPajakAwalState) + 1
 	);
-	let jumlahBulanState = $state(
-		bpa1.jumlahBulan ??
-			(bpa1.tahunAkhir - bpa1.tahunAwal) * 12 +
-				(bpa1.masaPajakAkhir - bpa1.masaPajakAwal) +
-				1
-	);
+	let jumlahBulanState = $state<number | undefined>(bpa1.jumlahBulan ?? undefined);
 	const biayaJabatan = $derived(
 		Math.min(Math.round(jumlahPenghasilanBruto * 0.05), 500_000 * Math.max(monthCount, 0))
 	);
@@ -82,9 +80,11 @@
 	const netoGabungan = $derived(penghasilanNeto + penghasilanNetoSebelumnyaState);
 	const isDisetahunkan = $derived(jenisPemotonganState === 'KURANG_SETAHUN_DISETAHUNKAN');
 	const penghasilanNetoSetahunDisetahunkan = $derived(
-		isDisetahunkan && jumlahBulanState > 0
-			? Math.round((netoGabungan * 12) / jumlahBulanState)
-			: netoGabungan
+		!isDisetahunkan
+			? netoGabungan
+			: jumlahBulanState && jumlahBulanState > 0
+				? Math.round((netoGabungan * 12) / jumlahBulanState)
+				: 0
 	);
 
 	const ptkpAmounts: Record<string, number> = {
@@ -128,9 +128,11 @@
 		};
 	});
 	const pphPasal21Terutang = $derived(
-		isDisetahunkan && jumlahBulanState > 0
-			? Math.round((resolvedTax.pajakPenghasilan * jumlahBulanState) / 12)
-			: resolvedTax.pajakPenghasilan
+		!isDisetahunkan
+			? resolvedTax.pajakPenghasilan
+			: jumlahBulanState && jumlahBulanState > 0
+				? Math.round((resolvedTax.pajakPenghasilan * jumlahBulanState) / 12)
+				: 0
 	);
 	let pphDipotongSebelumnyaState = $state(bpa1.pphPasal21DipotongSebelumnya);
 	const pphTerutangPadaIni = $derived(pphPasal21Terutang - pphDipotongSebelumnyaState);
@@ -443,7 +445,7 @@
 					</Label>
 					<Label>
 						<span>Jumlah Penghasilan Bruto (Rp)</span>
-						<Input type="rupiah" id={getContext('id')} value={jumlahPenghasilanBruto} disabled />
+						<Input type="text" id={getContext('id')} value={formatRupiahDerived(jumlahPenghasilanBruto)} disabled />
 					</Label>
 				</div>
 			{/snippet}
@@ -457,7 +459,7 @@
 				<div class="tw:flex tw:flex-col tw:gap-3 tw:px-3">
 					<Label>
 						<span>Biaya Jabatan / Biaya Pensiun (Rp)</span>
-						<Input type="rupiah" id={getContext('id')} value={biayaJabatan} disabled />
+						<Input type="text" id={getContext('id')} value={formatRupiahDerived(biayaJabatan)} disabled />
 					</Label>
 					<Label>
 						<span>Iuran terkait Pensiun atau Hari Tua (Rp)</span>
@@ -481,11 +483,11 @@
 					</Label>
 					<Label>
 						<span>Jumlah Pengurangan (Rp)</span>
-						<Input type="rupiah" id={getContext('id')} value={jumlahPengurangan} disabled />
+						<Input type="text" id={getContext('id')} value={formatRupiahDerived(jumlahPengurangan)} disabled />
 					</Label>
 					<Label>
 						<span>Jumlah Penghasilan Neto (Rp)</span>
-						<Input type="rupiah" id={getContext('id')} value={penghasilanNeto} disabled />
+						<Input type="text" id={getContext('id')} value={formatRupiahDerived(penghasilanNeto)} disabled />
 					</Label>
 				</div>
 			{/snippet}
@@ -520,19 +522,19 @@
 					<Label>
 						<span>Jumlah Penghasilan Neto untuk Perhitungan PPh Pasal 21 (Setahun/Disetahunkan) (Rp)</span>
 						<Input
-							type="rupiah"
+							type="text"
 							id={getContext('id')}
-							value={penghasilanNetoSetahunDisetahunkan}
+							value={formatRupiahDerived(penghasilanNetoSetahunDisetahunkan)}
 							disabled
 						/>
 					</Label>
 					<Label>
 						<span>Penghasilan Tidak Kena Pajak (Rp)</span>
-						<Input type="rupiah" id={getContext('id')} value={penghasilanTidakKenaPajak} disabled />
+						<Input type="text" id={getContext('id')} value={formatRupiahDerived(penghasilanTidakKenaPajak)} disabled />
 					</Label>
 					<Label>
 						<span>Penghasilan Kena Pajak Setahun / Disetahunkan (Rp)</span>
-						<Input type="rupiah" id={getContext('id')} value={penghasilanKenaPajak} disabled />
+						<Input type="text" id={getContext('id')} value={formatRupiahDerived(penghasilanKenaPajak)} disabled />
 					</Label>
 					<Label>
 						<span>Tarif (%)</span>
@@ -540,11 +542,11 @@
 					</Label>
 					<Label>
 						<span>PPh Pasal 21 atas Penghasilan Kena Pajak Setahun/Disetahunkan (Rp)</span>
-						<Input type="rupiah" id={getContext('id')} value={resolvedTax.pajakPenghasilan} disabled />
+						<Input type="text" id={getContext('id')} value={formatRupiahDerived(resolvedTax.pajakPenghasilan)} disabled />
 					</Label>
 					<Label>
 						<span>PPh Pasal 21 Terutang (Rp)</span>
-						<Input type="rupiah" id={getContext('id')} value={pphPasal21Terutang} disabled />
+						<Input type="text" id={getContext('id')} value={formatRupiahDerived(pphPasal21Terutang)} disabled />
 					</Label>
 					<Label>
 						<span>PPh Pasal 21 Dipotong dari Bukti Pemotongan Sebelumnya (Rp)</span>
@@ -558,15 +560,15 @@
 					</Label>
 					<Label>
 						<span>PPh Pasal 21 Terutang pada Bukti Pemotongan Ini (Dapat Dikreditkan Pada SPT Tahunan) (Rp)</span>
-						<Input type="rupiah" id={getContext('id')} value={pphTerutangPadaIni} disabled />
+						<Input type="text" id={getContext('id')} value={formatRupiahDerived(pphTerutangPadaIni)} disabled />
 					</Label>
 					<Label>
 						<span>PPh Pasal 21 yang Dipotong/Ditanggung Pemerintah (Rp)</span>
-						<Input type="rupiah" id={getContext('id')} value={pphDitanggungPemerintah} disabled />
+						<Input type="text" id={getContext('id')} value={formatRupiahDerived(pphDitanggungPemerintah)} disabled />
 					</Label>
 					<Label>
 						<span>PPh Pasal 21 Kurang (Lebih) Dipotong pada Masa Pajak Desember / Masa Pajak Terakhir (Rp)</span>
-						<Input type="rupiah" id={getContext('id')} value={pphKurangLebihDesember} disabled />
+						<Input type="text" id={getContext('id')} value={formatRupiahDerived(pphKurangLebihDesember)} disabled />
 					</Label>
 					<Label>
 						<span>Jenis Fasilitas pada Masa Pajak Desember/Masa Pajak Terakhir</span>
