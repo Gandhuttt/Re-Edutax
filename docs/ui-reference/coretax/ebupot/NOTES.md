@@ -437,14 +437,21 @@ overrides. Example shape (object `21-100-27`, "Upah Pegawai Tidak Tetap..."):
 ```
 
 For BP21's *live* "Imbalan yang Diterima oleh Olahragawan" (`21-100-34`) the
-UI showed a flat `DPP%=50, Tarif%=5` — meaning **not every BP21 object uses
-TER**; some use the older flat DPP×Tarif method (Pasal 17 non-final
-articles) and some (the "Upah/Bulanan" wage-earner objects, `21-1xx` codes
-with `TaxExemptionStatus` bands) use TER. **The BP21 form's DPP%/Tarif%
-fields are therefore only the resolved-for-this-recipient values, not the
-data model** — the reference row can encode either shape, and the client
-picks the applicable `ItemList` entry by facility/certificate code and then
-(for TER objects) the applicable band by PTKP status × bruto amount.
+UI showed `DPP%=50, Tarif%=5`, and 100,000,000 bruto produced 2,500,000 tax.
+The current bundle explains why this is not a globally flat rate:
+`ItemList.DeemedRate` supplies DPP% per object+facility, then `getRate()` and
+`getMinus()` select a `Rates` band using
+`Penghasilan Bruto × DeemedRate/100`. The generic calculation is
+`DPP amount × Rate/100 − Minus`. For this sample the DPP amount is 50,000,000,
+which remains in the first Pasal 17 band (5%, `Minus=0`).
+
+Across the fetched BP21 reference catalog the selected `ItemList` entries use
+`DeemedRate` values 0, 50, or 100. Zero-valued entries are manual/exempt
+combinations; 50 and 100 are real object-specific DPP values. Some wage objects
+use TER bands keyed by PTKP, some use plain bruto/DPP bands, and Pasal 17
+objects use cumulative-rate bands carrying `Minus`. The form's DPP%/Tarif%
+fields are the resolved values for the current object+facility+recipient, not
+flat columns on the object catalog.
 
 BPU's `ParameterData` (checked: `24-101-01` "Dividen") is simpler — just a
 flat `Rate` per `TaxCertificateCode`, no bracket table:
@@ -585,56 +592,57 @@ this doc update: `fasilitasPajak.remote.ts` now scopes BPU's facility list to
 codes 8/9/4, and the BPU form makes Tarif editable when Fasilitas Lainnya is
 selected instead of erroring server-side.
 
-## BP21: TER, flat, and cumulative-bracket formulas -- live-verified 2026-08-29
+## BP21: DPP, TER, Pasal 17, and cumulative formulas -- bundle-corrected 2026-09-24
 
-Re-verified live before implementing BP21 (not just relying on the notes
-above from the first pass). NIK `3273010101900001` ("INDRA SANJAYA") on the
-BP21 create form: entering it auto-fills Nama (read-only, grey) AND Status
-PTKP (editable, white background + clear button, defaulted to `K/0`) --
-confirms Status PTKP is a derived-but-overridable field, not purely manual
-and not purely locked.
+Re-checked against the currently deployed
+`withholding-slips-portal/id-ID/main.41a9646cf8a20dcc.js`, not only live UI
+samples. The BP21 component's exact sequence is:
 
-**TER formula** -- selected object `21-100-35` ("Upah Pegawai Tidak Tetap
-yang Dibayarkan secara Bulanan"). Bruto 10,000,000 + PTKP `K/0` -> Tarif
-2.00%, PPh 200,000. Same bruto, switched PTKP to `K/3` -> Tarif 1.50%, PPh
-150,000. Both match `ParameterData.ItemList[].Rates[]` exactly: filter bands
-by `TaxExemptionStatus` containing the PTKP code, then find the band whose
-`[Min,Max]` contains the bruto. `PPh = bruto x DeemedRate% x band.Rate%`.
+1. `jsonParseMapping()` selects the `ItemList` entry whose
+   `TaxCertificateCodes` contains the chosen facility.
+2. It writes `DeemedRate` to DPP%.
+3. `getRate()` and `getMinus()` search `Rates` using
+   `TaxBase × DeemedNetIncome/100`; PTKP is an additional predicate only when
+   a band has `TaxExemptionStatus`.
+4. For ordinary objects, `calculationIncomeTaxWithheld()` computes
+   `round(bruto × DPP% × tarif% − Minus)`.
+5. Only object codes `21-401-01` and `21-401-02` enter the separate
+   previous-payment cumulative branch.
 
-**Flat formula** -- object `21-402-02` ("Honor... PNS Golongan III..."): DPP
-100.00%, Tarif 5.00% regardless of PTKP or bruto -- matches a plain
-`Rate: 5` on the `ItemList` entry, no bracket table.
+This corrects the earlier local inference that any `Rates` entry carrying
+`Minus` identified the `21-401-01`/`21-401-02` cumulative branch. Many ordinary
+Pasal 17 objects carry the same five `Rate`/`Minus` bands. They apply those
+bands to the current payment's DPP amount and do **not** use
+`Pendapatan Bruto yang Telah Dibayar Sebelumnya`.
 
-**Cumulative/`Minus`-bracket formula** (only `21-401-01`/`21-401-02`,
-pesangon/pensiun sekaligus) -- these show an extra "Pendapatan Bruto yang
-Telah Dibayar Sebelumnya" field. Set previous=60,000,000, current bruto=
-50,000,000 (total=110,000,000) on `21-401-01` -> **Tarif 15.00%, PPh
-3,500,000**. Reverse-engineered and confirmed exact: bands carry a `Minus`
-subtraction constant (Pasal 17 lump-sum style), `tax(x) = x * band(x).Rate/100
-- band(x).Minus`; `taxOnTotal = tax(110,000,000) = 110,000,000*15% -
-12,500,000 = 4,000,000`; `taxOnPrevious = tax(60,000,000) = 60,000,000*5% -
-2,500,000 = 500,000`; `PPh = taxOnTotal - taxOnPrevious = 3,500,000`. Tarif
-shown is the bracket-of-total's `Rate`.
+**Object-specific 50% DPP / Pasal 17 example** -- `21-100-04` (the same shape
+also covers tenaga ahli, agents, artists, athletes, and several other objects):
+bruto 100,000,000, DPP 50% gives a 50,000,000 band lookup, therefore Tarif 5%
+and PPh 2,500,000. Looking up the band using bruto would incorrectly select
+15%; treating the mere presence of `Minus` as the cumulative branch would also
+incorrectly replace the displayed DPP with 100%.
 
-**A fourth, plain bruto-only bracket shape also exists** -- found by
-exhaustively running every one of the 36 objects' `ItemList` entries through
-`resolveBp21.ts`'s classification logic (all facility codes x all 12 PTKP
-codes x a spread of bruto amounts): `21-100-24` and `21-100-29` (both "Upah
-Pegawai Tidak Tetap...Harian...sampai dengan Rp2.500.000 Sehari", plain and
-"Fasilitas Tertentu" variants) carry `Rates` bands with **neither**
-`TaxExemptionStatus` **nor** `Minus` -- `{Min,Max,Rate}` only, selected
-purely by bruto. The original resolver only recognized TER (`TaxExemptionStatus`)
-and cumulative (`Minus`) bands, so it silently fell through to the
-exempt/manual branch for these two objects and always returned Tarif=0/no
-override, regardless of the real bracket. **Live-verified and fixed**:
-`21-100-24`, bruto=1,000,000, Status PTKP left unset -> Tarif 0.50%, PPh
-5,000 (bracket `[450001,2500000]=0.5%`); switching Status PTKP to `K/3`
-(same bruto) -> **identical** Tarif/PPh, confirming this bracket is genuinely
-PTKP-independent. Also confirmed live: entering a bruto above this object's
-own max (2,500,000) triggers Coretax's own "Gross Income exceed the maximum
-value allowed for this tax object" validation error. `resolveBp21.ts` and
-its client-side mirror in `bp21/[id]/+page.svelte` now check for this plain
-band shape between the TER and flat branches.
+**TER formula** -- object `21-100-35` ("Upah Pegawai Tidak Tetap yang
+Dibayarkan secara Bulanan"). Bruto 10,000,000 + PTKP `K/0` -> Tarif 2.00%,
+PPh 200,000. Same bruto, switched PTKP to `K/3` -> Tarif 1.50%, PPh 150,000.
+Both match `ParameterData.ItemList[].Rates[]`: filter bands by
+`TaxExemptionStatus` containing the PTKP code, then find the band containing
+the DPP amount. These objects currently use DPP 100%, so DPP amount equals
+bruto.
+
+**Cumulative previous-payment formula** -- only `21-401-01`/`21-401-02`
+(pesangon/pensiun sekaligus) show "Pendapatan Bruto yang Telah Dibayar
+Sebelumnya". Set previous=60,000,000, current bruto=50,000,000 on
+`21-401-01` -> Tarif 15.00%, PPh 3,500,000. `taxOnTotal =
+tax(110,000,000) = 4,000,000`; `taxOnPrevious = tax(60,000,000) = 500,000`;
+PPh is the difference, 3,500,000.
+
+**Plain DPP-band shape** -- `21-100-24` and `21-100-29` (daily wage up to
+Rp2,500,000) carry `{Min,Max,Rate}` bands with neither
+`TaxExemptionStatus` nor `Minus`. Selection is PTKP-independent and uses the
+same DPP-amount lookup. Both currently have DPP 100%: bruto 1,000,000 -> Tarif
+0.50% and PPh 5,000. Entering bruto above 2,500,000 triggers Coretax's "Gross
+Income exceed the maximum value allowed for this tax object" validation.
 
 ## BP21: bracket ceiling validation -- source-grounded and fixed
 

@@ -75,40 +75,46 @@
 		const manualDpp = item.ManualDeemedRate?.toUpperCase() === 'TRUE';
 		const manualTarif = item.ManualTaxRate?.toUpperCase() === 'TRUE';
 		const manualIncomeTax = item.ManualIncomeTaxWithheld?.toUpperCase() === 'TRUE';
-		const dppPercent = item.DeemedRate ?? 100;
+		const dppPercent = item.DeemedRate ?? 0;
+		const taxBase = penghasilanBrutoState * (dppPercent / 100);
+		const bands = item.Rates ?? [];
 
-		// Coretax's own max-bruto validator, mirrored from resolveBp21.ts --
-		// see docs/ui-reference/coretax/ebupot/NOTES.md "BP21: bracket ceiling
-		// validation". Server is the source of truth; this is display-only.
-		const maxBruto = item.Rates?.length
-			? Math.max(...item.Rates.map((band) => band.Max)) / (dppPercent / 100)
-			: undefined;
+		// Coretax validates Gross Income against the resolved DPP base's band
+		// ceiling. A zero DPP belongs to manual/exempt entries and has no
+		// meaningful automatic ceiling.
+		const maxBruto =
+			bands.length > 0 && dppPercent > 0
+				? Math.max(...bands.map((band) => band.Max)) / (dppPercent / 100)
+				: undefined;
 
-		const cumulativeBands = item.Rates?.filter((band) => band.Minus !== undefined) ?? [];
-		if (cumulativeBands.length > 0) {
+		// `Minus` is present on many ordinary Pasal 17 objects too. Only these
+		// two object codes use the previous-payment cumulative calculation.
+		if (isCumulativeObject && bands.some((band) => band.Minus !== undefined)) {
 			const total = pendapatanBrutoSebelumnyaState + penghasilanBrutoState;
-			const { tax: taxOnTotal, rate } = taxAtCumulativeBracket(cumulativeBands, total);
+			const { tax: taxOnTotal, rate } = taxAtCumulativeBracket(bands, total);
 			const { tax: taxOnPrevious } = taxAtCumulativeBracket(
-				cumulativeBands,
+				bands,
 				pendapatanBrutoSebelumnyaState
 			);
 			return {
-				dppPercent: 100,
+				dppPercent,
 				tarif: rate,
 				manualDpp,
 				manualTarif,
 				manualIncomeTax,
-				pajakPenghasilanOverride: Math.round(taxOnTotal - taxOnPrevious),
+				pajakPenghasilanOverride: Math.round(
+					(taxOnTotal - taxOnPrevious) * (dppPercent / 100)
+				),
 				maxBruto
 			};
 		}
 
-		const terBands = item.Rates?.filter((band) => band.TaxExemptionStatus !== undefined) ?? [];
+		const terBands = bands.filter((band) => band.TaxExemptionStatus !== undefined);
 		if (terBands.length > 0) {
 			const applicable = terBands.filter((band) =>
 				band.TaxExemptionStatus?.includes(statusPtkpState)
 			);
-			const band = applicable.find((b) => bandContains(b, penghasilanBrutoState));
+			const band = applicable.find((candidate) => bandContains(candidate, taxBase));
 			return {
 				dppPercent,
 				tarif: band?.Rate ?? 0,
@@ -120,19 +126,21 @@
 			};
 		}
 
-		// Plain bruto-only bracket -- bands with neither TaxExemptionStatus nor
-		// Minus (e.g. 21-100-24/21-100-29, daily wage <= Rp2.500.000/hari),
-		// selected purely by bruto, independent of PTKP. See resolveBp21.ts.
-		const plainBands = item.Rates ?? [];
-		if (plainBands.length > 0) {
-			const band = plainBands.find((b) => bandContains(b, penghasilanBrutoState));
+		// The current Coretax bundle selects non-TER bands with
+		// `bruto * DPP%`, not bruto alone. Pasal 17 bands then subtract their
+		// `Minus`; daily-wage bands use the same lookup without a subtraction.
+		if (bands.length > 0) {
+			const band = bands.find((candidate) => bandContains(candidate, taxBase));
 			return {
 				dppPercent,
 				tarif: band?.Rate ?? 0,
 				manualDpp,
 				manualTarif,
 				manualIncomeTax,
-				pajakPenghasilanOverride: undefined,
+				pajakPenghasilanOverride:
+					band?.Minus !== undefined
+						? Math.round(taxBase * (band.Rate / 100) - band.Minus)
+						: undefined,
 				maxBruto
 			};
 		}

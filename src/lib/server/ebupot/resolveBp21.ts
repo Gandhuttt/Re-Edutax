@@ -66,49 +66,73 @@ export const resolveBp21 = (
 	const manualDpp = item.ManualDeemedRate?.toUpperCase() === 'TRUE';
 	const manualTarif = item.ManualTaxRate?.toUpperCase() === 'TRUE';
 	const manualIncomeTax = item.ManualIncomeTaxWithheld?.toUpperCase() === 'TRUE';
-	const dppPercent = item.DeemedRate ?? 100;
+	const dppPercent = item.DeemedRate ?? 0;
+	const taxBase = bruto * (dppPercent / 100);
+	const bands = item.Rates ?? [];
 
-	// Coretax's own max-bruto validator, generic across all bracket shapes:
-	// max(...band.Max) / (dppPercent/100). Live-verified on 21-100-24 (top
-	// band Max=2,500,000, dppPercent=100 -> maxBruto=2,500,000; entering
-	// more triggers Coretax's "Gross Income exceed the maximum value
-	// allowed for this tax object" error).
-	const maxBruto = item.Rates?.length
-		? Math.max(...item.Rates.map((band) => band.Max)) / (dppPercent / 100)
-		: undefined;
+	// Coretax validates Gross Income against the resolved DPP base's band
+	// ceiling: max(...band.Max) / (DeemedRate/100). A zero DPP has no useful
+	// ceiling (the corresponding reference entries are manual/exempt).
+	const maxBruto =
+		bands.length > 0 && dppPercent > 0
+			? Math.max(...bands.map((band) => band.Max)) / (dppPercent / 100)
+			: undefined;
 
-	const cumulativeBands = item.Rates?.filter((band) => band.Minus !== undefined) ?? [];
-	if (cumulativeBands.length > 0) {
+	// Only these two object codes treat the bracket as cumulative across
+	// previous and current gross income. Many other BP21 objects also carry
+	// `Minus` bands, but Coretax evaluates those against this payment's DPP
+	// base; `Minus` alone does not identify the cumulative branch.
+	const isCumulativeObject =
+		parameterData.TaxObjectCode === '21-401-01' || parameterData.TaxObjectCode === '21-401-02';
+	if (isCumulativeObject && bands.some((band) => band.Minus !== undefined)) {
 		const total = brutoSebelumnya + bruto;
-		const { tax: taxOnTotal, rate } = taxAtCumulativeBracket(cumulativeBands, total);
-		const { tax: taxOnPrevious } = taxAtCumulativeBracket(cumulativeBands, brutoSebelumnya);
+		const { tax: taxOnTotal, rate } = taxAtCumulativeBracket(bands, total);
+		const { tax: taxOnPrevious } = taxAtCumulativeBracket(bands, brutoSebelumnya);
 		return {
-			dppPercent: 100,
+			dppPercent,
 			tarif: rate,
 			manualDpp,
 			manualTarif,
 			manualIncomeTax,
-			pajakPenghasilanOverride: Math.round(taxOnTotal - taxOnPrevious),
+			pajakPenghasilanOverride: Math.round(
+				(taxOnTotal - taxOnPrevious) * (dppPercent / 100)
+			),
 			maxBruto
 		};
 	}
 
-	const terBands = item.Rates?.filter((band) => band.TaxExemptionStatus !== undefined) ?? [];
+	const terBands = bands.filter((band) => band.TaxExemptionStatus !== undefined);
 	if (terBands.length > 0) {
 		const applicable = terBands.filter((band) => band.TaxExemptionStatus?.includes(statusPtkp));
-		const band = applicable.find((b) => bandContains(b, bruto));
-		return { dppPercent, tarif: band?.Rate ?? 0, manualDpp, manualTarif, manualIncomeTax, maxBruto };
+		const band = applicable.find((candidate) => bandContains(candidate, taxBase));
+		return {
+			dppPercent,
+			tarif: band?.Rate ?? 0,
+			manualDpp,
+			manualTarif,
+			manualIncomeTax,
+			maxBruto
+		};
 	}
 
-	// Plain bruto-only bracket -- bands with neither TaxExemptionStatus nor
-	// Minus, e.g. 21-100-24/21-100-29 (Upah Pegawai Tidak Tetap harian <=
-	// Rp2.500.000/hari). Selected purely by bruto, independent of PTKP --
-	// live-verified: 21-100-24, bruto=1,000,000 -> Tarif 0.50% (band
-	// [450001,2500000]=0.5%) whether Status PTKP is unset or K/3.
-	const plainBands = item.Rates ?? [];
-	if (plainBands.length > 0) {
-		const band = plainBands.find((b) => bandContains(b, bruto));
-		return { dppPercent, tarif: band?.Rate ?? 0, manualDpp, manualTarif, manualIncomeTax, maxBruto };
+	// Coretax resolves every non-TER band against the DPP amount, not gross
+	// income: `taxBase = bruto * DeemedRate/100`. Pasal 17 objects include a
+	// `Minus` constant and therefore need the complete bracket formula;
+	// daily-wage objects have the same lookup without `Minus`.
+	if (bands.length > 0) {
+		const band = bands.find((candidate) => bandContains(candidate, taxBase));
+		return {
+			dppPercent,
+			tarif: band?.Rate ?? 0,
+			manualDpp,
+			manualTarif,
+			manualIncomeTax,
+			pajakPenghasilanOverride:
+				band?.Minus !== undefined
+					? Math.round(taxBase * (band.Rate / 100) - band.Minus)
+					: undefined,
+			maxBruto
+		};
 	}
 
 	if (typeof item.Rate === 'number') {
