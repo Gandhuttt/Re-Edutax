@@ -1,6 +1,5 @@
 <script lang="ts">
-	import Table from '$lib/components/Table.svelte';
-	import Button from '$lib/components/Button.svelte';
+	import { DataTable, InlineAlert, Stack, TableActions } from '$lib/re-ui-components';
 	import { computeLabaRugiRows, type LabaRugiAkunTemplate } from './labaRugiRollup';
 
 	interface LabaRugiLeaf {
@@ -31,7 +30,6 @@
 	}: Props = $props();
 
 	const rupiah = new Intl.NumberFormat('id-ID');
-
 	const activeTemplate = $derived(templatesBySektor.get(sektorUsaha));
 	const template = $derived(activeTemplate?.rows ?? []);
 	const lampiranKode = $derived(activeTemplate?.lampiranKode ?? null);
@@ -68,96 +66,93 @@
 	});
 </script>
 
-<div class="tw:p-5 tw:flex tw:flex-col tw:gap-2">
+<Stack gap="12px">
 	{#if lampiranKode}
-		<span class="tw:text-sm tw:font-bold">Lampiran 1-{lampiranKode}</span>
+		<div class="lampiran-code">Lampiran 1-{lampiranKode}</div>
 		{#if belumTersimpan}
-			<span class="tw:text-sm">Perubahan sektor usaha belum disimpan. Klik Simpan Konsep untuk menyimpan baris ini.</span>
+			<InlineAlert
+				tone="warning"
+				compact
+				message="Perubahan sektor usaha belum disimpan. Klik Simpan Konsep untuk menyimpan baris ini."
+			/>
 		{/if}
 	{:else}
-		<span class="tw:text-sm">Belum ada transkrip untuk sektor usaha yang dipilih.</span>
+		<InlineAlert compact message="Belum ada transkrip untuk sektor usaha yang dipilih." />
 	{/if}
-	<div class="tw:overflow-scroll">
-		<Table class="tw:w-full">
-			{#snippet head()}
-				<tr class="tw:hidden">
-					<td><input type="text" /></td>
+
+	<DataTable
+		label="Transkrip laporan laba rugi"
+		minWidth="1440px"
+		headerTone="navy"
+		density="compact"
+		stickyFirstColumn
+	>
+		<table>
+			<thead>
+				<tr>
+					<th scope="col">Tindakan</th>
+					<th scope="col">Kode akun</th>
+					<th scope="col">Nama akun</th>
+					<th scope="col">Nilai komersial</th>
+					<th scope="col">Tidak termasuk objek pajak</th>
+					<th scope="col">Dikenakan PPh bersifat final</th>
+					<th scope="col">Objek pajak tidak final</th>
+					<th scope="col">Penyesuaian fiskal positif</th>
+					<th scope="col">Penyesuaian fiskal negatif</th>
+					<th scope="col">Kode penyesuaian fiskal</th>
+					<th scope="col">Nilai fiskal</th>
 				</tr>
-			{/snippet}
-			{#snippet body()}
-				<tr class="header tw:bg-[var(--color-primary)] tw:font-bold tw:text-center">
-					<td class="tw:w-[6rem]"><span>TINDAKAN</span></td>
-					<td class="tw:w-[6rem]"><span>KODE AKUN</span></td>
-					<td class="tw:w-[16rem]"><span>NAMA AKUN</span></td>
-					<td class="tw:w-[8rem]"><span>NILAI KOMERSIAL</span></td>
-					<td class="tw:w-[8rem]"><span>TIDAK TERMASUK OBJEK PAJAK</span></td>
-					<td class="tw:w-[8rem]"><span>DIKENAKAN PPh BERSIFAT FINAL</span></td>
-					<td class="tw:w-[8rem]"><span>OBJEK PAJAK TIDAK FINAL</span></td>
-					<td class="tw:w-[8rem]"><span>PENYESUAIAN FISKAL POSITIF</span></td>
-					<td class="tw:w-[8rem]"><span>PENYESUAIAN FISKAL NEGATIF</span></td>
-					<td class="tw:w-[8rem]"><span>KODE PENYESUAIAN FISKAL</span></td>
-					<td class="tw:w-[8rem]"><span>NILAI FISKAL</span></td>
-				</tr>
+			</thead>
+			<tbody>
 				{#each computedRows as row (row.nomorUrut)}
 					{#if row.rowType === 'header'}
 						<tr class="group-header">
-							<td colspan="11">{row.namaAkun}</td>
+							<th scope="rowgroup" colspan="11">{row.namaAkun}</th>
 						</tr>
 					{:else}
-						<tr class={row.rowType === 'sum' ? 'sum-row' : 'data-row'}>
-							<td class="tw:text-center">
+						<tr class:sum-row={row.rowType === 'sum'}>
+							<td class="action-cell">
 								{#if row.rowType === 'data'}
-									<Button
-										type="button"
-										class="tw:min-w-15!"
-										disabled={readonly}
-										onclick={() => openModal(row)}
-										data-bs-toggle="modal"
-										data-bs-target="#modalL1"
-									>
-										Edit
-									</Button>
+									<TableActions
+										actions={[{
+											label: 'Edit',
+											disabled: readonly,
+											onclick: () => openModal(row)
+										}]}
+									/>
 								{/if}
 							</td>
 							<td>{row.kode}</td>
 							<td>{row.namaAkun}</td>
-							<td class="tw:text-end">{formatCell(row, row.nilaiKomersial)}</td>
-							<td class="tw:text-end">{showFiskalSplit(row) ? formatCell(row, row.nonObjekPajak) : ''}</td>
-							<td class="tw:text-end">{showFiskalSplit(row) ? formatCell(row, row.dikenakanPphFinal) : ''}</td>
-							<td class="tw:text-end">{formatCell(row, row.objekPajakTidakFinal)}</td>
-							<td class="tw:text-end">{showFiskalSplit(row) ? formatCell(row, row.penyesuaianFiskalPositif) : ''}</td>
-							<td class="tw:text-end">{showFiskalSplit(row) ? formatCell(row, row.penyesuaianFiskalNegatif) : ''}</td>
-							<td class="tw:text-center">{row.kodePenyesuaianFiskal.join(', ')}</td>
-							<td class="tw:text-end">{formatCell(row, row.nilaiFiskal)}</td>
+							<td class="number">{formatCell(row, row.nilaiKomersial)}</td>
+							<td class="number">{showFiskalSplit(row) ? formatCell(row, row.nonObjekPajak) : ''}</td>
+							<td class="number">{showFiskalSplit(row) ? formatCell(row, row.dikenakanPphFinal) : ''}</td>
+							<td class="number">{formatCell(row, row.objekPajakTidakFinal)}</td>
+							<td class="number">{showFiskalSplit(row) ? formatCell(row, row.penyesuaianFiskalPositif) : ''}</td>
+							<td class="number">{showFiskalSplit(row) ? formatCell(row, row.penyesuaianFiskalNegatif) : ''}</td>
+							<td>{row.kodePenyesuaianFiskal.join(', ')}</td>
+							<td class="number">{formatCell(row, row.nilaiFiskal)}</td>
 						</tr>
 					{/if}
 				{/each}
-			{/snippet}
-		</Table>
-	</div>
-</div>
+			</tbody>
+		</table>
+	</DataTable>
+</Stack>
 
 <style>
-	.group-header td {
-		font-weight: bold;
-		background-color: #f3f3f3;
+	.lampiran-code {
+		color: var(--ui-navy);
+		font-size: 14px;
+		font-weight: 800;
 	}
-
-	.sum-row {
-		font-weight: bold;
+	.group-header th {
+		padding: 10px;
+		background: var(--ui-paper-deep);
+		color: var(--ui-navy);
+		text-align: left;
 	}
-
-	.data-row:nth-child(even) {
-		background-color: #f9f6ee;
-	}
-
-	.header td {
-		border: 1px solid white;
-	}
-
-	td {
-		padding: 0.5rem 0.75rem;
-		word-wrap: break-word;
-		font-size: 0.8rem;
+	.sum-row td {
+		font-weight: 800;
 	}
 </style>

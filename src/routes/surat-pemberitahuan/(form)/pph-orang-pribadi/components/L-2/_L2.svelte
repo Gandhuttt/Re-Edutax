@@ -1,59 +1,52 @@
 <script lang="ts">
-    import type { DaftarReferensi, KodeReferensi } from "../referensi";
-    import Accordion from "$lib/components/AccordionItem.svelte";
-    import A from "./A.svelte";
-    import B from "./B.svelte";
-    import C from "./C.svelte";
-    import type { BarisBukanObjek, BarisFinal, BarisLuarNegeri } from "./types";
+	import { DisclosureItem, Stack } from '$lib/re-ui-components';
+	import type { DaftarReferensi, KodeReferensi } from '../referensi';
+	import A from './A.svelte';
+	import B from './B.svelte';
+	import C from './C.svelte';
+	import type { BarisBukanObjek, BarisFinal, BarisLuarNegeri } from './types';
 
-    // L-2's three sections each own their own table and modal markup, same as
-    // every L-1 grid: A has no Hapus Semua on the live form, C carries foreign
-    // currency and a different empty-state string.
-    interface Props {
-        currentTab: string;
-        referensi: DaftarReferensi;
-        kodeReferensi: KodeReferensi;
-        final: BarisFinal[];
-        bukanObjek: BarisBukanObjek[];
-        luarNegeri: BarisLuarNegeri[];
-        // Each grid is editable exactly when the Induk question routing to it is
-        // Ya. The tab itself tracks the OR of all three, handled on the page.
-        i14cPenghasilanFinal: boolean | undefined;
-        i14dBukanObjekPajak: boolean | undefined;
-        b1dPenghasilanLuarNegeri: boolean | undefined;
-        readonly?: boolean;
-    }
+	interface Props {
+		currentTab: string;
+		referensi: DaftarReferensi;
+		kodeReferensi: KodeReferensi;
+		final: BarisFinal[];
+		bukanObjek: BarisBukanObjek[];
+		luarNegeri: BarisLuarNegeri[];
+		i14cPenghasilanFinal: boolean | undefined;
+		i14dBukanObjekPajak: boolean | undefined;
+		b1dPenghasilanLuarNegeri: boolean | undefined;
+		readonly?: boolean;
+	}
 
-    let {
-        currentTab,
-        referensi,
-        kodeReferensi,
-        final = $bindable(),
-        bukanObjek = $bindable(),
-        luarNegeri = $bindable(),
-        i14cPenghasilanFinal,
-        i14dBukanObjekPajak,
-        b1dPenghasilanLuarNegeri,
-        readonly = false
-    }: Props = $props();
+	let {
+		currentTab,
+		referensi,
+		kodeReferensi,
+		final = $bindable(),
+		bukanObjek = $bindable(),
+		luarNegeri = $bindable(),
+		i14cPenghasilanFinal,
+		i14dBukanObjekPajak,
+		b1dPenghasilanLuarNegeri,
+		readonly = false
+	}: Props = $props();
+
+	let sectionAOpen = $state(true);
+	let sectionBOpen = $state(true);
+	let sectionCOpen = $state(true);
 </script>
 
-<div class="{currentTab === 'L-2' ? '' : 'tw:hidden'}">
-    <div class="accordion">
-        <Accordion item={"A. PENGHASILAN YANG DIKENAKAN PAJAK PENGHASILAN BERSIFAT FINAL"}>
-            <div class="tw:p-5">
-                <A bind:rows={final} {referensi} {kodeReferensi} dapatDiubah={Boolean(i14cPenghasilanFinal)} {readonly} />
-            </div>
-        </Accordion>
-        <Accordion item={"B. PENGHASILAN YANG TIDAK TERMASUK OBJEK PAJAK"}>
-            <div class="tw:p-5">
-                <B bind:rows={bukanObjek} {referensi} {kodeReferensi} dapatDiubah={Boolean(i14dBukanObjekPajak)} {readonly} />
-            </div>
-        </Accordion>
-        <Accordion item={"C. PENGHASILAN NETO LUAR NEGERI"}>
-            <div class="tw:p-5">
-                <C bind:rows={luarNegeri} {referensi} {kodeReferensi} dapatDiubah={Boolean(b1dPenghasilanLuarNegeri)} {readonly} />
-            </div>
-        </Accordion>
-    </div>
+<div id="spt-panel-l-2" role="tabpanel" hidden={currentTab !== 'L-2'}>
+	<Stack gap="0">
+		<DisclosureItem title="A. Penghasilan yang Dikenakan Pajak Penghasilan Bersifat Final" bind:open={sectionAOpen}>
+			<A bind:rows={final} {referensi} {kodeReferensi} dapatDiubah={Boolean(i14cPenghasilanFinal)} {readonly} />
+		</DisclosureItem>
+		<DisclosureItem title="B. Penghasilan yang Tidak Termasuk Objek Pajak" bind:open={sectionBOpen}>
+			<B bind:rows={bukanObjek} {referensi} {kodeReferensi} dapatDiubah={Boolean(i14dBukanObjekPajak)} {readonly} />
+		</DisclosureItem>
+		<DisclosureItem title="C. Penghasilan Neto Luar Negeri" bind:open={sectionCOpen}>
+			<C bind:rows={luarNegeri} {referensi} {kodeReferensi} dapatDiubah={Boolean(b1dPenghasilanLuarNegeri)} {readonly} />
+		</DisclosureItem>
+	</Stack>
 </div>

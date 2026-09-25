@@ -18,7 +18,7 @@
 
 	let {
 		label,
-		value = $bindable(""),
+		value = $bindable(),
 		field,
 		hint = "",
 		error,
@@ -75,7 +75,7 @@
 	}
 	.label {
 		color: var(--ui-ink);
-		font-size: 12px;
+		font-size: 14px;
 		font-weight: 700;
 	}
 	.label em {
@@ -92,7 +92,7 @@
 		background: #fffefa;
 		color: var(--ui-ink);
 		font: inherit;
-		font-size: 13px;
+		font-size: 16px;
 		box-shadow: inset 0 1px 0 rgba(25, 41, 65, 0.03);
 	}
 	input:hover {
@@ -109,7 +109,7 @@
 	.hint,
 	.message {
 		color: var(--ui-muted);
-		font-size: 11px;
+		font-size: 12px;
 		line-height: 1.45;
 	}
 	.message {

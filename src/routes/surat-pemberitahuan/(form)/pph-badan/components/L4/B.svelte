@@ -1,95 +1,73 @@
 <script lang="ts">
-    import Table from "$lib/components/Table.svelte";
-    import Button from "$lib/components/Button.svelte";
+	import { ActionButton, DataTable, Stack, TableActions } from "$lib/re-ui-components";
 
-    let {
-        data,
-        openModal,
-        deleteItem,
-        jenisPenghasilanOptions
-    }: {
-        data: Array<{
-            id: string | number;
-            jenisPenghasilan: string;
-            sumberPenghasilan: string;
-            penghasilanBruto: number;
-        }>;
-        openModal: (item: unknown) => void;
-        deleteItem: (id: string | number) => void;
-        jenisPenghasilanOptions: { value: string; label: string }[];
-    } = $props();
+	let {
+		data,
+		openModal,
+		deleteItem,
+		jenisPenghasilanOptions,
+		readonly = false
+	}: {
+		data: Array<{
+			id: string | number;
+			jenisPenghasilan: string;
+			sumberPenghasilan: string;
+			penghasilanBruto: number;
+		}>;
+		openModal: (item: unknown) => void;
+		deleteItem: (id: string | number) => void;
+		jenisPenghasilanOptions: { value: string; label: string }[];
+		readonly?: boolean;
+	} = $props();
 
-    const jenisPenghasilanLabel = (kode: string) =>
-        jenisPenghasilanOptions.find((o) => o.value === kode)?.label ?? kode;
-
-    let totalPenghasilanBruto = $derived(data.reduce((sum, item) => sum + Number(item.penghasilanBruto || 0), 0));
+	const jenisPenghasilanLabel = (kode: string) => jenisPenghasilanOptions.find((option) => option.value === kode)?.label ?? kode;
+	let totalPenghasilanBruto = $derived(data.reduce((sum, item) => sum + Number(item.penghasilanBruto || 0), 0));
 </script>
 
-<div class="tw:p-5 tw:flex tw:flex-col tw:gap-1">
-    <Button type="button" class={"tw:text-white tw:w-30"} color={"#1c398e"} onclick={() => openModal(null)} data-bs-toggle="modal" data-bs-target="#modalL4B">Tambah</Button>
-    <div class="tw:overflow-scroll">
-        <Table class={"tw:w-full"}>
-            {#snippet head()}
-                <tr class="tw:hidden">
-                    <td><input type="text" name="" id=""></td>
-                </tr>
-            {/snippet}
-            {#snippet body()}
-                <tr class="header tw:bg-[var(--color-primary)] tw:font-bold tw:text-center">
-                    <td class="tw:w-[10rem]"><span>TINDAKAN</span></td>
-                    <td class="tw:w-[15rem]"><span>NO</span></td>
-                    <td class="tw:w-[15rem]"><span>KODE</span></td>
-                    <td class="tw:w-[15rem]"><span>JENIS PENGHASILAN</span></td>
-                    <td class="tw:w-[15rem]"><span>SUMBER PENGHASILAN</span></td>
-                    <td class="tw:w-[15rem]"><span>PENGHASILAN BRUTO</span></td>
-                </tr>
-                {#if data.length === 0}
-                <tr class="data tw:text-center"><td colspan="6">Tidak ada data yang ditampilkan</td></tr>
-                {:else}
-                {#each data as item, i}
-                <tr class="data">
-                    <td class="tw:flex tw:flex-row tw:gap-1 tw:justify-center">
-                        <Button type="button" class={"tw:min-w-15!"} onclick={() => openModal(item)} data-bs-toggle="modal" data-bs-target="#modalL4B">Edit</Button>
-                        <Button type="button" class={"tw:min-w-15!"} onclick={() => deleteItem(item.id)}>Hapus</Button>
-                    </td>
-                    <td>{i + 1}</td>
-                    <td>{item.jenisPenghasilan}</td>
-                    <td>{jenisPenghasilanLabel(item.jenisPenghasilan)}</td>
-                    <td>{item.sumberPenghasilan}</td>
-                    <td>{Number(item.penghasilanBruto || 0).toLocaleString('id-ID')}</td>
-                </tr>
-                {/each}
-                {/if}
-                <tr class="footer tw:bg-[#FFD230] tw:text-right tw:font-bold">
-                    <td colspan="5">JUMLAH</td>
-                    <td>{totalPenghasilanBruto.toLocaleString('id-ID')}</td>
-                </tr>
-            {/snippet}
-        </Table>
-    </div>
-</div>
+<Stack gap="12px">
+	<div><ActionButton type="button" disabled={readonly} onclick={() => openModal(null)}>Tambah</ActionButton></div>
+	<DataTable label="Penghasilan yang tidak termasuk objek pajak" minWidth="1040px" headerTone="navy" density="compact">
+		<table>
+			<thead>
+				<tr>
+					<th scope="col">Tindakan</th>
+					<th scope="col">No</th>
+					<th scope="col">Kode</th>
+					<th scope="col">Jenis Penghasilan</th>
+					<th scope="col">Sumber Penghasilan</th>
+					<th scope="col">Penghasilan Bruto</th>
+				</tr>
+			</thead>
+			<tbody>
+				{#if data.length === 0}
+					<tr><td colspan="6" class="empty">Tidak ada data yang ditampilkan</td></tr>
+				{:else}
+					{#each data as item, index (item.id)}
+						<tr>
+							<td><TableActions actions={[
+								{ label: 'Edit', disabled: readonly, onclick: () => openModal(item) },
+								{ label: 'Hapus', disabled: readonly, danger: true, onclick: () => deleteItem(item.id) }
+							]} /></td>
+							<td>{index + 1}</td>
+							<td>{item.jenisPenghasilan}</td>
+							<td>{jenisPenghasilanLabel(item.jenisPenghasilan)}</td>
+							<td>{item.sumberPenghasilan}</td>
+							<td class="number">{Number(item.penghasilanBruto || 0).toLocaleString('id-ID')}</td>
+						</tr>
+					{/each}
+				{/if}
+			</tbody>
+			<tfoot>
+				<tr>
+					<th scope="row" colspan="5">Jumlah</th>
+					<td class="number">{totalPenghasilanBruto.toLocaleString('id-ID')}</td>
+				</tr>
+			</tfoot>
+		</table>
+	</DataTable>
+</Stack>
 
 <style>
-.header td, .footer td {
-    border: 1px solid white;
-}
-
-.data {
-    &:nth-child(odd of .data) {
-        background-color: #F9F6EE;
-    }
-    td {
-        padding-inline: .5rem;
-    }
-}
-
-tr {
-    border: none;
-}
-
-td {
-    padding: .5rem 1rem;
-    word-wrap: break-word;
-    font-size: .8rem;
-}
+	.empty { text-align: center; }
+	.number { text-align: right; font-variant-numeric: tabular-nums; }
 </style>

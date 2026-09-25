@@ -1,69 +1,35 @@
 <script lang="ts">
-    import Table from "$lib/components/Table.svelte";
-    import Button from "$lib/components/Button.svelte";
+	import { ActionButton, DataTable, Stack } from "$lib/re-ui-components";
 </script>
 
-<div class="tw:flex tw:flex-col tw:p-5 tw:gap-1">
-    <Button class={"tw:text-white tw:w-30"} color={"var(--color-secondary)"}>Tambah</Button>
-    <div class="tw:overflow-scroll">
-        <Table class={"tw:w-full"}>
-            {#snippet head()}
-                <tr class="tw:hidden">
-                    <td></td>
-                </tr>
-            {/snippet}
-            {#snippet body()}
-                <tr class="header tw:bg-(--color-primary) tw:font-bold tw:text-center">
-                    <td class="tw:w-[10rem]">TINDAKAN</td>
-                    <td class="tw:w-[5rem]">NO.</td>
-                    <td class="tw:w-[15rem]">NOMOR IDENTITAS</td>
-                    <td class="tw:w-[15rem]">NAMA DEBITUR</td>
-                    <td class="tw:w-[15rem]">ALAMAT</td>
-                    <td class="tw:w-[15rem]">NILAI KREDIT KURANG LANCAR AWAL TAHUN BUKU</td>
-                    <td class="tw:w-[15rem]">NILAI KREDIT KURANG LANCAR AKHIR TAHUN BUKU</td>
-                    <td class="tw:w-[15rem]">JUMLAH BUNGA PADA TAHUN BUKU (AKRUAL)</td>
-                    <td class="tw:w-[15rem]">KATEGORI</td>
-                </tr>
-                {#if true}
-                <tr class="data tw:text-center"><td colspan="9">Tidak ada data yang ditampilkan</td></tr>
-                {:else}
-                <tr class="data">
-                    <td><Button>Edit</Button></td>
-                    <td>tsetaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</td>
-                    <td>tset</td>
-                    <td>tset</td>
-                    <td>tset</td>
-                    <td>tset</td>
-                </tr>
-                {/if}
-            {/snippet}
-        </Table>
-    </div>
-</div>
-
-<style>
-.header {
-    td {
-        border: 1px solid white;
-    }
-}
-
-.data {
-    &:nth-child(odd of .data) {
-        background-color: #F9F6EE;
-    }
-    td {
-        padding-inline: .5rem;
-    }
-}
-
-tr {
-    border: none;
-}
-
-td {
-    padding: .5rem 1rem;
-    word-wrap: break-word;
-    font-size: .8rem;
-}
-</style>
+<Stack gap="12px" align="start">
+	<ActionButton tone="secondary">Tambah</ActionButton>
+	<DataTable label="Daftar debitur non-performing loan" minWidth="1400px" headerTone="navy" density="compact" stickyFirstColumn>
+		<table>
+			<thead>
+				<tr>
+					<th scope="col">TINDAKAN</th>
+					<th scope="col">NO.</th>
+					<th scope="col">NOMOR IDENTITAS</th>
+					<th scope="col">NAMA DEBITUR</th>
+					<th scope="col">ALAMAT</th>
+					<th scope="col">NILAI KREDIT KURANG LANCAR AWAL TAHUN BUKU</th>
+					<th scope="col">NILAI KREDIT KURANG LANCAR AKHIR TAHUN BUKU</th>
+					<th scope="col">JUMLAH BUNGA PADA TAHUN BUKU (AKRUAL)</th>
+					<th scope="col">KATEGORI</th>
+				</tr>
+			</thead>
+			<tbody>
+				{#if true}
+					<tr><td class="empty" colspan="9">Tidak ada data yang ditampilkan</td></tr>
+				{:else}
+					<tr>
+						<td class="action-cell"><ActionButton tone="quiet">Edit</ActionButton></td>
+						<td>tsetaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</td>
+						<td>tset</td><td>tset</td><td>tset</td><td>tset</td>
+					</tr>
+				{/if}
+			</tbody>
+		</table>
+	</DataTable>
+</Stack>

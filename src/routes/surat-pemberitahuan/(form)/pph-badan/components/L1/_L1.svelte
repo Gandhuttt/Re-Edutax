@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Accordion from '$lib/components/AccordionItem.svelte';
+	import { DisclosureItem, Stack } from '$lib/re-ui-components';
 	import type { LabaRugiAkunTemplate } from './labaRugiRollup';
 	import type { NeracaAkunTemplate } from './neracaRollup';
 	import ModalEditLabaRugi from './_ModalEditLabaRugi.svelte';
@@ -53,36 +53,44 @@
 	});
 
 	let editing = $state<any>({ kodePenyesuaianFiskal: [] });
+	let modalOpen = $state(false);
 
 	function openModal(row: any) {
 		editing = { ...row };
+		modalOpen = true;
 	}
 
 	function saveItem() {
 		const index = labaRugi.findIndex((item) => item.akunId === editing.akunId);
-		if (index === -1) return;
-
-		labaRugi[index] = {
-			...labaRugi[index],
-			nilaiKomersial: Number(editing.nilaiKomersial) || 0,
-			nonObjekPajak: Number(editing.nonObjekPajak) || 0,
-			dikenakanPphFinal: Number(editing.dikenakanPphFinal) || 0,
-			penyesuaianFiskalPositif: Number(editing.penyesuaianFiskalPositif) || 0,
-			penyesuaianFiskalNegatif: Number(editing.penyesuaianFiskalNegatif) || 0,
-			kodePenyesuaianFiskal: editing.kodePenyesuaianFiskal ?? []
-		};
+		if (index !== -1) {
+			labaRugi[index] = {
+				...labaRugi[index],
+				nilaiKomersial: Number(editing.nilaiKomersial) || 0,
+				nonObjekPajak: Number(editing.nonObjekPajak) || 0,
+				dikenakanPphFinal: Number(editing.dikenakanPphFinal) || 0,
+				penyesuaianFiskalPositif: Number(editing.penyesuaianFiskalPositif) || 0,
+				penyesuaianFiskalNegatif: Number(editing.penyesuaianFiskalNegatif) || 0,
+				kodePenyesuaianFiskal: editing.kodePenyesuaianFiskal ?? []
+			};
+		}
+		modalOpen = false;
 	}
 </script>
 
-<div class="{currentTab.tab === 'L1' ? '' : 'tw:hidden'}">
-	<div class="accordion tw:mt-5">
-		<Accordion item="A. TRANSKRIP LAPORAN LABA RUGI">
+<section id="l1" class={currentTab.tab === 'L1' ? '' : 'tw:hidden'}>
+	<Stack gap="12px">
+		<DisclosureItem title="A. TRANSKRIP LAPORAN LABA RUGI" open>
 			<A {sektorUsaha} {templatesBySektor} bind:labaRugi {readonly} {openModal} />
-		</Accordion>
-		<Accordion item="B. TRANSKRIP NERACA">
+		</DisclosureItem>
+		<DisclosureItem title="B. TRANSKRIP NERACA">
 			<B {sektorUsaha} {neracaTemplatesBySektor} bind:neraca {readonly} />
-		</Accordion>
-	</div>
-</div>
+		</DisclosureItem>
+	</Stack>
+</section>
 
-<ModalEditLabaRugi bind:data={editing} {saveItem} {kodeKoreksiFiskalOptions} />
+<ModalEditLabaRugi
+	bind:open={modalOpen}
+	bind:data={editing}
+	{saveItem}
+	{kodeKoreksiFiskalOptions}
+/>

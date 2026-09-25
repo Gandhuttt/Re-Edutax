@@ -25,7 +25,7 @@
 		--ui-paper-deep: #eeebe2;
 		--ui-canvas: #ece9df;
 		--ui-ink: #1c2733;
-		--ui-muted: #606b75;
+		--ui-muted: #4e5963;
 		--ui-line: #d8d4ca;
 		--ui-line-strong: #b9b6ae;
 		--ui-danger: #8f2823;
@@ -41,8 +41,8 @@
 		background: var(--ui-canvas);
 		color: var(--ui-ink);
 		font-family: var(--ui-font-body);
-		font-size: 14px;
-		line-height: 1.45;
+		font-size: 16px;
+		line-height: 1.6;
 	}
 
 	.re-ui-root,

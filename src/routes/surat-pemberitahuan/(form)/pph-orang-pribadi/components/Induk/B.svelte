@@ -1,8 +1,6 @@
 <script lang="ts">
     import { untrack } from "svelte";
-    import Input from "$lib/components/Input.svelte";
-    import Select from "$lib/components/Select.svelte";
-    import Table from "$lib/components/Table.svelte";
+    import { DataTable, SelectField } from "$lib/re-ui-components";
     import RowTanya from "./RowTanya.svelte";
     import RowNilai from "./RowNilai.svelte";
     import { HINTS } from "./hints";
@@ -130,107 +128,115 @@
     });
 </script>
 
-<div class="tw:p-5">
-    <Table class="tw:min-w-full">
-        {#snippet head()}
-            <tr class="tw:hidden"><td><Input hidden/></td></tr>
-        {/snippet}
-        {#snippet body()}
+<DataTable
+    label="Ikhtisar penghasilan neto"
+    minWidth="1080px"
+    headerTone="navy"
+    density="compact"
+    framed={false}
+>
+    <table>
+        <thead>
+            <tr>
+                <th scope="col">Nomor</th>
+                <th scope="col">Uraian</th>
+                <th scope="col">Jawaban/Pilihan</th>
+                <th scope="col" class="number">Jumlah (Rupiah)</th>
+                <th scope="col">Informasi</th>
+            </tr>
+        </thead>
+        <tbody>
             <RowTanya
-                nomor={"1.a"}
-                label={"Apakah Anda menerima penghasilan dalam negeri dari pekerjaan?"}
-                name={"B1a"}
+                nomor="1.a"
+                label="Apakah Anda menerima penghasilan dalam negeri dari pekerjaan?"
+                name="B1a"
                 bind:answer={b1aPenghasilanPekerjaan}
                 hint={HINTS.b1a}
-                amount={"derived"}
+                amount="derived"
                 amountValue={n1a}
                 {readonly}
             />
             <RowTanya
-                nomor={"1.b.1"}
-                label={"Apakah Anda menerima penghasilan dalam negeri dari usaha dan/atau pekerjaan bebas?"}
-                name={"B1b1"}
+                nomor="1.b.1"
+                label="Apakah Anda menerima penghasilan dalam negeri dari usaha dan/atau pekerjaan bebas?"
+                name="B1b1"
                 bind:answer={b1b1PenghasilanUsaha}
                 hint={HINTS.b1b1}
                 {readonly}
             />
 
-            <!-- Answering 1.b.1 Tidak removes 1.b.2, 1.b.3 and 1.b.5 from the DOM
-                 entirely rather than disabling them. The sub-rows under 1.b are a
-                 conditional block, which is why the numbering appears to skip
-                 1.b.4 in a captured state. -->
             {#if b1b1PenghasilanUsaha}
                 <tr>
-                    <td class="tw:w-10"><span>1.b.2</span></td>
-                    <td class="tw:w-[40rem]"><span>Apakah Anda termasuk WP OP yang memiliki peredaran bruto tertentu atau OPPT?</span></td>
+                    <td><strong>1.b.2</strong></td>
+                    <td>Apakah Anda termasuk WP OP yang memiliki peredaran bruto tertentu atau OPPT?</td>
                     <td colspan="3">
-                        <Select bind:value={b1b2Oppt} disabled={readonly}>
-                            {#each opptOptions as option}
-                                <option class="tw:text-black" value={option.value}>{option.label}</option>
-                            {/each}
-                        </Select>
+                        <SelectField
+                            label="Jawaban pertanyaan 1.b.2"
+                            labelHidden
+                            floatingPanel
+                            bind:value={b1b2Oppt}
+                            options={opptOptions}
+                            disabled={readonly}
+                        />
                     </td>
                 </tr>
                 <tr>
-                    <td><span>1.b.3</span></td>
-                    <td><span>Apakah Anda menggunakan Norma dalam menghitung penghasilan neto?</span></td>
+                    <td><strong>1.b.3</strong></td>
+                    <td>Apakah Anda menggunakan Norma dalam menghitung penghasilan neto?</td>
                     <td colspan="3">
-                        <Select bind:value={b1b3Norma} disabled={readonly}>
-                            {#each normaOptions as option}
-                                <option class="tw:text-black" value={option.value}>{option.label}</option>
-                            {/each}
-                        </Select>
+                        <SelectField
+                            label="Jawaban pertanyaan 1.b.3"
+                            labelHidden
+                            floatingPanel
+                            bind:value={b1b3Norma}
+                            options={normaOptions}
+                            disabled={readonly}
+                        />
                     </td>
                 </tr>
                 {#if b1b3Norma === 'tidak_pembukuan'}
                     <tr>
-                        <td><span>1.b.4</span></td>
-                        <td><span>Anda menyelenggarakan pembukuan. Sebutkan sektor usaha yang Anda lakukan?</span></td>
+                        <td><strong>1.b.4</strong></td>
+                        <td>Anda menyelenggarakan pembukuan. Sebutkan sektor usaha yang Anda lakukan?</td>
                         <td colspan="3">
-                            <Select bind:value={b1b4Sektor} disabled={readonly}>
-                                {#each sektorOptions as option}
-                                    <option class="tw:text-black" value={option.value}>{option.label}</option>
-                                {/each}
-                            </Select>
+                            <SelectField
+                                label="Sektor usaha"
+                                labelHidden
+                                floatingPanel
+                                bind:value={b1b4Sektor}
+                                options={sektorOptions}
+                                disabled={readonly}
+                            />
                         </td>
                     </tr>
                 {/if}
                 <RowNilai
-                    nomor={"1.b.5"}
-                    label={"Penghasilan neto dari usaha dan/atau pekerjaan bebas"}
+                    nomor="1.b.5"
+                    label="Penghasilan neto dari usaha dan/atau pekerjaan bebas"
                     value={n1b}
                 />
             {/if}
 
             <RowTanya
-                nomor={"1.c"}
-                label={"Apakah Anda menerima penghasilan dalam negeri lainnya?"}
-                name={"B1c"}
+                nomor="1.c"
+                label="Apakah Anda menerima penghasilan dalam negeri lainnya?"
+                name="B1c"
                 bind:answer={b1cPenghasilanDalamNegeriLainnya}
                 hint={HINTS.b1c}
-                amount={"derived"}
+                amount="derived"
                 amountValue={n1c}
                 {readonly}
             />
             <RowTanya
-                nomor={"1.d"}
-                label={"Apakah Anda menerima penghasilan luar negeri?"}
-                name={"B1d"}
+                nomor="1.d"
+                label="Apakah Anda menerima penghasilan luar negeri?"
+                name="B1d"
                 bind:answer={b1dPenghasilanLuarNegeri}
                 hint={HINTS.b1d}
-                amount={"derived"}
+                amount="derived"
                 amountValue={n1d}
                 {readonly}
             />
-        {/snippet}
-    </Table>
-</div>
-
-<style>
-    tr {
-        border: none;
-        &:nth-child(even) { background-color: #F9F6EE; }
-    }
-    td { padding: .25rem .5rem; }
-    span { font-size: .8rem; }
-</style>
+        </tbody>
+    </table>
+</DataTable>

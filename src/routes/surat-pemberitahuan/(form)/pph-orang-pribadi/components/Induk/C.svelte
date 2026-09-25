@@ -1,7 +1,5 @@
 <script lang="ts">
-    import Input from "$lib/components/Input.svelte";
-    import Select from "$lib/components/Select.svelte";
-    import Table from "$lib/components/Table.svelte";
+    import { DataTable, FormField, SelectField } from "$lib/re-ui-components";
     import RowTanya from "./RowTanya.svelte";
     import RowNilai from "./RowNilai.svelte";
     import { HINTS } from "./hints";
@@ -30,66 +28,93 @@
         phMt = false,
         readonly = false
     }: Props = $props();
+
+    const ptkpOptions = [{ value: '', label: '' }, ...PTKP_OPTIONS];
 </script>
 
-<div class="tw:p-5">
-    <Table class="tw:min-w-full">
-        {#snippet head()}
-            <tr class="tw:hidden"><td><Input hidden/></td></tr>
-        {/snippet}
-        {#snippet body()}
-            <RowNilai nomor={"2."} label={"Penghasilan neto setahun (1a+1b+1c+1d)"} value={computed.n2} />
+<DataTable
+    label="Penghitungan pajak terutang"
+    minWidth="1080px"
+    headerTone="navy"
+    density="compact"
+    framed={false}
+>
+    <table>
+        <thead>
+            <tr>
+                <th scope="col">Nomor</th>
+                <th scope="col">Uraian</th>
+                <th scope="col">Jawaban/Pilihan</th>
+                <th scope="col" class="number">Jumlah (Rupiah)</th>
+                <th scope="col">Informasi</th>
+            </tr>
+        </thead>
+        <tbody>
+            <RowNilai nomor="2." label="Penghasilan neto setahun (1a+1b+1c+1d)" value={computed.n2} />
             <RowTanya
-                nomor={"3."}
-                label={"Apakah terdapat pengurang penghasilan neto (kompensasi kerugian, zakat/sumbangan keagamaan) selain yang telah diperhitungkan dalam Formulir BPA1 dan/atau BPA2?"}
-                name={"C3"}
+                nomor="3."
+                label="Apakah terdapat pengurang penghasilan neto (kompensasi kerugian, zakat/sumbangan keagamaan) selain yang telah diperhitungkan dalam Formulir BPA1 dan/atau BPA2?"
+                name="C3"
                 bind:answer={c3AdaPengurangPenghasilanNeto}
                 hint={HINTS.c3}
-                amount={"derived"}
+                amount="derived"
                 amountValue={computed.n3}
                 {readonly}
             />
-            <RowNilai nomor={"4."} label={"Penghasilan neto setelah pengurang penghasilan neto (2-3)"} value={computed.n4} />
+            <RowNilai nomor="4." label="Penghasilan neto setelah pengurang penghasilan neto (2-3)" value={computed.n4} />
             <tr>
-                <td class="tw:w-10"><span>5.</span></td>
-                <td class="tw:w-[40rem]"><span>Penghasilan Tidak Kena Pajak *</span></td>
-                <td class="tw:w-[10rem]">
-                    <Select bind:value={c5PtkpStatus} disabled={readonly || phMt}>
-                        <option class="tw:text-black" value={""}></option>
-                        {#each PTKP_OPTIONS as ptkp}
-                            <option class="tw:text-black" value={ptkp.value}>{ptkp.label}</option>
-                        {/each}
-                    </Select>
+                <td><strong>5.</strong></td>
+                <td>Penghasilan Tidak Kena Pajak *</td>
+                <td>
+                    <SelectField
+                        label="Status Penghasilan Tidak Kena Pajak"
+                        labelHidden
+                        floatingPanel
+                        bind:value={c5PtkpStatus}
+                        options={ptkpOptions}
+                        disabled={readonly || phMt}
+                    />
                 </td>
-                <td class="tw:w-[20rem]">
-                    <Input class={"tw:text-end"} type={"text"} value={formatRupiahDerived(computed.n5)} disabled />
+                <td class="amount-cell">
+                    <FormField
+                        label="Jumlah 5."
+                        value={formatRupiahDerived(computed.n5)}
+                        disabled
+                    />
                 </td>
-                <td class="tw:w-[30rem]"></td>
+                <td></td>
             </tr>
             <!-- Row 6 rounds down to the nearest 1.000 and floors at 0, both
                  implemented in hitungInduk and confirmed by measurement. -->
-            <RowNilai nomor={"6."} label={"Penghasilan Kena Pajak (4-5)"} value={computed.n6} />
-            <RowNilai nomor={"7."} label={"PPh Terutang"} value={computed.n7} />
+            <RowNilai nomor="6." label="Penghasilan Kena Pajak (4-5)" value={computed.n6} />
+            <RowNilai nomor="7." label="PPh Terutang" value={computed.n7} />
             <RowTanya
-                nomor={"8."}
-                label={"Apakah terdapat pengurang PPh Terutang?"}
-                name={"C8"}
+                nomor="8."
+                label="Apakah terdapat pengurang PPh Terutang?"
+                name="C8"
                 bind:answer={c8AdaPengurangPphTerutang}
                 hint={HINTS.c8}
-                amount={"derived"}
+                amount="derived"
                 amountValue={computed.n8}
                 {readonly}
             />
-            <RowNilai nomor={"9."} label={"PPh Terutang setelah pengurang PPh Terutang (7-8)"} value={computed.n9} />
-        {/snippet}
-    </Table>
-</div>
+            <RowNilai nomor="9." label="PPh Terutang setelah pengurang PPh Terutang (7-8)" value={computed.n9} />
+        </tbody>
+    </table>
+</DataTable>
 
 <style>
-    tr {
-        border: none;
-        &:nth-child(even) { background-color: #F9F6EE; }
+    .amount-cell {
+        min-width: 13rem;
     }
-    td { padding: .25rem .5rem; }
-    span { font-size: .8rem; }
+    .amount-cell :global(.field > .label),
+    .amount-cell :global(label > .label) {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+    }
 </style>

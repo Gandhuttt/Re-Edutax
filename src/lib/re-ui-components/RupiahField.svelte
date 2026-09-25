@@ -19,7 +19,7 @@
 
 	let {
 		label,
-		value = $bindable(0),
+		value = $bindable(),
 		field,
 		hint = "",
 		error = "",
@@ -37,7 +37,7 @@
 	const resolvedError = $derived(error || firstRemoteIssue(field)?.message || "");
 	const resolvedName = $derived(field ? remoteFieldName(field, "text") : name);
 	const resolvedValue = $derived.by(() => {
-		if (!field) return value;
+		if (!field) return Number(value ?? 0);
 		const raw = field.value() ?? value;
 		const numeric = Number(String(raw ?? "").replace(/\D/g, ""));
 		return Number.isFinite(numeric) ? numeric : 0;
@@ -99,7 +99,7 @@
 	}
 	.label {
 		color: var(--ui-ink);
-		font-size: 12px;
+		font-size: 14px;
 		font-weight: 700;
 	}
 	.label em {
@@ -135,7 +135,7 @@
 		border-right: 1px solid var(--ui-line);
 		background: var(--ui-paper-deep);
 		color: var(--ui-navy);
-		font-size: 11px;
+		font-size: 13px;
 		font-weight: 850;
 		letter-spacing: 0.02em;
 		transition:
@@ -156,7 +156,7 @@
 		background: transparent;
 		color: var(--ui-ink);
 		font: inherit;
-		font-size: 13px;
+		font-size: 16px;
 		font-variant-numeric: tabular-nums;
 		text-align: right;
 	}
@@ -180,7 +180,7 @@
 	}
 	.hint,
 	.message {
-		font-size: 11px;
+		font-size: 12px;
 		line-height: 1.4;
 	}
 	.hint {

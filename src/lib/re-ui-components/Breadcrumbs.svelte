@@ -49,7 +49,7 @@
 <style>
 	.breadcrumbs {
 		color: var(--ui-muted);
-		font-size: 11px;
+		font-size: 13px;
 	}
 
 	ol {

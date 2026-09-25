@@ -20,7 +20,7 @@
 
 	let {
 		label,
-		checked = $bindable(false),
+		checked = $bindable(),
 		field,
 		description = "",
 		error,
@@ -34,7 +34,7 @@
 	}: CheckboxFieldProps = $props();
 
 	const resolvedChecked = $derived(
-		field ? Boolean(field.value() ?? checked) : checked,
+		field ? Boolean(field.value() ?? checked) : Boolean(checked),
 	);
 	const resolvedName = $derived(
 		field ? remoteFieldName(field, "checkbox") : name,
@@ -216,18 +216,18 @@
 		display: block;
 	}
 	.copy strong {
-		font-size: 11px;
+		font-size: 14px;
 	}
 	.copy small {
 		margin-top: 2px;
 		color: var(--ui-muted);
-		font-size: 9px;
+		font-size: 12px;
 		line-height: 1.35;
 	}
 	.message {
 		grid-column: 1 / -1;
 		color: var(--ui-danger);
-		font-size: 10px;
+		font-size: 12px;
 		line-height: 1.4;
 	}
 	.disabled {

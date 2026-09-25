@@ -1,6 +1,6 @@
 <script lang="ts">
     import type { DaftarReferensi, KodeReferensi } from "../referensi";
-    import Accordion from "$lib/components/AccordionItem.svelte";
+    import { DisclosureItem, Stack } from "$lib/re-ui-components";
     import A from "./A.svelte";
     import B from "./B.svelte";
     import C from "./C.svelte";
@@ -36,38 +36,32 @@
 </script>
 
 <div class="{currentTab === 'L-5' ? '' : 'tw:hidden'}">
-    <div class="accordion">
-        <Accordion item={"A. PENGHITUNGAN KOMPENSASI KERUGIAN FISKAL"}>
-            <div class="tw:p-5">
-                <A
-                    bind:rows={kompensasi}
-                    {tahunPajak}
-                    dapatDiubah={Boolean(c3AdaPengurangPenghasilanNeto)}
-                    {readonly}
-                />
-            </div>
-        </Accordion>
-        <Accordion item={"B. PENGURANG PENGHASILAN NETO"}>
-            <div class="tw:p-5">
-                <B
-                    bind:rows={pengurangNeto}
-                    {referensi}
-                    {kodeReferensi}
-                    dapatDiubah={Boolean(c3AdaPengurangPenghasilanNeto)}
-                    {readonly}
-                />
-            </div>
-        </Accordion>
-        <Accordion item={"C. PENGURANG PPh TERUTANG"}>
-            <div class="tw:p-5">
-                <C
-                    bind:rows={pengurangPph}
-                    {referensi}
-                    {kodeReferensi}
-                    dapatDiubah={Boolean(c8AdaPengurangPphTerutang)}
-                    {readonly}
-                />
-            </div>
-        </Accordion>
-    </div>
+    <Stack gap="0">
+        <DisclosureItem title="A. PENGHITUNGAN KOMPENSASI KERUGIAN FISKAL" open>
+            <A
+                bind:rows={kompensasi}
+                {tahunPajak}
+                dapatDiubah={Boolean(c3AdaPengurangPenghasilanNeto)}
+                {readonly}
+            />
+        </DisclosureItem>
+        <DisclosureItem title="B. PENGURANG PENGHASILAN NETO" open>
+            <B
+                bind:rows={pengurangNeto}
+                {referensi}
+                {kodeReferensi}
+                dapatDiubah={Boolean(c3AdaPengurangPenghasilanNeto)}
+                {readonly}
+            />
+        </DisclosureItem>
+        <DisclosureItem title="C. PENGURANG PPh TERUTANG" open>
+            <C
+                bind:rows={pengurangPph}
+                {referensi}
+                {kodeReferensi}
+                dapatDiubah={Boolean(c8AdaPengurangPphTerutang)}
+                {readonly}
+            />
+        </DisclosureItem>
+    </Stack>
 </div>

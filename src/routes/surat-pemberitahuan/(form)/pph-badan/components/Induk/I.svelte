@@ -1,84 +1,50 @@
 <script lang="ts">
-    import Table from "$lib/components/Table.svelte";
-    import Label from "$lib/components/Label.svelte";
-    import Input from "$lib/components/Input.svelte";
-    import Select from "$lib/components/Select.svelte";
-	import Card from "$lib/components/Card.svelte";
-    import Button from "$lib/components/Button.svelte";
-    import { getContext } from "svelte";
+	import { ActionButton, DataTable, FileUploadField, FormSection, Stack } from "$lib/re-ui-components";
 </script>
 
-<div class="tw:p-5 tw:flex tw:flex-col tw:gap-5">
-    <div class="tw:flex tw:flex-row tw:w-full">
-        <span class="tw:inline-block tw:basis-1/3 tw:shrink">a.1. Laporan Keuangan/Laporan Keuangan yang Telah Diaduit*</span>
-        <div class="tw:basis-auto tw:grow tw:shrink-[2]">
-            <Card>
-                {#snippet head()}
-                    <div class="tw:py-2">
-                        <Button --color={'#FFD230'} type={"button"}>
-                            <Label class={"tw:w-full tw:h-full"}>
-                                <Input id={getContext("id")} type={"file"} placeholder={"test"}/>
-                                <span>Pilih</span>
-                            </Label>
-                        </Button>
-                        <Button --color={'#FFD230'} type={"button"}>
-                            <span>Unggah</span>
-                        </Button>
-                        <Button --color={'#FFD230'} type={"button"}>
-                            <span>Batal</span>
-                        </Button>
-                    </div>
-                {/snippet}
-                {#snippet body()}
-                    <span>PLACEHOLDER</span>
-                {/snippet}
-            </Card>
-        </div>
-    </div>
-    <div class="tw:flex tw:flex-row tw:w-full">
-        <span class="tw:inline-block tw:basis-1/3 tw:shrink">Files Uploaded</span>
-        <Table class={"tw:min-w-0! tw:basis-auto tw:grow tw:shrink-[2] tw:border-1 tw:border-[#A9A9A9]"}>
-            {#snippet head()}
-                <tr class="tw:hidden">
-                    <td><Input hidden/></td>
-                </tr>
-            {/snippet}
-            {#snippet body()}
-                <tr>
-                    <th><span>NO</span></th>
-                    <th><span>NAMA DOKUMEN</span></th>
-                    <th><span>TINDAKAN</span></th>
-                </tr>
-                <tr>
-                    <td><span>PLACEHOLDER</span></td>
-                    <td><span>PLACEHOLDER</span></td>
-                    <td><span>PLACEHOLDER</span></td>
-                </tr>
-            {/snippet}
-        </Table>
-    </div>
-</div>
+<Stack gap="18px">
+	<FormSection
+		title="Laporan Keuangan"
+		description="Laporan Keuangan/Laporan Keuangan yang Telah Diaudit *"
+		bordered
+	>
+		<Stack gap="14px">
+			<FileUploadField label="Pilih laporan keuangan" buttonLabel="Pilih" />
+			<div class="actions">
+				<ActionButton tone="secondary">Unggah</ActionButton>
+				<ActionButton tone="quiet">Batal</ActionButton>
+			</div>
+			<div class="document-placeholder">PLACEHOLDER</div>
+		</Stack>
+	</FormSection>
+
+	<FormSection title="Files Uploaded" bordered padded={false}>
+		<DataTable label="Berkas laporan keuangan yang telah diunggah" minWidth="560px" headerTone="yellow" density="compact" framed={false}>
+			<table>
+				<thead>
+					<tr><th scope="col">No.</th><th scope="col">Nama Dokumen</th><th scope="col">Tindakan</th></tr>
+				</thead>
+				<tbody>
+					<tr><td>PLACEHOLDER</td><td>PLACEHOLDER</td><td>PLACEHOLDER</td></tr>
+				</tbody>
+			</table>
+		</DataTable>
+	</FormSection>
+</Stack>
 
 <style>
-    tr {
-        border: none;
-    }
-    td, th {
-        padding: .25rem .5rem;
-        border: 1px solid #A9A9A9;
-    }
-    th {
-        text-align: center;
-        font-weight: 600;
-        background-color: #FFD230;
-    }
-    td {
-        text-align: right;
-        &:last-child {
-            text-align: center;
-        }
-    }
-    span {
-        font-size: .8rem;
-    }
+	.actions {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 8px;
+	}
+
+	.document-placeholder {
+		min-height: 48px;
+		padding: 12px;
+		border: 1px solid var(--ui-line);
+		background: #fffefa;
+		color: var(--ui-muted);
+		font-size: 14px;
+	}
 </style>

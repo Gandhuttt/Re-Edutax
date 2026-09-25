@@ -1,9 +1,18 @@
 <script lang="ts">
 	import { isHttpError } from '@sveltejs/kit';
 	import { tick } from 'svelte';
-	import Alert from '$lib/components/Alert.svelte';
-	import Button from '$lib/components/Button.svelte';
-	import Card from '$lib/components/Card.svelte';
+	import {
+		ActionButton,
+		Breadcrumbs,
+		DocumentWorkspace,
+		FormActions,
+		FormSection,
+		InlineAlert,
+		PageHeading,
+		PageLayout,
+		Stack,
+		StatusBadge
+	} from '$lib/re-ui-components';
 	import Navbar from '../Navbar.svelte';
 	import Induk from './components/Induk/_Induk.svelte';
 	import L1 from './components/L-1/_L1.svelte';
@@ -555,18 +564,52 @@
 		}
 	]);
 
+	const statusLabel =
+		spt.statusDraft === 'dilaporkan'
+			? 'Dilaporkan'
+			: spt.statusDraft === 'menunggu_pembayaran'
+				? 'Menunggu pembayaran'
+				: 'Konsep';
+	const statusTone =
+		spt.statusDraft === 'dilaporkan'
+			? 'success'
+			: spt.statusDraft === 'menunggu_pembayaran'
+				? 'attention'
+				: 'neutral';
+	let l3aTab = $derived(
+		b1b4Sektor === 'dagang'
+			? 'L-3A-1'
+			: b1b4Sektor === 'jasa'
+				? 'L-3A-2'
+				: b1b4Sektor === 'industri'
+					? 'L-3A-3'
+					: ''
+	);
+
 	let saveError = $state('');
 </script>
 
-<Card>
-	{#snippet head()}
-		<div class="tw:flex tw:w-full tw:items-center tw:justify-between">
-			<span class="tw:text-2xl">SPT Tahunan PPh Orang Pribadi</span>
-			<span class="tw:text-sm">Tahun Pajak {spt.tahunPajak}</span>
-		</div>
-	{/snippet}
-	{#snippet body()}
-		<form
+<svelte:head><title>SPT Tahunan PPh Orang Pribadi</title></svelte:head>
+
+{#snippet headingActions()}
+	<StatusBadge label={statusLabel} tone={statusTone} />
+{/snippet}
+
+<PageLayout contentWidth="1500px">
+	<Breadcrumbs
+		items={[
+			{ label: 'Beranda', href: '/' },
+			{ label: 'Surat Pemberitahuan', href: '/surat-pemberitahuan/konsep' },
+			{ label: 'SPT Tahunan PPh Orang Pribadi' }
+		]}
+	/>
+	<PageHeading
+		eyebrow={`Tahun Pajak ${spt.tahunPajak}`}
+		title="SPT Tahunan PPh Orang Pribadi"
+		actions={headingActions}
+	/>
+
+	<form
 			novalidate
 			onkeydown={(e) => {
 				if (e.key === 'Enter' && !(e.target instanceof HTMLTextAreaElement)) {
@@ -676,6 +719,7 @@
 			<input type="hidden" name="jcBuktiPotongLuarNegeri" value={jcBuktiPotongLuarNegeri} />
 			<input type="hidden" name="jdSuratKuasaKhusus" value={jdSuratKuasaKhusus} />
 			<input type="hidden" name="jeDokumenLainnya" value={jeDokumenLainnya} />
+			<input type="hidden" name="pernyataanBenar" value={pernyataanBenar} />
 			<input type="hidden" name="penandatangan" value={penandatangan} />
 			<!-- L-1 rows. Note these sit in the same unconditional block for the
 			     reason above: the L-1 tab is always visible, but its B, D and E
@@ -782,8 +826,16 @@
 			<!-- The only figure still fed by a lampiran that does not exist yet. -->
 			<input type="hidden" name="n1b" value={n1b} />
 
-			<Navbar {tabs} bind:currentTab />
+			<DocumentWorkspace>
+				<Stack gap="14px">
+					<Navbar {tabs} {currentTab} onchange={(tab) => (currentTab = tab)} />
+					<FormSection
+						title={currentTab === 'Induk' ? 'Induk' : `Lampiran ${currentTab}`}
+						padded={false}
+						bordered
+					>
 
+						<div id="spt-panel-induk" role="tabpanel" hidden={currentTab !== 'Induk'}>
 			<Induk
 				{currentTab}
 				{spt}
@@ -848,7 +900,9 @@
 				{n14c}
 				{n14d}
 			/>
+						</div>
 
+						<div id="spt-panel-l-1" role="tabpanel" hidden={currentTab !== 'L-1'}>
 			<L1
 				{currentTab}
 				{referensi}
@@ -864,7 +918,9 @@
 				{d10aAdaPphDipotongPihakLain}
 				{readonly}
 			/>
+						</div>
 
+						<div id="spt-panel-l-2" role="tabpanel" hidden={currentTab !== 'L-2'}>
 			<L2
 				{currentTab}
 				{referensi}
@@ -877,7 +933,13 @@
 				{b1dPenghasilanLuarNegeri}
 				{readonly}
 			/>
+						</div>
 
+						<div
+							id={l3aTab ? `spt-panel-${l3aTab.toLowerCase()}` : undefined}
+							role="tabpanel"
+							hidden={currentTab !== l3aTab}
+						>
 			<L3A
 				{currentTab}
 				sektor={b1b4Sektor ? (b1b4Sektor as Sektor) : null}
@@ -889,7 +951,9 @@
 				kodeKoreksiFiskal={l3aKodeKoreksiFiskal}
 				{readonly}
 			/>
+						</div>
 
+						<div id="spt-panel-l-3a-4" role="tabpanel" hidden={currentTab !== 'L-3A-4'}>
 			<L3A4
 				{currentTab}
 				{referensi}
@@ -903,7 +967,9 @@
 				bind:normaPersen={l3bTku.normaPersen}
 				{readonly}
 			/>
+						</div>
 
+						<div id="spt-panel-l-3b" role="tabpanel" hidden={currentTab !== 'L-3B'}>
 			<L3B
 				{currentTab}
 				npwp={spt.npwp}
@@ -916,7 +982,9 @@
 				{b1b3Norma}
 				{readonly}
 			/>
+						</div>
 
+						<div id="spt-panel-l-4" role="tabpanel" hidden={currentTab !== 'L-4'}>
 			<L4
 				{currentTab}
 				bind:data={l4}
@@ -928,7 +996,9 @@
 				npwpSuamiIstri={a8NpwpSuamiIstri}
 				{readonly}
 			/>
+						</div>
 
+						<div id="spt-panel-l-3c" role="tabpanel" hidden={currentTab !== 'L-3C'}>
 			<L3C
 				{currentTab}
 				{referensi}
@@ -939,7 +1009,9 @@
 				bind:totalAmortisasiKomersial={l3cTotalAmortisasiKomersial}
 				{readonly}
 			/>
+						</div>
 
+						<div id="spt-panel-l-3d" role="tabpanel" hidden={currentTab !== 'L-3D'}>
 			<L3D
 				{currentTab}
 				{referensi}
@@ -949,7 +1021,9 @@
 				bind:piutang={l3dPiutang}
 				{readonly}
 			/>
+						</div>
 
+						<div id="spt-panel-l-5" role="tabpanel" hidden={currentTab !== 'L-5'}>
 			<L5
 				{currentTab}
 				{referensi}
@@ -962,48 +1036,39 @@
 				{c8AdaPengurangPphTerutang}
 				{readonly}
 			/>
+						</div>
 
 			<!-- The remaining lampiran tabs are gated above but not built yet. -->
 			{#if currentTab !== 'Induk' && currentTab !== 'L-1' && currentTab !== 'L-2' && currentTab !== 'L-3A-1' && currentTab !== 'L-3A-2' && currentTab !== 'L-3A-3' && currentTab !== 'L-3A-4' && currentTab !== 'L-3B' && currentTab !== 'L-3C' && currentTab !== 'L-3D' && currentTab !== 'L-4' && currentTab !== 'L-5'}
-				<div class="tw:p-5">
-					<Alert bg={'var(--color-primary)'}>
-						{#snippet head()}
-							<span>i</span>
-						{/snippet}
-						{#snippet body()}
-							<span>
-								Lampiran {currentTab} belum tersedia. Jawaban pada Induk sudah menentukan lampiran
-								mana yang berlaku, dan pengisiannya akan ditambahkan berikutnya.
-							</span>
-						{/snippet}
-					</Alert>
-				</div>
+						<InlineAlert
+							tone="info"
+							title={`Lampiran ${currentTab} belum tersedia`}
+							message="Jawaban pada Induk sudah menentukan lampiran mana yang berlaku, dan pengisiannya akan ditambahkan berikutnya."
+						/>
 			{/if}
+					</FormSection>
 
-			{#if saveError}
-				<div class="tw:mt-4">
-					<Alert bg={'#dc2626'}>
-						{#snippet head()}
-							<span class="tw:text-white">!</span>
-						{/snippet}
-						{#snippet body()}
-							<span class="tw:text-white">{saveError}</span>
-						{/snippet}
-					</Alert>
-				</div>
-			{/if}
+					{#if saveError}
+						<InlineAlert
+							tone="error"
+							title="SPT belum dapat disimpan"
+							message={saveError}
+						/>
+					{/if}
 
-			{#if !readonly}
-				<div class="tw:mt-4 tw:flex tw:gap-2">
-					<Button type="submit" name="action" value="Simpan Konsep" color="var(--color-secondary)">
-						<span class="tw:text-white">Simpan Konsep</span>
-					</Button>
-					<Button type="submit" name="action" value="Simpan Lapor" color="var(--color-secondary)">
-						<span class="tw:text-white">Simpan Lapor</span>
-					</Button>
-				</div>
-			{/if}
+					{#if !readonly}
+						<FormActions>
+							<ActionButton type="submit" name="action" value="Simpan Konsep" tone="secondary">
+								Simpan Konsep
+							</ActionButton>
+							<ActionButton type="submit" name="action" value="Simpan Lapor">
+								Simpan Lapor
+							</ActionButton>
+						</FormActions>
+					{/if}
+				</Stack>
+			</DocumentWorkspace>
 		</form>
-		<form {...postForm} id={postFormId}></form>
-	{/snippet}
-</Card>
+</PageLayout>
+
+<form {...postForm} id={postFormId}></form>

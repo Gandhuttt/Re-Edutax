@@ -1,243 +1,87 @@
 <script lang="ts">
-    import Table from "$lib/components/Table.svelte";
-    import Label from "$lib/components/Label.svelte";
-    import Input from "$lib/components/Input.svelte";
-    import Select from "$lib/components/Select.svelte";
-    import Alert from "$lib/components/Alert.svelte";
-    import { getContext } from "svelte";
-    import type { computeIndukDEF } from "./computeIndukDEF";
+	import { DataTable, FormField, InlineAlert, RadioGroup, SelectField, Stack } from "$lib/re-ui-components";
+	import type { computeIndukDEF } from "./computeIndukDEF";
 
-    interface Props {
-        computed: ReturnType<typeof computeIndukDEF>;
-        d5FasilitasPenanamanModal: boolean;
-        d6FasilitasBrutoVokasi: boolean;
-        d8AdaKompensasiKerugian: boolean;
-        d10FasilitasBrutoLitbang: boolean;
-        tarifPajak: string;
-        persentaseTarifLainnya: number;
-        readonly?: boolean;
-    }
+	interface Props {
+		computed: ReturnType<typeof computeIndukDEF>;
+		d5FasilitasPenanamanModal: boolean;
+		d6FasilitasBrutoVokasi: boolean;
+		d8AdaKompensasiKerugian: boolean;
+		d10FasilitasBrutoLitbang: boolean;
+		tarifPajak: string;
+		persentaseTarifLainnya: number;
+		readonly?: boolean;
+	}
 
-    let {
-        computed,
-        d5FasilitasPenanamanModal = $bindable(),
-        d6FasilitasBrutoVokasi = $bindable(),
-        d8AdaKompensasiKerugian = $bindable(),
-        d10FasilitasBrutoLitbang = $bindable(),
-        tarifPajak = $bindable(),
-        persentaseTarifLainnya = $bindable(),
-        readonly = false
-    }: Props = $props();
+	let {
+		computed,
+		d5FasilitasPenanamanModal = $bindable(),
+		d6FasilitasBrutoVokasi = $bindable(),
+		d8AdaKompensasiKerugian = $bindable(),
+		d10FasilitasBrutoLitbang = $bindable(),
+		tarifPajak = $bindable(),
+		persentaseTarifLainnya = $bindable(),
+		readonly = false,
+	}: Props = $props();
 
-    const rupiah = new Intl.NumberFormat('id-ID');
-
-    const tarifPajakOptions = [
-        { value: 'pasal_17_1_b', label: 'a. Tarif Ketentuan Umum sebagaimana Pasal 17 ayat (1) huruf b UU PPh' },
-        { value: 'pasal_17_2b', label: 'b. Tarif fasilitas sebagaimana Pasal 17 ayat (2b) UU PPh' },
-        { value: 'pasal_31e', label: 'c. Tarif fasilitas sebagaimana Pasal 31E ayat (1) UU PPh' },
-        { value: 'lainnya', label: 'd. Tarif Pajak Lainnya' }
-    ];
+	const rupiah = new Intl.NumberFormat("id-ID");
+	const tarifPajakOptions = [
+		{ value: "pasal_17_1_b", label: "a. Tarif Ketentuan Umum sebagaimana Pasal 17 ayat (1) huruf b UU PPh" },
+		{ value: "pasal_17_2b", label: "b. Tarif fasilitas sebagaimana Pasal 17 ayat (2b) UU PPh" },
+		{ value: "pasal_31e", label: "c. Tarif fasilitas sebagaimana Pasal 31E ayat (1) UU PPh" },
+		{ value: "lainnya", label: "d. Tarif Pajak Lainnya" },
+	];
+	const yesNoOptions = $derived([
+		{ value: "false", label: "Tidak", disabled: readonly },
+		{ value: "true", label: "Ya", disabled: readonly },
+	]);
 </script>
 
-<div class="tw:p-5">
-    <Table class="tw:min-w-full">
-
-        <!-- Hidden input field -->
-        {#snippet head()}
-            <tr class="tw:hidden">
-                <td><Input hidden/></td>
-            </tr>
-        {/snippet}
-
-        <!-- Input field -->
-        {#snippet body()}
-            <tr>
-                <td class="tw:w-10"><span>4.</span></td>
-                <td class="tw:w-[40rem]"><span>Penghasilan Neto Fiskal sebelum Fasilitas Pajak</span></td>
-                <td class="tw:w-[10rem]"></td>
-                <td class="tw:w-[35rem]"><Input class={"tw:text-end"} type={"text"} value={rupiah.format(computed.d4)} disabled /></td>
-                <td class="tw:w-[30rem]"></td>
-            </tr>
-            <tr>
-                <td><span>5.</span></td>
-                <td><span>Apakah Wajib Pajak memperoleh Fasilitas Perpajakan Dalam Rangka Penanaman Modal berupa pengurangan penghasilan neto? *</span></td>
-                <td>
-                    <div class="tw:flex tw:gap-5">
-                        <Label for={getContext("id")} class="tw:flex tw:items-center tw:gap-1">
-                            <input type="radio" name="D5" value={false} bind:group={d5FasilitasPenanamanModal} disabled={readonly}>
-                            <span>Tidak</span>
-                        </Label>
-                        <Label for={getContext("id")} class="tw:flex tw:items-center tw:gap-1">
-                            <input type="radio" name="D5" value={true} bind:group={d5FasilitasPenanamanModal} disabled={readonly}>
-                            <span>Ya</span>
-                        </Label>
-                    </div>
-                </td>
-                <td><Input class={"tw:text-end"} type={"text"} value={0} disabled /></td>
-                <td>
-                {#if d5FasilitasPenanamanModal != undefined}
-                    <Alert bg={"var(--color-primary)"}>
-                        {#snippet head()}
-                            <span>i</span>
-                        {/snippet}
-                        {#snippet body()}
-                            <span>
-                            {d5FasilitasPenanamanModal ? "Ya, silahkan mengisi lampiran 13A" : "Tidak, silahkan lanjut pertanyaan berikutnya"}
-                            </span>
-                        {/snippet}
-                    </Alert>
-                {/if}
-                </td>
-            </tr>
-            <tr>
-                <td><span>6.</span></td>
-                <td><span>Apakah Wajib Pajak memperoleh Fasilitas Pengurangan Penghasilan Bruto untuk Kegiatan Praktik Kerja, Pemagangan, dan/atau Pembelajaran Dalam Rangka Pembinaan dan Pengembangan Sumber daya Manusia Berbasis Kompetensi Tertentu? *</span></td>
-                <td>
-                    <div class="tw:flex tw:gap-5">
-                        <Label for={getContext("id")} class="tw:flex tw:items-center tw:gap-1">
-                            <input type="radio" name="D6" value={false} bind:group={d6FasilitasBrutoVokasi} disabled={readonly}>
-                            <span>Tidak</span>
-                        </Label>
-                        <Label for={getContext("id")} class="tw:flex tw:items-center tw:gap-1">
-                            <input type="radio" name="D6" value={true} bind:group={d6FasilitasBrutoVokasi} disabled={readonly}>
-                            <span>Ya</span>
-                        </Label>
-                    </div>
-                </td>
-                <td><Input class={"tw:text-end"} type={"text"} value={rupiah.format(computed.d6Amt)} disabled /></td>
-                <td>
-                {#if d6FasilitasBrutoVokasi != undefined}
-                    <Alert bg={"var(--color-primary)"}>
-                        {#snippet head()}
-                            <span>i</span>
-                        {/snippet}
-                        {#snippet body()}
-                            <span>
-                            {d6FasilitasBrutoVokasi ? "Ya, silahkan mengisi lampiran 13B tabel A dan B" : "Tidak, silahkan lanjut pertanyaan berikutnya"}
-                            </span>
-                        {/snippet}
-                    </Alert>
-                {/if}
-                </td>
-            </tr>
-            <tr>
-                <td><span>7.</span></td>
-                <td><span>Penghasilan Neto Fiskal Setelah Fasilitas Pajak</span></td>
-                <td></td>
-                <td><Input class={"tw:text-end"} type={"text"} value={rupiah.format(computed.d7)} disabled /></td>
-                <td></td>
-            </tr>
-            <tr>
-                <td><span>8.</span></td>
-                <td><span>Apakah terdapat kerugian fiskal yang dapat dikompensasikan? *</span></td>
-                <td>
-                    <div class="tw:flex tw:gap-5">
-                        <Label for={getContext("id")} class="tw:flex tw:items-center tw:gap-1">
-                            <input type="radio" name="D8" value={false} bind:group={d8AdaKompensasiKerugian} disabled={readonly}>
-                            <span>Tidak</span>
-                        </Label>
-                        <Label for={getContext("id")} class="tw:flex tw:items-center tw:gap-1">
-                            <input type="radio" name="D8" value={true} bind:group={d8AdaKompensasiKerugian} disabled={readonly}>
-                            <span>Ya</span>
-                        </Label>
-                    </div>
-                </td>
-                <td><Input class={"tw:text-end"} type={"text"} value={rupiah.format(computed.d8Amt)} disabled /></td>
-                <td>
-                {#if d8AdaKompensasiKerugian != undefined}
-                    <Alert bg={"var(--color-primary)"}>
-                        {#snippet head()}
-                            <span>i</span>
-                        {/snippet}
-                        {#snippet body()}
-                            <span>
-                            {d8AdaKompensasiKerugian ? "Ya, silahkan mengisi lampiran 7" : "Tidak, silahkan lanjut pertanyaan berikutnya"}
-                            </span>
-                        {/snippet}
-                    </Alert>
-                {/if}
-                </td>
-            </tr>
-            <tr>
-                <td><span>9.</span></td>
-                <td><span>Penghasilan Kena Pajak</span></td>
-                <td></td>
-                <td><Input class={"tw:text-end"} type={"text"} value={rupiah.format(computed.d9)} disabled /></td>
-                <td></td>
-            </tr>
-            <tr>
-                <td><span>10.</span></td>
-                <td><span>Apakah Wajib Pajak memperoleh Fasilitas Pnegurangan Penghasilan Bruto untuk kegiatan Penelitian dan Pengembangan Tertentu? *</span></td>
-                <td>
-                    <div class="tw:flex tw:gap-5">
-                        <Label for={getContext("id")} class="tw:flex tw:items-center tw:gap-1">
-                            <input type="radio" name="D10" value={false} bind:group={d10FasilitasBrutoLitbang} disabled={readonly}>
-                            <span>Tidak</span>
-                        </Label>
-                        <Label for={getContext("id")} class="tw:flex tw:items-center tw:gap-1">
-                            <input type="radio" name="D10" value={true} bind:group={d10FasilitasBrutoLitbang} disabled={readonly}>
-                            <span>Ya</span>
-                        </Label>
-                    </div>
-                </td>
-                <td><Input class={"tw:text-end"} type={"text"} value={rupiah.format(computed.d10Amt)} disabled /></td>
-                <td>
-                {#if d10FasilitasBrutoLitbang != undefined}
-                    <Alert bg={"var(--color-primary)"}>
-                        {#snippet head()}
-                            <span>i</span>
-                        {/snippet}
-                        {#snippet body()}
-                            <span>
-                            {d10FasilitasBrutoLitbang ? "Ya, silahkan mengisi lampiran 13B tabel C dan D" : "Tidak, silahkan lanjut pertanyaan berikutnya"}
-                            </span>
-                        {/snippet}
-                    </Alert>
-                {/if}
-                </td>
-            </tr>
-            <tr>
-                <td><span>11.</span></td>
-                <td><span>Tarif Pajak *</span></td>
-                <td></td>
-                <td>
-                    <Select class={"tw:invalid:text-gray-500"} bind:value={tarifPajak} required disabled={readonly}>
-                        {#each tarifPajakOptions as tarif}
-                            <option class="tw:text-black" value={tarif.value}>{tarif.label}</option>
-                        {/each}
-                    </Select>
-                    {#if tarifPajak === 'lainnya'}
-                        <div class="tw:mt-2 tw:flex tw:items-center tw:gap-2">
-                            <span>Persentase:</span>
-                            <Input class={"tw:w-[10rem]! tw:text-end"} type={"number"} bind:value={persentaseTarifLainnya} disabled={readonly}/>
-                            <span>%</span>
-                        </div>
-                    {/if}
-                </td>
-                <td></td>
-            </tr>
-            <tr>
-                <td><span>12.</span></td>
-                <td><span>PPh Terutang *</span></td>
-                <td></td>
-                <td><Input class={"tw:text-end"} type={"text"} value={rupiah.format(computed.d12)} disabled /></td>
-                <td></td>
-            </tr>
-            {/snippet}
-    </Table>
-</div>
-
-<style>
-    tr {
-        border: none;
-        &:nth-child(even) {
-            background-color: #F9F6EE;
-        }
-    }
-    td {
-        padding: .25rem .5rem;
-    }
-    span {
-        font-size: .8rem;
-    }
-</style>
+<DataTable label="Penghitungan PPh" minWidth="1240px" headerTone="navy" density="compact">
+	<table>
+		<thead>
+			<tr><th scope="col">No.</th><th scope="col">Uraian</th><th scope="col">Jawaban</th><th scope="col">Jumlah</th><th scope="col">Informasi</th></tr>
+		</thead>
+		<tbody>
+			<tr><td>4.</td><td>Penghasilan Neto Fiskal sebelum Fasilitas Pajak</td><td></td><td><FormField label="Penghasilan Neto Fiskal sebelum Fasilitas Pajak" value={rupiah.format(computed.d4)} disabled /></td><td></td></tr>
+			<tr>
+				<td>5.</td><td>Apakah Wajib Pajak memperoleh Fasilitas Perpajakan Dalam Rangka Penanaman Modal berupa pengurangan penghasilan neto? *</td>
+				<td><RadioGroup label="Fasilitas penanaman modal" name="D5" value={String(d5FasilitasPenanamanModal)} options={yesNoOptions} onchange={(value) => (d5FasilitasPenanamanModal = value === "true")} /></td>
+				<td><FormField label="Pengurangan penghasilan neto" value="0" disabled /></td>
+				<td>{#if d5FasilitasPenanamanModal != undefined}<InlineAlert compact message={d5FasilitasPenanamanModal ? "Ya, silahkan mengisi lampiran 13A" : "Tidak, silahkan lanjut pertanyaan berikutnya"} />{/if}</td>
+			</tr>
+			<tr>
+				<td>6.</td><td>Apakah Wajib Pajak memperoleh Fasilitas Pengurangan Penghasilan Bruto untuk Kegiatan Praktik Kerja, Pemagangan, dan/atau Pembelajaran Dalam Rangka Pembinaan dan Pengembangan Sumber daya Manusia Berbasis Kompetensi Tertentu? *</td>
+				<td><RadioGroup label="Fasilitas penghasilan bruto vokasi" name="D6" value={String(d6FasilitasBrutoVokasi)} options={yesNoOptions} onchange={(value) => (d6FasilitasBrutoVokasi = value === "true")} /></td>
+				<td><FormField label="Pengurangan penghasilan bruto vokasi" value={rupiah.format(computed.d6Amt)} disabled /></td>
+				<td>{#if d6FasilitasBrutoVokasi != undefined}<InlineAlert compact message={d6FasilitasBrutoVokasi ? "Ya, silahkan mengisi lampiran 13B tabel A dan B" : "Tidak, silahkan lanjut pertanyaan berikutnya"} />{/if}</td>
+			</tr>
+			<tr><td>7.</td><td>Penghasilan Neto Fiskal Setelah Fasilitas Pajak</td><td></td><td><FormField label="Penghasilan Neto Fiskal Setelah Fasilitas Pajak" value={rupiah.format(computed.d7)} disabled /></td><td></td></tr>
+			<tr>
+				<td>8.</td><td>Apakah terdapat kerugian fiskal yang dapat dikompensasikan? *</td>
+				<td><RadioGroup label="Kompensasi kerugian fiskal" name="D8" value={String(d8AdaKompensasiKerugian)} options={yesNoOptions} onchange={(value) => (d8AdaKompensasiKerugian = value === "true")} /></td>
+				<td><FormField label="Kompensasi kerugian fiskal" value={rupiah.format(computed.d8Amt)} disabled /></td>
+				<td>{#if d8AdaKompensasiKerugian != undefined}<InlineAlert compact message={d8AdaKompensasiKerugian ? "Ya, silahkan mengisi lampiran 7" : "Tidak, silahkan lanjut pertanyaan berikutnya"} />{/if}</td>
+			</tr>
+			<tr><td>9.</td><td>Penghasilan Kena Pajak</td><td></td><td><FormField label="Penghasilan Kena Pajak" value={rupiah.format(computed.d9)} disabled /></td><td></td></tr>
+			<tr>
+				<td>10.</td><td>Apakah Wajib Pajak memperoleh Fasilitas Pnegurangan Penghasilan Bruto untuk kegiatan Penelitian dan Pengembangan Tertentu? *</td>
+				<td><RadioGroup label="Fasilitas penghasilan bruto litbang" name="D10" value={String(d10FasilitasBrutoLitbang)} options={yesNoOptions} onchange={(value) => (d10FasilitasBrutoLitbang = value === "true")} /></td>
+				<td><FormField label="Pengurangan penghasilan bruto litbang" value={rupiah.format(computed.d10Amt)} disabled /></td>
+				<td>{#if d10FasilitasBrutoLitbang != undefined}<InlineAlert compact message={d10FasilitasBrutoLitbang ? "Ya, silahkan mengisi lampiran 13B tabel C dan D" : "Tidak, silahkan lanjut pertanyaan berikutnya"} />{/if}</td>
+			</tr>
+			<tr>
+				<td>11.</td><td>Tarif Pajak *</td><td></td>
+				<td>
+					<Stack gap="10px">
+						<SelectField label="Tarif Pajak" bind:value={tarifPajak} options={tarifPajakOptions} required disabled={readonly} />
+						{#if tarifPajak === "lainnya"}
+							<FormField label="Persentase Tarif Lainnya (%)" type="number" bind:value={() => String(persentaseTarifLainnya), (value) => (persentaseTarifLainnya = Number(value))} disabled={readonly} />
+						{/if}
+					</Stack>
+				</td><td></td>
+			</tr>
+			<tr><td>12.</td><td>PPh Terutang *</td><td></td><td><FormField label="PPh Terutang" value={rupiah.format(computed.d12)} disabled /></td><td></td></tr>
+		</tbody>
+	</table>
+</DataTable>

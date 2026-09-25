@@ -114,12 +114,12 @@
 	}
 	.title strong {
 		color: var(--ui-navy);
-		font-size: 12px;
+		font-size: 14px;
 	}
 	.title small {
 		margin-top: 2px;
 		color: var(--ui-muted);
-		font-size: 10px;
+		font-size: 12px;
 	}
 	.disclosure-header:focus-visible {
 		position: relative;
@@ -195,7 +195,7 @@
 		border-top: 1px solid var(--ui-line);
 		background: #fffefa;
 		color: var(--ui-muted);
-		font-size: 12px;
+		font-size: 14px;
 		line-height: 1.55;
 	}
 	.body-motion {

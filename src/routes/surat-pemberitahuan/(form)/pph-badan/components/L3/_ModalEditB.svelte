@@ -1,116 +1,57 @@
 <script lang="ts">
-    import { applyRupiahInput, formatRupiah } from '$lib/helpers/rupiahInput';
+	import { ActionButton, DateField, FieldGrid, FormField, InstitutionalModal, RupiahField, SelectField } from '$lib/re-ui-components';
 
-    let {
-        data = $bindable() as {
-            id: string | number;
-            namaPemotongPemungut: string;
-            npwp?: string;
-            jenisPajak?: string;
-            dpp?: number;
-            pph?: number;
-            nomorBukti?: string;
-            tanggalBukti?: string;
-        },
-        saveItem,
-        jenisPajakOptions
-    }: {
-        data: {
-            id: string | number;
-            namaPemotongPemungut: string;
-            npwp?: string;
-            jenisPajak?: string;
-            dpp?: number;
-            pph?: number;
-            nomorBukti?: string;
-            tanggalBukti?: string;
-        };
-        saveItem: () => void;
-        jenisPajakOptions: { value: string; label: string }[];
-    } = $props();
+	let {
+		open = $bindable(false),
+		data = $bindable() as {
+			id: string | number;
+			namaPemotongPemungut: string;
+			npwp?: string;
+			jenisPajak?: string;
+			dpp?: number;
+			pph?: number;
+			nomorBukti?: string;
+			tanggalBukti?: string;
+		},
+		saveItem,
+		jenisPajakOptions,
+		readonly = false
+	}: {
+		open?: boolean;
+		data: {
+			id: string | number;
+			namaPemotongPemungut: string;
+			npwp?: string;
+			jenisPajak?: string;
+			dpp?: number;
+			pph?: number;
+			nomorBukti?: string;
+			tanggalBukti?: string;
+		};
+		saveItem: () => void;
+		jenisPajakOptions: { value: string; label: string }[];
+		readonly?: boolean;
+	} = $props();
 
-    function handleSave(): void {
-        saveItem();
-    }
+	function handleSave(): void {
+		saveItem();
+		open = false;
+	}
 </script>
 
-<!-- Modal -->
-<div class="modal fade" id="modalL3B" tabindex="-1" aria-labelledby="modalL3BLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h1 class="modal-title fs-5" id="modalL3BLabel" style="font-weight: bold; text-transform: uppercase;">
-          EDIT PPh YANG DIPOTONG/DIPUNGUT PIHAK LAIN
-        </h1>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
+<InstitutionalModal id="modalL3B" bind:open eyebrow="LAMPIRAN 3" title="Edit PPh yang Dipotong/Dipungut Pihak Lain" size="wide" scrollable>
+	<FieldGrid columns={2}>
+		<FormField label="Nama Pemotong/Pemungut Pajak" bind:value={data.namaPemotongPemungut} required disabled={readonly} />
+		<FormField label="NPWP" bind:value={data.npwp!} required disabled={readonly} />
+		<SelectField label="Jenis Pajak" bind:value={data.jenisPajak!} options={jenisPajakOptions} placeholder="Pilih jenis pajak" searchable required disabled={readonly} />
+		<RupiahField label="DPP" bind:value={data.dpp!} disabled={readonly} />
+		<RupiahField label="Pajak Penghasilan" bind:value={data.pph!} disabled={readonly} />
+		<FormField label="Nomor Bukti Pemotongan/SSP/SSPCP" bind:value={data.nomorBukti!} required disabled={readonly} />
+		<DateField label="Tanggal Bukti Pemotongan/SSP/SSPCP" bind:value={data.tanggalBukti!} required disabled={readonly} />
+	</FieldGrid>
 
-      <div class="modal-body">
-        <div style="display: flex; flex-direction: column; gap: 10px;">
-          <div style="display: flex; align-items: center;">
-            <label for="namaPemotongPemungut" style="width: 260px;">Nama Pemotong/Pemungut Pajak *</label>
-            <input type="text" id="namaPemotongPemungut" bind:value={data.namaPemotongPemungut} style="flex: 1;" />
-          </div>
-          <div style="display: flex; align-items: center;">
-            <label for="npwp" style="width: 260px;">NPWP *</label>
-            <input type="text" id="npwp" bind:value={data.npwp} style="flex: 1;" />
-          </div>
-          <div style="display: flex; align-items: center;">
-            <label for="jenisPajak" style="width: 260px;">Jenis Pajak *</label>
-            <select id="jenisPajak" bind:value={data.jenisPajak} style="flex: 1;">
-              <option value="" disabled>Pilih jenis pajak</option>
-              {#each jenisPajakOptions as jenis}
-                <option value={jenis.value}>{jenis.label}</option>
-              {/each}
-            </select>
-          </div>
-          <div style="display: flex; align-items: center;">
-            <label for="dpp" style="width: 260px;">DPP</label>
-            <div style="flex: 1; display: flex; align-items: center;">
-              <span style="margin-right: 5px;">Rp.</span>
-              <input
-                type="text"
-                inputmode="numeric"
-                id="dpp"
-                value={formatRupiah(data.dpp)}
-                oninput={(e) => (data.dpp = applyRupiahInput(e))}
-                style="flex: 1; text-align: right;"
-              />
-            </div>
-          </div>
-          <div style="display: flex; align-items: center;">
-            <label for="pph" style="width: 260px;">Pajak Penghasilan (Rp)</label>
-            <div style="flex: 1; display: flex; align-items: center;">
-              <span style="margin-right: 5px;">Rp.</span>
-              <input
-                type="text"
-                inputmode="numeric"
-                id="pph"
-                value={formatRupiah(data.pph)}
-                oninput={(e) => (data.pph = applyRupiahInput(e))}
-                style="flex: 1; text-align: right;"
-              />
-            </div>
-          </div>
-          <div style="display: flex; align-items: center;">
-            <label for="nomorBukti" style="width: 260px;">Nomor Bukti Pemotongan/SSP/SSPCP *</label>
-            <input type="text" id="nomorBukti" bind:value={data.nomorBukti} style="flex: 1;" />
-          </div>
-          <div style="display: flex; align-items: center;">
-            <label for="tanggalBukti" style="width: 260px;">Tanggal Bukti Pemotongan/SSP/SSPCP *</label>
-            <input type="date" id="tanggalBukti" bind:value={data.tanggalBukti} style="flex: 1;" />
-          </div>
-        </div>
-      </div>
-
-      <div class="modal-footer" style="justify-content: flex-end;">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-          Tutup
-        </button>
-        <button type="button" class="btn btn-primary" style="background-color: #1c398e; color: white;" onclick={handleSave} data-bs-dismiss="modal">
-          Simpan
-        </button>
-      </div>
-    </div>
-  </div>
-</div>
+	{#snippet actions()}
+		<ActionButton tone="quiet" onclick={() => (open = false)}>Tutup</ActionButton>
+		<ActionButton onclick={handleSave} disabled={readonly}>Simpan</ActionButton>
+	{/snippet}
+</InstitutionalModal>

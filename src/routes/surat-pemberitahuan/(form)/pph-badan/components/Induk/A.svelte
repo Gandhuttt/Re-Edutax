@@ -1,67 +1,26 @@
 <script lang="ts">
-    import Table from "$lib/components/Table.svelte";
-    import Input from "$lib/components/Input.svelte";
-    import Label from "$lib/components/Label.svelte";
-    import Select from "$lib/components/Select.svelte";
+	import { DataTable, FormField } from "$lib/re-ui-components";
 
-    interface Props {
-        data: {
-            npwp: string;
-        }
-        readonly: boolean
-    }
+	interface Props {
+		data: {
+			npwp: string;
+		};
+		readonly: boolean;
+	}
 
-    let { data, readonly }: Props = $props()
-
+	let { data, readonly }: Props = $props();
 </script>
 
-<div class="tw:p-5">
-    <Table class="tw:min-w-full" >
-
-        <!-- Hidden input field -->
-        {#snippet head()}
-            <tr class="tw:hidden">
-                <td><Input hidden/></td>
-            </tr>
-        {/snippet}
-
-        <!-- Input field -->
-        {#snippet body()}
-            <tr>
-                <td class="tw:w-10"><span>1.</span></td>
-                <td class="tw:w-[35rem]"><span>NPWP</span></td>
-                <td><Input type={"text"} value={data.npwp} readonly /></td>
-            </tr>
-            <tr>
-                <td><span>2.</span></td>
-                <td><span class="tw:mr-10">Nama</span></td>
-                <td><Input type={"text"} value={"-"} readonly /></td>
-            </tr>
-            <tr>
-                <td><span>3.</span></td>
-                <td><span>Alamat Email</span></td>
-                <td><Input type={"text"} value={"-"} readonly /></td>
-            </tr>
-            <tr>
-                <td><span>4.</span></td>
-                <td><span>Nomor Telepon</span></td>
-                <td><Input type={"text"} value={"-"} readonly /></td>
-            </tr>
-        {/snippet}
-    </Table>
-</div>
-
-<style>
-    tr {
-        border: none;
-        &:nth-child(even) {
-            background-color: #F9F6EE;
-        }
-    }
-    td {
-        padding: .25rem .5rem;
-    }
-    span {
-        font-size: .8rem;
-    }
-</style>
+<DataTable label="Identitas wajib pajak" minWidth="620px" headerTone="navy" density="compact">
+	<table>
+		<thead>
+			<tr><th scope="col">No.</th><th scope="col">Identitas</th><th scope="col">Nilai</th></tr>
+		</thead>
+		<tbody>
+			<tr><td>1.</td><td>NPWP</td><td><FormField label="NPWP" value={data.npwp} readonly /></td></tr>
+			<tr><td>2.</td><td>Nama</td><td><FormField label="Nama" value="-" readonly /></td></tr>
+			<tr><td>3.</td><td>Alamat Email</td><td><FormField label="Alamat Email" value="-" readonly /></td></tr>
+			<tr><td>4.</td><td>Nomor Telepon</td><td><FormField label="Nomor Telepon" value="-" readonly /></td></tr>
+		</tbody>
+	</table>
+</DataTable>

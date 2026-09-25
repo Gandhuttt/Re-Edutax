@@ -1,95 +1,85 @@
 <script lang="ts">
-    import { applyRupiahInput, formatRupiah } from '$lib/helpers/rupiahInput';
+	import { ActionButton, DataTable, InstitutionalModal } from "$lib/re-ui-components";
+	import { applyRupiahInput, formatRupiah } from '$lib/helpers/rupiahInput';
 
-    const bulanNames = [
-        'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
-        'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
-    ];
+	const bulanNames = [
+		'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+		'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+	];
 
-    let {
-        data = $bindable() as {
-            tkuId: string | number;
-            nama: string;
-            bulanan: Array<{
-                bulan: number;
-                jumlahPeredaranBruto: number;
-            }>;
-        },
-        saveItem
-    }: {
-        data: {
-            tkuId: string | number;
-            nama: string;
-            bulanan: Array<{
-                bulan: number;
-                jumlahPeredaranBruto: number;
-            }>;
-        };
-        saveItem: () => void;
-    } = $props();
+	let {
+		open = $bindable(false),
+		data = $bindable() as {
+			tkuId: string | number;
+			nama: string;
+			bulanan: Array<{
+				bulan: number;
+				jumlahPeredaranBruto: number;
+			}>;
+		},
+		saveItem
+	}: {
+		open?: boolean;
+		data: {
+			tkuId: string | number;
+			nama: string;
+			bulanan: Array<{
+				bulan: number;
+				jumlahPeredaranBruto: number;
+			}>;
+		};
+		saveItem: () => void;
+	} = $props();
 
-    function handleSave(): void {
-        saveItem();
-    }
+	function handleSave(): void {
+		saveItem();
+		open = false;
+	}
 </script>
 
-<!-- Modal -->
-<div class="modal fade" id="modalL5B" tabindex="-1" aria-labelledby="modalL5BLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h1 class="modal-title fs-5" id="modalL5BLabel" style="font-weight: bold; text-transform: uppercase;">
-          EDIT PEREDARAN BRUTO - {data.nama}
-        </h1>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-
-      <div class="modal-body">
-        <table class="tw:w-full tw:text-sm modal-bulanan-table">
-          <thead>
-            <tr>
-              <th>Bulan</th>
-              <th>Peredaran Bruto (Rp)</th>
-            </tr>
-          </thead>
-          <tbody>
-            {#each data.bulanan as item}
-              <tr>
-                <td>{bulanNames[item.bulan - 1]}</td>
-                <td>
-                  <input
-                    type="text"
-                    inputmode="numeric"
-                    value={formatRupiah(item.jumlahPeredaranBruto)}
-                    oninput={(e) => (item.jumlahPeredaranBruto = applyRupiahInput(e))}
-                    class="tw:w-full tw:text-right"
-                  />
-                </td>
-              </tr>
-            {/each}
-          </tbody>
-        </table>
-      </div>
-
-      <div class="modal-footer" style="justify-content: flex-end;">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-          Tutup
-        </button>
-        <button type="button" class="btn btn-primary" style="background-color: #1c398e; color: white;" onclick={handleSave} data-bs-dismiss="modal">
-          Simpan
-        </button>
-      </div>
-    </div>
-  </div>
-</div>
+<InstitutionalModal bind:open title={`Edit Peredaran Bruto - ${data.nama}`} size="wide" scrollable>
+	<DataTable label={`Peredaran bruto bulanan ${data.nama}`} minWidth="520px" headerTone="navy" density="compact">
+		<table>
+			<thead>
+				<tr>
+					<th scope="col">Bulan</th>
+					<th scope="col">Peredaran Bruto (Rp)</th>
+				</tr>
+			</thead>
+			<tbody>
+				{#each data.bulanan as item (item.bulan)}
+					<tr>
+						<td>{bulanNames[item.bulan - 1]}</td>
+						<td>
+							<input
+								type="text"
+								inputmode="numeric"
+								aria-label={`Peredaran bruto ${bulanNames[item.bulan - 1]}`}
+								value={formatRupiah(item.jumlahPeredaranBruto)}
+								oninput={(event) => (item.jumlahPeredaranBruto = applyRupiahInput(event))}
+							/>
+						</td>
+					</tr>
+				{/each}
+			</tbody>
+		</table>
+	</DataTable>
+	{#snippet actions()}
+		<ActionButton tone="quiet" onclick={() => (open = false)}>Tutup</ActionButton>
+		<ActionButton onclick={handleSave}>Simpan</ActionButton>
+	{/snippet}
+</InstitutionalModal>
 
 <style>
-.modal-bulanan-table th, .modal-bulanan-table td {
-    border: 1px solid #A9A9A9;
-    padding: .4rem .6rem;
-}
-.modal-bulanan-table th {
-    background-color: var(--color-primary);
-    font-weight: bold;
-}
+	input {
+		width: 100%;
+		padding: 7px 9px;
+		border: 1px solid var(--ui-line-strong);
+		border-radius: 3px;
+		background: #fffefa;
+		color: var(--ui-ink);
+		text-align: right;
+		font: inherit;
+		font-variant-numeric: tabular-nums;
+	}
 </style>

@@ -65,14 +65,14 @@
 		width: 100%;
 		min-width: var(--table-min-width);
 		border-collapse: collapse;
-		font-size: 12px;
+		font-size: 14px;
 	}
 	.table-viewport :global(th) {
 		padding: 11px 13px;
 		background: #e1e4e2;
 		color: #4f5a64;
 		text-align: left;
-		font-size: 10px;
+		font-size: 12px;
 		letter-spacing: 0.055em;
 		text-transform: uppercase;
 		white-space: nowrap;
@@ -104,7 +104,7 @@
 	}
 	.table-viewport :global(td code) {
 		color: var(--ui-navy);
-		font: 700 10px var(--ui-font-mono);
+		font: 700 12px var(--ui-font-mono);
 	}
 	.table-viewport :global(td strong) {
 		color: var(--ui-navy);
@@ -136,11 +136,11 @@
 	}
 	.table-viewport.compact :global(th) {
 		padding: 9px 10px;
-		font-size: 8px;
+		font-size: 12px;
 	}
 	.table-viewport.compact :global(td) {
 		padding: 10px;
-		font-size: 10px;
+		font-size: 13px;
 	}
 	.table-viewport.sticky-first :global(th:first-child),
 	.table-viewport.sticky-first :global(td:first-child) {

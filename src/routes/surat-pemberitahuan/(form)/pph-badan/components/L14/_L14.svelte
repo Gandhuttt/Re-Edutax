@@ -1,117 +1,122 @@
 <script lang="ts">
-    import Accordion from "$lib/components/AccordionItem.svelte";
-    import Table from "$lib/components/Table.svelte";
-    import Button from "$lib/components/Button.svelte";
+	import {
+		ActionButton,
+		DataTable,
+		DisclosureItem,
+		FormSection,
+		Stack,
+	} from "$lib/re-ui-components";
 
-    interface Props {
-        currentTab: {
-            tab: string;
-            title: string;
-        }
-    }
+	interface Props {
+		currentTab: {
+			tab: string;
+			title: string;
+		};
+	}
 
-    let { currentTab = $bindable() }: Props = $props();
+	let { currentTab = $bindable() }: Props = $props();
 
-    $effect(() => {currentTab.title = currentTab.tab === "L14" ? "PENGGUNAAN SISA LEBIH UNTUK PEMBANGUNAN DAN PENGADAAN SARAN DAN PRASARANA" : currentTab.title})
+	$effect(() => {
+		currentTab.title = currentTab.tab === "L14"
+			? "PENGGUNAAN SISA LEBIH UNTUK PEMBANGUNAN DAN PENGADAAN SARAN DAN PRASARANA"
+			: currentTab.title;
+	});
 
-    const currentYear = new Date().getFullYear();
+	const currentYear = new Date().getFullYear();
 </script>
 
-<div class="{currentTab.tab === "L14" ? "" : "tw:hidden"}">
-    <div class="accordion tw:mt-5">
-        <Accordion item={"PENGGUNAAN SISA LEBIH UNTUK PEMBANGUNAN DAN PENGADAAN SARANA DAN PRASARANA"}>
-            <div class="tw:flex tw:flex-col tw:gap-1 tw:p-5">
-                <Button class={"tw:w-30 tw:text-white"} color={"var(--color-secondary)"}>Tambah</Button>
-                <div class="tw:overflow-scroll">
-                    <Table class={"tw:w-full"}>
-                        {#snippet head()}
-                            <tr class="tw:hidden"><td></td></tr>
-                        {/snippet}
-                        {#snippet body()}
-                            <tr class="header tw:bg-[var(--color-primary)] tw:font-bold tw:text-center">
-                                <td class="tw:w-[10rem]" rowspan="3">TINDAKAN</td>
-                                <td class="tw:w-[7.5rem]" rowspan="3">Tahun Pajak/Bagian Tahun Pajak</td>
-                                <td class="tw:w-[10rem]">PENYEDIAAN SISA LEBIH UNTUK DITANAMKAN KEMBALI SEALAM 4 TAHUN</td>
-                                <td class="tw:w-[20rem]" rowspan="3">BENTUK PENANAMAN KEMBALI SISA LEBIH</td>
-                                <td class="tw:w-[40rem]" colspan="4">PENGGUNAAN SISA LEBIH UNTUK PEMBANGUNAN DAN PENGADAAN SARANA DAN PRASARANA</td>
-                                <td class="tw:w-[10rem]">JUMLAH PENGGUNAAN SISA LEBIH</td>
-                                <td class="tw:w-[10rem]">SISA LEBIH YANG BELUM DITANAMKAN KEMBALI</td>
-                                <td class="tw:w-[10rem]">SISA LEBIH YANG MELEWATI JANGKA WAKTU PENANAMAN KEMBALI DALAM JANGKA WAKTU 4 TAHUN</td>
-                            </tr>
-                            <tr class="header tw:bg-[var(--color-primary)] tw:font-bold tw:text-center">
-                                <td rowspan="2">RUPIAH</td>
-                                <td>Tahun Ke-1</td>
-                                <td>Tahun Ke-2</td>
-                                <td>Tahun Ke-3</td>
-                                <td>Tahun Ke-4</td>
-                                <td rowspan="2">RUPIAH</td>
-                                <td rowspan="2">RUPIAH</td>
-                                <td rowspan="2">RUPIAH</td>
-                            </tr>
-                            <tr class="header tw:bg-[var(--color-primary)] tw:font-bold tw:text-center">
-                                <td>RUPIAH</td>
-                                <td>RUPIAH</td>
-                                <td>RUPIAH</td>
-                                <td>RUPIAH</td>
-                            </tr>
-                            {#each {length: 4} as _, index}
-                            {@const indexYear = currentYear - (3 - index)}
-                            <tr class="data tw:text-right">
-                                <td class="tw:text-center">
-                                    {#if !(indexYear === currentYear)}
-                                    <Button>Edit</Button>
-                                    {/if}
-                                </td>
-                                <td class="tw:text-center">{indexYear}</td>
-                                <td>0</td>
-                                <td></td>
-                                <td>0</td>
-                                <td>0</td>
-                                <td>0</td>
-                                <td>0</td>
-                                <td>0</td>
-                                <td>0</td>
-                                <td>0</td>
-                            </tr>
-                            {/each}
-                            <tr class="footer tw:bg-[var(--color-primary)] tw:font-bold tw:text-right">
-                                <td colspan="9">JUMLAH</td>
-                                <td>0</td>
-                                <td>0</td>
-                            </tr>
-                            <tr class="footer tw:bg-[var(--color-primary)] tw:font-bold tw:text-right">
-                                <td colspan="10">SISA LEBIH YANG DAPAT DIGUNAKAN KEMBALI</td>
-                                <td>0</td>
-                            </tr>
-                        {/snippet}
-                    </Table>
-                </div>
-            </div>
-        </Accordion>
-    </div>
+<div class:hidden={currentTab.tab !== "L14"}>
+	<Stack gap="0" class="tw:mt-5">
+		<DisclosureItem
+			id="l14-penggunaan-sisa-lebih"
+			title="PENGGUNAAN SISA LEBIH UNTUK PEMBANGUNAN DAN PENGADAAN SARANA DAN PRASARANA"
+			open
+		>
+			<FormSection title="Penggunaan sisa lebih" padded>
+				<Stack gap="12px">
+					<ActionButton type="button">Tambah</ActionButton>
+					<DataTable
+						label="Penggunaan sisa lebih untuk pembangunan dan pengadaan sarana dan prasarana"
+						minWidth="1640px"
+						headerTone="navy"
+						density="compact"
+						stickyFirstColumn
+					>
+						<table>
+							<thead>
+								<tr>
+									<th scope="col" rowspan="3">Tindakan</th>
+									<th scope="col" rowspan="3">Tahun pajak/bagian tahun pajak</th>
+									<th scope="col" rowspan="2">Penyediaan sisa lebih untuk ditanamkan kembali selama 4 tahun</th>
+									<th scope="col" rowspan="3">Bentuk penanaman kembali sisa lebih</th>
+									<th scope="colgroup" colspan="4">Penggunaan sisa lebih untuk pembangunan dan pengadaan sarana dan prasarana</th>
+									<th scope="col" rowspan="2">Jumlah penggunaan sisa lebih</th>
+									<th scope="col" rowspan="2">Sisa lebih yang belum ditanamkan kembali</th>
+									<th scope="col" rowspan="2">Sisa lebih yang melewati jangka waktu penanaman kembali dalam jangka waktu 4 tahun</th>
+								</tr>
+								<tr>
+									<th scope="col">Tahun ke-1</th>
+									<th scope="col">Tahun ke-2</th>
+									<th scope="col">Tahun ke-3</th>
+									<th scope="col">Tahun ke-4</th>
+								</tr>
+								<tr>
+									<th scope="col">Rupiah</th>
+									<th scope="col">Rupiah</th>
+									<th scope="col">Rupiah</th>
+									<th scope="col">Rupiah</th>
+									<th scope="col">Rupiah</th>
+									<th scope="col">Rupiah</th>
+									<th scope="col">Rupiah</th>
+								</tr>
+							</thead>
+							<tbody>
+								{#each { length: 4 } as _, index}
+									{@const indexYear = currentYear - (3 - index)}
+									<tr>
+										<td class="center">
+											{#if indexYear !== currentYear}<ActionButton tone="quiet">Edit</ActionButton>{/if}
+										</td>
+										<td class="center">{indexYear}</td>
+										<td class="right">0</td>
+										<td></td>
+										<td class="right">0</td>
+										<td class="right">0</td>
+										<td class="right">0</td>
+										<td class="right">0</td>
+										<td class="right">0</td>
+										<td class="right">0</td>
+										<td class="right">0</td>
+									</tr>
+								{/each}
+							</tbody>
+							<tfoot>
+								<tr>
+									<th scope="row" colspan="9">Jumlah</th>
+									<td class="right">0</td>
+									<td class="right">0</td>
+								</tr>
+								<tr>
+									<th scope="row" colspan="10">Sisa lebih yang dapat digunakan kembali</th>
+									<td class="right">0</td>
+								</tr>
+							</tfoot>
+						</table>
+					</DataTable>
+				</Stack>
+			</FormSection>
+		</DisclosureItem>
+	</Stack>
 </div>
 
 <style>
-    .header td, .footer td {
-    border: 1px solid white;
-    }
-
-    .data {
-        &:nth-child(odd of .data) {
-            background-color: #F9F6EE;
-        }
-        td {
-            padding-inline: .5rem;
-        }
-    }
-
-    tr {
-        border: none;
-    }
-
-    td {
-        padding: .5rem 1rem;
-        word-wrap: break-word;
-        font-size: .8rem;
-    }
+	.hidden {
+		display: none;
+	}
+	.center {
+		text-align: center;
+	}
+	.right {
+		text-align: right;
+	}
 </style>

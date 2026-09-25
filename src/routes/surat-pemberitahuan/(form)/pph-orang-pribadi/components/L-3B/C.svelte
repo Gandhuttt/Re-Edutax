@@ -1,18 +1,19 @@
 <script lang="ts">
-    import Button from "$lib/components/Button.svelte";
-    import Table from "$lib/components/Table.svelte";
-    import { closeBsModal } from "$lib/helpers/bsModal";
+    import {
+        ActionButton,
+        DataTable,
+        FormField,
+        InstitutionalModal,
+        Stack,
+        TableActions
+    } from "$lib/re-ui-components";
     import { applyRupiahInput, formatRupiah, formatRupiahDerived } from "$lib/helpers/rupiahInput";
     import type { BarisPeredaranBulanan } from "./types";
 
     // C. PENGGUNA NORMA PENGHITUNGAN PENGHASILAN NETO (NPPN).
     //
     // JUMLAH PPh is always 0 here, matching the live form: section C carries no
-    // tax of its own. The neto derivation is NOT out of reach, contrary to an
-    // earlier note here — it lives in L-3A-4 Bagian A, which sums this section's
-    // twelve monthly bruto and multiplies by a norma percentage the taxpayer
-    // types (Coretax validates it > 0 and <= 100; there is no NPPN reference
-    // table involved). See hitungLampiranL3A4BagianA.
+    // tax of its own. The neto derivation lives in L-3A-4 Bagian A.
     const bulanNames = [
         "JANUARI", "FEBRUARI", "MARET", "APRIL", "MEI", "JUNI",
         "JULI", "AGUSTUS", "SEPTEMBER", "OKTOBER", "NOVEMBER", "DESEMBER"
@@ -36,154 +37,158 @@
 
     let bisaEdit = $derived(dapatDiubah && !readonly);
     let jumlahBruto = $derived(rows.reduce((s, r) => s + Number(r.peredaranBruto || 0), 0));
-
+    let modalOpen = $state(false);
     let draft = $state<BarisPeredaranBulanan[]>(rows.map((r) => ({ ...r })));
-    let draftJenisUsaha = $state('');
+    let draftJenisUsaha = $state("");
 
     function bukaUbah() {
         draft = rows.map((r) => ({ ...r }));
         draftJenisUsaha = jenisUsahaPekerjaanBebas;
+        modalOpen = true;
     }
 
     function simpanModal() {
         rows = draft.map((r) => ({ ...r, peredaranBruto: Number(r.peredaranBruto || 0) }));
         jenisUsahaPekerjaanBebas = draftJenisUsaha;
-        closeBsModal('modalOpL3BC');
+        modalOpen = false;
     }
 </script>
 
-<div class="tw:mb-6">
-    <div class="tw:overflow-x-auto">
-        <Table class="tw:min-w-full">
-            {#snippet head()}
-                <tr>
-                    {#if bisaEdit}<th class="tw:w-[6rem]">TINDAKAN</th>{/if}
-                    <th>NAMA TKU</th>
-                    <th>JENIS USAHA/PEKERJAAN BEBAS</th>
-                    {#each bulanNames as bulan}
-                        <th class="tw:text-end">{bulan}</th>
-                    {/each}
-                    <th class="tw:text-end">JUMLAH</th>
-                </tr>
-            {/snippet}
-            {#snippet body()}
-                <tr>
-                    {#if bisaEdit}
-                        <td>
-                            <Button type="button" onclick={bukaUbah} data-bs-toggle="modal" data-bs-target="#modalOpL3BC">Ubah</Button>
-                        </td>
-                    {/if}
-                    <td>{namaTku}</td>
-                    <td>{jenisUsahaPekerjaanBebas}</td>
-                    {#each rows as row}
-                        <td class="tw:text-end">{formatRupiahDerived(row.peredaranBruto)}</td>
-                    {/each}
-                    <td class="tw:text-end">{formatRupiahDerived(jumlahBruto)}</td>
-                </tr>
-                <tr class="footer">
-                    {#if bisaEdit}<td></td>{/if}
-                    <td colspan="2">JUMLAH PEREDARAN BRUTO</td>
-                    {#each rows as row}
-                        <td class="tw:text-end">{formatRupiahDerived(row.peredaranBruto)}</td>
-                    {/each}
-                    <td class="tw:text-end">{formatRupiahDerived(jumlahBruto)}</td>
-                </tr>
-                <tr class="footer">
-                    {#if bisaEdit}<td></td>{/if}
-                    <td colspan="2">JUMLAH PPh</td>
-                    {#each bulanNames as _}
-                        <td class="tw:text-end">0</td>
-                    {/each}
-                    <td class="tw:text-end">0</td>
-                </tr>
-            {/snippet}
-        </Table>
-    </div>
-</div>
-
-<div class="modal fade" id="modalOpL3BC" tabindex="-1" aria-labelledby="modalOpL3BCLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h1 class="modal-title fs-5" id="modalOpL3BCLabel" style="font-weight: bold; text-transform: uppercase;">
-          Pengguna Norma Penghitungan Penghasilan Neto - {namaTku}
-        </h1>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
-      </div>
-      <div class="modal-body">
-        <div style="display: flex; align-items: center; margin-bottom: 12px;">
-          <label for="l3bc-jenis" style="width: 220px;">Jenis Usaha/Pekerjaan Bebas</label>
-          <input type="text" id="l3bc-jenis" bind:value={draftJenisUsaha} style="flex: 1;" />
-        </div>
-        <table class="tw:w-full tw:text-sm modal-bulanan-table">
-          <thead>
+<DataTable
+    label="Peredaran bruto pengguna norma penghitungan penghasilan neto"
+    minWidth="1900px"
+    framed={false}
+    headerTone="navy"
+    density="compact"
+>
+    <table>
+        <thead>
             <tr>
-              <th>Bulan</th>
-              <th>Peredaran Bruto (Rp)</th>
+                {#if bisaEdit}<th scope="col">Tindakan</th>{/if}
+                <th scope="col">Nama TKU</th>
+                <th scope="col">Jenis Usaha/Pekerjaan Bebas</th>
+                {#each bulanNames as bulan}
+                    <th scope="col" class="right">{bulan}</th>
+                {/each}
+                <th scope="col" class="right">Jumlah</th>
             </tr>
-          </thead>
-          <tbody>
-            {#each draft as item, index}
-              <tr>
-                <td>{bulanNames[index]}</td>
-                <td>
-                  <input
-                    type="text"
-                    inputmode="numeric"
-                    value={formatRupiah(item.peredaranBruto)}
-                    oninput={(e) => (draft[index].peredaranBruto = applyRupiahInput(e))}
-                    class="tw:w-full tw:text-right"
-                  />
-                </td>
-              </tr>
-            {/each}
-            <tr class="tw:font-bold">
-              <td>JUMLAH</td>
-              <td class="tw:text-end">
-                {formatRupiahDerived(draft.reduce((s, r) => s + Number(r.peredaranBruto || 0), 0))}
-              </td>
+        </thead>
+        <tbody>
+            <tr>
+                {#if bisaEdit}
+                    <td class="action-cell">
+                        <TableActions
+                            visibleCount={1}
+                            actions={[{ label: "Ubah", onclick: bukaUbah }]}
+                        />
+                    </td>
+                {/if}
+                <td>{namaTku}</td>
+                <td>{jenisUsahaPekerjaanBebas}</td>
+                {#each rows as row}
+                    <td class="right number">{formatRupiahDerived(row.peredaranBruto)}</td>
+                {/each}
+                <td class="right number amount">{formatRupiahDerived(jumlahBruto)}</td>
             </tr>
-          </tbody>
-        </table>
-      </div>
-      <div class="modal-footer" style="justify-content: flex-end;">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-        <button type="button" class="btn btn-primary" style="background-color: #1c398e; color: white;" onclick={simpanModal}>Simpan</button>
-      </div>
-    </div>
-  </div>
-</div>
+            <tr class="summary-row">
+                {#if bisaEdit}<td></td>{/if}
+                <th scope="row" colspan="2">Jumlah Peredaran Bruto</th>
+                {#each rows as row}
+                    <td class="right number">{formatRupiahDerived(row.peredaranBruto)}</td>
+                {/each}
+                <td class="right number amount">{formatRupiahDerived(jumlahBruto)}</td>
+            </tr>
+            <tr class="summary-row">
+                {#if bisaEdit}<td></td>{/if}
+                <th scope="row" colspan="2">Jumlah PPh</th>
+                {#each bulanNames as _}
+                    <td class="right number">0</td>
+                {/each}
+                <td class="right number amount">0</td>
+            </tr>
+        </tbody>
+    </table>
+</DataTable>
+
+<InstitutionalModal
+    bind:open={modalOpen}
+    title={`Pengguna Norma Penghitungan Penghasilan Neto - ${namaTku}`}
+    size="wide"
+    scrollable
+>
+    <Stack gap="18px">
+        <FormField
+            label="Jenis Usaha/Pekerjaan Bebas"
+            id="l3bc-jenis"
+            bind:value={draftJenisUsaha}
+        />
+        <DataTable
+            label={`Peredaran bruto bulanan NPPN ${namaTku}`}
+            minWidth="520px"
+            framed={false}
+            headerTone="navy"
+            density="compact"
+        >
+            <table>
+                <thead>
+                    <tr>
+                        <th scope="col">Bulan</th>
+                        <th scope="col" class="right">Peredaran Bruto (Rp)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {#each draft as item, index}
+                        <tr>
+                            <td>{bulanNames[index]}</td>
+                            <td>
+                                <input
+                                    type="text"
+                                    inputmode="numeric"
+                                    aria-label={`Peredaran bruto ${bulanNames[index]}`}
+                                    value={formatRupiah(item.peredaranBruto)}
+                                    oninput={(e) => (draft[index].peredaranBruto = applyRupiahInput(e))}
+                                    class="table-rupiah-input"
+                                />
+                            </td>
+                        </tr>
+                    {/each}
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <th scope="row">Jumlah</th>
+                        <td class="right number amount">
+                            {formatRupiahDerived(draft.reduce((s, r) => s + Number(r.peredaranBruto || 0), 0))}
+                        </td>
+                    </tr>
+                </tfoot>
+            </table>
+        </DataTable>
+    </Stack>
+    {#snippet actions()}
+        <ActionButton tone="quiet" onclick={() => (modalOpen = false)}>Tutup</ActionButton>
+        <ActionButton onclick={simpanModal}>Simpan</ActionButton>
+    {/snippet}
+</InstitutionalModal>
 
 <style>
-    th {
-    	font-size: .7rem;
-    	font-weight: bold;
-    	text-align: center;
-    	padding: .4rem .5rem;
-    	white-space: nowrap;
-    	background-color: var(--color-primary);
-    	border: 1px solid white;
+    .table-rupiah-input {
+        width: 100%;
+        min-width: 100px;
+        padding: 6px 8px;
+        border: 1px solid var(--ui-line-strong);
+        border-radius: 3px;
+        background: #fffefa;
+        text-align: right;
     }
-    td {
-    	font-size: .75rem;
-    	padding: .3rem .4rem;
-    	white-space: nowrap;
-    	border: 1px solid white;
+
+    .table-rupiah-input:focus {
+        outline: 3px solid var(--ui-yellow-soft);
+        border-color: var(--ui-navy);
     }
-    tr:not(.total):not(.footer):nth-child(odd) {
-    	background-color: #F9F6EE;
-    }
-    tr.footer td {
-    	font-weight: bold;
-    	background-color: var(--color-primary);
-    	border: 1px solid white;
-    }
-    .modal-bulanan-table th, .modal-bulanan-table td {
-        border: 1px solid #A9A9A9;
-        padding: .4rem .6rem;
-    }
-    .modal-bulanan-table th {
-        background-color: var(--color-primary);
-        font-weight: bold;
+
+    .summary-row th,
+    .summary-row td {
+        font-weight: 700;
+        background: var(--ui-paper-deep);
     }
 </style>

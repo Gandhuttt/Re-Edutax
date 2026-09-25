@@ -1,96 +1,92 @@
 <script lang="ts">
-    import Accordion from "$lib/components/AccordionItem.svelte";
-    import Table from "$lib/components/Table.svelte";
-    import Button from "$lib/components/Button.svelte";
-    import ModalEdit from "./_ModalEdit.svelte";
+	import {
+		ActionButton,
+		DataTable,
+		DisclosureItem,
+		FormSection,
+		Stack,
+	} from "$lib/re-ui-components";
+	import ModalEdit from "./_ModalEdit.svelte";
 
-    interface Props {
-        currentTab: {
-            tab: string;
-            title: string;
-        }
-    }
+	interface Props {
+		currentTab: {
+			tab: string;
+			title: string;
+		};
+	}
 
-    let { currentTab = $bindable() }: Props = $props();
+	let { currentTab = $bindable() }: Props = $props();
+	let modalOpen = $state(false);
 
-    $effect(() => {currentTab.title = currentTab.tab === "L13-C" ? "DAFTAR FASILITAS PENGURANGAN PPh BADAN" : currentTab.title})
+	$effect(() => {
+		currentTab.title = currentTab.tab === "L13-C"
+			? "DAFTAR FASILITAS PENGURANGAN PPh BADAN"
+			: currentTab.title;
+	});
 </script>
 
-<div class="{currentTab.tab === "L13-C" ? "" : "tw:hidden"}">
-    <div class="accordion tw:mt-5">
-        <Accordion item={"DAFTAR FASILITAS PENGURANGAN PPh BADAN"}>
-            <div class="tw:flex tw:flex-col tw:gap-1 tw:p-5">
-                <Button class={"tw:w-30 tw:text-white"} color={"var(--color-secondary)"} type={"button"} data-bs-toggle={"modal"} data-bs-target={"#modalL13C"}>Tambah</Button>
-                <div class="tw:overflow-scroll">
-                    <Table class={"tw:w-full"}>
-                        {#snippet head()}
-                            <tr class="tw:hidden"><td></td></tr>
-                        {/snippet}
-                        {#snippet body()}
-                            <tr class="header tw:bg-(--color-primary) tw:font-bold tw:text-center">
-                                <td class="tw:w-[10rem]" rowspan="2">TINDAKAN</td>
-                                <td class="tw:w-[5rem]" rowspan="2">NO.</td>
-                                <td class="tw:w-[20rem]" colspan="2">KEPUTUSAN PEMBERIAN FASILITAS</td>
-                                <td class="tw:w-[20rem]" colspan="2">KEPUTUSAN PEMANFAATAN FASILITAS</td>
-                                <td class="tw:w-[10rem]" rowspan="2">JANGKA WAKTU FASILITAS (TAHUN)</td>
-                                <td class="tw:w-[10rem]" rowspan="2">PEMANFAATAN TAHUN KE-</td>
-                                <td class="tw:w-[10rem]" rowspan="2">PERSENTASE PENGURANGAN PPh</td>
-                                <td class="tw:w-[35rem]" colspan="3">PENGHITUNGAN FASILITAS PENGURANGAN PPh BADAN</td>
-                            </tr>
-                            <tr class="header tw:bg-(--color-primary) tw:font-bold tw:text-center">
-                                <!-- KEPUTUSAN PEMBERIAN FASILITAS -->
-                                <td class="tw:w-[5rem]">NO.</td>
-                                <td class="tw:w-[15rem]">TANGGAL</td>
-                                <!-- KEPUTUSAN PEMANFAATAN FASILITAS -->
-                                <td class="tw:w-[5rem]">NO.</td>
-                                <td class="tw:w-[15rem]">TANGGAL</td>
-                                <!-- PENGHITUGAN FASILITAS PENGURANGAN PPh BADAN -->
-                                <td>PENGHASILAN KENA PAJAK</td>
-                                <td>PPh TERUTANG</td>
-                                <td>BESARAN FASILITAS PENGURANGAN PPh TERUTANG</td>
-                            </tr>
-                            {#if true}
-                            <tr class="data tw:text-center"><td colspan="12">Tidak ada data yang ditampilkan</td></tr>
-                            {:else}
-                            <tr class="data">
-                                <td></td>
-                            </tr>
-                            {/if}
-                            <tr class="footer tw:bg-(--color-primary) tw:font-bold tw:text-right">
-                                <td colspan="11">JUMLAH FASILITAS PENGURANGAN PPh TERUTANG</td>
-                                <td>0,00</td>
-                            </tr>
-                        {/snippet}
-                    </Table>
-                </div>
-            </div>
-        </Accordion>
-    </div>
+<div class:hidden={currentTab.tab !== "L13-C"}>
+	<Stack gap="0" class="tw:mt-5">
+		<DisclosureItem id="l13c-fasilitas" title="DAFTAR FASILITAS PENGURANGAN PPh BADAN" open>
+			<FormSection title="Fasilitas pengurangan PPh badan" padded>
+				<Stack gap="12px">
+					<ActionButton type="button" onclick={() => (modalOpen = true)}>Tambah</ActionButton>
+					<DataTable
+						label="Daftar fasilitas pengurangan PPh badan"
+						minWidth="1500px"
+						headerTone="navy"
+						density="compact"
+						stickyFirstColumn
+					>
+						<table>
+							<thead>
+								<tr>
+									<th scope="col" rowspan="2">Tindakan</th>
+									<th scope="col" rowspan="2">No.</th>
+									<th scope="colgroup" colspan="2">Keputusan pemberian fasilitas</th>
+									<th scope="colgroup" colspan="2">Keputusan pemanfaatan fasilitas</th>
+									<th scope="col" rowspan="2">Jangka waktu fasilitas (tahun)</th>
+									<th scope="col" rowspan="2">Pemanfaatan tahun ke-</th>
+									<th scope="col" rowspan="2">Persentase pengurangan PPh</th>
+									<th scope="colgroup" colspan="3">Penghitungan fasilitas pengurangan PPh badan</th>
+								</tr>
+								<tr>
+									<th scope="col">No.</th>
+									<th scope="col">Tanggal</th>
+									<th scope="col">No.</th>
+									<th scope="col">Tanggal</th>
+									<th scope="col">Penghasilan kena pajak</th>
+									<th scope="col">PPh terutang</th>
+									<th scope="col">Besaran fasilitas pengurangan PPh terutang</th>
+								</tr>
+							</thead>
+							<tbody>
+								<tr><td colspan="12" class="empty">Tidak ada data yang ditampilkan</td></tr>
+							</tbody>
+							<tfoot>
+								<tr>
+									<th scope="row" colspan="11">Jumlah fasilitas pengurangan PPh terutang</th>
+									<td class="right amount">0,00</td>
+								</tr>
+							</tfoot>
+						</table>
+					</DataTable>
+				</Stack>
+			</FormSection>
+		</DisclosureItem>
+	</Stack>
 </div>
 
-<ModalEdit/>
+<ModalEdit bind:open={modalOpen} />
 
 <style>
-    .header td, .footer td {
-    border: 1px solid white;
-    }
-
-    .data {
-        &:nth-child(odd of .data) {
-            background-color: #F9F6EE;
-        }
-        td {
-            padding-inline: .5rem;
-        }
-    }
-
-    tr {
-        border: none;
-    }
-
-    td {
-        padding: .5rem 1rem;
-        word-wrap: break-word;
-        font-size: .8rem;
-    }
+	.hidden {
+		display: none;
+	}
+	.empty {
+		text-align: center;
+	}
+	.right {
+		text-align: right;
+	}
 </style>

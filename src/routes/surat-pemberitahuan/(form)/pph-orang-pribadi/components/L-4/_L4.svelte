@@ -1,8 +1,12 @@
 <script lang="ts">
-    import Accordion from "$lib/components/AccordionItem.svelte";
-    import Input from "$lib/components/Input.svelte";
-    import Select from "$lib/components/Select.svelte";
-    import Table from "$lib/components/Table.svelte";
+    import {
+        DataTable,
+        DisclosureItem,
+        FormField,
+        RupiahField,
+        SelectField,
+        Stack
+    } from "$lib/re-ui-components";
     import {
         hitungLampiranL4,
         hitungLampiranL4SectionB,
@@ -65,7 +69,10 @@
         statusKewajibanSuamiIstri === 'ph' || statusKewajibanSuamiIstri === 'mt'
     );
 
-    type ManualField = Exclude<keyof LampiranL4, 'ptkpStatus'>;
+    type ManualField = Exclude<
+        keyof LampiranL4,
+        'ptkpStatus' | 'ptkpGabunganStatus' | 'namaSuamiIstri'
+    >;
 
     const fields: { key: ManualField; label: string }[] = [
         { key: 'penghasilanNeto', label: 'Penghasilan neto *' },
@@ -102,326 +109,347 @@
 </script>
 
 <div class="{currentTab === 'L-4' ? '' : 'tw:hidden'}">
-    <div class="accordion">
+    <Stack gap="16px">
         {#if bagianAGated}
-        <Accordion item={"A. PENGHITUNGAN ANGSURAN PPh PASAL 25 TAHUN PAJAK BERIKUTNYA"}>
-            <div class="tw:p-5">
-                <Table class="tw:min-w-full">
-                    {#snippet head()}
-                        <tr>
-                            <th>URAIAN</th>
-                            <th class="tw:text-end">JUMLAH (Rp)</th>
-                        </tr>
-                    {/snippet}
-                    {#snippet body()}
-                        {#each fields as field}
+            <DisclosureItem
+                title="A. PENGHITUNGAN ANGSURAN PPh PASAL 25 TAHUN PAJAK BERIKUTNYA"
+                open
+            >
+                <DataTable
+                    label="Penghitungan angsuran PPh Pasal 25 tahun pajak berikutnya"
+                    minWidth="680px"
+                    headerTone="navy"
+                    density="compact"
+                >
+                    <table>
+                        <thead>
                             <tr>
-                                <td>{field.label}</td>
-                                <td>
-                                    <Input
-                                        class={"tw:text-end"}
-                                        type={"rupiah"}
-                                        bind:value={data[field.key]}
-                                        disabled={readonly}
+                                <th scope="col">URAIAN</th>
+                                <th class="right" scope="col">JUMLAH (Rp)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {#each fields as field}
+                                <tr>
+                                    <th scope="row">{field.label}</th>
+                                    <td class="field-cell">
+                                        <RupiahField
+                                            label={field.label}
+                                            bind:value={data[field.key]}
+                                            disabled={readonly}
+                                        />
+                                    </td>
+                                </tr>
+                            {/each}
+                            <tr>
+                                <th scope="row">Jumlah penghasilan neto</th>
+                                <td class="field-cell">
+                                    <RupiahField
+                                        label="Jumlah penghasilan neto"
+                                        value={computed.jumlahPenghasilanNeto}
+                                        disabled
                                     />
                                 </td>
                             </tr>
-                        {/each}
-                        <tr>
-                            <td>Jumlah penghasilan neto</td>
-                            <td>
-                                <Input
-                                    class={"tw:text-end"}
-                                    type={"rupiah"}
-                                    value={computed.jumlahPenghasilanNeto}
-                                    disabled
-                                />
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Penghasilan tidak kena pajak *</td>
-                            <td>
-                                <!-- Disabled on PH/MT (isTaxExemptionDisabled):
-                                     row 5 stays 0 there. Deliberate deviation:
-                                     Coretax sets the code to "-/-" via patchValue,
-                                     which does not fire its change handler, so a
-                                     previously chosen amount survives in a field
-                                     the user can no longer correct. We zero it. -->
-                                <Select
-                                    bind:value={data.ptkpStatus}
-                                    disabled={readonly || sectionBGated}
-                                >
-                                    <option class="tw:text-black" value={""}></option>
-                                    {#each PTKP_OPTIONS as ptkp}
-                                        <option class="tw:text-black" value={ptkp.value}>{ptkp.label}</option>
-                                    {/each}
-                                </Select>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Penghasilan Kena Pajak</td>
-                            <td>
-                                <Input
-                                    class={"tw:text-end"}
-                                    type={"rupiah"}
-                                    value={computed.penghasilanKenaPajak}
-                                    disabled
-                                />
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Pajak Terutang</td>
-                            <td>
-                                <Input
-                                    class={"tw:text-end"}
-                                    type={"rupiah"}
-                                    value={computed.pajakTerutang}
-                                    disabled
-                                />
-                            </td>
-                        </tr>
-                        {#each fieldsAfterPtkp as field}
                             <tr>
-                                <td>{field.label}</td>
+                                <th scope="row">Penghasilan tidak kena pajak *</th>
                                 <td>
-                                    <Input
-                                        class={"tw:text-end"}
-                                        type={"rupiah"}
-                                        bind:value={data[field.key]}
-                                        disabled={readonly}
+                                    <!-- PH/MT locks this field to zero because joint PTKP is claimed in Bagian B. -->
+                                    <SelectField
+                                        label="Penghasilan tidak kena pajak"
+                                        bind:value={data.ptkpStatus}
+                                        options={[
+                                            { value: '', label: 'Silakan pilih' },
+                                            ...PTKP_OPTIONS
+                                        ]}
+                                        disabled={readonly || sectionBGated}
+                                        labelHidden
+                                        floatingPanel
                                     />
                                 </td>
                             </tr>
-                        {/each}
-                        <tr>
-                            <td>PPh yang harus dibayar</td>
-                            <td>
-                                <Input
-                                    class={"tw:text-end"}
-                                    type={"rupiah"}
-                                    value={computed.pphYangHarusDibayar}
-                                    disabled
-                                />
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Angsuran PPh Pasal 25 Tahun Pajak Berikutnya</td>
-                            <td>
-                                <Input
-                                    class={"tw:text-end"}
-                                    type={"rupiah"}
-                                    value={computed.angsuranPph25}
-                                    disabled
-                                />
-                            </td>
-                        </tr>
-                    {/snippet}
-                </Table>
-            </div>
-        </Accordion>
+                            <tr>
+                                <th scope="row">Penghasilan Kena Pajak</th>
+                                <td class="field-cell">
+                                    <RupiahField
+                                        label="Penghasilan Kena Pajak"
+                                        value={computed.penghasilanKenaPajak}
+                                        disabled
+                                    />
+                                </td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Pajak Terutang</th>
+                                <td class="field-cell">
+                                    <RupiahField
+                                        label="Pajak Terutang"
+                                        value={computed.pajakTerutang}
+                                        disabled
+                                    />
+                                </td>
+                            </tr>
+                            {#each fieldsAfterPtkp as field}
+                                <tr>
+                                    <th scope="row">{field.label}</th>
+                                    <td class="field-cell">
+                                        <RupiahField
+                                            label={field.label}
+                                            bind:value={data[field.key]}
+                                            disabled={readonly}
+                                        />
+                                    </td>
+                                </tr>
+                            {/each}
+                            <tr>
+                                <th scope="row">PPh yang harus dibayar</th>
+                                <td class="field-cell">
+                                    <RupiahField
+                                        label="PPh yang harus dibayar"
+                                        value={computed.pphYangHarusDibayar}
+                                        disabled
+                                    />
+                                </td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Angsuran PPh Pasal 25 Tahun Pajak Berikutnya</th>
+                                <td class="field-cell">
+                                    <RupiahField
+                                        label="Angsuran PPh Pasal 25 Tahun Pajak Berikutnya"
+                                        value={computed.angsuranPph25}
+                                        disabled
+                                    />
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </DataTable>
+            </DisclosureItem>
         {/if}
+
         {#if sectionBGated}
-        <Accordion item={"B. PENGHITUNGAN PPh TERUTANG WAJIB PAJAK DAN SUAMI/ISTRI"}>
-            <div class="tw:p-5">
-                <Table class="tw:min-w-full">
-                    {#snippet head()}
-                        <tr>
-                            <th>URAIAN</th>
-                            <th class="tw:text-end">WAJIB PAJAK (Rp)</th>
-                            <th class="tw:text-end">SUAMI/ISTRI (Rp)</th>
-                        </tr>
-                    {/snippet}
-                    {#snippet body()}
-                        <tr>
-                            <td>Penghasilan Bruto</td>
-                            <td>
-                                <Input
-                                    class={"tw:text-end"}
-                                    type={"rupiah"}
-                                    bind:value={data.brutoWp}
-                                    disabled={readonly}
-                                />
-                            </td>
-                            <td>
-                                <Input
-                                    class={"tw:text-end"}
-                                    type={"rupiah"}
-                                    bind:value={data.brutoSuamiIstri}
-                                    disabled={readonly}
-                                />
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Penghasilan Neto</td>
-                            <td>
-                                <Input class={"tw:text-end"} type={"rupiah"} value={n2} disabled />
-                            </td>
-                            <td>
-                                <Input
-                                    class={"tw:text-end"}
-                                    type={"rupiah"}
-                                    bind:value={data.netoSuamiIstri}
-                                    disabled={readonly}
-                                />
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                Penghasilan neto setelah dikurangi zakat/sumbangan keagamaan wajib
-                                dan kompensasi kerugian
-                            </td>
-                            <td>
-                                <Input class={"tw:text-end"} type={"rupiah"} value={n4} disabled />
-                            </td>
-                            <td>
-                                <Input
-                                    class={"tw:text-end"}
-                                    type={"rupiah"}
-                                    bind:value={data.setelahDikurangiSuamiIstri}
-                                    disabled={readonly}
-                                />
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                Penghasilan neto setelah dikurangi zakat/sumbangan keagamaan wajib
-                                dan kompensasi kerugian gabungan
-                            </td>
-                            <td colspan="2">
-                                <Input
-                                    class={"tw:text-end"}
-                                    type={"rupiah"}
-                                    value={computedB.netoGabungan}
-                                    disabled
-                                />
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Penghasilan tidak kena pajak gabungan</td>
-                            <td colspan="2">
-                                <Select bind:value={data.ptkpGabunganStatus} disabled={readonly}>
-                                    <option class="tw:text-black" value={""}></option>
-                                    {#each PTKP_OPTIONS as ptkp}
-                                        <option class="tw:text-black" value={ptkp.value}>{ptkp.label}</option>
-                                    {/each}
-                                </Select>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>Penghasilan kena pajak gabungan</td>
-                            <td colspan="2">
-                                <Input
-                                    class={"tw:text-end"}
-                                    type={"rupiah"}
-                                    value={computedB.penghasilanKenaPajakGabungan}
-                                    disabled
-                                />
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>PPh terutang gabungan</td>
-                            <td colspan="2">
-                                <Input
-                                    class={"tw:text-end"}
-                                    type={"rupiah"}
-                                    value={computedB.pphTerutangGabungan}
-                                    disabled
-                                />
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>PPh terutang yang ditanggung oleh Wajib Pajak</td>
-                            <td colspan="2">
-                                <Input
-                                    class={"tw:text-end"}
-                                    type={"rupiah"}
-                                    value={computedB.pphDitanggungWp}
-                                    disabled
-                                />
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>PPh terutang yang ditanggung oleh suami/istri</td>
-                            <td colspan="2">
-                                <Input
-                                    class={"tw:text-end"}
-                                    type={"rupiah"}
-                                    value={computedB.pphDitanggungSuamiIstri}
-                                    disabled
-                                />
-                            </td>
-                        </tr>
-                    {/snippet}
-                </Table>
+            <DisclosureItem title="B. PENGHITUNGAN PPh TERUTANG WAJIB PAJAK DAN SUAMI/ISTRI" open>
+                <Stack gap="16px">
+                    <DataTable
+                        label="Penghitungan PPh terutang Wajib Pajak dan suami atau istri"
+                        minWidth="880px"
+                        headerTone="navy"
+                        density="compact"
+                    >
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th scope="col">URAIAN</th>
+                                    <th class="right" scope="col">WAJIB PAJAK (Rp)</th>
+                                    <th class="right" scope="col">SUAMI/ISTRI (Rp)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <th scope="row">Penghasilan Bruto</th>
+                                    <td class="field-cell">
+                                        <RupiahField
+                                            label="Penghasilan Bruto Wajib Pajak"
+                                            bind:value={data.brutoWp}
+                                            disabled={readonly}
+                                        />
+                                    </td>
+                                    <td class="field-cell">
+                                        <RupiahField
+                                            label="Penghasilan Bruto Suami/Istri"
+                                            bind:value={data.brutoSuamiIstri}
+                                            disabled={readonly}
+                                        />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">Penghasilan Neto</th>
+                                    <td class="field-cell">
+                                        <RupiahField label="Penghasilan Neto Wajib Pajak" value={n2} disabled />
+                                    </td>
+                                    <td class="field-cell">
+                                        <RupiahField
+                                            label="Penghasilan Neto Suami/Istri"
+                                            bind:value={data.netoSuamiIstri}
+                                            disabled={readonly}
+                                        />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">
+                                        Penghasilan neto setelah dikurangi zakat/sumbangan keagamaan wajib
+                                        dan kompensasi kerugian
+                                    </th>
+                                    <td class="field-cell">
+                                        <RupiahField
+                                            label="Penghasilan neto Wajib Pajak setelah pengurang"
+                                            value={n4}
+                                            disabled
+                                        />
+                                    </td>
+                                    <td class="field-cell">
+                                        <RupiahField
+                                            label="Penghasilan neto Suami/Istri setelah pengurang"
+                                            bind:value={data.setelahDikurangiSuamiIstri}
+                                            disabled={readonly}
+                                        />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">
+                                        Penghasilan neto setelah dikurangi zakat/sumbangan keagamaan wajib
+                                        dan kompensasi kerugian gabungan
+                                    </th>
+                                    <td class="field-cell" colspan="2">
+                                        <RupiahField
+                                            label="Penghasilan neto gabungan setelah pengurang"
+                                            value={computedB.netoGabungan}
+                                            disabled
+                                        />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">Penghasilan tidak kena pajak gabungan</th>
+                                    <td colspan="2">
+                                        <SelectField
+                                            label="Penghasilan tidak kena pajak gabungan"
+                                            bind:value={data.ptkpGabunganStatus}
+                                            options={[
+                                                { value: '', label: 'Silakan pilih' },
+                                                ...PTKP_OPTIONS
+                                            ]}
+                                            disabled={readonly}
+                                            labelHidden
+                                            floatingPanel
+                                        />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">Penghasilan kena pajak gabungan</th>
+                                    <td class="field-cell" colspan="2">
+                                        <RupiahField
+                                            label="Penghasilan kena pajak gabungan"
+                                            value={computedB.penghasilanKenaPajakGabungan}
+                                            disabled
+                                        />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">PPh terutang gabungan</th>
+                                    <td class="field-cell" colspan="2">
+                                        <RupiahField
+                                            label="PPh terutang gabungan"
+                                            value={computedB.pphTerutangGabungan}
+                                            disabled
+                                        />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">PPh terutang yang ditanggung oleh Wajib Pajak</th>
+                                    <td class="field-cell" colspan="2">
+                                        <RupiahField
+                                            label="PPh terutang yang ditanggung oleh Wajib Pajak"
+                                            value={computedB.pphDitanggungWp}
+                                            disabled
+                                        />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">PPh terutang yang ditanggung oleh suami/istri</th>
+                                    <td class="field-cell" colspan="2">
+                                        <RupiahField
+                                            label="PPh terutang yang ditanggung oleh suami/istri"
+                                            value={computedB.pphDitanggungSuamiIstri}
+                                            disabled
+                                        />
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </DataTable>
 
-                <Table class="tw:mt-4 tw:min-w-full">
-                    {#snippet head()}
-                        <tr><th colspan="2">WAJIB PAJAK</th></tr>
-                    {/snippet}
-                    {#snippet body()}
-                        <tr>
-                            <td>NIK/NPWP</td>
-                            <td><Input type={"text"} value={identitas?.npwp ?? ''} disabled /></td>
-                        </tr>
-                        <tr>
-                            <td>NAMA</td>
-                            <td><Input type={"text"} value={identitas?.nama ?? ''} disabled /></td>
-                        </tr>
-                    {/snippet}
-                </Table>
+                    <DataTable
+                        label="Identitas Wajib Pajak"
+                        minWidth="560px"
+                        headerTone="navy"
+                        density="compact"
+                    >
+                        <table>
+                            <thead><tr><th colspan="2" scope="colgroup">WAJIB PAJAK</th></tr></thead>
+                            <tbody>
+                                <tr>
+                                    <th scope="row">NIK/NPWP</th>
+                                    <td class="field-cell">
+                                        <FormField
+                                            label="NIK/NPWP Wajib Pajak"
+                                            value={identitas?.npwp ?? ''}
+                                            disabled
+                                        />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">NAMA</th>
+                                    <td class="field-cell">
+                                        <FormField
+                                            label="Nama Wajib Pajak"
+                                            value={identitas?.nama ?? ''}
+                                            disabled
+                                        />
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </DataTable>
 
-                <Table class="tw:mt-4 tw:min-w-full">
-                    {#snippet head()}
-                        <tr><th colspan="2">SUAMI/ISTRI</th></tr>
-                    {/snippet}
-                    {#snippet body()}
-                        <tr>
-                            <td>NIK/NPWP</td>
-                            <td><Input type={"text"} value={npwpSuamiIstri} disabled /></td>
-                        </tr>
-                        <tr>
-                            <td>NAMA</td>
-                            <td>
-                                <!-- The live form auto-fills this from a DJP spousal NPWP
-                                     lookup we have no equivalent of, so it is a plain
-                                     manual input here. -->
-                                <Input
-                                    type={"text"}
-                                    bind:value={data.namaSuamiIstri}
-                                    disabled={readonly}
-                                />
-                            </td>
-                        </tr>
-                    {/snippet}
-                </Table>
-            </div>
-        </Accordion>
+                    <DataTable
+                        label="Identitas suami atau istri"
+                        minWidth="560px"
+                        headerTone="navy"
+                        density="compact"
+                    >
+                        <table>
+                            <thead><tr><th colspan="2" scope="colgroup">SUAMI/ISTRI</th></tr></thead>
+                            <tbody>
+                                <tr>
+                                    <th scope="row">NIK/NPWP</th>
+                                    <td class="field-cell">
+                                        <FormField label="NIK/NPWP Suami/Istri" value={npwpSuamiIstri} disabled />
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th scope="row">NAMA</th>
+                                    <td class="field-cell">
+                                        <!-- This remains manual because there is no equivalent DJP spouse lookup. -->
+                                        <FormField
+                                            label="Nama Suami/Istri"
+                                            bind:value={data.namaSuamiIstri}
+                                            disabled={readonly}
+                                        />
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </DataTable>
+                </Stack>
+            </DisclosureItem>
         {/if}
-    </div>
+    </Stack>
 </div>
 
 <style>
-    th {
-    	font-size: .7rem;
-    	font-weight: bold;
-    	text-align: center;
-    	padding: .4rem .5rem;
-    	white-space: nowrap;
-    	background-color: var(--color-primary);
-    	border: 1px solid white;
+    .field-cell :global(.label) {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
     }
-    td {
-    	font-size: .8rem;
-    	padding: .4rem .5rem;
-    	border: 1px solid white;
-    }
-    td:first-child {
-    	width: 40rem;
-    }
-    td:last-child {
-    	width: 16rem;
-    }
-    tr:nth-child(odd) {
-    	background-color: #F9F6EE;
+
+    .field-cell :global(.field),
+    .field-cell :global(label) {
+        gap: 0;
     }
 </style>

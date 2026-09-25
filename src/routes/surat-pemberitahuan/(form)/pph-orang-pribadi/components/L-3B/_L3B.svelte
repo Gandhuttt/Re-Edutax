@@ -1,8 +1,13 @@
 <script lang="ts">
-    import Accordion from "$lib/components/AccordionItem.svelte";
-    import Button from "$lib/components/Button.svelte";
-    import Table from "$lib/components/Table.svelte";
-    import { closeBsModal } from "$lib/helpers/bsModal";
+    import {
+        ActionButton,
+        DataTable,
+        DisclosureItem,
+        FieldGrid,
+        FormField,
+        InstitutionalModal,
+        Stack
+    } from "$lib/re-ui-components";
     import A from "./A.svelte";
     import B from "./B.svelte";
     import C from "./C.svelte";
@@ -45,162 +50,77 @@
     }: Props = $props();
 
     const metodeLabel: Record<string, string> = {
-        pencatatan: '1 (Pencatatan)',
-        pembukuan_kas: '2 (Pembukuan Stelsel Kas)',
-        pembukuan_akrual: '2 (Pembukuan Stelsel Akrual)'
+        pencatatan: "1 (Pencatatan)",
+        pembukuan_kas: "2 (Pembukuan Stelsel Kas)",
+        pembukuan_akrual: "2 (Pembukuan Stelsel Akrual)"
     };
 
     let idTku = $derived(`${npwp}000000`);
-
     let draft = $state<TkuL3B>({ ...tku });
+    let modalOpen = $state(false);
 
     function bukaUbah() {
         draft = { ...tku };
+        modalOpen = true;
     }
 
     function simpanModal() {
         tku = { ...draft };
-        closeBsModal('modalOpL3BTku');
+        modalOpen = false;
     }
 </script>
 
-<div class="{currentTab === 'L-3B' ? '' : 'tw:hidden'}">
-    <div class="accordion">
-        <Accordion item={"DAFTAR TEMPAT KEGIATAN USAHA (TKU)"}>
-            <div class="tw:p-5">
+<div class:hidden={currentTab !== "L-3B"}>
+    <Stack gap="0">
+        <DisclosureItem title="DAFTAR TEMPAT KEGIATAN USAHA (TKU)">
+            <Stack gap="16px">
                 {#if !readonly}
-                    <div class="tw:mb-2 tw:flex tw:justify-end">
-                        <Button type="button" onclick={bukaUbah} data-bs-toggle="modal" data-bs-target="#modalOpL3BTku">Ubah</Button>
-                    </div>
+                    <div class="actions"><ActionButton onclick={bukaUbah}>Ubah</ActionButton></div>
                 {/if}
-                <div class="tw:overflow-x-auto">
-                    <Table class="tw:min-w-full">
-                        {#snippet head()}
-                            <tr>
-                                <th>ID TKU</th>
-                                <th>NAMA</th>
-                                <th>ALAMAT</th>
-                                <th>KELURAHAN/DESA</th>
-                                <th>KECAMATAN</th>
-                                <th>KOTA/KABUPATEN</th>
-                                <th>PROVINSI</th>
-                            </tr>
-                        {/snippet}
-                        {#snippet body()}
-                            <tr>
-                                <td>{idTku}</td>
-                                <td>{tku.nama}</td>
-                                <td>{tku.alamat}</td>
-                                <td>{tku.kelurahan}</td>
-                                <td>{tku.kecamatan}</td>
-                                <td>{tku.kabupaten}</td>
-                                <td>{tku.provinsi}</td>
-                            </tr>
-                        {/snippet}
-                    </Table>
-                </div>
-            </div>
-        </Accordion>
-        <Accordion item={"A. PEREDARAN BRUTO TERTENTU YANG DIKENAKAN PAJAK PENGHASILAN BERSIFAT FINAL"}>
-            <div class="tw:p-5">
-                <A
-                    bind:rows={a}
-                    namaTku={tku.nama}
-                    dapatDiubah={b1b2Oppt === 'peredaran_bruto_tertentu'}
-                    {readonly}
-                />
-            </div>
-        </Accordion>
-        <Accordion item={"B. ORANG PRIBADI PENGUSAHA TERTENTU (OPPT)"}>
-            <div class="tw:p-5">
-                <B
-                    bind:rows={b}
-                    namaTku={tku.nama}
-                    metodePembukuanLabel={metodeLabel[metodePembukuan] ?? metodePembukuan}
-                    dapatDiubah={b1b2Oppt === 'pengusaha_tertentu'}
-                    {readonly}
-                />
-            </div>
-        </Accordion>
-        <Accordion item={"C. PENGGUNA NORMA PENGHITUNGAN PENGHASILAN NETO (NPPN)"}>
-            <div class="tw:p-5">
-                <C
-                    bind:rows={c}
-                    namaTku={tku.nama}
-                    bind:jenisUsahaPekerjaanBebas={tku.jenisUsahaPekerjaanBebas}
-                    dapatDiubah={b1b3Norma === 'ya_norma'}
-                    {readonly}
-                />
-            </div>
-        </Accordion>
-    </div>
+                <DataTable label="Daftar tempat kegiatan usaha" minWidth="920px" framed={false} headerTone="navy" density="compact">
+                    <table>
+                        <thead><tr>
+                            <th scope="col">ID TKU</th><th scope="col">Nama</th><th scope="col">Alamat</th>
+                            <th scope="col">Kelurahan/Desa</th><th scope="col">Kecamatan</th>
+                            <th scope="col">Kota/Kabupaten</th><th scope="col">Provinsi</th>
+                        </tr></thead>
+                        <tbody><tr>
+                            <td>{idTku}</td><td>{tku.nama}</td><td>{tku.alamat}</td><td>{tku.kelurahan}</td>
+                            <td>{tku.kecamatan}</td><td>{tku.kabupaten}</td><td>{tku.provinsi}</td>
+                        </tr></tbody>
+                    </table>
+                </DataTable>
+            </Stack>
+        </DisclosureItem>
+        <DisclosureItem title="A. PEREDARAN BRUTO TERTENTU YANG DIKENAKAN PAJAK PENGHASILAN BERSIFAT FINAL">
+            <A bind:rows={a} namaTku={tku.nama} dapatDiubah={b1b2Oppt === "peredaran_bruto_tertentu"} {readonly} />
+        </DisclosureItem>
+        <DisclosureItem title="B. ORANG PRIBADI PENGUSAHA TERTENTU (OPPT)">
+            <B bind:rows={b} namaTku={tku.nama} metodePembukuanLabel={metodeLabel[metodePembukuan] ?? metodePembukuan} dapatDiubah={b1b2Oppt === "pengusaha_tertentu"} {readonly} />
+        </DisclosureItem>
+        <DisclosureItem title="C. PENGGUNA NORMA PENGHITUNGAN PENGHASILAN NETO (NPPN)">
+            <C bind:rows={c} namaTku={tku.nama} bind:jenisUsahaPekerjaanBebas={tku.jenisUsahaPekerjaanBebas} dapatDiubah={b1b3Norma === "ya_norma"} {readonly} />
+        </DisclosureItem>
+    </Stack>
 </div>
 
-<div class="modal fade" id="modalOpL3BTku" tabindex="-1" aria-labelledby="modalOpL3BTkuLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h1 class="modal-title fs-5" id="modalOpL3BTkuLabel" style="font-weight: bold; text-transform: uppercase;">
-          Tempat Kegiatan Usaha
-        </h1>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
-      </div>
-      <div class="modal-body">
-        <div style="display: flex; flex-direction: column; gap: 10px;">
-          <div style="display: flex; align-items: center;">
-            <label for="l3btku-id" style="width: 220px;">ID TKU (tidak dapat diubah)</label>
-            <input type="text" id="l3btku-id" value={idTku} readonly style="flex: 1; background-color: #e9ecef;" />
-          </div>
-          <div style="display: flex; align-items: center;">
-            <label for="l3btku-nama" style="width: 220px;">Nama</label>
-            <input type="text" id="l3btku-nama" bind:value={draft.nama} style="flex: 1;" />
-          </div>
-          <div style="display: flex; align-items: center;">
-            <label for="l3btku-alamat" style="width: 220px;">Alamat</label>
-            <input type="text" id="l3btku-alamat" bind:value={draft.alamat} style="flex: 1;" />
-          </div>
-          <div style="display: flex; align-items: center;">
-            <label for="l3btku-kelurahan" style="width: 220px;">Kelurahan/Desa</label>
-            <input type="text" id="l3btku-kelurahan" bind:value={draft.kelurahan} style="flex: 1;" />
-          </div>
-          <div style="display: flex; align-items: center;">
-            <label for="l3btku-kecamatan" style="width: 220px;">Kecamatan</label>
-            <input type="text" id="l3btku-kecamatan" bind:value={draft.kecamatan} style="flex: 1;" />
-          </div>
-          <div style="display: flex; align-items: center;">
-            <label for="l3btku-kabupaten" style="width: 220px;">Kota/Kabupaten</label>
-            <input type="text" id="l3btku-kabupaten" bind:value={draft.kabupaten} style="flex: 1;" />
-          </div>
-          <div style="display: flex; align-items: center;">
-            <label for="l3btku-provinsi" style="width: 220px;">Provinsi</label>
-            <input type="text" id="l3btku-provinsi" bind:value={draft.provinsi} style="flex: 1;" />
-          </div>
-        </div>
-      </div>
-      <div class="modal-footer" style="justify-content: flex-end;">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-        <button type="button" class="btn btn-primary" style="background-color: #1c398e; color: white;" onclick={simpanModal}>Simpan</button>
-      </div>
-    </div>
-  </div>
-</div>
+<InstitutionalModal bind:open={modalOpen} title="Tempat Kegiatan Usaha" eyebrow="LAMPIRAN L-3B" size="wide">
+    <FieldGrid columns={2}>
+        <FormField label="ID TKU (tidak dapat diubah)" value={idTku} readonly />
+        <FormField label="Nama" bind:value={draft.nama} />
+        <FormField label="Alamat" bind:value={draft.alamat} />
+        <FormField label="Kelurahan/Desa" bind:value={draft.kelurahan} />
+        <FormField label="Kecamatan" bind:value={draft.kecamatan} />
+        <FormField label="Kota/Kabupaten" bind:value={draft.kabupaten} />
+        <FormField label="Provinsi" bind:value={draft.provinsi} />
+    </FieldGrid>
+    {#snippet actions()}
+        <ActionButton tone="quiet" onclick={() => (modalOpen = false)}>Tutup</ActionButton>
+        <ActionButton onclick={simpanModal}>Simpan</ActionButton>
+    {/snippet}
+</InstitutionalModal>
 
 <style>
-    th {
-    	font-size: .7rem;
-    	font-weight: bold;
-    	text-align: center;
-    	padding: .4rem .5rem;
-    	white-space: nowrap;
-    	background-color: var(--color-primary);
-    	border: 1px solid white;
-    }
-    td {
-    	font-size: .8rem;
-    	padding: .25rem .5rem;
-    	border: 1px solid white;
-    }
-    tr:not(.total):not(.footer):nth-child(odd) {
-    	background-color: #F9F6EE;
-    }
+    .hidden { display: none; }
+    .actions { display: flex; justify-content: flex-end; }
 </style>

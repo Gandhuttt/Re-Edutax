@@ -1,56 +1,57 @@
 <script lang="ts">
-    import Input from "$lib/components/Input.svelte";
-    import InputGroup from "$lib/components/InputGroup.svelte";
-    import Label from "$lib/components/Label.svelte";
+	import { FormSection, RupiahField, Stack } from "$lib/re-ui-components";
 
-    let {
-        jumlahTambahanPengurangLitbang,
-        termanfaatkanTahunSebelumnya = $bindable(),
-        penghasilanKenaPajakSebelumFasilitas,
-        readonly = false
-    }: {
-        jumlahTambahanPengurangLitbang: number;
-        termanfaatkanTahunSebelumnya: number;
-        penghasilanKenaPajakSebelumFasilitas: number;
-        readonly?: boolean;
-    } = $props();
+	let {
+		jumlahTambahanPengurangLitbang,
+		termanfaatkanTahunSebelumnya = $bindable(),
+		penghasilanKenaPajakSebelumFasilitas,
+		readonly = false,
+	}: {
+		jumlahTambahanPengurangLitbang: number;
+		termanfaatkanTahunSebelumnya: number;
+		penghasilanKenaPajakSebelumFasilitas: number;
+		readonly?: boolean;
+	} = $props();
 
-    const rupiah = new Intl.NumberFormat('id-ID');
-
-    let belumTermanfaatkanTahunIni = $derived(
-        jumlahTambahanPengurangLitbang - Number(termanfaatkanTahunSebelumnya || 0)
-    );
-
-    let batas40Persen = $derived(0.4 * Number(penghasilanKenaPajakSebelumFasilitas || 0));
-
-    let dapatDibebankanTahunIni = $derived(Math.max(0, Math.min(belumTermanfaatkanTahunIni, batas40Persen)));
-
-    let sisaBelumTermanfaatkan = $derived(belumTermanfaatkanTahunIni - dapatDibebankanTahunIni);
+	let belumTermanfaatkanTahunIni = $derived(
+		jumlahTambahanPengurangLitbang - Number(termanfaatkanTahunSebelumnya || 0),
+	);
+	let batas40Persen = $derived(0.4 * Number(penghasilanKenaPajakSebelumFasilitas || 0));
+	let dapatDibebankanTahunIni = $derived(Math.max(0, Math.min(belumTermanfaatkanTahunIni, batas40Persen)));
+	let sisaBelumTermanfaatkan = $derived(belumTermanfaatkanTahunIni - dapatDibebankanTahunIni);
 </script>
 
-<div class="tw:p-5 tw:flex tw:flex-col tw:gap-3">
-    <Label class={"tw:flex! tw:flex-row tw:w-full tw:items-center"}>
-        <span class="tw:flex tw:w-full tw:text-sm">1. JUMLAH TAMBAHAN PENGURANG PENGHASILAN BRUTO PENELITIAN DAN PENGEMBANGAN</span>
-        <InputGroup class={"tw:w-[25rem]! tw:text-right"} type={"text"} value={rupiah.format(jumlahTambahanPengurangLitbang)} readonly>Rp.</InputGroup>
-    </Label>
-    <Label class={"tw:flex! tw:flex-row tw:w-full tw:items-center"}>
-        <span class="tw:flex tw:w-full tw:text-sm">2. JUMLAH TAMBAHAN PENGURANGAN PENGHASILAN BRUTO PENELITIAN DAN PENGEMBANGAN YANG TERMANFAATKAN TAHUN-TAHUN SEBELUMNYA</span>
-        <InputGroup class={"tw:w-[25rem]! tw:text-right"} type={"rupiah"} bind:value={termanfaatkanTahunSebelumnya} disabled={readonly}>Rp.</InputGroup>
-    </Label>
-    <Label class={"tw:flex! tw:flex-row tw:w-full tw:items-center"}>
-        <span class="tw:flex tw:w-full tw:text-sm">3. JUMLAH TAMBAHAN PENGURANGAN PENGHASILAN BRUTO PENELITIAN DAN PENGEMBANGAN YANG BELUM TERMANFAATKAN TAHUN INI</span>
-        <InputGroup class={"tw:w-[25rem]! tw:text-right"} type={"text"} value={rupiah.format(belumTermanfaatkanTahunIni)} readonly>Rp.</InputGroup>
-    </Label>
-    <Label class={"tw:flex! tw:flex-row tw:w-full tw:items-center"}>
-        <span class="tw:flex tw:w-full tw:text-sm">4. 40% x PENGHASILAN KENA PAJAK SEBELUM FASILITAS</span>
-        <InputGroup class={"tw:w-[25rem]! tw:text-right"} type={"text"} value={rupiah.format(batas40Persen)} readonly>Rp.</InputGroup>
-    </Label>
-    <Label class={"tw:flex! tw:flex-row tw:w-full tw:items-center"}>
-        <span class="tw:flex tw:w-full tw:text-sm">5. TAMBAHAN PENGURANG PENGHASILAN BRUTO PENELITIAN DAN PENGEMBANGAN YANG DAPAT DIBEBANKAN PADA TAHUN INI</span>
-        <InputGroup class={"tw:w-[25rem]! tw:text-right"} type={"text"} value={rupiah.format(dapatDibebankanTahunIni)} readonly>Rp.</InputGroup>
-    </Label>
-    <Label class={"tw:flex! tw:flex-row tw:w-full tw:items-center"}>
-        <span class="tw:flex tw:w-full tw:text-sm">6. SISA TAMBAHAN PENGURANGAN PENGHASILAN BRUTO PENELITIAN DAN PENGEMBANGAN YANG BELUM TERMANFAATKAN TAHUN INI</span>
-        <InputGroup class={"tw:w-[25rem]! tw:text-right"} type={"text"} value={rupiah.format(sisaBelumTermanfaatkan)} readonly>Rp.</InputGroup>
-    </Label>
-</div>
+<FormSection title="Penghitungan tambahan pengurang penghasilan bruto" padded>
+	<Stack gap="16px">
+		<RupiahField
+			label="1. Jumlah tambahan pengurang penghasilan bruto penelitian dan pengembangan"
+			value={jumlahTambahanPengurangLitbang}
+			readonly
+		/>
+		<RupiahField
+			label="2. Jumlah tambahan pengurangan penghasilan bruto penelitian dan pengembangan yang termanfaatkan tahun-tahun sebelumnya"
+			bind:value={termanfaatkanTahunSebelumnya}
+			disabled={readonly}
+		/>
+		<RupiahField
+			label="3. Jumlah tambahan pengurangan penghasilan bruto penelitian dan pengembangan yang belum termanfaatkan tahun ini"
+			value={belumTermanfaatkanTahunIni}
+			readonly
+		/>
+		<RupiahField
+			label="4. 40% × penghasilan kena pajak sebelum fasilitas"
+			value={batas40Persen}
+			readonly
+		/>
+		<RupiahField
+			label="5. Tambahan pengurang penghasilan bruto penelitian dan pengembangan yang dapat dibebankan pada tahun ini"
+			value={dapatDibebankanTahunIni}
+			readonly
+		/>
+		<RupiahField
+			label="6. Sisa tambahan pengurangan penghasilan bruto penelitian dan pengembangan yang belum termanfaatkan tahun ini"
+			value={sisaBelumTermanfaatkan}
+			readonly
+		/>
+	</Stack>
+</FormSection>

@@ -1,6 +1,5 @@
 <script lang="ts">
-    import Input from "$lib/components/Input.svelte";
-    import Table from "$lib/components/Table.svelte";
+    import { DataTable } from "$lib/re-ui-components";
     import RowTanya from "./RowTanya.svelte";
     import RowNilai from "./RowNilai.svelte";
     import { HINTS, HINTS_DISABLED } from "./hints";
@@ -58,51 +57,63 @@
     }: Props = $props();
 </script>
 
-<div class="tw:p-5">
-    <Table class="tw:min-w-full">
-        {#snippet head()}
-            <tr class="tw:hidden"><td><Input hidden/></td></tr>
-        {/snippet}
-        {#snippet body()}
+<DataTable
+    label="Transaksi dan kewajiban lainnya"
+    minWidth="1080px"
+    headerTone="navy"
+    density="compact"
+    framed={false}
+>
+    <table>
+        <thead>
+            <tr>
+                <th scope="col">Nomor</th>
+                <th scope="col">Uraian</th>
+                <th scope="col">Jawaban/Pilihan</th>
+                <th scope="col" class="number">Jumlah (Rupiah)</th>
+                <th scope="col">Informasi</th>
+            </tr>
+        </thead>
+        <tbody>
             <RowNilai
-                nomor={"14.a"}
-                label={"Harta pada akhir Tahun Pajak (Isi Lampiran 1 Bagian A, lalu ke pertanyaan selanjutnya)"}
+                nomor="14.a"
+                label="Harta pada akhir Tahun Pajak (Isi Lampiran 1 Bagian A, lalu ke pertanyaan selanjutnya)"
                 value={n14a}
             />
             <RowTanya
-                nomor={"14.b"}
-                label={"Apakah Anda memiliki utang pada akhir tahun pajak?"}
-                name={"I14b"}
+                nomor="14.b"
+                label="Apakah Anda memiliki utang pada akhir tahun pajak?"
+                name="I14b"
                 bind:answer={i14bMemilikiUtang}
                 hint={HINTS.i14b}
-                amount={"derived"}
+                amount="derived"
                 amountValue={n14b}
                 {readonly}
             />
             <RowTanya
-                nomor={"14.c"}
-                label={"Apakah Anda menerima penghasilan yang dikenakan pajak penghasilan bersifat final?"}
-                name={"I14c"}
+                nomor="14.c"
+                label="Apakah Anda menerima penghasilan yang dikenakan pajak penghasilan bersifat final?"
+                name="I14c"
                 bind:answer={i14cPenghasilanFinal}
                 hint={HINTS.i14c}
-                amount={"derived"}
+                amount="derived"
                 amountValue={n14c}
                 {readonly}
             />
             <RowTanya
-                nomor={"14.d"}
-                label={"Apakah Anda menerima penghasilan yang tidak termasuk objek pajak?"}
-                name={"I14d"}
+                nomor="14.d"
+                label="Apakah Anda menerima penghasilan yang tidak termasuk objek pajak?"
+                name="I14d"
                 bind:answer={i14dBukanObjekPajak}
                 hint={HINTS.i14d}
-                amount={"derived"}
+                amount="derived"
                 amountValue={n14d}
                 {readonly}
             />
             <RowTanya
-                nomor={"14.e"}
-                label={"Apakah Anda melaporkan biaya penyusutan dan/atau amortisasi fiskal?"}
-                name={"I14e"}
+                nomor="14.e"
+                label="Apakah Anda melaporkan biaya penyusutan dan/atau amortisasi fiskal?"
+                name="I14e"
                 bind:answer={i14ePenyusutanAmortisasiFiskal}
                 hint={HINTS.i14e}
                 disabled={b1b3Norma !== 'tidak_pembukuan'}
@@ -110,9 +121,9 @@
                 {readonly}
             />
             <RowTanya
-                nomor={"14.f"}
-                label={"Apakah Anda melaporkan biaya entertainment, promosi, penggantian atau imbalan dalam bentuk natura dan/atau kenikmatan, serta piutang yang nyata-nyata tidak dapat ditagih?"}
-                name={"I14f"}
+                nomor="14.f"
+                label="Apakah Anda melaporkan biaya entertainment, promosi, penggantian atau imbalan dalam bentuk natura dan/atau kenikmatan, serta piutang yang nyata-nyata tidak dapat ditagih?"
+                name="I14f"
                 bind:answer={i14fBiayaEntertainment}
                 hint={HINTS.i14f}
                 disabled={!b1b1PenghasilanUsaha}
@@ -122,28 +133,20 @@
             <!-- Routes nowhere: 14g = Ya shows a compliance reminder rather than
                  sending the taxpayer to a lampiran. -->
             <RowTanya
-                nomor={"14.g"}
-                label={"Apakah Anda menerima dividen dan/atau penghasilan lain dari luar negeri dan melaporkannya sebagai penghasilan tidak termasuk objek pajak?"}
-                name={"I14g"}
+                nomor="14.g"
+                label="Apakah Anda menerima dividen dan/atau penghasilan lain dari luar negeri dan melaporkannya sebagai penghasilan tidak termasuk objek pajak?"
+                name="I14g"
                 bind:answer={i14gDividenLuarNegeri}
                 hint={HINTS.i14g}
                 {readonly}
             />
             <RowNilai
-                nomor={"14.h"}
-                label={"Kelebihan PPh Final atas penghasilan dari usaha dengan peredaran bruto tertentu yang dapat diminta pengembalian"}
+                nomor="14.h"
+                label="Kelebihan PPh Final atas penghasilan dari usaha dengan peredaran bruto tertentu yang dapat diminta pengembalian"
                 bind:value={i14hKelebihanPphFinal}
                 editable
                 {readonly}
             />
-        {/snippet}
-    </Table>
-</div>
-
-<style>
-    tr {
-        border: none;
-        &:nth-child(even) { background-color: #F9F6EE; }
-    }
-    td { padding: .25rem .5rem; }
-</style>
+        </tbody>
+    </table>
+</DataTable>

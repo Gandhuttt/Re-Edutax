@@ -103,7 +103,7 @@
 		color: var(--ui-ink);
 	}
 	label {
-		font-size: 12px;
+		font-size: 14px;
 		font-weight: 700;
 	}
 	label em {
@@ -120,7 +120,7 @@
 		background: #fffefa;
 		color: var(--ui-ink);
 		font: inherit;
-		font-size: 13px;
+		font-size: 16px;
 		line-height: 1.5;
 		transition:
 			border-color 140ms ease,
@@ -152,7 +152,7 @@
 	.hint,
 	.message,
 	.count {
-		font-size: 11px;
+		font-size: 12px;
 		line-height: 1.4;
 	}
 	.hint,
@@ -165,7 +165,7 @@
 	.count {
 		flex: 0 0 auto;
 		font-family: var(--ui-font-mono);
-		font-size: 10px;
+		font-size: 12px;
 	}
 	.error textarea {
 		border-color: #a9433d;

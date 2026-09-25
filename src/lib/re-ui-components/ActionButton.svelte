@@ -43,7 +43,7 @@
 		border: 1px solid transparent;
 		border-radius: 3px;
 		font: inherit;
-		font-size: 13px;
+		font-size: 15px;
 		font-weight: 700;
 		line-height: 1;
 		cursor: pointer;

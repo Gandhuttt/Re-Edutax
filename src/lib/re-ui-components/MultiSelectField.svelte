@@ -36,7 +36,7 @@
 
 	let {
 		label,
-		value = $bindable([]),
+		value = $bindable(),
 		field,
 		name = "",
 		options = [],
@@ -60,11 +60,11 @@
 	let root = $state<HTMLDivElement>();
 	let closeTimer: ReturnType<typeof setTimeout> | undefined;
 	const resolvedValue = $derived.by(() => {
-		if (!field) return value;
+		if (!field) return value ?? [];
 		const remoteValue = field.value();
 		return Array.isArray(remoteValue)
 			? remoteValue.filter((entry): entry is string => typeof entry === "string")
-			: value;
+			: (value ?? []);
 	});
 	const resolvedError = $derived(error || firstRemoteIssue(field)?.message || "");
 	const resolvedName = $derived(
@@ -216,7 +216,7 @@
 		align-content: start;
 	}
 	.field-label {
-		font-size: 12px;
+		font-size: 14px;
 		font-weight: 700;
 	}
 	.field-label em {
@@ -237,7 +237,7 @@
 		background: #fffefa;
 		color: var(--ui-ink);
 		font: inherit;
-		font-size: 13px;
+		font-size: 16px;
 		text-align: left;
 		cursor: pointer;
 		transition:
@@ -282,7 +282,7 @@
 		border-radius: 10px;
 		background: var(--ui-navy);
 		color: white;
-		font-size: 10px;
+		font-size: 12px;
 	}
 	.trigger-meta i {
 		color: var(--ui-navy);
@@ -328,13 +328,13 @@
 	}
 	.panel-summary span {
 		color: var(--ui-muted);
-		font-size: 8px;
+		font-size: 12px;
 		font-weight: 900;
 		letter-spacing: 0.09em;
 	}
 	.panel-summary strong {
 		color: var(--ui-navy);
-		font-size: 10px;
+		font-size: 12px;
 	}
 	.option-groups {
 		max-height: 240px;
@@ -344,7 +344,7 @@
 	.group-label {
 		padding: 8px 9px 5px;
 		color: var(--ui-muted);
-		font-size: 8px;
+		font-size: 12px;
 		font-weight: 900;
 		letter-spacing: 0.09em;
 		text-transform: uppercase;
@@ -352,7 +352,7 @@
 	.empty-option {
 		padding: 18px 12px;
 		color: var(--ui-muted);
-		font-size: 11px;
+		font-size: 14px;
 		text-align: center;
 	}
 	.multi-option {
@@ -370,7 +370,7 @@
 		background: transparent;
 		color: var(--ui-ink);
 		font: inherit;
-		font-size: 12px;
+		font-size: 14px;
 		text-align: left;
 		cursor: pointer;
 		opacity: 0;
@@ -420,7 +420,7 @@
 	.hint,
 	.message {
 		color: var(--ui-muted);
-		font-size: 11px;
+		font-size: 12px;
 		line-height: 1.4;
 	}
 	.message {

@@ -39,7 +39,7 @@
 
 	let {
 		label,
-		value = $bindable(""),
+		value = $bindable(),
 		field,
 		name = "",
 		options = [],
@@ -74,11 +74,11 @@
 	let floatingWidth = $state(0);
 	let floatingListHeight = $state(230);
 	const resolvedValue = $derived.by(() => {
-		if (!field) return value;
+		if (!field) return value ?? "";
 		const remoteValue = field.value();
 		return typeof remoteValue === "string" || typeof remoteValue === "number"
 			? remoteValue
-			: value;
+			: (value ?? "");
 	});
 	const resolvedError = $derived(error || firstRemoteIssue(field)?.message || "");
 	const resolvedName = $derived(
@@ -352,7 +352,7 @@
 		align-content: start;
 	}
 	.field-label {
-		font-size: 12px;
+		font-size: 14px;
 		font-weight: 700;
 	}
 	.label-hidden {
@@ -389,13 +389,13 @@
 	}
 	.inline .field-label {
 		color: var(--ui-muted);
-		font-size: 10px;
+		font-size: 12px;
 		white-space: nowrap;
 	}
 	.inline .select-trigger {
 		height: 34px;
 		padding: 0 9px;
-		font-size: 11px;
+		font-size: 14px;
 	}
 	.inline .message,
 	.inline .hint {
@@ -414,7 +414,7 @@
 		background: #fffefa;
 		color: var(--ui-ink);
 		font: inherit;
-		font-size: 13px;
+		font-size: 16px;
 		text-align: left;
 		cursor: pointer;
 		transition:
@@ -499,7 +499,7 @@
 		background: #fffefa;
 		color: var(--ui-ink);
 		font: inherit;
-		font-size: 12px;
+		font-size: 14px;
 	}
 	.option-search input:focus {
 		outline: 2px solid var(--ui-yellow);
@@ -527,7 +527,7 @@
 		background: transparent;
 		color: var(--ui-ink);
 		font: inherit;
-		font-size: 12px;
+		font-size: 14px;
 		text-align: left;
 		cursor: pointer;
 		opacity: 0;
@@ -553,11 +553,11 @@
 	}
 	.empty-option strong {
 		color: var(--ui-ink);
-		font-size: 12px;
+		font-size: 14px;
 	}
 	.empty-option span {
 		margin-top: 3px;
-		font-size: 10px;
+		font-size: 12px;
 	}
 	.check {
 		color: var(--ui-yellow-deep);
@@ -566,7 +566,7 @@
 	}
 	.hint,
 	.message {
-		font-size: 11px;
+		font-size: 12px;
 		line-height: 1.4;
 	}
 	.hint {

@@ -1,33 +1,17 @@
 <script lang="ts">
-    import Alert from "$lib/components/Alert.svelte";
-    import Input from "$lib/components/Input.svelte";
-    import RadioPair from "$lib/components/RadioPair.svelte";
-    import { applyRupiahInput, formatRupiah, formatRupiahDerived } from "$lib/helpers/rupiahInput";
+    import { FormField, InlineAlert, RupiahField } from "$lib/re-ui-components";
+    import { formatRupiahDerived } from "$lib/helpers/rupiahInput";
     import type { Hint } from "./hints";
 
-    // One Ya/Tidak question row, with its hint chip and optional amount cell.
-    //
-    // The amount cell has three distinct states on the real form, and all three
-    // are needed: present and enabled, present but disabled (grey), and absent
-    // from the DOM entirely. 10d = Ya enables its input; 10a = Tidak removes its
-    // input rather than disabling it. See STATES.md / NOTES.md.
     interface Props {
         nomor: string;
         label: string;
         name: string;
         answer: boolean | undefined;
-        // Omitted on rows that are permanently disabled: those never show an
-        // answer-dependent chip, only `disabledHint`.
         hint?: Hint;
-        // 'none' omits the cell, 'derived' shows it disabled (a computed figure),
-        // 'input' shows an editable rupiah field.
         amount?: 'none' | 'derived' | 'input';
         amountValue?: number;
-        // When set, the amount cell only appears for this answer. Used by 10a
-        // (input absent on Tidak) and 10d (input only on Ya).
         amountWhen?: boolean;
-        // A disabled row can still assert an answer through its hint, so the chip
-        // text is passed separately rather than derived from `answer`.
         disabled?: boolean;
         disabledHint?: string;
         readonly?: boolean;
@@ -56,51 +40,83 @@
 </script>
 
 <tr>
-    <td class="tw:w-10"><span>{nomor}</span></td>
-    <td class="tw:w-[40rem]"><span>{label}</span></td>
-    <td class="tw:w-[10rem]">
-        <RadioPair {name} bind:group={answer} disabled={readonly || disabled} />
+    <td class="code"><strong>{nomor}</strong></td>
+    <td>{label}</td>
+    <td>
+        <div class="boolean-options" role="radiogroup" aria-label={label}>
+            <label class:selected={answer === false}>
+                <input type="radio" {name} value={false} bind:group={answer} disabled={readonly || disabled} />
+                <span>Tidak</span>
+            </label>
+            <label class:selected={answer === true}>
+                <input type="radio" {name} value={true} bind:group={answer} disabled={readonly || disabled} />
+                <span>Ya</span>
+            </label>
+        </div>
     </td>
-    <td class="tw:w-[20rem]">
+    <td class="amount-cell">
         {#if showAmount}
             {#if amount === 'input'}
-                <Input
-                    class={"tw:text-end"}
-                    type={"text"}
-                    value={formatRupiah(amountValue)}
-                    oninput={(e: Event) => (amountValue = applyRupiahInput(e))}
+                <RupiahField
+                    label={`Jumlah ${nomor}`}
+                    bind:value={amountValue}
                     disabled={readonly || disabled}
                 />
             {:else}
-                <Input class={"tw:text-end"} type={"text"} value={formatRupiahDerived(amountValue)} disabled />
+                <FormField
+                    label={`Jumlah ${nomor}`}
+                    value={formatRupiahDerived(amountValue)}
+                    disabled
+                />
             {/if}
         {/if}
     </td>
-    <td class="tw:w-[30rem]">
+    <td>
         {#if chip}
-            <Alert bg={"var(--color-primary)"}>
-                {#snippet head()}
-                    <span>i</span>
-                {/snippet}
-                {#snippet body()}
-                    <span>{chip}</span>
-                {/snippet}
-            </Alert>
+            <InlineAlert compact message={chip} />
         {/if}
     </td>
 </tr>
 
 <style>
-    tr {
-        border: none;
-        &:nth-child(even) {
-            background-color: #F9F6EE;
-        }
+    .code {
+        white-space: nowrap;
     }
-    td {
-        padding: .25rem .5rem;
+    .boolean-options {
+        min-width: 10rem;
+        display: flex;
+        gap: 6px;
     }
-    span {
-        font-size: .8rem;
+    .boolean-options label {
+        min-height: 34px;
+        padding: 7px 9px;
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        border: 1px solid var(--ui-line);
+        border-radius: 2px;
+        background: #fffefa;
+        cursor: pointer;
+    }
+    .boolean-options label.selected {
+        border-color: #b8aa67;
+        background: var(--ui-yellow-soft);
+    }
+    .boolean-options label:has(input:disabled) {
+        cursor: not-allowed;
+        opacity: 0.65;
+    }
+    .amount-cell {
+        min-width: 13rem;
+    }
+    .amount-cell :global(.field > .label),
+    .amount-cell :global(label > .label) {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
     }
 </style>

@@ -107,7 +107,7 @@
 		background: transparent;
 		color: var(--ui-muted);
 		font: inherit;
-		font-size: 11px;
+		font-size: 14px;
 		font-weight: 750;
 		cursor: pointer;
 		transition:

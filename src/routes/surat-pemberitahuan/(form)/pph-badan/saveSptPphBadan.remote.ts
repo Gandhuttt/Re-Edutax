@@ -20,16 +20,27 @@ import { L10CSchema, saveLampiranL10C } from './components/L10-C/saveLampiranL10
 import { L10DSchema, saveLampiranL10D } from './components/L10-D/saveLampiranL10D.server';
 import { L13BSchema, saveLampiranL13B } from './components/L13-B/saveLampiranL13B.server';
 import { computeIndukDEF } from './components/Induk/computeIndukDEF';
+const optionalBooleanRadio = v.optional(
+	v.union([
+		v.boolean(),
+		v.pipe(v.picklist(['true', 'false']), v.transform((value) => value === 'true'))
+	])
+);
 
 const SaveSptPphBadanSchema = v.object({
 	id: requiredString('SPT PPh Badan'),
 	action: v.optional(v.picklist(['Simpan Konsep', 'Simpan Lapor']), 'Simpan Konsep'),
 	metodePembukuan: v.optional(v.picklist(['akrual', 'kas']), 'akrual'),
 	sektorUsaha: requiredString('Sektor usaha'),
-	diaudit: booleanRadio(false),
+	diaudit: optionalBooleanRadio,
 	opiniAuditor: v.optional(v.string(), ''),
 	npwpKantorAkuntanPublik: v.optional(v.string(), ''),
 	namaKantorAkuntanPublik: v.optional(v.string(), ''),
+	pernyataanBenar: booleanRadio(false),
+	penandatangan: v.optional(
+		v.union([v.picklist(['wajib_pajak', 'kuasa_wajib_pajak']), v.literal('')]),
+		''
+	),
 	menerimaPenghasilanPp23: booleanRadio(false),
 	hanyaPenghasilanPp23: booleanRadio(false),
 	menerimaPenghasilanFinal: booleanRadio(false),
@@ -97,9 +108,20 @@ export const saveSptPphBadan = form(SaveSptPphBadanSchema, async (input) => {
 	if (!spt) {
 		error(404, 'Konsep SPT PPh Badan tidak ditemukan');
 	}
+	if (input.action === 'Simpan Lapor') {
+		if (input.diaudit === undefined) {
+			error(400, 'Pilih apakah laporan keuangan diaudit sebelum melaporkan SPT');
+		}
+		if (!input.pernyataanBenar) {
+			error(400, 'Setujui pernyataan kebenaran dan kelengkapan SPT sebelum melaporkan');
+		}
+		if (!input.penandatangan) {
+			error(400, 'Pilih penandatangan sebelum melaporkan SPT');
+		}
+	}
 
 	const sektorUsahaId = await getSektorUsahaId(input.sektorUsaha);
-	const opiniAuditorId = await getOpiniAuditorId(input.diaudit, input.opiniAuditor);
+	const opiniAuditorId = await getOpiniAuditorId(input.diaudit === true, input.opiniAuditor);
 
 	// D1 has no real multi-statement transaction over the Workers binding, only db.batch()
 	// (which requires every statement to be built upfront). Each saveLampiranXX() helper builds
@@ -153,10 +175,10 @@ export const saveSptPphBadan = form(SaveSptPphBadanSchema, async (input) => {
 				.set({
 					metodePembukuan: input.metodePembukuan,
 					sektorUsahaId,
-					diaudit: input.diaudit,
+					diaudit: input.diaudit ?? null,
 					opiniAuditorId,
-					npwpKantorAkuntanPublik: input.diaudit ? input.npwpKantorAkuntanPublik : null,
-					namaKantorAkuntanPublik: input.diaudit ? input.namaKantorAkuntanPublik : null,
+					npwpKantorAkuntanPublik: input.diaudit === true ? input.npwpKantorAkuntanPublik : null,
+					namaKantorAkuntanPublik: input.diaudit === true ? input.namaKantorAkuntanPublik : null,
 					menerimaPenghasilanPp23: input.menerimaPenghasilanPp23,
 					hanyaPenghasilanPp23: input.hanyaPenghasilanPp23,
 					menerimaPenghasilanFinal: input.menerimaPenghasilanFinal,

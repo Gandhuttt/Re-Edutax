@@ -116,6 +116,7 @@ const SaveSptPphOrangPribadiSchema = v.object({
 	l3aNamaKantorAkuntanPublik: v.optional(v.string(), ''),
 
 	penandatangan: v.optional(v.picklist(['wajib_pajak', 'kuasa_wajib_pajak']), 'wajib_pajak'),
+	pernyataanBenar: booleanRadio(false),
 
 	...L1Schema.entries,
 	...L2Schema.entries,
@@ -156,6 +157,17 @@ export const saveSptPphOrangPribadi = form(SaveSptPphOrangPribadiSchema, async (
 
 	if (spt.statusDraft !== 'konsep') {
 		error(400, 'SPT ini sudah tidak berstatus konsep');
+	}
+	if (input.action === 'Simpan Lapor') {
+		if (input.sumberPenghasilan.length === 0) {
+			error(400, 'Pilih sedikitnya satu sumber penghasilan sebelum melaporkan SPT');
+		}
+		if (!input.c5PtkpStatus) {
+			error(400, 'Pilih status Penghasilan Tidak Kena Pajak sebelum melaporkan SPT');
+		}
+		if (!input.pernyataanBenar) {
+			error(400, 'Setujui pernyataan kebenaran dan kelengkapan SPT sebelum melaporkan');
+		}
 	}
 
 	// Row 12a is read from the SPT being amended, never from the submitted form.

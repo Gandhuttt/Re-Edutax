@@ -32,7 +32,7 @@
 	let {
 		label,
 		name = id,
-		value = $bindable(""),
+		value = $bindable(),
 		field,
 		options = [],
 		required = false,
@@ -41,7 +41,7 @@
 		onchange,
 	}: RadioGroupProps = $props();
 
-	const resolvedValue = $derived(field ? (field.value() ?? value) : value);
+	const resolvedValue = $derived(field ? (field.value() ?? value ?? "") : (value ?? ""));
 	const resolvedError = $derived(
 		error !== undefined
 			? error
@@ -118,7 +118,7 @@
 	}
 	legend {
 		padding: 0;
-		font-size: 12px;
+		font-size: 14px;
 		font-weight: 700;
 	}
 	legend em {
@@ -205,13 +205,13 @@
 		display: block;
 	}
 	.copy strong {
-		font-size: 12px;
+		font-size: 14px;
 		line-height: 1.35;
 	}
 	.copy small {
 		margin-top: 2px;
 		color: var(--ui-muted);
-		font-size: 10px;
+		font-size: 12px;
 		line-height: 1.4;
 	}
 	.option.disabled {
@@ -220,7 +220,7 @@
 	}
 	.hint,
 	.message {
-		font-size: 11px;
+		font-size: 12px;
 		line-height: 1.4;
 	}
 	.hint {

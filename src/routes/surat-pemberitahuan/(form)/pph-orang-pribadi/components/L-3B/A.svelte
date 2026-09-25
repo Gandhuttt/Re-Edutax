@@ -1,7 +1,10 @@
 <script lang="ts">
-    import Button from "$lib/components/Button.svelte";
-    import Table from "$lib/components/Table.svelte";
-    import { closeBsModal } from "$lib/helpers/bsModal";
+    import {
+        ActionButton,
+        DataTable,
+        InstitutionalModal,
+        TableActions
+    } from "$lib/re-ui-components";
     import { applyRupiahInput, formatRupiah, formatRupiahDerived } from "$lib/helpers/rupiahInput";
     import { hitungPeredaranBrutoFinal } from "./hitungPeredaranBrutoFinal";
     import type { BarisFinalBulanan } from "./types";
@@ -33,7 +36,7 @@
     let { rows = $bindable(), namaTku, dapatDiubah = true, readonly = false }: Props = $props();
 
     let bisaEdit = $derived(dapatDiubah && !readonly);
-
+    let modalOpen = $state(false);
     let draft = $state<BarisFinalBulanan[]>(rows.map((r) => ({ ...r })));
 
     let hasil = $derived(
@@ -48,11 +51,12 @@
 
     function bukaUbah() {
         draft = rows.map((r) => ({ ...r }));
+        modalOpen = true;
     }
 
     function simpanModal() {
         rows = draft.map((r) => ({ ...r, peredaranBruto: Number(r.peredaranBruto || 0) }));
-        closeBsModal('modalOpL3BA');
+        modalOpen = false;
     }
 
     function ubahDipotong(index: number, e: Event) {
@@ -60,182 +64,183 @@
     }
 </script>
 
-<div class="tw:mb-6">
-    <div class="tw:overflow-x-auto">
-        <Table class="tw:min-w-full">
-            {#snippet head()}
-                <tr>
-                    {#if bisaEdit}<th class="tw:w-[6rem]">TINDAKAN</th>{/if}
-                    <th>NAMA TKU</th>
-                    {#each bulanNames as bulan}
-                        <th class="tw:text-end">{bulan}</th>
-                    {/each}
-                    <th class="tw:text-end">JUMLAH</th>
-                </tr>
-            {/snippet}
-            {#snippet body()}
-                <tr>
-                    {#if bisaEdit}
-                        <td>
-                            <Button type="button" onclick={bukaUbah} data-bs-toggle="modal" data-bs-target="#modalOpL3BA">Ubah</Button>
-                        </td>
-                    {/if}
-                    <td>{namaTku}</td>
-                    {#each hasil.baris as baris}
-                        <td class="tw:text-end">{formatRupiahDerived(baris.peredaranBruto)}</td>
-                    {/each}
-                    <td class="tw:text-end">{formatRupiahDerived(hasil.totalBruto)}</td>
-                </tr>
-                <tr class="footer">
-                    {#if bisaEdit}<td></td>{/if}
-                    <td>b. AKUMULASI PEREDARAN BRUTO</td>
-                    {#each hasil.baris as baris}
-                        <td class="tw:text-end">{formatRupiahDerived(baris.akumulasi)}</td>
-                    {/each}
-                    <td></td>
-                </tr>
-                <tr class="footer">
-                    {#if bisaEdit}<td></td>{/if}
-                    <td>c. PEREDARAN BRUTO TIDAK KENA PAJAK</td>
-                    <td class="tw:text-end" colspan="12">500.000.000</td>
-                    <td class="tw:text-end">500.000.000</td>
-                </tr>
-                <tr class="footer">
-                    {#if bisaEdit}<td></td>{/if}
-                    <td>d. PEREDARAN BRUTO KENA PAJAK</td>
-                    {#each hasil.baris as baris}
-                        <td class="tw:text-end">{formatRupiahDerived(baris.kenaPajak)}</td>
-                    {/each}
-                    <td class="tw:text-end">{formatRupiahDerived(hasil.totalKenaPajak)}</td>
-                </tr>
-                <tr class="footer">
-                    {#if bisaEdit}<td></td>{/if}
-                    <td>e. JUMLAH PPh FINAL TERUTANG</td>
-                    {#each hasil.baris as baris}
-                        <td class="tw:text-end">{formatRupiahDerived(baris.pphTerutang)}</td>
-                    {/each}
-                    <td class="tw:text-end">{formatRupiahDerived(hasil.totalPphTerutang)}</td>
-                </tr>
-                <tr class="footer">
-                    {#if bisaEdit}<td></td>{/if}
-                    <td>f. PPh FINAL YANG DISETOR SENDIRI</td>
-                    {#each bulanNames as _}
-                        <td class="tw:text-end">0</td>
-                    {/each}
-                    <td class="tw:text-end">0</td>
-                </tr>
-                <tr class="footer">
-                    {#if bisaEdit}<td></td>{/if}
-                    <td>g. JUMLAH PPh FINAL DIPOTONG/DIPUNGUT PIHAK LAIN</td>
-                    {#each rows as row, index}
-                        <td class="tw:text-end">
-                            {#if bisaEdit}
-                                <input
-                                    type="text"
-                                    inputmode="numeric"
-                                    value={formatRupiah(row.dipotongPihakLain)}
-                                    oninput={(e) => ubahDipotong(index, e)}
-                                    class="tw:w-full tw:text-end tw:bg-transparent"
-                                />
-                            {:else}
-                                {formatRupiahDerived(row.dipotongPihakLain)}
-                            {/if}
-                        </td>
-                    {/each}
-                    <td class="tw:text-end">{formatRupiahDerived(hasil.totalDipotongPihakLain)}</td>
-                </tr>
-                <tr class="footer">
-                    {#if bisaEdit}<td></td>{/if}
-                    <td>h. SELISIH (e-f-g)</td>
-                    {#each hasil.baris as baris}
-                        <td class="tw:text-end">{formatRupiahDerived(baris.selisih)}</td>
-                    {/each}
-                    <td class="tw:text-end">{formatRupiahDerived(hasil.totalSelisih)}</td>
-                </tr>
-            {/snippet}
-        </Table>
-    </div>
-</div>
-
-<div class="modal fade" id="modalOpL3BA" tabindex="-1" aria-labelledby="modalOpL3BALabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h1 class="modal-title fs-5" id="modalOpL3BALabel" style="font-weight: bold; text-transform: uppercase;">
-          Rekapitulasi Peredaran Bruto Tertentu - {namaTku}
-        </h1>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
-      </div>
-      <div class="modal-body">
-        <table class="tw:w-full tw:text-sm modal-bulanan-table">
-          <thead>
+<DataTable
+    label="Rekapitulasi peredaran bruto tertentu"
+    minWidth="1700px"
+    framed={false}
+    headerTone="navy"
+    density="compact"
+>
+    <table>
+        <thead>
             <tr>
-              <th>Bulan</th>
-              <th>Peredaran Bruto (Rp)</th>
+                {#if bisaEdit}<th scope="col">Tindakan</th>{/if}
+                <th scope="col">Nama TKU</th>
+                {#each bulanNames as bulan}
+                    <th scope="col" class="right">{bulan}</th>
+                {/each}
+                <th scope="col" class="right">Jumlah</th>
             </tr>
-          </thead>
-          <tbody>
-            {#each draft as item, index}
-              <tr>
-                <td>{bulanNames[index]}</td>
-                <td>
-                  <input
-                    type="text"
-                    inputmode="numeric"
-                    value={formatRupiah(item.peredaranBruto)}
-                    oninput={(e) => (draft[index].peredaranBruto = applyRupiahInput(e))}
-                    class="tw:w-full tw:text-right"
-                  />
-                </td>
-              </tr>
-            {/each}
-            <tr class="tw:font-bold">
-              <td>JUMLAH</td>
-              <td class="tw:text-end">
-                {formatRupiahDerived(draft.reduce((s, r) => s + Number(r.peredaranBruto || 0), 0))}
-              </td>
+        </thead>
+        <tbody>
+            <tr>
+                {#if bisaEdit}
+                    <td class="action-cell">
+                        <TableActions
+                            visibleCount={1}
+                            actions={[{ label: "Ubah", onclick: bukaUbah }]}
+                        />
+                    </td>
+                {/if}
+                <td>{namaTku}</td>
+                {#each hasil.baris as baris}
+                    <td class="right number">{formatRupiahDerived(baris.peredaranBruto)}</td>
+                {/each}
+                <td class="right number amount">{formatRupiahDerived(hasil.totalBruto)}</td>
             </tr>
-          </tbody>
+            <tr class="summary-row">
+                {#if bisaEdit}<td></td>{/if}
+                <th scope="row">b. Akumulasi Peredaran Bruto</th>
+                {#each hasil.baris as baris}
+                    <td class="right number">{formatRupiahDerived(baris.akumulasi)}</td>
+                {/each}
+                <td></td>
+            </tr>
+            <tr class="summary-row">
+                {#if bisaEdit}<td></td>{/if}
+                <th scope="row">c. Peredaran Bruto Tidak Kena Pajak</th>
+                <td class="right number" colspan="12">500.000.000</td>
+                <td class="right number amount">500.000.000</td>
+            </tr>
+            <tr class="summary-row">
+                {#if bisaEdit}<td></td>{/if}
+                <th scope="row">d. Peredaran Bruto Kena Pajak</th>
+                {#each hasil.baris as baris}
+                    <td class="right number">{formatRupiahDerived(baris.kenaPajak)}</td>
+                {/each}
+                <td class="right number amount">{formatRupiahDerived(hasil.totalKenaPajak)}</td>
+            </tr>
+            <tr class="summary-row">
+                {#if bisaEdit}<td></td>{/if}
+                <th scope="row">e. Jumlah PPh Final Terutang</th>
+                {#each hasil.baris as baris}
+                    <td class="right number">{formatRupiahDerived(baris.pphTerutang)}</td>
+                {/each}
+                <td class="right number amount">{formatRupiahDerived(hasil.totalPphTerutang)}</td>
+            </tr>
+            <tr class="summary-row">
+                {#if bisaEdit}<td></td>{/if}
+                <th scope="row">f. PPh Final yang Disetor Sendiri</th>
+                {#each bulanNames as _}
+                    <td class="right number">0</td>
+                {/each}
+                <td class="right number amount">0</td>
+            </tr>
+            <tr class="summary-row">
+                {#if bisaEdit}<td></td>{/if}
+                <th scope="row">g. Jumlah PPh Final Dipotong/Dipungut Pihak Lain</th>
+                {#each rows as row, index}
+                    <td class="right number">
+                        {#if bisaEdit}
+                            <input
+                                type="text"
+                                inputmode="numeric"
+                                aria-label={`PPh final dipotong atau dipungut pihak lain ${bulanNames[index]}`}
+                                value={formatRupiah(row.dipotongPihakLain)}
+                                oninput={(e) => ubahDipotong(index, e)}
+                                class="table-rupiah-input"
+                            />
+                        {:else}
+                            {formatRupiahDerived(row.dipotongPihakLain)}
+                        {/if}
+                    </td>
+                {/each}
+                <td class="right number amount">{formatRupiahDerived(hasil.totalDipotongPihakLain)}</td>
+            </tr>
+            <tr class="summary-row">
+                {#if bisaEdit}<td></td>{/if}
+                <th scope="row">h. Selisih (e-f-g)</th>
+                {#each hasil.baris as baris}
+                    <td class="right number">{formatRupiahDerived(baris.selisih)}</td>
+                {/each}
+                <td class="right number amount">{formatRupiahDerived(hasil.totalSelisih)}</td>
+            </tr>
+        </tbody>
+    </table>
+</DataTable>
+
+<InstitutionalModal
+    bind:open={modalOpen}
+    title={`Rekapitulasi Peredaran Bruto Tertentu - ${namaTku}`}
+    size="wide"
+    scrollable
+>
+    <DataTable
+        label={`Peredaran bruto bulanan ${namaTku}`}
+        minWidth="520px"
+        framed={false}
+        headerTone="navy"
+        density="compact"
+    >
+        <table>
+            <thead>
+                <tr>
+                    <th scope="col">Bulan</th>
+                    <th scope="col" class="right">Peredaran Bruto (Rp)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {#each draft as item, index}
+                    <tr>
+                        <td>{bulanNames[index]}</td>
+                        <td>
+                            <input
+                                type="text"
+                                inputmode="numeric"
+                                aria-label={`Peredaran bruto ${bulanNames[index]}`}
+                                value={formatRupiah(item.peredaranBruto)}
+                                oninput={(e) => (draft[index].peredaranBruto = applyRupiahInput(e))}
+                                class="table-rupiah-input"
+                            />
+                        </td>
+                    </tr>
+                {/each}
+            </tbody>
+            <tfoot>
+                <tr>
+                    <th scope="row">Jumlah</th>
+                    <td class="right number amount">
+                        {formatRupiahDerived(draft.reduce((s, r) => s + Number(r.peredaranBruto || 0), 0))}
+                    </td>
+                </tr>
+            </tfoot>
         </table>
-      </div>
-      <div class="modal-footer" style="justify-content: flex-end;">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-        <button type="button" class="btn btn-primary" style="background-color: #1c398e; color: white;" onclick={simpanModal}>Simpan</button>
-      </div>
-    </div>
-  </div>
-</div>
+    </DataTable>
+    {#snippet actions()}
+        <ActionButton tone="quiet" onclick={() => (modalOpen = false)}>Tutup</ActionButton>
+        <ActionButton onclick={simpanModal}>Simpan</ActionButton>
+    {/snippet}
+</InstitutionalModal>
 
 <style>
-    th {
-    	font-size: .7rem;
-    	font-weight: bold;
-    	text-align: center;
-    	padding: .4rem .5rem;
-    	white-space: nowrap;
-    	background-color: var(--color-primary);
-    	border: 1px solid white;
+    .table-rupiah-input {
+        width: 100%;
+        min-width: 100px;
+        padding: 6px 8px;
+        border: 1px solid var(--ui-line-strong);
+        border-radius: 3px;
+        background: #fffefa;
+        text-align: right;
     }
-    td {
-    	font-size: .75rem;
-    	padding: .3rem .4rem;
-    	white-space: nowrap;
-    	border: 1px solid white;
+
+    .table-rupiah-input:focus {
+        outline: 3px solid var(--ui-yellow-soft);
+        border-color: var(--ui-navy);
     }
-    tr:not(.total):not(.footer):nth-child(odd) {
-    	background-color: #F9F6EE;
-    }
-    tr.footer td {
-    	font-weight: bold;
-    	background-color: var(--color-primary);
-    	border: 1px solid white;
-    }
-    .modal-bulanan-table th, .modal-bulanan-table td {
-        border: 1px solid #A9A9A9;
-        padding: .4rem .6rem;
-    }
-    .modal-bulanan-table th {
-        background-color: var(--color-primary);
-        font-weight: bold;
+
+    .summary-row th,
+    .summary-row td {
+        font-weight: 700;
+        background: var(--ui-paper-deep);
     }
 </style>

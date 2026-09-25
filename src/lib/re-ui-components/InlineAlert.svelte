@@ -128,14 +128,14 @@
 		background: var(--alert-accent);
 		color: white;
 		font-family: var(--ui-font-body);
-		font-size: 12px;
+		font-size: 14px;
 		font-weight: 900;
 		line-height: 1;
 	}
 	.compact .icon {
 		width: 17px;
 		height: 17px;
-		font-size: 10px;
+		font-size: 12px;
 	}
 	.dismiss {
 		width: 28px;
@@ -162,13 +162,13 @@
 	}
 	.content {
 		min-width: 0;
-		font-size: 12px;
+		font-size: 14px;
 		line-height: 1.45;
 	}
 	.content strong {
 		display: block;
 		color: var(--alert-accent);
-		font-size: 12px;
+		font-size: 14px;
 	}
 	.body {
 		color: var(--ui-ink);
@@ -178,7 +178,7 @@
 	}
 	.compact .content,
 	.compact .content strong {
-		font-size: 11px;
+		font-size: 13px;
 	}
 	@media (prefers-reduced-motion: reduce) {
 		.alert,

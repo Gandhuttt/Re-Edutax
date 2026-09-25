@@ -1,86 +1,55 @@
 <script lang="ts">
-    import { applyRupiahInput, formatRupiah } from '$lib/helpers/rupiahInput';
+	import { ActionButton, FieldGrid, FormField, InstitutionalModal, RupiahField, SelectField } from "$lib/re-ui-components";
 
-    let {
-        data = $bindable() as {
-            id: string | number;
-            jenisPenghasilan?: string;
-            sumberPenghasilan?: string;
-            penghasilanBruto?: number;
-        },
-        saveItem,
-        jenisPenghasilanOptions
-    }: {
-        data: {
-            id: string | number;
-            jenisPenghasilan?: string;
-            sumberPenghasilan?: string;
-            penghasilanBruto?: number;
-        };
-        saveItem: () => void;
-        jenisPenghasilanOptions: { value: string; label: string }[];
-    } = $props();
+	let {
+		open = $bindable(false),
+		data = $bindable() as {
+			id: string | number;
+			jenisPenghasilan?: string;
+			sumberPenghasilan?: string;
+			penghasilanBruto?: number;
+		},
+		saveItem,
+		jenisPenghasilanOptions
+	}: {
+		open?: boolean;
+		data: {
+			id: string | number;
+			jenisPenghasilan?: string;
+			sumberPenghasilan?: string;
+			penghasilanBruto?: number;
+		};
+		saveItem: () => void;
+		jenisPenghasilanOptions: { value: string; label: string }[];
+	} = $props();
 
-    function handleSave(): void {
-        saveItem();
-    }
+	function handleSave(): void {
+		saveItem();
+		open = false;
+	}
 </script>
 
-<!-- Modal -->
-<div class="modal fade" id="modalL4B" tabindex="-1" aria-labelledby="modalL4BLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h1 class="modal-title fs-5" id="modalL4BLabel" style="font-weight: bold; text-transform: uppercase;">
-          EDIT PENGHASILAN YANG TIDAK TERMASUK OBJEK PAJAK
-        </h1>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-
-      <div class="modal-body">
-        <div style="display: flex; flex-direction: column; gap: 10px;">
-          <div style="display: flex; align-items: center;">
-            <label for="jenisPenghasilanKode" style="width: 260px;">Kode *</label>
-            <input type="text" id="jenisPenghasilanKode" value={data.jenisPenghasilan ?? ''} readonly style="flex: 1; background-color: #eee;" />
-          </div>
-          <div style="display: flex; align-items: center;">
-            <label for="jenisPenghasilanNama" style="width: 260px;">Jenis Penghasilan *</label>
-            <select id="jenisPenghasilanNama" bind:value={data.jenisPenghasilan} style="flex: 1; width: 0; min-width: 0; text-overflow: ellipsis;">
-              <option value="" disabled>Pilih jenis penghasilan</option>
-              {#each jenisPenghasilanOptions as jenis}
-                <option value={jenis.value}>{jenis.label}</option>
-              {/each}
-            </select>
-          </div>
-          <div style="display: flex; align-items: center;">
-            <label for="sumberPenghasilan" style="width: 260px;">Sumber Penghasilan *</label>
-            <input type="text" id="sumberPenghasilan" bind:value={data.sumberPenghasilan} style="flex: 1;" />
-          </div>
-          <div style="display: flex; align-items: center;">
-            <label for="penghasilanBruto" style="width: 260px;">Penghasilan Bruto *</label>
-            <div style="flex: 1; display: flex; align-items: center;">
-              <span style="margin-right: 5px;">Rp.</span>
-              <input
-                type="text"
-                inputmode="numeric"
-                id="penghasilanBruto"
-                value={formatRupiah(data.penghasilanBruto)}
-                oninput={(e) => (data.penghasilanBruto = applyRupiahInput(e))}
-                style="flex: 1; text-align: right;"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="modal-footer" style="justify-content: flex-end;">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-          Tutup
-        </button>
-        <button type="button" class="btn btn-primary" style="background-color: #1c398e; color: white;" onclick={handleSave} data-bs-dismiss="modal">
-          Simpan
-        </button>
-      </div>
-    </div>
-  </div>
-</div>
+<InstitutionalModal bind:open title="Edit Penghasilan yang Tidak Termasuk Objek Pajak" size="wide">
+	<FieldGrid columns={2}>
+		<FormField label="Kode" value={data.jenisPenghasilan ?? ''} disabled required />
+		<SelectField
+			label="Jenis Penghasilan"
+			bind:value={data.jenisPenghasilan!}
+			options={jenisPenghasilanOptions}
+			placeholder="Pilih jenis penghasilan"
+			required
+			searchable
+			floatingPanel
+		/>
+		<FormField label="Sumber Penghasilan" bind:value={data.sumberPenghasilan!} required />
+		<RupiahField
+			label="Penghasilan Bruto"
+			bind:value={data.penghasilanBruto!}
+			required
+		/>
+	</FieldGrid>
+	{#snippet actions()}
+		<ActionButton tone="quiet" onclick={() => (open = false)}>Tutup</ActionButton>
+		<ActionButton onclick={handleSave}>Simpan</ActionButton>
+	{/snippet}
+</InstitutionalModal>

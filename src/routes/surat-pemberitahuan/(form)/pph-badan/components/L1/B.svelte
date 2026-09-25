@@ -1,5 +1,5 @@
 <script lang="ts">
-	import Table from '$lib/components/Table.svelte';
+	import { DataTable, FieldGrid, InlineAlert, Stack } from '$lib/re-ui-components';
 	import { applyRupiahInput } from '$lib/helpers/rupiahInput';
 	import { computeNeracaRows, type NeracaAkunTemplate, type NeracaComputedRow } from './neracaRollup';
 
@@ -19,7 +19,6 @@
 	let { sektorUsaha, neracaTemplatesBySektor, neraca = $bindable(), readonly = false }: Props = $props();
 
 	const rupiah = new Intl.NumberFormat('id-ID');
-
 	const activeNeracaTemplate = $derived(neracaTemplatesBySektor.get(sektorUsaha));
 	const neracaTemplate = $derived(activeNeracaTemplate?.rows ?? []);
 	const computedNeracaRows = $derived(computeNeracaRows(neracaTemplate, neraca));
@@ -45,41 +44,37 @@
 
 	function handleNeracaInput(e: Event, akunId: string): void {
 		const num = applyRupiahInput(e);
-
 		const index = neraca.findIndex((item) => item.akunId === akunId);
 		if (index !== -1) neraca[index] = { ...neraca[index], nilai: num };
 	}
 </script>
 
-{#snippet neracaTable(rows: NeracaComputedRow[])}
-	<div class="tw:overflow-scroll">
-		<Table class="tw:w-full">
-			{#snippet head()}
-				<tr class="tw:hidden">
-					<td><input type="text" /></td>
+{#snippet neracaTable(rows: NeracaComputedRow[], label: string)}
+	<DataTable {label} minWidth="520px" headerTone="navy" density="compact">
+		<table>
+			<thead>
+				<tr>
+					<th scope="col">Kode akun</th>
+					<th scope="col">Nama akun</th>
+					<th scope="col">Nilai</th>
 				</tr>
-			{/snippet}
-			{#snippet body()}
-				<tr class="header tw:bg-[var(--color-primary)] tw:font-bold tw:text-center">
-					<td class="tw:w-[6rem]"><span>KODE AKUN</span></td>
-					<td class="tw:w-[20rem]"><span>NAMA AKUN</span></td>
-					<td class="tw:w-[10rem]"><span>NILAI</span></td>
-				</tr>
+			</thead>
+			<tbody>
 				{#each rows as row (row.nomorUrut)}
 					{#if row.rowType === 'header'}
 						<tr class="group-header">
-							<td colspan="3">{row.namaAkun}</td>
+							<th scope="rowgroup" colspan="3">{row.namaAkun}</th>
 						</tr>
 					{:else}
-						<tr class={row.rowType === 'sum' ? 'sum-row' : 'data-row'}>
+						<tr class:sum-row={row.rowType === 'sum'}>
 							<td>{row.kode}</td>
 							<td>{row.namaAkun}</td>
-							<td class="tw:text-end">
+							<td class="number input-cell">
 								{#if row.rowType === 'data'}
 									<input
 										type="text"
 										inputmode="numeric"
-										class="tw:w-full tw:text-end"
+										aria-label={`Nilai ${row.namaAkun}`}
 										value={formatRupiahInput(row.nilai)}
 										disabled={readonly}
 										oninput={(e) => handleNeracaInput(e, row.akunId ?? '')}
@@ -87,7 +82,7 @@
 								{:else}
 									<input
 										type="text"
-										class="tw:w-full tw:text-end"
+										aria-label={`Jumlah ${row.namaAkun}`}
 										value={formatNilai(row.nilai)}
 										readonly
 										disabled
@@ -97,49 +92,60 @@
 						</tr>
 					{/if}
 				{/each}
-			{/snippet}
-		</Table>
-	</div>
+			</tbody>
+		</table>
+	</DataTable>
 {/snippet}
 
-<div class="tw:p-5 tw:flex tw:flex-col tw:gap-4">
-	{#if neracaTemplate.length === 0}
-		<span class="tw:text-sm">Belum ada transkrip neraca untuk sektor usaha yang dipilih.</span>
-	{:else}
-		<div class="tw:flex tw:flex-row tw:gap-4 tw:items-start">
-			<div class="tw:flex tw:flex-col tw:gap-2 tw:basis-1/2 tw:min-w-0">
-				<span class="tw:text-sm tw:font-bold">ASET</span>
-				{@render neracaTable(asetRows)}
-			</div>
-			<div class="tw:flex tw:flex-col tw:gap-2 tw:basis-1/2 tw:min-w-0">
-				<span class="tw:text-sm tw:font-bold">LIABILITAS DAN EKUITAS</span>
-				{@render neracaTable(liabilitasEkuitasRows)}
-			</div>
-		</div>
-	{/if}
-</div>
+{#if neracaTemplate.length === 0}
+	<InlineAlert compact message="Belum ada transkrip neraca untuk sektor usaha yang dipilih." />
+{:else}
+	<FieldGrid columns={2} gap="16px">
+		<Stack gap="8px">
+			<strong class="table-title">Aset</strong>
+			{@render neracaTable(asetRows, 'Transkrip neraca aset')}
+		</Stack>
+		<Stack gap="8px">
+			<strong class="table-title">Liabilitas dan ekuitas</strong>
+			{@render neracaTable(liabilitasEkuitasRows, 'Transkrip neraca liabilitas dan ekuitas')}
+		</Stack>
+	</FieldGrid>
+{/if}
 
 <style>
-	.group-header td {
-		font-weight: bold;
-		background-color: #f3f3f3;
+	.table-title {
+		color: var(--ui-navy);
+		font-size: 14px;
+		text-transform: uppercase;
 	}
-
-	.sum-row {
-		font-weight: bold;
+	.group-header th {
+		padding: 10px;
+		background: var(--ui-paper-deep);
+		color: var(--ui-navy);
+		text-align: left;
 	}
-
-	.data-row:nth-child(even) {
-		background-color: #f9f6ee;
+	.sum-row td {
+		font-weight: 800;
 	}
-
-	.header td {
-		border: 1px solid white;
+	.input-cell input {
+		width: 100%;
+		min-width: 120px;
+		height: 34px;
+		padding: 0 9px;
+		border: 1px solid var(--ui-line-strong);
+		border-radius: 3px;
+		background: #fffefa;
+		color: var(--ui-ink);
+		font: inherit;
+		font-variant-numeric: tabular-nums;
+		text-align: right;
 	}
-
-	td {
-		padding: 0.5rem 0.75rem;
-		word-wrap: break-word;
-		font-size: 0.8rem;
+	.input-cell input:focus {
+		outline: 3px solid var(--ui-yellow-soft);
+		border-color: var(--ui-navy);
+	}
+	.input-cell input:disabled {
+		background: #e9e7df;
+		color: #666b70;
 	}
 </style>

@@ -1,6 +1,5 @@
 <script lang="ts">
-    import Input from "$lib/components/Input.svelte";
-    import Table from "$lib/components/Table.svelte";
+    import { DataTable } from "$lib/re-ui-components";
     import RowTanya from "./RowTanya.svelte";
     import { HINTS } from "./hints";
 
@@ -66,51 +65,55 @@
     });
 </script>
 
-<div class="tw:p-5">
-    <Table class="tw:min-w-full">
-        {#snippet head()}
-            <tr class="tw:hidden"><td><Input hidden/></td></tr>
-        {/snippet}
-        {#snippet body()}
+<DataTable
+    label="Angsuran PPh Pasal 25 tahun berikutnya"
+    minWidth="1080px"
+    headerTone="navy"
+    density="compact"
+    framed={false}
+>
+    <table>
+        <thead>
+            <tr>
+                <th scope="col">Nomor</th>
+                <th scope="col">Uraian</th>
+                <th scope="col">Jawaban/Pilihan</th>
+                <th scope="col" class="number">Jumlah (Rupiah)</th>
+                <th scope="col">Informasi</th>
+            </tr>
+        </thead>
+        <tbody>
             <RowTanya
-                nomor={"13.a"}
-                label={"Apakah Anda hanya menerima penghasilan teratur dan berkewajiban membayar angsuran PPh Pasal 25 tahun berikutnya?"}
-                name={"H13a"}
+                nomor="13.a"
+                label="Apakah Anda hanya menerima penghasilan teratur dan berkewajiban membayar angsuran PPh Pasal 25 tahun berikutnya?"
+                name="H13a"
                 bind:answer={h13aAngsuranTeratur}
                 hint={hint13a}
-                amount={"derived"}
+                amount="derived"
                 amountWhen={true}
                 amountValue={angsuranPph25}
                 {readonly}
             />
             <RowTanya
-                nomor={"13.b"}
-                label={"Apakah Anda menyusun perhitungan tersendiri angsuran PPh Pasal 25 tahun berikutnya?"}
-                name={"H13b"}
+                nomor="13.b"
+                label="Apakah Anda menyusun perhitungan tersendiri angsuran PPh Pasal 25 tahun berikutnya?"
+                name="H13b"
                 bind:answer={h13bPerhitunganTersendiri}
                 hint={HINTS.h13b}
-                amount={"derived"}
+                amount="derived"
                 amountWhen={true}
                 amountValue={l4AngsuranPph25}
                 disabled={b13bTerkunci}
                 {readonly}
             />
             <RowTanya
-                nomor={"13.c"}
-                label={"Apakah Anda membayar angsuran PPh Pasal 25 OPPT tahun berikutnya?"}
-                name={"H13c"}
+                nomor="13.c"
+                label="Apakah Anda membayar angsuran PPh Pasal 25 OPPT tahun berikutnya?"
+                name="H13c"
                 bind:answer={h13cAngsuranOppt}
                 hint={HINTS.h13c}
                 {readonly}
             />
-        {/snippet}
-    </Table>
-</div>
-
-<style>
-    tr {
-        border: none;
-        &:nth-child(even) { background-color: #F9F6EE; }
-    }
-    td { padding: .25rem .5rem; }
-</style>
+        </tbody>
+    </table>
+</DataTable>

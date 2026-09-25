@@ -1,134 +1,129 @@
 <script lang="ts">
-    import Table from "$lib/components/Table.svelte";
-    import Button from "$lib/components/Button.svelte";
-    import Input from "$lib/components/Input.svelte";
-    import ModalEditC from "./_ModalEditC.svelte";
-    import type { L13BCRow } from "./types";
+	import { ActionButton, DataTable, FormSection, Stack, TableActions } from "$lib/re-ui-components";
+	import ModalEditC from "./_ModalEditC.svelte";
+	import type { L13BCRow } from "./types";
 
-    let {
-        data = $bindable(),
-        readonly = false
-    }: {
-        data: L13BCRow[];
-        readonly?: boolean;
-    } = $props();
+	let {
+		data = $bindable(),
+		readonly = false,
+	}: {
+		data: L13BCRow[];
+		readonly?: boolean;
+	} = $props();
 
-    const rupiah = new Intl.NumberFormat('id-ID');
+	const rupiah = new Intl.NumberFormat("id-ID");
+	const tambahanPengurang = (row: L13BCRow) =>
+		Math.round((Number(row.jumlahBiaya || 0) * Number(row.persentaseFasilitasPajak || 0)) / 100);
 
-    const tambahanPengurang = (row: L13BCRow) =>
-        Math.round((Number(row.jumlahBiaya || 0) * Number(row.persentaseFasilitasPajak || 0)) / 100);
+	let totalTambahanPengurang = $derived(data.reduce((sum, row) => sum + tambahanPengurang(row), 0));
+	let editing = $state<Partial<L13BCRow>>({});
+	let modalOpen = $state(false);
 
-    let totalTambahanPengurang = $derived(data.reduce((sum, row) => sum + tambahanPengurang(row), 0));
+	function emptyRow(): Partial<L13BCRow> {
+		return {
+			nomorProposal: "",
+			jangkaWaktuDariTahun: 0,
+			jangkaWaktuSampaiTahun: 0,
+			jumlahBiaya: 0,
+			tahunPerolehanHki: 0,
+			persentaseFasilitasPajak: 0,
+		};
+	}
 
-    let editing = $state<Partial<L13BCRow>>({});
+	function openModal(row: L13BCRow | null) {
+		editing = row ? { ...row } : emptyRow();
+		modalOpen = true;
+	}
 
-    function emptyRow(): Partial<L13BCRow> {
-        return {
-            nomorProposal: '',
-            jangkaWaktuDariTahun: 0,
-            jangkaWaktuSampaiTahun: 0,
-            jumlahBiaya: 0,
-            tahunPerolehanHki: 0,
-            persentaseFasilitasPajak: 0
-        };
-    }
+	function saveItem() {
+		const index = data.findIndex((row) => row.id === editing.id);
+		if (index !== -1) {
+			data[index] = { ...(editing as L13BCRow) };
+		} else {
+			data.push({ ...(editing as L13BCRow), id: Date.now() });
+		}
+	}
 
-    function openModal(row: L13BCRow | null) {
-        editing = row ? { ...row } : emptyRow();
-    }
-
-    function saveItem() {
-        const index = data.findIndex((row) => row.id === editing.id);
-        if (index !== -1) {
-            data[index] = { ...(editing as L13BCRow) };
-        } else {
-            data.push({ ...(editing as L13BCRow), id: Date.now() });
-        }
-    }
-
-    function deleteItem(id: string | number) {
-        data = data.filter((row) => row.id !== id);
-    }
+	function deleteItem(id: string | number) {
+		data = data.filter((row) => row.id !== id);
+	}
 </script>
 
-<div class="tw:p-5 tw:flex tw:flex-col tw:gap-1">
-    <Button type="button" class={"tw:text-white tw:w-30"} color={"#1c398e"} disabled={readonly} onclick={() => openModal(null)} data-bs-toggle="modal" data-bs-target="#modalL13BC">Tambah</Button>
-    <div class="tw:overflow-scroll">
-        <Table class={"tw:w-full"}>
-            {#snippet head()}
-            <tr class="tw:hidden">
-                <td></td>
-            </tr>
-            {/snippet}
-            {#snippet body()}
-            <tr class="header tw:bg-[var(--color-primary)] tw:font-bold tw:text-center">
-                <td class="tw:w-[10rem]" rowspan="2">TINDAKAN</td>
-                <td class="tw:w-[5rem]" rowspan="2">NO.</td>
-                <td class="tw:w-[10rem]" rowspan="2">NOMOR PROPOSAL</td>
-                <td class="tw:w-[20rem]" colspan="2">JANGKA WAKTU PENGELUARAN BIAYA</td>
-                <td class="tw:w-[15rem]" rowspan="2">JUMLAH BIAYA</td>
-                <td class="tw:w-[20rem]" rowspan="2">TAHUN PEROLEHAN HAK KEKAYAAN INTELEKTUAL / KOMERSIALISASI</td>
-                <td class="tw:w-[20rem]" rowspan="2">PERSENTASE FASILITAS PAJAK (%)</td>
-                <td class="tw:w-[20rem]" rowspan="2">TAMBAHAN PENGURANGAN PENGHASILAN BRUTO PENELITIAN DAN PENGEMBANGAN</td>
-            </tr>
-            <tr class="header tw:bg-[var(--color-primary)] tw:font-bold tw:text-center">
-                <td>DARI TAHUN</td>
-                <td>SAMPAI TAHUN</td>
-            </tr>
-            {#if data.length === 0}
-            <tr class="data tw:text-center"><td colspan="9">Tidak ada data yang ditampilkan</td></tr>
-            {:else}
-            {#each data as row, index}
-            <tr class="data tw:text-right">
-                <td class="tw:flex tw:flex-row tw:gap-1 tw:justify-center">
-                    <Button type="button" class={"tw:min-w-15!"} disabled={readonly} onclick={() => openModal(row)} data-bs-toggle="modal" data-bs-target="#modalL13BC">Edit</Button>
-                    <Button type="button" class={"tw:min-w-15!"} disabled={readonly} onclick={() => deleteItem(row.id)}>Hapus</Button>
-                </td>
-                <td class="tw:text-center">{index + 1}</td>
-                <td>{row.nomorProposal}</td>
-                <td>{row.jangkaWaktuDariTahun}</td>
-                <td>{row.jangkaWaktuSampaiTahun}</td>
-                <td>{rupiah.format(row.jumlahBiaya)}</td>
-                <td>{row.tahunPerolehanHki}</td>
-                <td>{row.persentaseFasilitasPajak}</td>
-                <td>{rupiah.format(tambahanPengurang(row))}</td>
-            </tr>
-            {/each}
-            {/if}
-            <tr class="footer tw:bg-[var(--color-primary)] tw:font-bold tw:text-right">
-                <td colspan="8">JUMLAH TAMBAHAN PENGURANG PENGHASILAN BRUTO PENELITIAN DAN PENGEMBANGAN</td>
-                <td><Input class={"tw:text-right tw:border-none! tw:bg-transparent!"} type={"text"} value={rupiah.format(totalTambahanPengurang)} readonly/></td>
-            </tr>
-            {/snippet}
-        </Table>
-    </div>
-</div>
+<FormSection title="Fasilitas penelitian dan pengembangan" padded>
+	<Stack gap="12px">
+		<ActionButton type="button" disabled={readonly} onclick={() => openModal(null)}>Tambah</ActionButton>
+		<DataTable
+			label="Daftar fasilitas penelitian dan pengembangan"
+			minWidth="1320px"
+			headerTone="navy"
+			density="compact"
+			stickyFirstColumn
+		>
+			<table>
+				<thead>
+					<tr>
+						<th scope="col" rowspan="2">Tindakan</th>
+						<th scope="col" rowspan="2">No.</th>
+						<th scope="col" rowspan="2">Nomor proposal</th>
+						<th scope="colgroup" colspan="2">Jangka waktu pengeluaran biaya</th>
+						<th scope="col" rowspan="2" class="right">Jumlah biaya</th>
+						<th scope="col" rowspan="2">Tahun perolehan hak kekayaan intelektual / komersialisasi</th>
+						<th scope="col" rowspan="2" class="right">Persentase fasilitas pajak (%)</th>
+						<th scope="col" rowspan="2" class="right">Tambahan pengurangan penghasilan bruto penelitian dan pengembangan</th>
+					</tr>
+					<tr>
+						<th scope="col">Dari tahun</th>
+						<th scope="col">Sampai tahun</th>
+					</tr>
+				</thead>
+				<tbody>
+					{#if data.length === 0}
+						<tr><td colspan="9" class="empty">Tidak ada data yang ditampilkan</td></tr>
+					{:else}
+						{#each data as row, index (row.id)}
+							<tr>
+								<td class="action-cell">
+									<TableActions
+										actions={[
+											{ label: "Edit", disabled: readonly, onclick: () => openModal(row) },
+											{ label: "Hapus", disabled: readonly, danger: true, onclick: () => deleteItem(row.id) },
+										]}
+									/>
+								</td>
+								<td class="center">{index + 1}</td>
+								<td>{row.nomorProposal}</td>
+								<td>{row.jangkaWaktuDariTahun}</td>
+								<td>{row.jangkaWaktuSampaiTahun}</td>
+								<td class="right amount">{rupiah.format(row.jumlahBiaya)}</td>
+								<td>{row.tahunPerolehanHki}</td>
+								<td class="right">{row.persentaseFasilitasPajak}</td>
+								<td class="right amount">{rupiah.format(tambahanPengurang(row))}</td>
+							</tr>
+						{/each}
+					{/if}
+				</tbody>
+				<tfoot>
+					<tr>
+						<th scope="row" colspan="8">Jumlah tambahan pengurangan penghasilan bruto penelitian dan pengembangan</th>
+						<td class="right amount">{rupiah.format(totalTambahanPengurang)}</td>
+					</tr>
+				</tfoot>
+			</table>
+		</DataTable>
+	</Stack>
+</FormSection>
 
-<ModalEditC bind:data={editing} {saveItem} {readonly}/>
+<ModalEditC bind:open={modalOpen} bind:data={editing} {saveItem} {readonly} />
 
 <style>
-.header, .footer {
-    td {
-        border: 1px solid white;
-    }
-}
-
-.data {
-    &:nth-child(odd of .data) {
-        background-color: #F9F6EE;
-    }
-    td {
-        padding-inline: .5rem;
-    }
-}
-
-tr {
-    border: none;
-}
-
-td {
-    padding: .5rem 1rem;
-    word-wrap: break-word;
-    font-size: .8rem;
-}
+	.center,
+	.empty {
+		text-align: center;
+	}
+	.right {
+		text-align: right;
+	}
+	:global(.action-cell) {
+		white-space: nowrap;
+	}
 </style>

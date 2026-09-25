@@ -34,7 +34,7 @@
 
 	let {
 		label,
-		value = $bindable(""),
+		value = $bindable(),
 		field,
 		name = "",
 		placeholder = "Pilih tanggal",
@@ -78,7 +78,7 @@
 	let calendarWidth = $state(310);
 	let opensAbove = $state(false);
 	const resolvedValue = $derived(
-		field ? String(field.value() ?? value) : value,
+		field ? String(field.value() ?? value ?? "") : (value ?? ""),
 	);
 	const resolvedError = $derived(error || firstRemoteIssue(field)?.message || "");
 	const resolvedName = $derived(
@@ -348,7 +348,7 @@
 	}
 	.field-label {
 		color: var(--ui-ink);
-		font-size: 12px;
+		font-size: 14px;
 		font-weight: 700;
 	}
 	.label-hidden {
@@ -395,7 +395,7 @@
 		background: #fffefa;
 		color: var(--ui-ink);
 		font: inherit;
-		font-size: 13px;
+		font-size: 16px;
 		text-align: left;
 		cursor: pointer;
 		transition:
@@ -534,7 +534,7 @@
 	}
 	.weekday-row span {
 		color: var(--ui-muted);
-		font-size: 8px;
+		font-size: 12px;
 		font-weight: 900;
 		text-align: center;
 		text-transform: uppercase;
@@ -554,7 +554,7 @@
 		background: transparent;
 		color: var(--ui-ink);
 		font: inherit;
-		font-size: 11px;
+		font-size: 14px;
 		cursor: pointer;
 		animation: day-enter 140ms calc(var(--index) * 5ms) ease-out both;
 	}
@@ -611,7 +611,7 @@
 		background: transparent;
 		color: var(--ui-navy);
 		font: inherit;
-		font-size: 9px;
+		font-size: 12px;
 		font-weight: 800;
 		cursor: pointer;
 	}
@@ -621,13 +621,13 @@
 	.calendar-foot span {
 		overflow: hidden;
 		color: var(--ui-muted);
-		font-size: 9px;
+		font-size: 12px;
 		text-overflow: ellipsis;
 		white-space: nowrap;
 	}
 	.hint,
 	.message {
-		font-size: 11px;
+		font-size: 12px;
 		line-height: 1.4;
 	}
 	.hint {

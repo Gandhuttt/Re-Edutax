@@ -1,112 +1,91 @@
 <script lang="ts">
-    import Table from "$lib/components/Table.svelte";
-    import Button from "$lib/components/Button.svelte";
+	import { ActionButton, DataTable, Stack, TableActions } from "$lib/re-ui-components";
 
-    let {
-        data,
-        openModal,
-        deleteItem,
-        objekPajakOptions
-    }: {
-        data: Array<{
-            id: string | number;
-            npwpPemotongPemungutPenyetor: string;
-            namaPemotongPemungutPenyetor: string;
-            objekPajak: string;
-            dasarPengenaanPajak: number;
-            tarif: number;
-            pphFinalTerutang: number;
-            nomorBuktiPotong: string;
-            tanggalBuktiPotong: string;
-            keterangan: string;
-        }>;
-        openModal: (item: unknown) => void;
-        deleteItem: (id: string | number) => void;
-        objekPajakOptions: { value: string; label: string }[];
-    } = $props();
+	let {
+		data,
+		openModal,
+		deleteItem,
+		objekPajakOptions,
+		readonly = false
+	}: {
+		data: Array<{
+			id: string | number;
+			npwpPemotongPemungutPenyetor: string;
+			namaPemotongPemungutPenyetor: string;
+			objekPajak: string;
+			dasarPengenaanPajak: number;
+			tarif: number;
+			pphFinalTerutang: number;
+			nomorBuktiPotong: string;
+			tanggalBuktiPotong: string;
+			keterangan: string;
+		}>;
+		openModal: (item: unknown) => void;
+		deleteItem: (id: string | number) => void;
+		objekPajakOptions: { value: string; label: string }[];
+		readonly?: boolean;
+	} = $props();
 
-    const objekPajakLabel = (kode: string) => objekPajakOptions.find((o) => o.value === kode)?.label ?? kode;
-
-    let totalDasarPengenaanPajak = $derived(data.reduce((sum, item) => sum + Number(item.dasarPengenaanPajak || 0), 0));
-    let totalPphFinalTerutang = $derived(data.reduce((sum, item) => sum + Number(item.pphFinalTerutang || 0), 0));
+	const objekPajakLabel = (kode: string) => objekPajakOptions.find((option) => option.value === kode)?.label ?? kode;
+	let totalDasarPengenaanPajak = $derived(data.reduce((sum, item) => sum + Number(item.dasarPengenaanPajak || 0), 0));
+	let totalPphFinalTerutang = $derived(data.reduce((sum, item) => sum + Number(item.pphFinalTerutang || 0), 0));
 </script>
 
-<div class="tw:p-5 tw:flex tw:flex-col tw:gap-1">
-    <Button type="button" class={"tw:text-white tw:w-30"} color={"#1c398e"} onclick={() => openModal(null)} data-bs-toggle="modal" data-bs-target="#modalL4A">Tambah</Button>
-    <div class="tw:overflow-scroll">
-        <Table class={"tw:w-full"}>
-            {#snippet head()}
-                <tr class="tw:hidden">
-                    <td><input type="text" name="" id=""></td>
-                </tr>
-            {/snippet}
-            {#snippet body()}
-                <tr class="header tw:bg-[var(--color-primary)] tw:font-bold tw:text-center">
-                    <td class="tw:w-[10rem]"><span>TINDAKAN</span></td>
-                    <td class="tw:w-[15rem]"><span>NPWP PEMOTONG/PEMUNGUT/PENYETOR</span></td>
-                    <td class="tw:w-[15rem]"><span>NAMA PEMOTONG/PEMUNGUT/PENYETOR</span></td>
-                    <td class="tw:w-[20rem]"><span>OBJEK PAJAK</span></td>
-                    <td class="tw:w-[15rem]"><span>DASAR PENGENAAN PAJAK (Rupiah)</span></td>
-                    <td class="tw:w-[8rem]"><span>TARIF (%)</span></td>
-                    <td class="tw:w-[15rem]"><span>PPh FINAL TERUTANG (Rupiah)</span></td>
-                    <td class="tw:w-[12rem]"><span>NOMOR BUKTI POTONG/SETOR</span></td>
-                    <td class="tw:w-[10rem]"><span>TANGGAL BUKTI POTONG/SETOR</span></td>
-                    <td class="tw:w-[15rem]"><span>KETERANGAN</span></td>
-                </tr>
-                {#if data.length === 0}
-                <tr class="data tw:text-center"><td colspan="10">Tidak ada data yang ditampilkan</td></tr>
-                {:else}
-                {#each data as item, i}
-                <tr class="data">
-                    <td class="tw:flex tw:flex-row tw:gap-1 tw:justify-center">
-                        <Button type="button" class={"tw:min-w-15!"} onclick={() => openModal(item)} data-bs-toggle="modal" data-bs-target="#modalL4A">Edit</Button>
-                        <Button type="button" class={"tw:min-w-15!"} onclick={() => deleteItem(item.id)}>Hapus</Button>
-                    </td>
-                    <td>{item.npwpPemotongPemungutPenyetor}</td>
-                    <td>{item.namaPemotongPemungutPenyetor}</td>
-                    <td>{objekPajakLabel(item.objekPajak)}</td>
-                    <td>{Number(item.dasarPengenaanPajak || 0).toLocaleString('id-ID')}</td>
-                    <td>{item.tarif}</td>
-                    <td>{Number(item.pphFinalTerutang || 0).toLocaleString('id-ID')}</td>
-                    <td>{item.nomorBuktiPotong}</td>
-                    <td>{item.tanggalBuktiPotong}</td>
-                    <td>{item.keterangan}</td>
-                </tr>
-                {/each}
-                {/if}
-                <tr class="footer tw:bg-[#FFD230] tw:text-right tw:font-bold">
-                    <td colspan="4">JUMLAH</td>
-                    <td>{totalDasarPengenaanPajak.toLocaleString('id-ID')}</td>
-                    <td></td>
-                    <td>{totalPphFinalTerutang.toLocaleString('id-ID')}</td>
-                    <td colspan="3"></td>
-                </tr>
-            {/snippet}
-        </Table>
-    </div>
-</div>
+<Stack gap="12px">
+	<div><ActionButton type="button" disabled={readonly} onclick={() => openModal(null)}>Tambah</ActionButton></div>
+	<DataTable label="Penghasilan yang dikenakan PPh yang bersifat final" minWidth="1720px" headerTone="navy" density="compact">
+		<table>
+			<thead>
+				<tr>
+					<th scope="col">Tindakan</th>
+					<th scope="col">NPWP Pemotong/Pemungut/Penyetor</th>
+					<th scope="col">Nama Pemotong/Pemungut/Penyetor</th>
+					<th scope="col">Objek Pajak</th>
+					<th scope="col">Dasar Pengenaan Pajak (Rupiah)</th>
+					<th scope="col">Tarif (%)</th>
+					<th scope="col">PPh Final Terutang (Rupiah)</th>
+					<th scope="col">Nomor Bukti Potong/Setor</th>
+					<th scope="col">Tanggal Bukti Potong/Setor</th>
+					<th scope="col">Keterangan</th>
+				</tr>
+			</thead>
+			<tbody>
+				{#if data.length === 0}
+					<tr><td colspan="10" class="empty">Tidak ada data yang ditampilkan</td></tr>
+				{:else}
+					{#each data as item (item.id)}
+						<tr>
+							<td><TableActions actions={[
+								{ label: 'Edit', disabled: readonly, onclick: () => openModal(item) },
+								{ label: 'Hapus', disabled: readonly, danger: true, onclick: () => deleteItem(item.id) }
+							]} /></td>
+							<td>{item.npwpPemotongPemungutPenyetor}</td>
+							<td>{item.namaPemotongPemungutPenyetor}</td>
+							<td>{objekPajakLabel(item.objekPajak)}</td>
+							<td class="number">{Number(item.dasarPengenaanPajak || 0).toLocaleString('id-ID')}</td>
+							<td class="number">{item.tarif}</td>
+							<td class="number">{Number(item.pphFinalTerutang || 0).toLocaleString('id-ID')}</td>
+							<td>{item.nomorBuktiPotong}</td>
+							<td>{item.tanggalBuktiPotong}</td>
+							<td>{item.keterangan}</td>
+						</tr>
+					{/each}
+				{/if}
+			</tbody>
+			<tfoot>
+				<tr>
+					<th scope="row" colspan="4">Jumlah</th>
+					<td class="number">{totalDasarPengenaanPajak.toLocaleString('id-ID')}</td>
+					<td></td>
+					<td class="number">{totalPphFinalTerutang.toLocaleString('id-ID')}</td>
+					<td colspan="3"></td>
+				</tr>
+			</tfoot>
+		</table>
+	</DataTable>
+</Stack>
 
 <style>
-.header td, .footer td {
-    border: 1px solid white;
-}
-
-.data {
-    &:nth-child(odd of .data) {
-        background-color: #F9F6EE;
-    }
-    td {
-        padding-inline: .5rem;
-    }
-}
-
-tr {
-    border: none;
-}
-
-td {
-    padding: .5rem 1rem;
-    word-wrap: break-word;
-    font-size: .8rem;
-}
+	.empty { text-align: center; }
+	.number { text-align: right; font-variant-numeric: tabular-nums; }
 </style>

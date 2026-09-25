@@ -1,296 +1,189 @@
 <script lang="ts">
-    import { kodeUntuk, type DaftarReferensi, type KodeReferensi } from "../referensi";
-    import Button from "$lib/components/Button.svelte";
-    import { closeBsModal } from "$lib/helpers/bsModal";
-    import Table from "$lib/components/Table.svelte";
-    import { applyRupiahInput, formatRupiah, formatRupiahDerived } from "$lib/helpers/rupiahInput";
-    import type { BarisLuarNegeri } from "./types";
+	import {
+		ActionButton,
+		DataTable,
+		DateField,
+		FieldGrid,
+		FormField,
+		InstitutionalModal,
+		RupiahField,
+		SelectField,
+		Stack,
+		TableActions
+	} from '$lib/re-ui-components';
+	import { formatRupiahDerived } from '$lib/helpers/rupiahInput';
+	import { kodeUntuk, type DaftarReferensi, type KodeReferensi } from '../referensi';
+	import type { BarisLuarNegeri } from './types';
 
-    // C. PENGHASILAN NETO LUAR NEGERI.
-    //
-    // The most divergent grid in the form:
-    //   - it is the only one carrying foreign currency, so it shows both the
-    //     asing and rupiah amounts side by side rather than converting
-    //   - its empty state reads "Tidak ada data untuk ditampilkan." where every
-    //     L-1 grid says "Tidak ada data yang ditemukan."
-    //   - it has two consumers, not one
-    //
-    // Feeds Induk 1.d via JUMLAH PENGHASILAN NETO, and separately feeds L-1
-    // Bagian E its KREDIT PAJAK ATAS PENGHASILAN LUAR NEGERI row, which rolls on
-    // into Induk 10a. That second edge is lampiran-to-lampiran and was only found
-    // because every grid was populated at once.
-    interface Props {
-        rows: BarisLuarNegeri[];
-        referensi: DaftarReferensi;
-        kodeReferensi: KodeReferensi;
-        dapatDiubah?: boolean;
-        readonly?: boolean;
-    }
+	interface Props {
+		rows: BarisLuarNegeri[];
+		referensi: DaftarReferensi;
+		kodeReferensi: KodeReferensi;
+		dapatDiubah?: boolean;
+		readonly?: boolean;
+	}
 
-    let { rows = $bindable(), referensi, kodeReferensi, dapatDiubah = true, readonly = false }: Props = $props();
+	let { rows = $bindable(), referensi, kodeReferensi, dapatDiubah = true, readonly = false }: Props = $props();
 
-    const kosong = (): BarisLuarNegeri => ({
-        namaSumber: '', negara: '', tanggalTransaksi: '', jenisPenghasilan: '',
-        kodePenghasilan: '', penghasilanNeto: 0, pajakLuarNegeriAsing: 0,
-        mataUang: '', pajakLuarNegeriRupiah: 0, kreditPajakDiperhitungkan: 0
-    });
-    let indeksDiubah = $state<number | null>(null);
-    let draft = $state<BarisLuarNegeri>(kosong());
+	const kosong = (): BarisLuarNegeri => ({
+		namaSumber: '',
+		negara: '',
+		tanggalTransaksi: '',
+		jenisPenghasilan: '',
+		kodePenghasilan: '',
+		penghasilanNeto: 0,
+		pajakLuarNegeriAsing: 0,
+		mataUang: '',
+		pajakLuarNegeriRupiah: 0,
+		kreditPajakDiperhitungkan: 0
+	});
+	let indeksDiubah = $state<number | null>(null);
+	let draft = $state<BarisLuarNegeri>(kosong());
+	let modalOpen = $state(false);
+	let errors = $state<Record<string, string>>({});
 
-    // Coretax derives the disabled KODE cell from the chosen description. This
-    // list has no reference type, so the lookup yields '' and the cell stays
-    // blank -- wired anyway so it fills in if a source is ever found.
-    let kode = $derived(kodeUntuk(kodeReferensi, 'l2_c_jenis_penghasilan', draft.jenisPenghasilan));
-    let errors = $state<Record<string, string>>({});
+	let kode = $derived(kodeUntuk(kodeReferensi, 'l2_c_jenis_penghasilan', draft.jenisPenghasilan));
+	let bisaEdit = $derived(dapatDiubah && !readonly);
+	let totalNeto = $derived(rows.reduce((sum, row) => sum + Number(row.penghasilanNeto || 0), 0));
+	let totalPajakRupiah = $derived(rows.reduce((sum, row) => sum + Number(row.pajakLuarNegeriRupiah || 0), 0));
+	let totalKredit = $derived(rows.reduce((sum, row) => sum + Number(row.kreditPajakDiperhitungkan || 0), 0));
+	let negaraOptions = $derived([
+		{ value: '', label: 'Silakan pilih' },
+		...(referensi.negara ?? []).map((label) => ({ value: label, label }))
+	]);
+	let jenisOptions = $derived([
+		{ value: '', label: 'Silakan pilih' },
+		...(referensi.l2_c_jenis_penghasilan ?? []).map((label) => ({ value: label, label }))
+	]);
+	let mataUangOptions = $derived([
+		{ value: '', label: 'Silakan pilih' },
+		...(referensi.mata_uang ?? []).map((label) => ({ value: label, label }))
+	]);
 
-    let bisaEdit = $derived(dapatDiubah && !readonly);
-    let totalNeto = $derived(rows.reduce((s, r) => s + Number(r.penghasilanNeto || 0), 0));
-    // The live form totals three columns in this footer, not two: the foreign
-    // currency amount is left untotaled (mixed currencies), but its Rupiah
-    // conversion is, alongside the neto and the kredit.
-    let totalPajakRupiah = $derived(rows.reduce((s, r) => s + Number(r.pajakLuarNegeriRupiah || 0), 0));
-    let totalKredit = $derived(rows.reduce((s, r) => s + Number(r.kreditPajakDiperhitungkan || 0), 0));
+	function bukaTambah() {
+		indeksDiubah = null;
+		draft = kosong();
+		errors = {};
+		modalOpen = true;
+	}
 
-    function bukaTambah() {
-        indeksDiubah = null;
-        draft = kosong();
-        errors = {};
-    }
+	function bukaUbah(index: number) {
+		indeksDiubah = index;
+		draft = { ...rows[index] };
+		errors = {};
+		modalOpen = true;
+	}
 
-    function bukaUbah(index: number) {
-        indeksDiubah = index;
-        draft = { ...rows[index] };
-        errors = {};
-    }
+	function simpanModal() {
+		const next: Record<string, string> = {};
+		if (!draft.namaSumber) next.namaSumber = 'Kolom ini wajib diisi!';
+		if (!draft.negara) next.negara = 'Kolom ini wajib diisi!';
+		if (!draft.tanggalTransaksi) next.tanggalTransaksi = 'Kolom ini wajib diisi!';
+		if (!draft.jenisPenghasilan) next.jenisPenghasilan = 'Kolom ini wajib diisi!';
+		if (!draft.penghasilanNeto) next.penghasilanNeto = 'Kolom ini wajib diisi!';
+		if (!draft.pajakLuarNegeriAsing) next.pajakLuarNegeriAsing = 'Kolom ini wajib diisi!';
+		if (!draft.mataUang) next.mataUang = 'Kolom ini wajib diisi!';
+		if (!draft.pajakLuarNegeriRupiah) next.pajakLuarNegeriRupiah = 'Kolom ini wajib diisi!';
+		if (!draft.kreditPajakDiperhitungkan) next.kreditPajakDiperhitungkan = 'Kolom ini wajib diisi!';
+		errors = next;
+		if (Object.keys(next).length > 0) return;
 
-    function simpanModal() {
-        const next: Record<string, string> = {};
-        if (!draft.namaSumber) next.namaSumber = 'Kolom ini wajib diisi!';
-        if (!draft.negara) next.negara = 'Kolom ini wajib diisi!';
-        if (!draft.tanggalTransaksi) next.tanggalTransaksi = 'Kolom ini wajib diisi!';
-        if (!draft.jenisPenghasilan) next.jenisPenghasilan = 'Kolom ini wajib diisi!';
-        if (!draft.penghasilanNeto) next.penghasilanNeto = 'Kolom ini wajib diisi!';
-        if (!draft.pajakLuarNegeriAsing) next.pajakLuarNegeriAsing = 'Kolom ini wajib diisi!';
-        if (!draft.mataUang) next.mataUang = 'Kolom ini wajib diisi!';
-        if (!draft.pajakLuarNegeriRupiah) next.pajakLuarNegeriRupiah = 'Kolom ini wajib diisi!';
-        if (!draft.kreditPajakDiperhitungkan) next.kreditPajakDiperhitungkan = 'Kolom ini wajib diisi!';
-        errors = next;
-        if (Object.keys(next).length > 0) return;
+		draft.kodePenghasilan = kode;
+		if (indeksDiubah === null) rows = [...rows, draft];
+		else rows = rows.map((row, index) => (index === indeksDiubah ? draft : row));
+		modalOpen = false;
+	}
 
-        draft.kodePenghasilan = kode;
+	function hapus(index: number) {
+		rows = rows.filter((_, rowIndex) => rowIndex !== index);
+	}
 
-        if (indeksDiubah === null) rows = [...rows, draft];
-        else rows = rows.map((r, i) => (i === indeksDiubah ? draft : r));
-        closeBsModal('modalOpL2C');
-    }
-
-    function hapus(index: number) {
-        rows = rows.filter((_, i) => i !== index);
-    }
-
-    function hapusSemua() {
-        if (rows.length > 0 && confirm(`Hapus semua ${rows.length} baris pada Bagian C?`)) rows = [];
-    }
+	function hapusSemua() {
+		if (rows.length > 0 && confirm(`Hapus semua ${rows.length} baris pada Bagian C?`)) rows = [];
+	}
 </script>
 
-<div class="tw:mb-6">
-    {#if bisaEdit}
-        <div class="tw:mb-2 tw:flex tw:justify-end tw:gap-2">
-            <Button type="button" onclick={bukaTambah} data-bs-toggle="modal" data-bs-target="#modalOpL2C">Tambah</Button>
-            <Button type="button" onclick={hapusSemua}>Hapus Semua</Button>
-        </div>
-    {/if}
+<Stack gap="12px">
+	{#if bisaEdit}
+		<Stack direction="horizontal" align="end">
+			<ActionButton onclick={bukaTambah}>Tambah</ActionButton>
+			<ActionButton tone="danger" onclick={hapusSemua}>Hapus Semua</ActionButton>
+		</Stack>
+	{/if}
 
-    <div class="tw:overflow-x-auto">
-        <Table class="tw:min-w-full">
-            {#snippet head()}
-                <tr>
-                    {#if bisaEdit}<th class="tw:w-[8rem]">TINDAKAN</th>{/if}
-                    <th class="tw:w-[4rem]">NO.</th>
-                    <th>SUMBER/PEMBERI PENGHASILAN</th>
-                    <th>NEGARA</th>
-                    <th>TANGGAL TRANSAKSI</th>
-                    <th>JENIS PENGHASILAN</th>
-                    <th class="tw:text-end">PENGHASILAN NETO (RUPIAH)</th>
-                    <th>MATA UANG ASING</th>
-                    <th class="tw:text-end">NILAI DALAM MATA UANG ASING</th>
-                    <th class="tw:text-end">NILAI DALAM RUPIAH</th>
-                    <th class="tw:text-end">KREDIT PAJAK YANG DAPAT DIPERHITUNGKAN</th>
-                </tr>
-            {/snippet}
-            {#snippet body()}
-                {#each rows as row, index}
-                    <tr>
-                        {#if bisaEdit}
-                            <td class="tw:flex tw:gap-1">
-                                <Button type="button" onclick={() => bukaUbah(index)} data-bs-toggle="modal" data-bs-target="#modalOpL2C">Ubah</Button>
-                                <Button type="button" color="var(--color-danger)" onclick={() => hapus(index)}>
-                                    <span class="tw:text-white">Hapus</span>
-                                </Button>
-                            </td>
-                        {/if}
-                        <td>{index + 1}</td>
-                        <td>{row.namaSumber}</td>
-                        <td>{row.negara}</td>
-                        <td>{row.tanggalTransaksi}</td>
-                        <td>{row.jenisPenghasilan}</td>
-                        <td class="tw:text-end">{formatRupiahDerived(row.penghasilanNeto)}</td>
-                        <td>{row.mataUang}</td>
-                        <td class="tw:text-end">{formatRupiahDerived(row.pajakLuarNegeriAsing)}</td>
-                        <td class="tw:text-end">{formatRupiahDerived(row.pajakLuarNegeriRupiah)}</td>
-                        <td class="tw:text-end">{formatRupiahDerived(row.kreditPajakDiperhitungkan)}</td>
-                    </tr>
-                {:else}
-                    <!-- Different empty-state wording from the L-1 grids. -->
-                    <tr><td colspan={bisaEdit ? 11 : 10} class="tw:text-center">Tidak ada data untuk ditampilkan.</td></tr>
-                {/each}
-                <tr class="total">
-                    <td colspan={bisaEdit ? 6 : 5}>JUMLAH PENGHASILAN NETO</td>
-                    <td class="tw:text-end">{formatRupiahDerived(totalNeto)}</td>
-                    <td colspan="2"></td>
-                    <td class="tw:text-end">{formatRupiahDerived(totalPajakRupiah)}</td>
-                    <td class="tw:text-end">{formatRupiahDerived(totalKredit)}</td>
-                </tr>
-            {/snippet}
-        </Table>
-    </div>
-</div>
+	<DataTable label="Penghasilan neto luar negeri" minWidth="1580px" headerTone="navy" density="compact">
+		<table>
+			<thead>
+				<tr>
+					{#if bisaEdit}<th scope="col">Tindakan</th>{/if}
+					<th scope="col">No.</th>
+					<th scope="col">Sumber/Pemberi Penghasilan</th>
+					<th scope="col">Negara</th>
+					<th scope="col">Tanggal Transaksi</th>
+					<th scope="col">Jenis Penghasilan</th>
+					<th scope="col" class="right">Penghasilan Neto (Rupiah)</th>
+					<th scope="col">Mata Uang Asing</th>
+					<th scope="col" class="right">Nilai dalam Mata Uang Asing</th>
+					<th scope="col" class="right">Nilai dalam Rupiah</th>
+					<th scope="col" class="right">Kredit Pajak yang Dapat Diperhitungkan</th>
+				</tr>
+			</thead>
+			<tbody>
+				{#each rows as row, index}
+					<tr>
+						{#if bisaEdit}
+							<td class="action-cell">
+								<TableActions
+									actions={[
+										{ label: 'Ubah', onclick: () => bukaUbah(index) },
+										{ label: 'Hapus', danger: true, onclick: () => hapus(index) }
+									]}
+								/>
+							</td>
+						{/if}
+						<td>{index + 1}</td>
+						<td>{row.namaSumber}</td>
+						<td>{row.negara}</td>
+						<td>{row.tanggalTransaksi}</td>
+						<td>{row.jenisPenghasilan}</td>
+						<td class="right amount">{formatRupiahDerived(row.penghasilanNeto)}</td>
+						<td>{row.mataUang}</td>
+						<td class="right amount">{formatRupiahDerived(row.pajakLuarNegeriAsing)}</td>
+						<td class="right amount">{formatRupiahDerived(row.pajakLuarNegeriRupiah)}</td>
+						<td class="right amount">{formatRupiahDerived(row.kreditPajakDiperhitungkan)}</td>
+					</tr>
+				{:else}
+					<tr><td colspan={bisaEdit ? 11 : 10} class="empty">Tidak ada data untuk ditampilkan.</td></tr>
+				{/each}
+			</tbody>
+			<tfoot>
+				<tr>
+					<th scope="row" colspan={bisaEdit ? 6 : 5}>Jumlah Penghasilan Neto</th>
+					<td class="right amount">{formatRupiahDerived(totalNeto)}</td>
+					<td colspan="2"></td>
+					<td class="right amount">{formatRupiahDerived(totalPajakRupiah)}</td>
+					<td class="right amount">{formatRupiahDerived(totalKredit)}</td>
+				</tr>
+			</tfoot>
+		</table>
+	</DataTable>
+</Stack>
 
-<div class="modal fade" id="modalOpL2C" tabindex="-1" aria-labelledby="modalOpL2CLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h1 class="modal-title fs-5" id="modalOpL2CLabel" style="font-weight: bold; text-transform: uppercase;">
-          Penghasilan Luar Negeri
-        </h1>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
-      </div>
-      <div class="modal-body">
-        <div style="display: flex; flex-direction: column; gap: 10px;">
-          <div style="display: flex; align-items: center;">
-            <label for="l2c-nama" style="width: 220px;">Nama Sumber/Pemberi Penghasilan *</label>
-            <input type="text" id="l2c-nama" bind:value={draft.namaSumber} style="flex: 1;" />
-          </div>
-          {#if errors.namaSumber}<span class="error">{errors.namaSumber}</span>{/if}
-          <div style="display: flex; align-items: center;">
-            <label for="l2c-negara" style="width: 220px;">Negara Sumber/Pemberi Penghasilan *</label>
-            <select id="l2c-negara" bind:value={draft.negara} style="flex: 1;">
-              <option value={""}>Silakan pilih</option>
-              {#each referensi.negara ?? [] as opsi}
-                <option value={opsi}>{opsi}</option>
-              {/each}
-            </select>
-          </div>
-          {#if errors.negara}<span class="error">{errors.negara}</span>{/if}
-          <div style="display: flex; align-items: center;">
-            <label for="l2c-tanggal" style="width: 220px;">Tanggal Transaksi *</label>
-            <input type="date" id="l2c-tanggal" bind:value={draft.tanggalTransaksi} style="flex: 1;" />
-          </div>
-          {#if errors.tanggalTransaksi}<span class="error">{errors.tanggalTransaksi}</span>{/if}
-          <div style="display: flex; align-items: center;">
-            <label for="l2c-jenis" style="width: 220px;">Jenis Penghasilan *</label>
-            <select id="l2c-jenis" bind:value={draft.jenisPenghasilan} style="flex: 1;">
-              <option value={""}>Silakan pilih</option>
-              {#each referensi.l2_c_jenis_penghasilan ?? [] as opsi}
-                <option value={opsi}>{opsi}</option>
-              {/each}
-            </select>
-          </div>
-          {#if errors.jenisPenghasilan}<span class="error">{errors.jenisPenghasilan}</span>{/if}
-          <div style="display: flex; align-items: center;">
-            <label for="l2c-kode" style="width: 220px;">Kode Penghasilan</label>
-            <input type="text" id="l2c-kode" value={kode} readonly style="flex: 1; background-color: #e9ecef;" />
-          </div>
-          <div style="display: flex; align-items: center;">
-            <label for="l2c-neto" style="width: 220px;">Penghasilan Neto *</label>
-            <input
-              type="text"
-              inputmode="numeric"
-              id="l2c-neto"
-              value={formatRupiah(draft.penghasilanNeto)}
-              oninput={(e: Event) => (draft.penghasilanNeto = applyRupiahInput(e))}
-              style="flex: 1; text-align: right;"
-            />
-          </div>
-          {#if errors.penghasilanNeto}<span class="error">{errors.penghasilanNeto}</span>{/if}
-          <div style="display: flex; align-items: center;">
-            <label for="l2c-pajak-asing" style="width: 220px;">Pajak yang Dibayar/Dipotong/Terutang di Luar Negeri dalam Mata Uang Asing *</label>
-            <input
-              type="text"
-              inputmode="numeric"
-              id="l2c-pajak-asing"
-              value={formatRupiah(draft.pajakLuarNegeriAsing)}
-              oninput={(e: Event) => (draft.pajakLuarNegeriAsing = applyRupiahInput(e))}
-              style="flex: 1; text-align: right;"
-            />
-          </div>
-          {#if errors.pajakLuarNegeriAsing}<span class="error">{errors.pajakLuarNegeriAsing}</span>{/if}
-          <div style="display: flex; align-items: center;">
-            <label for="l2c-mata-uang" style="width: 220px;">Mata Uang *</label>
-            <select id="l2c-mata-uang" bind:value={draft.mataUang} style="flex: 1;">
-              <option value={""}>Silakan pilih</option>
-              {#each referensi.mata_uang ?? [] as opsi}
-                <option value={opsi}>{opsi}</option>
-              {/each}
-            </select>
-          </div>
-          {#if errors.mataUang}<span class="error">{errors.mataUang}</span>{/if}
-          <div style="display: flex; align-items: center;">
-            <label for="l2c-pajak-rupiah" style="width: 220px;">Pajak yang Dibayar/Dipotong/Terutang di Luar Negeri dalam Rupiah *</label>
-            <input
-              type="text"
-              inputmode="numeric"
-              id="l2c-pajak-rupiah"
-              value={formatRupiah(draft.pajakLuarNegeriRupiah)}
-              oninput={(e: Event) => (draft.pajakLuarNegeriRupiah = applyRupiahInput(e))}
-              style="flex: 1; text-align: right;"
-            />
-          </div>
-          {#if errors.pajakLuarNegeriRupiah}<span class="error">{errors.pajakLuarNegeriRupiah}</span>{/if}
-          <div style="display: flex; align-items: center;">
-            <label for="l2c-kredit" style="width: 220px;">Kredit Pajak yang Dapat Diperhitungkan *</label>
-            <input
-              type="text"
-              inputmode="numeric"
-              id="l2c-kredit"
-              value={formatRupiah(draft.kreditPajakDiperhitungkan)}
-              oninput={(e: Event) => (draft.kreditPajakDiperhitungkan = applyRupiahInput(e))}
-              style="flex: 1; text-align: right;"
-            />
-          </div>
-          {#if errors.kreditPajakDiperhitungkan}<span class="error">{errors.kreditPajakDiperhitungkan}</span>{/if}
-        </div>
-      </div>
-      <div class="modal-footer" style="justify-content: flex-end;">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-        <button type="button" class="btn btn-primary" style="background-color: #1c398e; color: white;" onclick={simpanModal}>Simpan</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<style>
-    th {
-    	font-size: .7rem;
-    	font-weight: bold;
-    	text-align: center;
-    	padding: .4rem .5rem;
-    	white-space: nowrap;
-    	background-color: var(--color-primary);
-    	border: 1px solid white;
-    }
-    td {
-    	font-size: .8rem;
-    	padding: .25rem .5rem;
-    	border: 1px solid white;
-    }
-    tr:not(.total):not(.footer):nth-child(odd) {
-    	background-color: #F9F6EE;
-    }
-    tr.total td {
-    	font-weight: bold;
-    	background-color: var(--color-primary);
-    	border: 1px solid white;
-    }
-    .error { background: #fde8e8; color: #b91c1c; font-size: 0.75rem; padding: 0.25rem 0.5rem; margin-left: 220px; }
-</style>
+<InstitutionalModal bind:open={modalOpen} title="Penghasilan Luar Negeri" size="large" scrollable>
+	<FieldGrid>
+		<FormField label="Nama Sumber/Pemberi Penghasilan" bind:value={draft.namaSumber} required error={errors.namaSumber} />
+		<SelectField label="Negara Sumber/Pemberi Penghasilan" bind:value={draft.negara} options={negaraOptions} searchable required error={errors.negara} />
+		<DateField label="Tanggal Transaksi" bind:value={draft.tanggalTransaksi} required error={errors.tanggalTransaksi} floatingPanel />
+		<SelectField label="Jenis Penghasilan" bind:value={draft.jenisPenghasilan} options={jenisOptions} searchable required error={errors.jenisPenghasilan} />
+		<FormField label="Kode Penghasilan" value={kode} readonly />
+		<RupiahField label="Penghasilan Neto" bind:value={draft.penghasilanNeto} required error={errors.penghasilanNeto} />
+		<RupiahField label="Pajak di Luar Negeri dalam Mata Uang Asing" bind:value={draft.pajakLuarNegeriAsing} required error={errors.pajakLuarNegeriAsing} currencyPrefix="" />
+		<SelectField label="Mata Uang" bind:value={draft.mataUang} options={mataUangOptions} searchable required error={errors.mataUang} />
+		<RupiahField label="Pajak di Luar Negeri dalam Rupiah" bind:value={draft.pajakLuarNegeriRupiah} required error={errors.pajakLuarNegeriRupiah} />
+		<RupiahField label="Kredit Pajak yang Dapat Diperhitungkan" bind:value={draft.kreditPajakDiperhitungkan} required error={errors.kreditPajakDiperhitungkan} />
+	</FieldGrid>
+	{#snippet actions()}
+		<ActionButton tone="quiet" onclick={() => (modalOpen = false)}>Tutup</ActionButton>
+		<ActionButton onclick={simpanModal}>Simpan</ActionButton>
+	{/snippet}
+</InstitutionalModal>

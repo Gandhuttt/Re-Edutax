@@ -85,7 +85,7 @@
 	}
 
 	.lookup-field > span {
-		font-size: 12px;
+		font-size: 14px;
 		font-weight: 700;
 	}
 
@@ -104,7 +104,7 @@
 		background: #fffefa;
 		color: var(--ui-ink);
 		font: inherit;
-		font-size: 12px;
+		font-size: 16px;
 	}
 
 	input:focus {
@@ -123,7 +123,7 @@
 		background: var(--ui-navy);
 		color: white;
 		font: inherit;
-		font-size: 10px;
+		font-size: 13px;
 		font-weight: 800;
 		cursor: pointer;
 		transition:
@@ -143,7 +143,7 @@
 
 	.hint,
 	.message {
-		font-size: 11px;
+		font-size: 12px;
 		line-height: 1.45;
 	}
 

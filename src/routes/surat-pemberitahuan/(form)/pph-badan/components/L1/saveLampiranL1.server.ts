@@ -67,24 +67,35 @@ export async function saveLampiranL1(
 	sektorUsahaId: string,
 	input: L1Input
 ): Promise<{ statements: Statement[]; netoFiskalSebelumFasilitas: number }> {
-	const labaRugiTemplate = await db
-		.select({
-			id: spt_pph_badan_lampiran_1_akun.id,
-			nomorUrut: spt_pph_badan_lampiran_1_akun.nomorUrut,
-			kode: spt_pph_badan_lampiran_1_akun.kode,
-			namaAkun: spt_pph_badan_lampiran_1_akun.namaAkun,
-			rowType: spt_pph_badan_lampiran_1_akun.rowType,
-			classification: spt_pph_badan_lampiran_1_akun.classification,
-			parentKode: spt_pph_badan_lampiran_1_akun.parentKode,
-			sign: spt_pph_badan_lampiran_1_akun.sign
-		})
-		.from(spt_pph_badan_lampiran_1_akun)
-		.where(eq(spt_pph_badan_lampiran_1_akun.sektorUsahaId, sektorUsahaId));
-
-	const neracaTemplate = await db
-		.select({ id: spt_pph_badan_lampiran_1_neraca_akun.id, rowType: spt_pph_badan_lampiran_1_neraca_akun.rowType })
-		.from(spt_pph_badan_lampiran_1_neraca_akun)
-		.where(eq(spt_pph_badan_lampiran_1_neraca_akun.sektorUsahaId, sektorUsahaId));
+	const [labaRugiTemplate, neracaTemplate, existingLabaRugiRows] = await Promise.all([
+		db
+			.select({
+				id: spt_pph_badan_lampiran_1_akun.id,
+				nomorUrut: spt_pph_badan_lampiran_1_akun.nomorUrut,
+				kode: spt_pph_badan_lampiran_1_akun.kode,
+				namaAkun: spt_pph_badan_lampiran_1_akun.namaAkun,
+				rowType: spt_pph_badan_lampiran_1_akun.rowType,
+				classification: spt_pph_badan_lampiran_1_akun.classification,
+				parentKode: spt_pph_badan_lampiran_1_akun.parentKode,
+				sign: spt_pph_badan_lampiran_1_akun.sign
+			})
+			.from(spt_pph_badan_lampiran_1_akun)
+			.where(eq(spt_pph_badan_lampiran_1_akun.sektorUsahaId, sektorUsahaId)),
+		db
+			.select({
+				id: spt_pph_badan_lampiran_1_neraca_akun.id,
+				rowType: spt_pph_badan_lampiran_1_neraca_akun.rowType
+			})
+			.from(spt_pph_badan_lampiran_1_neraca_akun)
+			.where(eq(spt_pph_badan_lampiran_1_neraca_akun.sektorUsahaId, sektorUsahaId)),
+		db
+			.select({
+				id: spt_pph_badan_lampiran_1_laba_rugi.id,
+				akunId: spt_pph_badan_lampiran_1_laba_rugi.akunId
+			})
+			.from(spt_pph_badan_lampiran_1_laba_rugi)
+			.where(eq(spt_pph_badan_lampiran_1_laba_rugi.sptPphBadanId, sptPphBadanId))
+	]);
 
 	const statements: Statement[] = [];
 
@@ -103,6 +114,9 @@ export async function saveLampiranL1(
 		).find((row) => row.kode === '4800')?.nilaiFiskal ?? 0;
 
 	const dataAkunIds = new Set(labaRugiTemplate.filter((row) => row.rowType === 'data').map((row) => row.id));
+	const existingLabaRugiIdByAkunId = new Map(
+		existingLabaRugiRows.map((row) => [row.akunId, row.id])
+	);
 
 	const allKode = [...new Set(input.labaRugi.flatMap((row) => row.kodePenyesuaianFiskal))];
 	const idByKode = await getKodePenyesuaianFiskalIds(allKode);
@@ -118,10 +132,10 @@ export async function saveLampiranL1(
 			penyesuaianFiskalNegatif: Number(row.penyesuaianFiskalNegatif)
 		};
 
-		// D1's batch() can't return generated ids mid-batch, so this uses a deterministic id
-		// (a pure function of sptPphBadanId + akunId) instead of relying on onConflictDoUpdate's
-		// returning() to learn an existing row's id.
-		const id = labaRugiId(sptPphBadanId, row.akunId);
+		// Corrections cloned before their first save have random row ids. Reuse
+		// that id so fiscal-correction children keep their parent, while fresh
+		// rows use the deterministic id required by D1's batched writes.
+		const id = existingLabaRugiIdByAkunId.get(row.akunId) ?? labaRugiId(sptPphBadanId, row.akunId);
 
 		statements.push(
 			db
@@ -133,7 +147,10 @@ export async function saveLampiranL1(
 					...values
 				})
 				.onConflictDoUpdate({
-					target: spt_pph_badan_lampiran_1_laba_rugi.id,
+					target: [
+						spt_pph_badan_lampiran_1_laba_rugi.sptPphBadanId,
+						spt_pph_badan_lampiran_1_laba_rugi.akunId
+					],
 					set: values
 				}),
 			db

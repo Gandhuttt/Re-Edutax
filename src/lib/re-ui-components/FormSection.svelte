@@ -71,7 +71,7 @@
 	p {
 		margin: 2px 0 0;
 		color: var(--ui-muted);
-		font-size: 10px;
+		font-size: 13px;
 	}
 	.content {
 		min-width: 0;

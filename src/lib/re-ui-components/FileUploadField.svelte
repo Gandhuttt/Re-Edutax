@@ -99,7 +99,7 @@
 		color: var(--ui-ink);
 	}
 	.field-label {
-		font-size: 12px;
+		font-size: 14px;
 		font-weight: 700;
 	}
 	.field-label em {
@@ -142,7 +142,7 @@
 		border-right: 1px solid var(--ui-line-strong);
 		background: var(--ui-navy);
 		color: white;
-		font-size: 11px;
+		font-size: 14px;
 		font-weight: 800;
 		white-space: nowrap;
 		transition: background 140ms ease;
@@ -161,7 +161,7 @@
 		padding: 0 11px;
 		overflow: hidden;
 		color: var(--ui-muted);
-		font-size: 12px;
+		font-size: 14px;
 		text-overflow: ellipsis;
 		white-space: nowrap;
 	}
@@ -174,12 +174,12 @@
 	}
 	.hint {
 		color: var(--ui-muted);
-		font-size: 11px;
+		font-size: 12px;
 		line-height: 1.4;
 	}
 	.message {
 		color: var(--ui-danger);
-		font-size: 11px;
+		font-size: 12px;
 		line-height: 1.4;
 	}
 	.error .upload {

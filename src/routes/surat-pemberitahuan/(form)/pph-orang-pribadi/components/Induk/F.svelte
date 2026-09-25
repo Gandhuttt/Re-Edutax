@@ -1,9 +1,8 @@
 <script lang="ts">
-    import Input from "$lib/components/Input.svelte";
-    import Label from "$lib/components/Label.svelte";
-    import Table from "$lib/components/Table.svelte";
-    import RowNilai from "./RowNilai.svelte";
     import { getContext } from "svelte";
+    import { CheckboxField, DataTable, FormField } from "$lib/re-ui-components";
+    import { formatRupiahDerived } from "$lib/helpers/rupiahInput";
+    import RowNilai from "./RowNilai.svelte";
     import type { hitungInduk } from "./hitungPphOrangPribadi";
 
     // Only applies when the SPT status is Pembetulan. On the real form this is a
@@ -38,51 +37,66 @@
         aktif,
         readonly = false
     }: Props = $props();
+
+    const id = getContext<string>("id");
 </script>
 
-<div class="tw:p-5">
-    <Table class="tw:min-w-full">
-        {#snippet head()}
-            <tr class="tw:hidden"><td><Input hidden/></td></tr>
-        {/snippet}
-        {#snippet body()}
+<DataTable
+    label="Pembetulan"
+    minWidth="1080px"
+    headerTone="navy"
+    density="compact"
+    framed={false}
+>
+    <table>
+        <thead>
             <tr>
-                <td class="tw:w-10"><span>12.a</span></td>
-                <td class="tw:w-[40rem]"><span>PPh kurang/lebih bayar pada SPT yang dibetulkan</span></td>
-                <td class="tw:w-[10rem]">
-                    <Label for={getContext("id")} class="tw:flex! tw:items-center tw:gap-1">
-                        <input
-                            type="checkbox"
-                            bind:checked={f12aGantiSptSebelumnya}
-                            disabled={readonly || !aktif}
-                        >
-                        <span>Ganti SPT sebelumnya</span>
-                    </Label>
-                </td>
-                <td class="tw:w-[20rem]">
-                    <Input
-                        class={"tw:text-end"}
-                        type={"text"}
-                        value={f12a.toLocaleString('id-ID')}
-                        disabled
+                <th scope="col">Nomor</th>
+                <th scope="col">Uraian</th>
+                <th scope="col">Jawaban/Pilihan</th>
+                <th scope="col" class="number">Jumlah (Rupiah)</th>
+                <th scope="col">Informasi</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td><strong>12.a</strong></td>
+                <td>PPh kurang/lebih bayar pada SPT yang dibetulkan</td>
+                <td>
+                    <CheckboxField
+                        {id}
+                        label="Ganti SPT sebelumnya"
+                        compact
+                        bind:checked={f12aGantiSptSebelumnya}
+                        disabled={readonly || !aktif}
                     />
                 </td>
-                <td class="tw:w-[30rem]"></td>
+                <td class="amount-cell">
+                    <FormField label="Jumlah 12.a" value={formatRupiahDerived(f12a)} disabled />
+                </td>
+                <td></td>
             </tr>
             <RowNilai
-                nomor={"12.b"}
-                label={"PPh kurang/lebih bayar karena pembetulan (11a-12a)"}
+                nomor="12.b"
+                label="PPh kurang/lebih bayar karena pembetulan (11a-12a)"
                 value={computed.n12b}
             />
-        {/snippet}
-    </Table>
-</div>
+        </tbody>
+    </table>
+</DataTable>
 
 <style>
-    tr {
-        border: none;
-        &:nth-child(even) { background-color: #F9F6EE; }
+    .amount-cell {
+        min-width: 13rem;
     }
-    td { padding: .25rem .5rem; }
-    span { font-size: .8rem; }
+    .amount-cell :global(.field > .label),
+    .amount-cell :global(label > .label) {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+    }
 </style>

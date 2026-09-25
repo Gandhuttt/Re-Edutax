@@ -1,5 +1,5 @@
 <script lang="ts">
-    import Accordion from "$lib/components/AccordionItem.svelte";
+    import { DisclosureItem, Stack } from "$lib/re-ui-components";
     import Header from "./_Header.svelte";
     import A from "./A.svelte";
     import B from "./B.svelte";
@@ -181,12 +181,12 @@
     };
 </script>
 
-<div class="{currentTab === 'Induk' ? '' : 'tw:hidden'}">
-    <div class="tw:mb-3 tw:flex tw:justify-end">
-        <span class="tw:text-sm">Status SPT : <strong>{statusLabel[computed.statusSpt]}</strong></span>
-    </div>
-    <div class="accordion">
-        <Accordion item={"HEADER"}>
+<div id="spt-panel-induk" role="tabpanel" hidden={currentTab !== 'Induk'}>
+    <Stack gap="14px">
+        <div class="tw:flex tw:justify-end">
+            <span class="tw:text-sm">Status SPT : <strong>{statusLabel[computed.statusSpt]}</strong></span>
+        </div>
+        <DisclosureItem title="HEADER" open>
             <Header
                 tahunPajak={spt.tahunPajak}
                 statusSpt={spt.statusSpt}
@@ -197,11 +197,11 @@
                 {readonly}
                 {postFormId}
             />
-        </Accordion>
-        <Accordion item={"A. IDENTITAS WAJIB PAJAK"}>
+        </DisclosureItem>
+        <DisclosureItem title="A. IDENTITAS WAJIB PAJAK" open>
             <A {identitas} bind:a7StatusKewajibanSuamiIstri bind:a8NpwpSuamiIstri {readonly} />
-        </Accordion>
-        <Accordion item={"B. IKHTISAR PENGHASILAN NETO"}>
+        </DisclosureItem>
+        <DisclosureItem title="B. IKHTISAR PENGHASILAN NETO" open>
             <B
                 bind:b1aPenghasilanPekerjaan
                 bind:b1b1PenghasilanUsaha
@@ -217,8 +217,8 @@
                 {n1d}
                 {readonly}
             />
-        </Accordion>
-        <Accordion item={"C. PENGHITUNGAN PAJAK TERUTANG"}>
+        </DisclosureItem>
+        <DisclosureItem title="C. PENGHITUNGAN PAJAK TERUTANG" open>
             <C
                 {computed}
                 bind:c3AdaPengurangPenghasilanNeto
@@ -227,8 +227,8 @@
                 phMt={a7StatusKewajibanSuamiIstri === 'ph' || a7StatusKewajibanSuamiIstri === 'mt'}
                 {readonly}
             />
-        </Accordion>
-        <Accordion item={"D. KREDIT PAJAK"}>
+        </DisclosureItem>
+        <DisclosureItem title="D. KREDIT PAJAK" open>
             <D
                 bind:d10aAdaPphDipotongPihakLain
                 {n10a}
@@ -238,14 +238,14 @@
                 bind:d10dJumlah
                 {readonly}
             />
-        </Accordion>
-        <Accordion item={"E. PPh KURANG/LEBIH BAYAR"}>
+        </DisclosureItem>
+        <DisclosureItem title="E. PPh KURANG/LEBIH BAYAR" open>
             <E {computed} bind:e11bAdaSkPengangsuranPenundaan bind:e11bJumlah {readonly} />
-        </Accordion>
-        <Accordion item={"F. PEMBETULAN (DIISI JIKA STATUS SPT ADALAH PEMBETULAN)"}>
+        </DisclosureItem>
+        <DisclosureItem title="F. PEMBETULAN (DIISI JIKA STATUS SPT ADALAH PEMBETULAN)" open>
             <F {computed} {f12a} bind:f12aGantiSptSebelumnya aktif={adaPembetulan} {readonly} />
-        </Accordion>
-        <Accordion item={"G. PERMOHONAN PENGEMBALIAN PPh LEBIH BAYAR (DIISI JIKA STATUS SPT ADALAH LEBIH BAYAR)"}>
+        </DisclosureItem>
+        <DisclosureItem title="G. PERMOHONAN PENGEMBALIAN PPh LEBIH BAYAR (DIISI JIKA STATUS SPT ADALAH LEBIH BAYAR)" open>
             <G
                 bind:gMetodePengembalian
                 bind:gNomorRekening
@@ -254,8 +254,8 @@
                 aktif={adaLebihBayar}
                 {readonly}
             />
-        </Accordion>
-        <Accordion item={"H. ANGSURAN PPh PASAL 25 TAHUN PAJAK BERIKUTNYA"}>
+        </DisclosureItem>
+        <DisclosureItem title="H. ANGSURAN PPh PASAL 25 TAHUN PAJAK BERIKUTNYA" open>
             <H
                 bind:h13aAngsuranTeratur
                 bind:h13bPerhitunganTersendiri
@@ -265,8 +265,8 @@
                 jumlahBulan={computed.jumlahBulan}
                 {readonly}
             />
-        </Accordion>
-        <Accordion item={"I. PERNYATAAN TRANSAKSI LAINNYA"}>
+        </DisclosureItem>
+        <DisclosureItem title="I. PERNYATAAN TRANSAKSI LAINNYA" open>
             <I
                 {n14a}
                 {n14b}
@@ -283,8 +283,8 @@
                 bind:i14hKelebihanPphFinal
                 {readonly}
             />
-        </Accordion>
-        <Accordion item={"J. LAMPIRAN TAMBAHAN"}>
+        </DisclosureItem>
+        <DisclosureItem title="J. LAMPIRAN TAMBAHAN" open>
             <J
                 bind:jaLaporanKeuangan
                 bind:jbBuktiZakat
@@ -293,9 +293,9 @@
                 bind:jeDokumenLainnya
                 {readonly}
             />
-        </Accordion>
-        <Accordion item={"K. PERNYATAAN"}>
+        </DisclosureItem>
+        <DisclosureItem title="K. PERNYATAAN" open>
             <K {identitas} bind:pernyataanBenar bind:penandatangan {readonly} />
-        </Accordion>
-    </div>
+        </DisclosureItem>
+    </Stack>
 </div>

@@ -1,71 +1,37 @@
 <script lang="ts">
-    import Table from "$lib/components/Table.svelte";
-    import Button from "$lib/components/Button.svelte";
+	import { ActionButton, DataTable, Stack } from "$lib/re-ui-components";
 </script>
 
-<div class="tw:flex tw:flex-col tw:p-5 tw:gap-1">
-    <Button class={"tw:text-white tw:w-30"} color={"var(--color-secondary)"}>Tambah</Button>
-    <div class="tw:overflow-scroll">
-        <Table class={"tw:w-full"}>
-            {#snippet head()}
-                <tr class="tw:hidden">
-                    <td></td>
-                </tr>
-            {/snippet}
-            {#snippet body()}
-                <tr class="header tw:bg-(--color-primary) tw:font-bold tw:text-center">
-                    <td class="tw:w-[10rem]">TINDAKAN</td>
-                    <td class="tw:w-[15rem]">TANGGAL PEMBERIAN ENTERTAINMENT</td>
-                    <td class="tw:w-[15rem]">TEMPAT PEMBERIAN ENTERTAINMENT</td>
-                    <td class="tw:w-[15rem]">ALAMAT PEMBERI ENTERTAINMENT</td>
-                    <td class="tw:w-[15rem]">JENIS PEMBERIAN ENTERTAINMENT</td>
-                    <td class="tw:w-[15rem]">NILAI PEMBERIAN ENTERTAINMENT (Rp.)</td>
-                    <td class="tw:w-[15rem]">NAMA RELASI USAHA</td>
-                    <td class="tw:w-[15rem]">JABATAN RELASI USAHA</td>
-                    <td class="tw:w-[15rem]">NAMA PERUSAHAAN RELASI USAHA</td>
-                    <td class="tw:w-[15rem]">JENIS USAHA RELASI USAHA</td>
-                    <td class="tw:w-[15rem]">USAHA TIDAK MENGKHIANATI HASIL</td>
-                </tr>
-                {#if true}
-                <tr class="data tw:text-center"><td colspan="11">Tidak ada data yang ditampilkan</td></tr>
-                {:else}
-                <tr class="data">
-                    <td><Button>Edit</Button></td>
-                    <td>tsetaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</td>
-                    <td>tset</td>
-                    <td>tset</td>
-                    <td>tset</td>
-                    <td>tset</td>
-                </tr>
-                {/if}
-            {/snippet}
-        </Table>
-    </div>
-</div>
-
-<style>
-.header {
-    td {
-        border: 1px solid white;
-    }
-}
-
-.data {
-    &:nth-child(odd of .data) {
-        background-color: #F9F6EE;
-    }
-    td {
-        padding-inline: .5rem;
-    }
-}
-
-tr {
-    border: none;
-}
-
-td {
-    padding: .5rem 1rem;
-    word-wrap: break-word;
-    font-size: .8rem;
-}
-</style>
+<Stack gap="12px" align="start">
+	<ActionButton tone="secondary">Tambah</ActionButton>
+	<DataTable label="Daftar nominatif biaya entertainment" minWidth="1600px" headerTone="navy" density="compact" stickyFirstColumn>
+		<table>
+			<thead>
+				<tr>
+					<th scope="col">TINDAKAN</th>
+					<th scope="col">TANGGAL PEMBERIAN ENTERTAINMENT</th>
+					<th scope="col">TEMPAT PEMBERIAN ENTERTAINMENT</th>
+					<th scope="col">ALAMAT PEMBERI ENTERTAINMENT</th>
+					<th scope="col">JENIS PEMBERIAN ENTERTAINMENT</th>
+					<th scope="col">NILAI PEMBERIAN ENTERTAINMENT (Rp.)</th>
+					<th scope="col">NAMA RELASI USAHA</th>
+					<th scope="col">JABATAN RELASI USAHA</th>
+					<th scope="col">NAMA PERUSAHAAN RELASI USAHA</th>
+					<th scope="col">JENIS USAHA RELASI USAHA</th>
+					<th scope="col">USAHA TIDAK MENGKHIANATI HASIL</th>
+				</tr>
+			</thead>
+			<tbody>
+				{#if true}
+					<tr><td class="empty" colspan="11">Tidak ada data yang ditampilkan</td></tr>
+				{:else}
+					<tr>
+						<td class="action-cell"><ActionButton tone="quiet">Edit</ActionButton></td>
+						<td>tsetaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa</td>
+						<td>tset</td><td>tset</td><td>tset</td><td>tset</td>
+					</tr>
+				{/if}
+			</tbody>
+		</table>
+	</DataTable>
+</Stack>

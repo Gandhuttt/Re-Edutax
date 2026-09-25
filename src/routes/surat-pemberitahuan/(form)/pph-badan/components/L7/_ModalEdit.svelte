@@ -1,81 +1,48 @@
 <script lang="ts">
-    import Label from "$lib/components/Label.svelte";
-    import Input from "$lib/components/Input.svelte";
-    import InputGroup from "$lib/components/InputGroup.svelte";
+	import { ActionButton, FieldGrid, FormField, InstitutionalModal, RupiahField } from "$lib/re-ui-components";
 
-    type Row = {
-        tahunPajak: number;
-        labaRugiNetoFiskal: number;
-        kompensasiYMin4: number;
-        kompensasiYMin3: number;
-        kompensasiYMin2: number;
-        kompensasiYMin1: number;
-        kompensasiTahunIni: number;
-        kompensasiYPlus1: number;
-    };
+	type Row = {
+		tahunPajak: number;
+		labaRugiNetoFiskal: number;
+		kompensasiYMin4: number;
+		kompensasiYMin3: number;
+		kompensasiYMin2: number;
+		kompensasiYMin1: number;
+		kompensasiTahunIni: number;
+		kompensasiYPlus1: number;
+	};
 
-    let {
-        data = $bindable(),
-        saveItem,
-        readonly = false
-    }: {
-        data: Row;
-        saveItem: () => void;
-        readonly?: boolean;
-    } = $props();
+	let {
+		open = $bindable(false),
+		data = $bindable(),
+		saveItem,
+		readonly = false
+	}: {
+		open?: boolean;
+		data: Row;
+		saveItem: () => void;
+		readonly?: boolean;
+	} = $props();
 
-    function handleSave(): void {
-        saveItem();
-    }
+	function handleSave(): void {
+		saveItem();
+		open = false;
+	}
 </script>
 
-<div class="modal fade" id="modalL7" tabindex="-1" aria-labelledby="modalL7Label" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-        <div class="modal-header">
-            <h1 class="modal-title fs-5" id="exampleModalLabel">SPT Pajak Penghasilan Badan</h1>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body">
-            <div class="tw:flex tw:flex-col tw:gap-5">
-                <Label class={"tw:w-full"}>
-                    <span>TAHUN/BAGIAN TAHUN PAJAK</span>
-                    <Input type={"text"} value={data.tahunPajak} readonly/>
-                </Label>
-                <Label class={"tw:w-full"}>
-                    <span>LABA (RUGI) NETTO FISKAL</span>
-                    <InputGroup class={"tw:text-right"} type={"rupiah"} bind:value={data.labaRugiNetoFiskal} disabled={readonly}>Rp.</InputGroup>
-                </Label>
-                <Label class={"tw:w-full"}>
-                    <span>KOMPENSASI KERUGIAN FISKAL Y-4</span>
-                    <InputGroup class={"tw:text-right"} type={"rupiah"} bind:value={data.kompensasiYMin4} disabled={readonly}>Rp.</InputGroup>
-                </Label>
-                <Label class={"tw:w-full"}>
-                    <span>KOMPENSASI KERUGIAN FISKAL Y-3</span>
-                    <InputGroup class={"tw:text-right"} type={"rupiah"} bind:value={data.kompensasiYMin3} disabled={readonly}>Rp.</InputGroup>
-                </Label>
-                <Label class={"tw:w-full"}>
-                    <span>KOMPENSASI KERUGIAN FISKAL Y-2</span>
-                    <InputGroup class={"tw:text-right"} type={"rupiah"} bind:value={data.kompensasiYMin2} disabled={readonly}>Rp.</InputGroup>
-                </Label>
-                <Label class={"tw:w-full"}>
-                    <span>KOMPENSASI KERUGIAN FISKAL Y-1</span>
-                    <InputGroup class={"tw:text-right"} type={"rupiah"} bind:value={data.kompensasiYMin1} disabled={readonly}>Rp.</InputGroup>
-                </Label>
-                <Label class={"tw:w-full"}>
-                    <span>KOMPENSASI KERUGIAN FISKAL TAHUN PAJAK INI</span>
-                    <InputGroup class={"tw:text-right"} type={"rupiah"} bind:value={data.kompensasiTahunIni} disabled={readonly}>Rp.</InputGroup>
-                </Label>
-                <Label class={"tw:w-full"}>
-                    <span>KOMPENSASI KERUGIAN FISKAL Y+1</span>
-                    <InputGroup class={"tw:text-right"} type={"rupiah"} bind:value={data.kompensasiYPlus1} disabled={readonly}>Rp.</InputGroup>
-                </Label>
-            </div>
-        </div>
-        <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-            <button type="button" class="btn btn-primary" onclick={handleSave} data-bs-dismiss="modal" disabled={readonly}>Simpan</button>
-        </div>
-        </div>
-    </div>
-</div>
+<InstitutionalModal bind:open title="SPT Pajak Penghasilan Badan" size="wide" scrollable>
+	<FieldGrid columns={2}>
+		<FormField label="Tahun/Bagian Tahun Pajak" value={String(data.tahunPajak)} disabled />
+		<RupiahField label="Laba (Rugi) Netto Fiskal" bind:value={data.labaRugiNetoFiskal} disabled={readonly} />
+		<RupiahField label="Kompensasi Kerugian Fiskal Y-4" bind:value={data.kompensasiYMin4} disabled={readonly} />
+		<RupiahField label="Kompensasi Kerugian Fiskal Y-3" bind:value={data.kompensasiYMin3} disabled={readonly} />
+		<RupiahField label="Kompensasi Kerugian Fiskal Y-2" bind:value={data.kompensasiYMin2} disabled={readonly} />
+		<RupiahField label="Kompensasi Kerugian Fiskal Y-1" bind:value={data.kompensasiYMin1} disabled={readonly} />
+		<RupiahField label="Kompensasi Kerugian Fiskal Tahun Pajak Ini" bind:value={data.kompensasiTahunIni} disabled={readonly} />
+		<RupiahField label="Kompensasi Kerugian Fiskal Y+1" bind:value={data.kompensasiYPlus1} disabled={readonly} />
+	</FieldGrid>
+	{#snippet actions()}
+		<ActionButton tone="quiet" onclick={() => (open = false)}>Tutup</ActionButton>
+		<ActionButton onclick={handleSave} disabled={readonly}>Simpan</ActionButton>
+	{/snippet}
+</InstitutionalModal>

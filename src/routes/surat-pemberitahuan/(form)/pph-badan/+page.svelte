@@ -1,14 +1,19 @@
 <script lang="ts">
 	import { isHttpError } from '@sveltejs/kit';
 	import { tick } from 'svelte';
-	import Accordion from '$lib/components/AccordionItem.svelte';
-	import Alert from '$lib/components/Alert.svelte';
-	import Button from '$lib/components/Button.svelte';
-	import Card from '$lib/components/Card.svelte';
-	import Input from '$lib/components/Input.svelte';
-	import Label from '$lib/components/Label.svelte';
-	import Select from '$lib/components/Select.svelte';
-	import Table from '$lib/components/Table.svelte';
+	import {
+		ActionButton,
+		Breadcrumbs,
+		DisclosureItem,
+		DocumentWorkspace,
+		FormActions,
+		InlineAlert,
+		KeyValueGrid,
+		PageHeading,
+		PageLayout,
+		Stack,
+		StatusBadge
+	} from '$lib/re-ui-components';
 	import Induk from './components/Induk/_Induk.svelte';
 	import Navbar from '../Navbar.svelte';
 	import L1 from './components/L1/_L1.svelte';
@@ -491,43 +496,26 @@
 	let h21hSisaLebihSaranaPrasarana = $state(Boolean(spt.h21hSisaLebihSaranaPrasarana));
 	let h21iDividenLuarNegeri = $state(Boolean(spt.h21iDividenLuarNegeri));
 	let pernyataanBenar = $state(false);
-	let penandatangan = $state('wajib-pajak');
+	let penandatangan = $state('');
 	let currentTab = $state({
 		tab: 'Induk',
 		title: ''
 	});
 	let saveError = $state('');
+	let lampiranHeaderOpen = $state(true);
 
-	//vvvLOST & FOUNDvvv//
-	const tabs = ['Induk', 'L1', 'L2', 'L3', 'L4', 'L5', 'L6', 'L7', 'L8', 'L9', 'L10-A', 'L10-B', 'L10-C', 'L10-D', 'L11-A', 'L11-B', 'L13-A', 'L13-B', 'L13-C', 'L14'];
-	// Some lampiran only apply when the corresponding Induk question is answered "Ya" -
-	// tabs without an entry here are always applicable. L2 is also conditional per Induk H
-	// (21.c/21.d) but isn't gated here: that condition only applies to its "Bagian B"
-	// sub-section, and gating the whole tab would also hide "Bagian A", which is
-	// unconditional. L11-A/L13-A/L13-C/L14 are gated below even though L13-A/L14 are still
-	// static stubs with no working save/get and L13-C doesn't exist as a component at all yet
-	// - hiding a tab doesn't require the form behind it to be functional (see
-	// spt_pph_badan_induk_def_status memory). L11-B ("Penghitungan Biaya Pinjaman" -
-	// thin-cap/EBITDA interest limitation) has no gating question anywhere in Induk yet, so
-	// it's left ungated (always visible) rather than guessed.
-	const tabVisibility: Partial<Record<string, () => boolean>> = {
-		L3: () => e13AdaKreditPajakLuarNegeri,
-		L4: () => menerimaPenghasilanFinal || menerimaPenghasilanBukanObjekPajak,
-		L5: () => menerimaPenghasilanPp23,
-		L7: () => d8AdaKompensasiKerugian,
-		'L13-B': () => d6FasilitasBrutoVokasi || d10FasilitasBrutoLitbang,
-		'L10-A': () => h21aTransaksiHubunganIstimewa,
-		'L10-B': () => h21aTransaksiHubunganIstimewa,
-		'L10-C': () => h21aTransaksiHubunganIstimewa,
-		'L10-D': () => h21bDokumenPenentuanHargaTransfer,
-		L9: () => h21ePenyusutanAmortisasiFiskal,
-		'L11-A': () => h21fBiayaEntertainment,
-		'L13-A': () => d5FasilitasPenanamanModal || h21gFasilitasPenanamanModalDaerahTertentu,
-		'L13-C': () => e16FasilitasPenguranganPphTerutang,
-		L14: () => h21hSisaLebihSaranaPrasarana
-	};
-	let visibleTabs = $derived(tabs.filter((tab) => (tabVisibility[tab] ?? (() => true))()));
-	//^^^LOST & FOUND^^^//
+	const statusLabel =
+		spt.statusDraft === 'dilaporkan'
+			? 'Dilaporkan'
+			: spt.statusDraft === 'menunggu_pembayaran'
+				? 'Menunggu pembayaran'
+				: 'Konsep';
+	const statusTone =
+		spt.statusDraft === 'dilaporkan'
+			? 'success'
+			: spt.statusDraft === 'menunggu_pembayaran'
+				? 'attention'
+				: 'neutral';
 
 	const tabLabel = (tab: string) => {
 		if (tab !== 'L1') return tab;
@@ -535,45 +523,56 @@
 		return `L1${lampiranKode ? `-${lampiranKode}` : ''}`;
 	};
 
-	let test = $derived([
-		{tab: 'Induk', visibility: true},
-		{tab: 'L1', visibility: true},
-		{tab: 'L2', visibility: true},
-		{tab: 'L3', visibility: e13AdaKreditPajakLuarNegeri},
-		{tab: 'L4', visibility: menerimaPenghasilanFinal || menerimaPenghasilanBukanObjekPajak},
-		{tab: 'L5', visibility: menerimaPenghasilanPp23},
-		{tab: 'L6', visibility: true},
-		{tab: 'L7', visibility: d8AdaKompensasiKerugian},
-		{tab: 'L8', visibility: true},
-		{tab: 'L9', visibility: h21ePenyusutanAmortisasiFiskal},
-		{tab: 'L10-A', visibility: h21aTransaksiHubunganIstimewa},
-		{tab: 'L10-B', visibility: h21aTransaksiHubunganIstimewa},
-		{tab: 'L10-C', visibility: h21aTransaksiHubunganIstimewa},
-		{tab: 'L10-D', visibility: h21bDokumenPenentuanHargaTransfer},
-		{tab: 'L11-A', visibility: h21fBiayaEntertainment},
-		{tab: 'L11-B', visibility: true},
-		{tab: 'L13-A', visibility: d5FasilitasPenanamanModal || h21gFasilitasPenanamanModalDaerahTertentu},
-		{tab: 'L13-B', visibility: d6FasilitasBrutoVokasi || d10FasilitasBrutoLitbang},
-		{tab: 'L13-C', visibility: e16FasilitasPenguranganPphTerutang},
-		{tab: 'L14', visibility: h21hSisaLebihSaranaPrasarana},
-	])
-
-	// $effect(() => {
-	// 	if (!test.find((t) => t.tab === currentTab.tab)?.visibility) {
-	// 		currentTab.tab = 'Induk';
-	// 	}
-	// });
+	const tabs = $derived([
+		{ tab: 'Induk', visibility: true },
+		{ tab: 'L1', visibility: true },
+		{ tab: 'L2', visibility: true },
+		{ tab: 'L3', visibility: e13AdaKreditPajakLuarNegeri },
+		{ tab: 'L4', visibility: menerimaPenghasilanFinal || menerimaPenghasilanBukanObjekPajak },
+		{ tab: 'L5', visibility: menerimaPenghasilanPp23 },
+		{ tab: 'L6', visibility: true },
+		{ tab: 'L7', visibility: d8AdaKompensasiKerugian },
+		{ tab: 'L8', visibility: true },
+		{ tab: 'L9', visibility: h21ePenyusutanAmortisasiFiskal },
+		{ tab: 'L10-A', visibility: h21aTransaksiHubunganIstimewa },
+		{ tab: 'L10-B', visibility: h21aTransaksiHubunganIstimewa },
+		{ tab: 'L10-C', visibility: h21aTransaksiHubunganIstimewa },
+		{ tab: 'L10-D', visibility: h21bDokumenPenentuanHargaTransfer },
+		{ tab: 'L11-A', visibility: h21fBiayaEntertainment },
+		{ tab: 'L11-B', visibility: true },
+		{
+			tab: 'L13-A',
+			visibility: d5FasilitasPenanamanModal || h21gFasilitasPenanamanModalDaerahTertentu
+		},
+		{ tab: 'L13-B', visibility: d6FasilitasBrutoVokasi || d10FasilitasBrutoLitbang },
+		{ tab: 'L13-C', visibility: e16FasilitasPenguranganPphTerutang },
+		{ tab: 'L14', visibility: h21hSisaLebihSaranaPrasarana }
+	]);
 </script>
 
-<Card>
-	{#snippet head()}
-		<div class="tw:flex tw:w-full tw:items-center tw:justify-between">
-			<span class="tw:text-2xl">SPT Tahunan PPh Badan</span>
-			<span class="tw:text-sm">Tahun Pajak {spt.tahunPajak}</span>
-		</div>
-	{/snippet}
-	{#snippet body()}
-		<form
+<svelte:head><title>SPT Tahunan PPh Badan</title></svelte:head>
+
+<form {...postForm} id={postFormId} hidden></form>
+
+{#snippet headingActions()}
+	<StatusBadge label={statusLabel} tone={statusTone} />
+{/snippet}
+
+<PageLayout contentWidth="1500px">
+	<Breadcrumbs
+		items={[
+			{ label: 'Beranda', href: '/' },
+			{ label: 'Surat Pemberitahuan', href: '/surat-pemberitahuan/konsep' },
+			{ label: 'SPT Tahunan PPh Badan' }
+		]}
+	/>
+	<PageHeading
+		eyebrow={`Tahun Pajak ${spt.tahunPajak}`}
+		title="SPT Tahunan PPh Badan"
+		actions={headingActions}
+	/>
+
+	<form
 			novalidate
 			onkeydown={(e) => {
 				if (e.key === 'Enter' && !(e.target instanceof HTMLTextAreaElement)) {
@@ -690,258 +689,258 @@
 			/>
 			<input type="hidden" name="h21hSisaLebihSaranaPrasarana" value={h21hSisaLebihSaranaPrasarana} />
 			<input type="hidden" name="h21iDividenLuarNegeri" value={h21iDividenLuarNegeri} />
+			<input type="hidden" name="pernyataanBenar" value={pernyataanBenar} />
+			<input type="hidden" name="penandatangan" value={penandatangan} />
 
-			<!-- NAVBAR -->
-			<!-- <header class="tw:mb-5">
-				<nav class="tw:overflow-x-auto tw:border-b tw:border-[#A9A9A9]">
-					<ul class="tw:m-0! tw:flex tw:min-w-max tw:flex-row tw:p-0!">
-						{#each visibleTabs as tab}
-							<li class:active-tab={currentTab.tab === tab}>
-								<button type="button" onclick={() => (currentTab.tab = tab)}>{tabLabel(tab)}</button>
-							</li>
-						{/each}
-					</ul>
-				</nav>
-			</header> -->
-			<Navbar tabs={test} bind:currentTab={currentTab.tab} specialLabel={tabLabel}/>
+			<DocumentWorkspace>
+				<Stack gap="14px">
+					<Navbar {tabs} currentTab={currentTab.tab} onchange={(tab) => (currentTab.tab = tab)} specialLabel={tabLabel} />
 
-			<Induk
-				bind:currentTab
-				{spt}
-				{readonly}
-				{postFormId}
-				bind:sektorUsaha
-				bind:menerimaPenghasilanPp23
-				bind:hanyaPenghasilanPp23
-				bind:menerimaPenghasilanFinal
-				bind:menerimaPenghasilanBukanObjekPajak
-				{l4a}
-				{l4b}
-				computed={indukDEF}
-				bind:d5FasilitasPenanamanModal
-				bind:d6FasilitasBrutoVokasi
-				bind:d8AdaKompensasiKerugian
-				bind:d10FasilitasBrutoLitbang
-				bind:tarifPajak
-				bind:persentaseTarifLainnya
-				bind:e13AdaKreditPajakLuarNegeri
-				bind:e14AngsuranPph25TahunBerjalan
-				bind:e15StpPph25
-				bind:e16FasilitasPenguranganPphTerutang
-				bind:f17bAdaSkPengangsuranPenundaan
-				bind:f17bJumlahDiangsurDitunda
-				bind:f19aMetodePengembalian
-				{f18a}
-				{f18b}
-				bind:g20WajibLaporAngsuranPph25
-				bind:h21aTransaksiHubunganIstimewa
-				bind:h21bDokumenPenentuanHargaTransfer
-				bind:h21cPenanamanModalAfiliasi
-				bind:h21dUtangPiutangAfiliasi
-				bind:h21ePenyusutanAmortisasiFiskal
-				bind:h21fBiayaEntertainment
-				bind:h21gFasilitasPenanamanModalDaerahTertentu
-				bind:h21hSisaLebihSaranaPrasarana
-				bind:h21iDividenLuarNegeri
-			></Induk>
-
-			<!-- Lampiran -->
-			<div class="{currentTab.tab === "Induk" ? "tw:hidden" : ""}">
-				<h2>{currentTab.title}</h2>
-
-				<!-- Header -->
-				<Card>
-				{#snippet head()}
-					<span class="tw:text-xl!">HEADER</span>
-				{/snippet}
-				{#snippet body()}
-					<div>
-						<Table class="tw:table-fixed tw:min-w-full tw:border-collapse" >
-						{#snippet head()}
-							<tr class="tw:hidden">
-								<td><Input hidden/></td>
-							</tr>
-						{/snippet}
-						{#snippet body()}
-							<tr>
-								<td class="tw:w-[20rem]"><span>Tahun Pajak/Bagian Tahun Pajak</span></td>
-								<td><Input type={"text"} value={spt.tahunPajak} disabled /></td>
-							</tr>
-							<tr>
-								<td><span class="tw:mr-10">Nomor Identitas WP</span></td>
-								<td><Input type={"text"} value={"00000000000000000"} disabled /></td>
-							</tr>
-						{/snippet}
-						</Table>
+					<div hidden={currentTab.tab === 'Induk'}>
+						<DisclosureItem
+							title={currentTab.title || tabLabel(currentTab.tab)}
+							meta="Identitas wajib pajak"
+							bind:open={lampiranHeaderOpen}
+						>
+							<KeyValueGrid
+								columns={2}
+								items={[
+									{
+										label: 'Tahun Pajak / Bagian Tahun Pajak',
+										value: spt.tahunPajak
+									},
+									{ label: 'Nomor Identitas Wajib Pajak', value: spt.npwp }
+								]}
+							/>
+						</DisclosureItem>
 					</div>
-				{/snippet}
-				</Card>
-			</div>
 
-			<L1
-				bind:currentTab
-				{sektorUsaha}
-				templatesBySektor={lampiran1LabaRugiTemplatesBySektor}
-				bind:labaRugi
-				neracaTemplatesBySektor={lampiran1NeracaTemplatesBySektor}
-				bind:neraca
-				{readonly}
-				{kodeKoreksiFiskalOptions}
-			/>
-			<L2 bind:currentTab bind:l2a bind:l2b {readonly} {negaraOptions}/>
-			<L3
-				bind:currentTab
-				bind:l3a
-				bind:l3aPengembalianPengurangan
-				bind:l3b
-				{readonly}
-				{negaraOptions}
-				jenisPenghasilanOptions={jenisPenghasilanKreditPajakLuarNegeriOptions}
-				{mataUangOptions}
-				jenisPajakOptions={jenisPajakDipotongDipungutOptions}
-			/>
-			<L4 bind:currentTab bind:l4a bind:l4b {readonly} {objekPajakOptions} jenisPenghasilanOptions={jenisPenghasilanBukanObjekPajakOptions}/>
-			<L5 bind:currentTab bind:l5a bind:l5bDipotong {readonly}/>
-			<L6
-				bind:currentTab
-				bind:dasarAngsuran={l6DasarAngsuran}
-				bind:kompensasiKerugian={l6KompensasiKerugian}
-				bind:pphTerutang={l6PphTerutang}
-				bind:kreditPajakTahunLalu={l6KreditPajakTahunLalu}
-				onKompensasiKerugianEdit={() => (l6KompensasiKerugianTouched = true)}
-				onPphTerutangEdit={() => (l6PphTerutangTouched = true)}
-				{readonly}
-			/>
-			<L7 bind:currentTab bind:l7 {readonly}/>
-			<L8
-				bind:currentTab
-				bind:jumlahPeredaranBruto={l8JumlahPeredaranBruto}
-				penghasilanKenaPajak={l8PenghasilanKenaPajak}
-				{readonly}
-			/>
-			<L9
-				bind:currentTab
-				bind:l9
-				bind:jumlahPenyusutanKomersialA={l9AJumlahPenyusutanKomersial}
-				bind:jumlahPenyusutanKomersialB={l9BJumlahPenyusutanKomersial}
-				bind:jumlahAmortisasiKomersialC={l9CJumlahAmortisasiKomersial}
-				{readonly}
-				{jenisHartaOptions}
-				{metodePenyusutanOptions}
-			/>
-			<L10A
-				bind:currentTab
-				bind:l10a
-				{readonly}
-				{negaraOptions}
-				{bentukHubunganOptions}
-				{jenisTransaksiOptions}
-				{metodeHargaTransferOptions}
-			/>
-			<L10B
-				bind:currentTab
-				bind:hubunganA={l10bHubunganA}
-				bind:hubunganB={l10bHubunganB}
-				bind:hubunganC={l10bHubunganC}
-				bind:hubunganD={l10bHubunganD}
-				bind:transaksiA={l10bTransaksiA}
-				bind:transaksiB={l10bTransaksiB}
-				bind:transaksiC={l10bTransaksiC}
-				bind:dokumentasiA={l10bDokumentasiA}
-				bind:dokumentasiB={l10bDokumentasiB}
-				bind:dokumentasiC={l10bDokumentasiC}
-				bind:dokumentasiD={l10bDokumentasiD}
-				bind:dokumentasiE={l10bDokumentasiE}
-				bind:dokumenA={l10bDokumenA}
-				bind:dokumenB={l10bDokumenB}
-				bind:dokumenC={l10bDokumenC}
-				{readonly}
-			/>
-			<L10C
-				bind:currentTab
-				bind:l10c
-				bind:ditentukanPrinsip={l10cDitentukanPrinsip}
-				{readonly}
-				{negaraOptions}
-				{jenisTransaksiOptions}
-			/>
-			<L10D
-				bind:currentTab
-				bind:dokumenIndukA={l10dDokumenIndukA}
-				bind:dokumenIndukB={l10dDokumenIndukB}
-				bind:dokumenIndukC={l10dDokumenIndukC}
-				bind:dokumenIndukD={l10dDokumenIndukD}
-				bind:dokumenIndukE={l10dDokumenIndukE}
-				bind:dokumenLokalA={l10dDokumenLokalA}
-				bind:dokumenLokalB={l10dDokumenLokalB}
-				bind:dokumenLokalC={l10dDokumenLokalC}
-				bind:dokumenLokalD={l10dDokumenLokalD}
-				bind:dokumenLokalE={l10dDokumenLokalE}
-				bind:tanggalDokumenIndukTersedia={l10dTanggalDokumenIndukTersedia}
-				bind:tanggalDokumenLokalTersedia={l10dTanggalDokumenLokalTersedia}
-				{readonly}
-			/>
-			<L11A bind:currentTab/>
-			<L11B bind:currentTab/>
-			<L13A bind:currentTab/>
-			<L13B
-				bind:currentTab
-				bind:l13bA
-				bind:l13bB
-				bind:l13bC
-				bind:l13bDTermanfaatkanTahunSebelumnya
-				penghasilanKenaPajakSebelumFasilitas={indukDEF.litbangCapBase}
-				{readonly}
-			/>
-			<L13C bind:currentTab/>
-			<L14 bind:currentTab/>
+					<div id="spt-panel-induk" role="tabpanel" hidden={currentTab.tab !== 'Induk'}>
+						<Induk
+							bind:currentTab
+							{spt}
+							{readonly}
+							{postFormId}
+							bind:sektorUsaha
+							bind:menerimaPenghasilanPp23
+							bind:hanyaPenghasilanPp23
+							bind:menerimaPenghasilanFinal
+							bind:menerimaPenghasilanBukanObjekPajak
+							{l4a}
+							{l4b}
+							computed={indukDEF}
+							bind:d5FasilitasPenanamanModal
+							bind:d6FasilitasBrutoVokasi
+							bind:d8AdaKompensasiKerugian
+							bind:d10FasilitasBrutoLitbang
+							bind:tarifPajak
+							bind:persentaseTarifLainnya
+							bind:e13AdaKreditPajakLuarNegeri
+							bind:e14AngsuranPph25TahunBerjalan
+							bind:e15StpPph25
+							bind:e16FasilitasPenguranganPphTerutang
+							bind:f17bAdaSkPengangsuranPenundaan
+							bind:f17bJumlahDiangsurDitunda
+							bind:f19aMetodePengembalian
+							{f18a}
+							{f18b}
+							bind:g20WajibLaporAngsuranPph25
+							bind:h21aTransaksiHubunganIstimewa
+							bind:h21bDokumenPenentuanHargaTransfer
+							bind:h21cPenanamanModalAfiliasi
+							bind:h21dUtangPiutangAfiliasi
+							bind:h21ePenyusutanAmortisasiFiskal
+							bind:h21fBiayaEntertainment
+							bind:h21gFasilitasPenanamanModalDaerahTertentu
+							bind:h21hSisaLebihSaranaPrasarana
+							bind:h21iDividenLuarNegeri
+							bind:pernyataanBenar
+							bind:penandatangan
+						/>
+					</div>
 
-			{#if saveError}
-				<div class="tw:mt-4">
-					<Alert bg={'#dc2626'}>
-						{#snippet head()}
-							<span class="tw:text-white">!</span>
-						{/snippet}
-						{#snippet body()}
-							<span class="tw:text-white">{saveError}</span>
-						{/snippet}
-					</Alert>
-				</div>
-			{/if}
+					<div id="spt-panel-l1" role="tabpanel" hidden={currentTab.tab !== 'L1'}>
+						<L1
+							bind:currentTab
+							{sektorUsaha}
+							templatesBySektor={lampiran1LabaRugiTemplatesBySektor}
+							bind:labaRugi
+							neracaTemplatesBySektor={lampiran1NeracaTemplatesBySektor}
+							bind:neraca
+							{readonly}
+							{kodeKoreksiFiskalOptions}
+						/>
+					</div>
+					<div id="spt-panel-l2" role="tabpanel" hidden={currentTab.tab !== 'L2'}>
+						<L2 bind:currentTab bind:l2a bind:l2b {readonly} {negaraOptions} />
+					</div>
+					<div id="spt-panel-l3" role="tabpanel" hidden={currentTab.tab !== 'L3'}>
+						<L3
+							bind:currentTab
+							bind:l3a
+							bind:l3aPengembalianPengurangan
+							bind:l3b
+							{readonly}
+							{negaraOptions}
+							jenisPenghasilanOptions={jenisPenghasilanKreditPajakLuarNegeriOptions}
+							{mataUangOptions}
+							jenisPajakOptions={jenisPajakDipotongDipungutOptions}
+						/>
+					</div>
+					<div id="spt-panel-l4" role="tabpanel" hidden={currentTab.tab !== 'L4'}>
+						<L4
+							bind:currentTab
+							bind:l4a
+							bind:l4b
+							{readonly}
+							{objekPajakOptions}
+							jenisPenghasilanOptions={jenisPenghasilanBukanObjekPajakOptions}
+						/>
+					</div>
+					<div id="spt-panel-l5" role="tabpanel" hidden={currentTab.tab !== 'L5'}>
+						<L5 bind:currentTab bind:l5a bind:l5bDipotong {readonly} />
+					</div>
+					<div id="spt-panel-l6" role="tabpanel" hidden={currentTab.tab !== 'L6'}>
+						<L6
+							bind:currentTab
+							bind:dasarAngsuran={l6DasarAngsuran}
+							bind:kompensasiKerugian={l6KompensasiKerugian}
+							bind:pphTerutang={l6PphTerutang}
+							bind:kreditPajakTahunLalu={l6KreditPajakTahunLalu}
+							onKompensasiKerugianEdit={() => (l6KompensasiKerugianTouched = true)}
+							onPphTerutangEdit={() => (l6PphTerutangTouched = true)}
+							{readonly}
+						/>
+					</div>
+					<div id="spt-panel-l7" role="tabpanel" hidden={currentTab.tab !== 'L7'}>
+						<L7 bind:currentTab bind:l7 {readonly} />
+					</div>
+					<div id="spt-panel-l8" role="tabpanel" hidden={currentTab.tab !== 'L8'}>
+						<L8
+							bind:currentTab
+							bind:jumlahPeredaranBruto={l8JumlahPeredaranBruto}
+							penghasilanKenaPajak={l8PenghasilanKenaPajak}
+							{readonly}
+						/>
+					</div>
+					<div id="spt-panel-l9" role="tabpanel" hidden={currentTab.tab !== 'L9'}>
+						<L9
+							bind:currentTab
+							bind:l9
+							bind:jumlahPenyusutanKomersialA={l9AJumlahPenyusutanKomersial}
+							bind:jumlahPenyusutanKomersialB={l9BJumlahPenyusutanKomersial}
+							bind:jumlahAmortisasiKomersialC={l9CJumlahAmortisasiKomersial}
+							{readonly}
+							{jenisHartaOptions}
+							{metodePenyusutanOptions}
+						/>
+					</div>
+					<div id="spt-panel-l10-a" role="tabpanel" hidden={currentTab.tab !== 'L10-A'}>
+						<L10A
+							bind:currentTab
+							bind:l10a
+							{readonly}
+							{negaraOptions}
+							{bentukHubunganOptions}
+							{jenisTransaksiOptions}
+							{metodeHargaTransferOptions}
+						/>
+					</div>
+					<div id="spt-panel-l10-b" role="tabpanel" hidden={currentTab.tab !== 'L10-B'}>
+						<L10B
+							bind:currentTab
+							bind:hubunganA={l10bHubunganA}
+							bind:hubunganB={l10bHubunganB}
+							bind:hubunganC={l10bHubunganC}
+							bind:hubunganD={l10bHubunganD}
+							bind:transaksiA={l10bTransaksiA}
+							bind:transaksiB={l10bTransaksiB}
+							bind:transaksiC={l10bTransaksiC}
+							bind:dokumentasiA={l10bDokumentasiA}
+							bind:dokumentasiB={l10bDokumentasiB}
+							bind:dokumentasiC={l10bDokumentasiC}
+							bind:dokumentasiD={l10bDokumentasiD}
+							bind:dokumentasiE={l10bDokumentasiE}
+							bind:dokumenA={l10bDokumenA}
+							bind:dokumenB={l10bDokumenB}
+							bind:dokumenC={l10bDokumenC}
+							{readonly}
+						/>
+					</div>
+					<div id="spt-panel-l10-c" role="tabpanel" hidden={currentTab.tab !== 'L10-C'}>
+						<L10C
+							bind:currentTab
+							bind:l10c
+							bind:ditentukanPrinsip={l10cDitentukanPrinsip}
+							{readonly}
+							{negaraOptions}
+							{jenisTransaksiOptions}
+						/>
+					</div>
+					<div id="spt-panel-l10-d" role="tabpanel" hidden={currentTab.tab !== 'L10-D'}>
+						<L10D
+							bind:currentTab
+							bind:dokumenIndukA={l10dDokumenIndukA}
+							bind:dokumenIndukB={l10dDokumenIndukB}
+							bind:dokumenIndukC={l10dDokumenIndukC}
+							bind:dokumenIndukD={l10dDokumenIndukD}
+							bind:dokumenIndukE={l10dDokumenIndukE}
+							bind:dokumenLokalA={l10dDokumenLokalA}
+							bind:dokumenLokalB={l10dDokumenLokalB}
+							bind:dokumenLokalC={l10dDokumenLokalC}
+							bind:dokumenLokalD={l10dDokumenLokalD}
+							bind:dokumenLokalE={l10dDokumenLokalE}
+							bind:tanggalDokumenIndukTersedia={l10dTanggalDokumenIndukTersedia}
+							bind:tanggalDokumenLokalTersedia={l10dTanggalDokumenLokalTersedia}
+							{readonly}
+						/>
+					</div>
+					<div id="spt-panel-l11-a" role="tabpanel" hidden={currentTab.tab !== 'L11-A'}>
+						<L11A bind:currentTab />
+					</div>
+					<div id="spt-panel-l11-b" role="tabpanel" hidden={currentTab.tab !== 'L11-B'}>
+						<L11B bind:currentTab />
+					</div>
+					<div id="spt-panel-l13-a" role="tabpanel" hidden={currentTab.tab !== 'L13-A'}>
+						<L13A bind:currentTab />
+					</div>
+					<div id="spt-panel-l13-b" role="tabpanel" hidden={currentTab.tab !== 'L13-B'}>
+						<L13B
+							bind:currentTab
+							bind:l13bA
+							bind:l13bB
+							bind:l13bC
+							bind:l13bDTermanfaatkanTahunSebelumnya
+							penghasilanKenaPajakSebelumFasilitas={indukDEF.litbangCapBase}
+							{readonly}
+						/>
+					</div>
+					<div id="spt-panel-l13-c" role="tabpanel" hidden={currentTab.tab !== 'L13-C'}>
+						<L13C bind:currentTab />
+					</div>
+					<div id="spt-panel-l14" role="tabpanel" hidden={currentTab.tab !== 'L14'}>
+						<L14 bind:currentTab />
+					</div>
 
-			{#if !readonly}
-				<div class="tw:mt-4 tw:flex tw:gap-2">
-					<Button type="submit" name="action" value="Simpan Konsep" color="var(--color-secondary)"><span class="tw:text-white">Simpan Konsep</span></Button>
-					<Button type="submit" name="action" value="Simpan Lapor" color="var(--color-secondary)"><span class="tw:text-white">Simpan Lapor</span></Button>
-				</div>
-			{/if}
+					{#if saveError}
+						<InlineAlert
+							tone="error"
+							title="SPT belum dapat disimpan"
+							message={saveError}
+						/>
+					{/if}
+
+					{#if !readonly}
+						<FormActions message="Periksa kembali seluruh bagian sebelum menyimpan atau melaporkan SPT.">
+							<ActionButton type="submit" name="action" value="Simpan Konsep" tone="quiet">
+								Simpan Konsep
+							</ActionButton>
+							<ActionButton type="submit" name="action" value="Simpan Lapor">
+								Simpan Lapor
+							</ActionButton>
+						</FormActions>
+					{/if}
+				</Stack>
+			</DocumentWorkspace>
 		</form>
-		<form {...postForm} id={postFormId}></form>
-	{/snippet}
-</Card>
-
-<style>
-	nav button {
-		padding: 1rem;
-	}
-
-	nav li {
-		position: relative;
-	}
-
-	nav li::before {
-		bottom: 0;
-		left: 0;
-		height: 1px;
-		width: 0;
-		background-color: brown;
-		content: '';
-		position: absolute;
-		transition: 300ms;
-	}
-
-	nav li:hover::before,
-	nav li.active-tab::before {
-		width: 100%;
-	}
-</style>
+</PageLayout>

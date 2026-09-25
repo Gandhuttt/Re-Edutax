@@ -37,7 +37,7 @@
 		border-radius: 999px;
 		background: var(--ui-paper-deep);
 		color: var(--ui-muted);
-		font-size: 11px;
+		font-size: 13px;
 		font-weight: 750;
 		letter-spacing: 0.03em;
 	}
