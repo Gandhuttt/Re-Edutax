@@ -78,7 +78,7 @@
 				<FileUploadField label="Pilih Rekening Bank" buttonLabel="File" />
 				<ActionButton type="button" tone="quiet">Clear</ActionButton>
 			</Stack>
-			<FieldGrid min="220px">
+			<FieldGrid columns={3}>
 				<FormField label="Nomor Rekening" disabled />
 				<FormField label="Nama Bank" disabled />
 				<FormField label="Nama Pemilik Rekening" disabled />

@@ -1,11 +1,8 @@
 <script lang="ts">
-	import Button from '$lib/components/Button.svelte';
-	import Card from '$lib/components/Card.svelte';
-	import Input from '$lib/components/Input.svelte';
-	import Label from '$lib/components/Label.svelte';
-	import Select from '$lib/components/Select.svelte';
+	import { page as appPage } from '$app/state';
 	import { formatMonth } from '$lib/helpers/date';
-	import { getContext, untrack } from 'svelte';
+	import { ActionButton, Breadcrumbs, DocumentWorkspace, FieldGrid, FormActions, FormField, FormSection, InlineAlert, LookupField, PageLayout, RupiahField, SelectField, ServiceWorkspace, Stack } from '$lib/re-ui-components';
+	import { untrack } from 'svelte';
 	import { getFasilitasPajakBpu } from '../../fasilitasPajak.remote';
 	import { getJenisDokumenEbupot } from '../../jenisDokumen.remote';
 	import { getObjekPajakBpu } from '../../objekPajakBpu.remote';
@@ -16,351 +13,102 @@
 	import { updateBpu } from './updateBpu.remote';
 
 	const bpu = await getBpu();
-	const [objekPajakOptions, fasilitasOptions, jenisDokumenOptions] = await Promise.all([
-		getObjekPajakBpu(),
-		getFasilitasPajakBpu(),
-		getJenisDokumenEbupot()
-	]);
-
+	const [objekPajakOptions, fasilitasOptions, jenisDokumenOptions] = await Promise.all([getObjekPajakBpu(), getFasilitasPajakBpu(), getJenisDokumenEbupot()]);
 	let masaPajakState = $state(bpu.masaPajak);
 	let tahunState = $state(bpu.tahun);
-	let nomorIdentitasWpState = $state(bpu.nomorIdentitasWp);
-	let namaPenerimaState = $state(bpu.namaPenerima);
+	let nomorIdentitasWpState = $state(bpu.nomorIdentitasWp ?? '');
+	let namaPenerimaState = $state(bpu.namaPenerima ?? '');
 	let kodeObjekPajakIdState = $state(bpu.kodeObjekPajakId ?? '');
 	let fasilitasPajakIdState = $state(bpu.fasilitasPajakId ?? '');
 	const selectedObjekPajak = $derived(objekPajakOptions.find((o) => o.id === kodeObjekPajakIdState));
 	const selectedFasilitas = $derived(fasilitasOptions.find((f) => f.id === fasilitasPajakIdState));
 	const nitkuPenerima = $derived(nomorIdentitasWpState ? `${nomorIdentitasWpState}000000` : '');
 	const nitkuPemotong = `${bpu.npwpPemotong}000000`;
-
-	// Client-side mirror of resolveTarif.ts, for display only -- the server
-	// is the source of truth at save time. See docs/ui-reference/coretax/
-	// ebupot/NOTES.md "BPU: Fasilitas Pajak and manual-rate objects": Coretax
-	// unlocks Tarif(%) for manual entry when the matching ItemList entry has
-	// ManualTaxRate: "TRUE", instead of leaving it derived-and-readonly.
 	const resolvedTarif = $derived.by(() => {
 		if (!selectedObjekPajak || !selectedFasilitas) return null;
-		const item = selectedObjekPajak.parameterData.ItemList.find(
-			(entry) =>
-				entry.TaxCertificateCode === selectedFasilitas.kode ||
-				entry.TaxCertificateCodes?.includes(selectedFasilitas.kode)
-		);
+		const item = selectedObjekPajak.parameterData.ItemList.find((entry) => entry.TaxCertificateCode === selectedFasilitas.kode || entry.TaxCertificateCodes?.includes(selectedFasilitas.kode));
 		if (!item) return null;
 		const manual = item.ManualTaxRate?.toUpperCase() === 'TRUE';
 		const manualIncomeTax = item.ManualIncomeTaxWithheld?.toUpperCase() === 'TRUE';
 		const tarif = typeof item.Rate === 'number' ? item.Rate : (item.Rates?.[0]?.Rate ?? 0);
 		return { tarif, manual, manualIncomeTax };
 	});
-
 	let dasarPengenaanPajakState = $state(bpu.dasarPengenaanPajak);
 	let tarifManualState = $state(bpu.tarif);
-	$effect(() => {
-		// Every combo change resets Tarif to Coretax's default for it, even
-		// when manual entry is allowed -- matches live behavior (switching
-		// Fasilitas re-populates Tarif with the new default rather than
-		// preserving a prior manual override).
-		if (resolvedTarif) tarifManualState = resolvedTarif.tarif;
-	});
-
-	const pajakPenghasilanDefault = $derived(
-		Math.round(((dasarPengenaanPajakState ?? 0) * tarifManualState) / 100)
-	);
+	$effect(() => { if (resolvedTarif) tarifManualState = resolvedTarif.tarif; });
+	const pajakPenghasilanDefault = $derived(Math.round(((dasarPengenaanPajakState ?? 0) * tarifManualState) / 100));
 	let pajakPenghasilanManualState = $state(bpu.pajakPenghasilan);
-	$effect(() => {
-		// Resets only when the combo changes (same trigger as Tarif's reset
-		// above), not on every DPP/Tarif keystroke -- otherwise a manual
-		// Pajak Penghasilan override would be impossible to keep, since
-		// editing DPP or Tarif afterward would silently wipe it back to the
-		// derived default. `untrack` reads the current default without
-		// subscribing to its own DPP/Tarif dependencies.
-		if (resolvedTarif) pajakPenghasilanManualState = untrack(() => pajakPenghasilanDefault);
-	});
-
+	$effect(() => { if (resolvedTarif) pajakPenghasilanManualState = untrack(() => pajakPenghasilanDefault); });
 	async function cariNpwpPenerima() {
 		const wp = await getWajibPajak({ npwp: nomorIdentitasWpState });
-		if (wp) {
-			namaPenerimaState = wp.nama;
-		} else if (
-			nomorIdentitasWpState &&
-			confirm(
-				`TIN ${nomorIdentitasWpState} saat ini belum terdaftar dalam sistem. Sistem akan otomatis menggunakan TIN 9990000000999000 sebagai TIN penerima penghasilan.`
-			)
-		) {
+		if (wp) namaPenerimaState = wp.nama;
+		else if (nomorIdentitasWpState && confirm(`TIN ${nomorIdentitasWpState} saat ini belum terdaftar dalam sistem. Sistem akan otomatis menggunakan TIN 9990000000999000 sebagai TIN penerima penghasilan.`)) {
 			namaPenerimaState = `PENERIMA PENGHASILAN#${nomorIdentitasWpState}`;
 			nomorIdentitasWpState = '9990000000999000';
 		}
 	}
-
 	const months = Array.from({ length: 12 }, (_, i) => i + 1);
+	let sidebarOpen = $state(false);
+	const accountName = $derived(String(appPage.data.user?.name ?? 'Wajib Pajak'));
+	const accountNpwp = $derived(String(appPage.data.user?.username ?? ''));
 </script>
 
+<svelte:head><title>e-Bupot BPPU</title></svelte:head>
+
 {#snippet formContent()}
-	<div class="tw:flex tw:flex-col tw:gap-5 tw:w-full">
-		<div class="tw:flex tw:flex-row tw:gap-5">
-			<div class="tw:basis-1/2">
-				<Card>
-					{#snippet head()}
-						<span class="tw:text-xl">Informasi Umum</span>
-					{/snippet}
-					{#snippet body()}
-						<div class="tw:flex tw:flex-col tw:gap-3 tw:px-3">
-							<Label>
-								<span>Masa Pajak</span>
-								<div class="tw:flex tw:flex-row tw:gap-2">
-									<Select
-										name="masaPajak"
-										id={getContext('id')}
-										bind:value={masaPajakState}
-										disabled={!bpu.canEdit}
-									>
-										{#each months as m (m)}
-											<option value={m}>{formatMonth(m)}</option>
-										{/each}
-									</Select>
-									<Input
-										name="tahun"
-										type="number"
-										bind:value={tahunState}
-										disabled={!bpu.canEdit}
-										class="tw:w-30"
-									/>
-								</div>
-							</Label>
-							<Label>
-								<span>Status</span>
-								<Input type="text" id={getContext('id')} value={bpu.status} disabled />
-							</Label>
-							<Label>
-								<span>Nomor Identitas WP (Penerima)</span>
-								<div class="tw:flex tw:flex-row">
-									<Input
-										class={bpu.canEdit ? 'tw:rounded-e-none! tw:border-e-0' : ''}
-										name="nomorIdentitasWp"
-										type="text"
-										id={getContext('id')}
-										bind:value={nomorIdentitasWpState}
-										disabled={!bpu.canEdit}
-									/>
-									{#if bpu.canEdit}
-										<Button
-											type="button"
-											color="#FFD230"
-											class="tw:rounded-s-none! tw:w-30"
-											onclick={cariNpwpPenerima}
-										>
-											Cari NPWP
-										</Button>
-									{/if}
-								</div>
-							</Label>
-							<Label>
-								<span>Nama Penerima</span>
-								<Input
-									name="namaPenerima"
-									type="text"
-									id={getContext('id')}
-									bind:value={namaPenerimaState}
-									disabled={!bpu.canEdit}
-								/>
-							</Label>
-							<Label>
-								<span>NITKU/Nomor Identitas Subunit Organisasi Penerima Penghasilan</span>
-								<Input type="text" id={getContext('id')} value={nitkuPenerima} disabled />
-							</Label>
-						</div>
-					{/snippet}
-				</Card>
-			</div>
-
-			<div class="tw:basis-1/2">
-				<Card>
-					{#snippet head()}
-						<span class="tw:text-xl">Dokumen Referensi</span>
-					{/snippet}
-					{#snippet body()}
-						<div class="tw:flex tw:flex-col tw:gap-3 tw:px-3">
-							<Label>
-								<span>Jenis Dokumen</span>
-								<Select
-									name="jenisDokumenId"
-									id={getContext('id')}
-									value={bpu.jenisDokumenId ?? ''}
-									disabled={!bpu.canEdit}
-								>
-									<option value="" disabled>Please select</option>
-									{#each jenisDokumenOptions as d (d.id)}
-										<option value={d.id}>{d.nama}</option>
-									{/each}
-								</Select>
-							</Label>
-							<Label>
-								<span>Nomor Dokumen</span>
-								<Input
-									name="nomorDokumen"
-									type="text"
-									id={getContext('id')}
-									value={bpu.nomorDokumen}
-									disabled={!bpu.canEdit}
-								/>
-							</Label>
-							<Label>
-								<span>Tanggal Dokumen</span>
-								<Input
-									name="tanggalDokumen"
-									type="date"
-									id={getContext('id')}
-									value={bpu.tanggalDokumen ?? ''}
-									disabled={!bpu.canEdit}
-								/>
-							</Label>
-							<Label>
-								<span>NITKU/Nomor Identitas Sub Unit Organisasi</span>
-								<Input type="text" id={getContext('id')} value={nitkuPemotong} disabled />
-							</Label>
-						</div>
-					{/snippet}
-				</Card>
-			</div>
-		</div>
-
-		<Card>
-			{#snippet head()}
-				<span class="tw:text-xl">Pajak Penghasilan (Rp)</span>
-			{/snippet}
-			{#snippet body()}
-				<div class="tw:flex tw:flex-col tw:gap-3 tw:px-3">
-					<Label>
-						<span>Fasilitas Pajak yang Dimiliki oleh Penerima Penghasilan</span>
-						<Select
-							name="fasilitasPajakId"
-							id={getContext('id')}
-							bind:value={fasilitasPajakIdState}
-							disabled={!bpu.canEdit}
-						>
-							<option value="" disabled>Please select</option>
-							{#each fasilitasOptions as f (f.id)}
-								<option value={f.id}>{f.nama}</option>
-							{/each}
-						</Select>
-					</Label>
-					<Label>
-						<span>Nama Objek Pajak</span>
-						<Select
-							name="kodeObjekPajakId"
-							id={getContext('id')}
-							bind:value={kodeObjekPajakIdState}
-							disabled={!bpu.canEdit}
-						>
-							<option value="" disabled>Please select</option>
-							{#each objekPajakOptions as o (o.id)}
-								<option value={o.id}>{o.nama}</option>
-							{/each}
-						</Select>
-					</Label>
-					<Label>
-						<span>Jenis Pajak</span>
-						<Input type="text" id={getContext('id')} value={selectedObjekPajak?.pasal ?? ''} disabled />
-					</Label>
-					<Label>
-						<span>Kode Objek Pajak</span>
-						<Input type="text" id={getContext('id')} value={selectedObjekPajak?.kode ?? ''} disabled />
-					</Label>
-					<Label>
-						<span>Sifat Pajak Penghasilan</span>
-						<Input type="text" id={getContext('id')} value={selectedObjekPajak?.sifat ?? ''} disabled />
-					</Label>
-					<Label>
-						<span>Dasar Pengenaan Pajak (Rp)</span>
-						<Input
-							name="dasarPengenaanPajak"
-							type="rupiah"
-							id={getContext('id')}
-							bind:value={dasarPengenaanPajakState}
-							disabled={!bpu.canEdit}
-						/>
-					</Label>
-					<Label>
-						<span>Tarif (%)</span>
-						{#if resolvedTarif?.manual}
-							<Input
-								name="tarifManual"
-								type="text"
-								id={getContext('id')}
-								bind:value={tarifManualState}
-								disabled={!bpu.canEdit}
-							/>
-						{:else}
-							<Input type="text" id={getContext('id')} value={resolvedTarif?.tarif ?? bpu.tarif} disabled />
-						{/if}
-					</Label>
-					<Label>
-						<span>Pajak Penghasilan (Rp)</span>
-						{#if resolvedTarif?.manualIncomeTax}
-							<Input
-								name="pajakPenghasilanManual"
-								type="rupiah"
-								id={getContext('id')}
-								bind:value={pajakPenghasilanManualState}
-								disabled={!bpu.canEdit}
-							/>
-						{:else}
-							<Input type="rupiah" id={getContext('id')} value={pajakPenghasilanDefault} disabled />
-						{/if}
-					</Label>
-					<Label>
-						<span>KAP</span>
-						<Input type="text" id={getContext('id')} value={selectedObjekPajak?.kap ?? ''} disabled />
-					</Label>
-					<p class="tw:text-sm tw:text-gray-500">
-						{#if resolvedTarif?.manual || resolvedTarif?.manualIncomeTax}
-							Tarif dan/atau Pajak Penghasilan untuk kombinasi ini dapat diisi manual.
-						{:else}
-							Tarif dan Pajak Penghasilan dihitung otomatis dari kombinasi Nama Objek Pajak dan
-							Fasilitas Pajak saat disimpan.
-						{/if}
-					</p>
-				</div>
-			{/snippet}
-		</Card>
-
-		{#if bpu.canEdit}
-			<div class="tw:flex tw:flex-row tw:justify-end tw:items-center tw:gap-2">
-				<a href="/ebupot/bpu" class="tw:text-black!"><Button type="button">Kembali</Button></a>
-				<Button type="submit" class="tw:text-white" color="var(--color-secondary)">
-					Simpan Konsep
-				</Button>
-			</div>
-		{:else}
-			<div class="tw:flex tw:flex-row tw:justify-end">
-				<a href="/ebupot/bpu" class="tw:text-black!"><Button type="button">Kembali</Button></a>
-			</div>
-		{/if}
-	</div>
+	<Stack gap="18px">
+		{#if !bpu.canEdit && bpu.nomorPemotongan}<InlineAlert title="Nomor Pemotongan" message={bpu.nomorPemotongan} tone="info" />{/if}
+		<FormSection number="01" title="Informasi Umum" bordered>
+			<FieldGrid gap="14px 16px">
+				<SelectField label="Masa Pajak" name="masaPajak" value={masaPajakState} onchange={(value) => (masaPajakState = Number(value))} disabled={!bpu.canEdit} options={months.map((m) => ({ value: m, label: formatMonth(m) }))} />
+				<FormField label="Tahun" name="tahun" type="number" bind:value={() => String(tahunState), (value) => (tahunState = Number(value))} disabled={!bpu.canEdit} />
+				<FormField label="Status" value={bpu.status} disabled />
+				<LookupField label="Nomor Identitas WP (Penerima)" name="nomorIdentitasWp" bind:value={nomorIdentitasWpState} buttonLabel="Cari NPWP" buttonVisible={bpu.canEdit} disabled={!bpu.canEdit} inputmode="numeric" maxlength={16} onlookup={cariNpwpPenerima} />
+				<FormField label="Nama Penerima" name="namaPenerima" bind:value={namaPenerimaState} disabled={!bpu.canEdit} />
+				<FormField label="NITKU/Nomor Identitas Subunit Organisasi Penerima Penghasilan" value={nitkuPenerima} disabled />
+			</FieldGrid>
+		</FormSection>
+		<FormSection number="02" title="Dokumen Referensi" bordered>
+			<FieldGrid gap="14px 16px">
+				<SelectField label="Jenis Dokumen" name="jenisDokumenId" value={bpu.jenisDokumenId ?? ''} disabled={!bpu.canEdit} options={[{ value: '', label: 'Please select' }, ...jenisDokumenOptions.map((d) => ({ value: d.id, label: d.nama }))]} />
+				<FormField label="Nomor Dokumen" name="nomorDokumen" value={bpu.nomorDokumen ?? ''} disabled={!bpu.canEdit} />
+				<FormField label="Tanggal Dokumen" name="tanggalDokumen" type="date" value={bpu.tanggalDokumen ?? ''} disabled={!bpu.canEdit} />
+				<FormField label="NITKU/Nomor Identitas Sub Unit Organisasi" value={nitkuPemotong} disabled />
+			</FieldGrid>
+		</FormSection>
+		<FormSection number="03" title="Pajak Penghasilan (Rp)" bordered>
+			<FieldGrid gap="14px 16px">
+				<SelectField label="Fasilitas Pajak yang Dimiliki oleh Penerima Penghasilan" name="fasilitasPajakId" value={fasilitasPajakIdState} onchange={(value) => (fasilitasPajakIdState = String(value))} disabled={!bpu.canEdit} options={[{ value: '', label: 'Please select' }, ...fasilitasOptions.map((f) => ({ value: f.id, label: f.nama }))]} />
+				<SelectField label="Nama Objek Pajak" name="kodeObjekPajakId" value={kodeObjekPajakIdState} onchange={(value) => (kodeObjekPajakIdState = String(value))} disabled={!bpu.canEdit} options={[{ value: '', label: 'Please select' }, ...objekPajakOptions.map((o) => ({ value: o.id, label: o.nama }))]} />
+				<FormField label="Jenis Pajak" value={selectedObjekPajak?.pasal ?? ''} disabled />
+				<FormField label="Kode Objek Pajak" value={selectedObjekPajak?.kode ?? ''} disabled />
+				<FormField label="Sifat Pajak Penghasilan" value={selectedObjekPajak?.sifat ?? ''} disabled />
+				<RupiahField label="Dasar Pengenaan Pajak" name="dasarPengenaanPajak" bind:value={dasarPengenaanPajakState} disabled={!bpu.canEdit} />
+				{#if resolvedTarif?.manual}<FormField label="Tarif (%)" name="tarifManual" bind:value={() => String(tarifManualState), (value) => (tarifManualState = Number(value))} disabled={!bpu.canEdit} />{:else}<FormField label="Tarif (%)" value={String(resolvedTarif?.tarif ?? bpu.tarif)} disabled />{/if}
+				{#if resolvedTarif?.manualIncomeTax}<RupiahField label="Pajak Penghasilan (Rp)" name="pajakPenghasilanManual" bind:value={pajakPenghasilanManualState} disabled={!bpu.canEdit} />{:else}<RupiahField label="Pajak Penghasilan (Rp)" value={pajakPenghasilanDefault} disabled />{/if}
+				<FormField label="KAP" value={selectedObjekPajak?.kap ?? ''} disabled />
+			</FieldGrid>
+			<InlineAlert title="Informasi perhitungan" message={resolvedTarif?.manual || resolvedTarif?.manualIncomeTax ? 'Tarif dan/atau Pajak Penghasilan untuk kombinasi ini dapat diisi manual.' : 'Tarif dan Pajak Penghasilan dihitung otomatis dari kombinasi Nama Objek Pajak dan Fasilitas Pajak saat disimpan.'} />
+		</FormSection>
+	</Stack>
 {/snippet}
 
-<div class="tw:w-full tw:p-25">
-	<div class="tw:text-2xl tw:mb-5">EBUPOT BPPU</div>
-	{#if bpu.canEdit}
-		<form {...updateBpu}>{@render formContent()}</form>
-		<div class="tw:flex tw:flex-row tw:justify-end tw:items-center tw:mt-3 tw:gap-2">
-			{#if bpu.status !== 'SUBMITTED'}
-				<form {...submitBpu}>
-					<Button type="submit" class="tw:text-white" color="var(--color-danger)">Submit</Button>
-				</form>
-			{:else}
-				<form {...terbitkanBpu.for(bpu.id)}>
-					<Button type="submit" class="tw:text-white" color="var(--color-secondary)">
-						Terbitkan
-					</Button>
-				</form>
-			{/if}
-		</div>
-	{:else}
-		{#if bpu.nomorPemotongan}
-			<p class="tw:text-sm tw:text-gray-600 tw:mb-3">
-				Nomor Pemotongan: <span class="tw:font-mono">{bpu.nomorPemotongan}</span>
-			</p>
-		{/if}
-		{@render formContent()}
-	{/if}
-</div>
+<PageLayout contentWidth="1540px">
+	<Stack gap="16px">
+		<Breadcrumbs separator="›" items={[{ label: 'Beranda', href: '/' }, { label: 'e-Bupot' }, { label: 'BPPU', href: '/ebupot/bpu' }, { label: 'Detail' }]} />
+		<ServiceWorkspace bind:sidebarOpen identity={{ eyebrow: 'Wajib Pajak', name: accountName, identifier: accountNpwp, mark: 'EB' }} groups={[{ label: 'e-Bupot', links: [{ label: 'Bukti Potong Saya', href: '/ebupot/bukti-potong-saya' }, { label: 'BPPU', href: '/ebupot/bpu', active: true }, { label: 'BP21', href: '/ebupot/bp21' }, { label: 'BP26', href: '/ebupot/bp26' }, { label: 'BPA1', href: '/ebupot/bpa1' }, { label: 'BPA2', href: '/ebupot/bpa2' }, { label: 'Bukti Pemotongan Bulanan Pegawai Tetap', href: '/ebupot/mp' }]}]}>
+			<DocumentWorkspace>
+				{#if bpu.canEdit}
+					<form {...updateBpu}>
+						{@render formContent()}
+						<FormActions><ActionButton type="button" tone="quiet" onclick={() => (window.location.href = '/ebupot/bpu')}>Kembali</ActionButton><ActionButton type="submit">Simpan Konsep</ActionButton></FormActions>
+					</form>
+					<FormActions>{#if bpu.status !== 'SUBMITTED'}<form {...submitBpu}><ActionButton type="submit" tone="danger">Submit</ActionButton></form>{:else}<form {...terbitkanBpu.for(bpu.id)}><ActionButton type="submit">Terbitkan</ActionButton></form>{/if}</FormActions>
+				{:else}
+					{@render formContent()}
+					<FormActions><ActionButton type="button" tone="quiet" onclick={() => (window.location.href = '/ebupot/bpu')}>Kembali</ActionButton></FormActions>
+				{/if}
+			</DocumentWorkspace>
+		</ServiceWorkspace>
+	</Stack>
+</PageLayout>

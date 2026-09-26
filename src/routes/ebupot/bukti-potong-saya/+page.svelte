@@ -1,58 +1,113 @@
 <script lang="ts">
-	import Card from '$lib/components/Card.svelte';
-	import Table from '$lib/components/Table.svelte';
+	import { page as appPage } from '$app/state';
 	import { formatMonth } from '$lib/helpers/date';
+	import {
+		Breadcrumbs,
+		DataTableBody,
+		DataTableViewport,
+		DataWorkspace,
+		PageLayout,
+		PaginationBar,
+		ServiceWorkspace,
+		Stack
+	} from '$lib/re-ui-components';
 	import { listBuktiPotongSaya } from './listBuktiPotongSaya.remote';
 
 	const rupiah = new Intl.NumberFormat('id-ID', { minimumFractionDigits: 0 });
+	const issuedRecords = await listBuktiPotongSaya();
+	let sidebarOpen = $state(false);
+	let currentPage = $state(1);
+	let pageSize = $state(50);
+
+	const accountName = $derived(String(appPage.data.user?.name ?? 'Wajib Pajak'));
+	const accountNpwp = $derived(String(appPage.data.user?.username ?? ''));
+	const pagedRecords = $derived(
+		issuedRecords.slice((currentPage - 1) * pageSize, currentPage * pageSize)
+	);
 </script>
 
-<div class="tw:w-full tw:p-25">
-	<Card>
-		{#snippet head()}
-			<span class="tw:text-2xl tw:h-10 tw:flex tw:items-center">Bukti Potong Saya</span>
-		{/snippet}
-		{#snippet body()}
-			<div class="tw:min-h-100 tw:overflow-scroll">
-				<Table class="tw:w-full">
-					{#snippet head()}
-						<tr>
-							<th class="tw:w-[6rem]">Jenis</th>
-							<th class="tw:w-[15rem]">Nomor Pemotongan</th>
-							<th class="tw:w-[10rem]">Masa Pajak</th>
-							<th class="tw:w-[15rem]">NPWP Pemotong</th>
-							<th class="tw:w-[15rem]">Nama Pemotong</th>
-							<th class="tw:w-[20rem]">Objek Pajak</th>
-							<th class="tw:w-[10rem]">Pajak Penghasilan (Rp)</th>
-						</tr>
-					{/snippet}
-					{#snippet body()}
-						{#each await listBuktiPotongSaya() as row}
+<svelte:head><title>Bukti Potong Saya</title></svelte:head>
+
+<PageLayout contentWidth="1540px">
+	<Stack gap="16px">
+		<Breadcrumbs
+			separator="›"
+			items={[
+				{ label: 'Beranda', href: '/' },
+				{ label: 'e-Bupot' },
+				{ label: 'Bukti Potong Saya' }
+			]}
+		/>
+
+		<ServiceWorkspace
+			bind:sidebarOpen
+			identity={{
+				eyebrow: 'Wajib Pajak',
+				name: accountName,
+				identifier: accountNpwp,
+				mark: 'EB'
+			}}
+			groups={[
+				{
+					label: 'e-Bupot',
+					links: [
+						{ label: 'Bukti Potong Saya', href: '/ebupot/bukti-potong-saya', active: true },
+						{ label: 'BPPU', href: '/ebupot/bpu' },
+						{ label: 'BP21', href: '/ebupot/bp21' },
+						{ label: 'BP26', href: '/ebupot/bp26' },
+						{ label: 'BPA1', href: '/ebupot/bpa1' },
+						{ label: 'BPA2', href: '/ebupot/bpa2' },
+						{ label: 'Bukti Pemotongan Bulanan Pegawai Tetap', href: '/ebupot/mp' }
+					]
+				}
+			]}
+		>
+			<DataWorkspace title="Bukti Potong Saya">
+				<DataTableViewport
+					label="Daftar bukti potong saya"
+					minWidth="1260px"
+					framed={false}
+					headerTone="yellow"
+					density="compact"
+				>
+					<table>
+						<thead>
 							<tr>
+								<th scope="col" style="width: 110px">Jenis</th>
+								<th scope="col" style="width: 240px">Nomor Pemotongan</th>
+								<th scope="col" style="width: 150px">Masa Pajak</th>
+								<th scope="col" style="width: 180px">NPWP Pemotong</th>
+								<th scope="col" style="width: 220px">Nama Pemotong</th>
+								<th scope="col" style="width: 250px">Objek Pajak</th>
+								<th scope="col" class="right" style="width: 190px">Pajak Penghasilan (Rp)</th>
+							</tr>
+						</thead>
+						<DataTableBody
+							items={pagedRecords}
+							getKey={(row, index) => `${row.nomorPemotongan}-${index}`}
+							emptyColspan={7}
+							emptyText="Tidak ada data yang ditemukan."
+						>
+							{#snippet row(row)}
 								<td>{row.jenis}</td>
-								<td class="tw:font-mono">{row.nomorPemotongan}</td>
+								<td><code>{row.nomorPemotongan}</code></td>
 								<td>{formatMonth(row.masaPajak)} {row.tahun}</td>
 								<td>{row.npwpPemotong}</td>
 								<td>{row.namaPemotong}</td>
 								<td>{row.namaObjekPajak ?? ''}</td>
-								<td>{rupiah.format(row.pajakPenghasilan)}</td>
-							</tr>
-						{:else}
-							<tr>
-								<td colspan="7">Tidak ada data yang ditemukan.</td>
-							</tr>
-						{/each}
-					{/snippet}
-				</Table>
-			</div>
-		{/snippet}
-	</Card>
-</div>
-
-<style>
-	th,
-	td {
-		padding-block: 0.5rem;
-		padding-inline: 1rem;
-	}
-</style>
+								<td class="right amount">{rupiah.format(row.pajakPenghasilan)}</td>
+							{/snippet}
+						</DataTableBody>
+					</table>
+				</DataTableViewport>
+				<PaginationBar
+					bind:page={currentPage}
+					bind:pageSize
+					totalItems={issuedRecords.length}
+					pageSizeOptions={[10, 25, 50, 100]}
+					itemLabel="bukti potong"
+				/>
+			</DataWorkspace>
+		</ServiceWorkspace>
+	</Stack>
+</PageLayout>

@@ -1,13 +1,23 @@
 <script lang="ts">
-	import Button from '$lib/components/Button.svelte';
-	import Card from '$lib/components/Card.svelte';
-	import Input from '$lib/components/Input.svelte';
-	import Label from '$lib/components/Label.svelte';
-	import Select from '$lib/components/Select.svelte';
+	import { page as appPage } from '$app/state';
 	import { formatMonth } from '$lib/helpers/date';
-	import { formatRupiahDerived } from '$lib/helpers/rupiahInput';
 	import { bpa1PtkpOptions } from '$lib/helpers/ptkp-bpa1';
-	import { getContext } from 'svelte';
+	import {
+		ActionButton,
+		Breadcrumbs,
+		DocumentWorkspace,
+		FieldGrid,
+		FormActions,
+		FormField,
+		FormSection,
+		InlineAlert,
+		LookupField,
+		PageLayout,
+		RupiahField,
+		SelectField,
+		ServiceWorkspace,
+		Stack
+	} from '$lib/re-ui-components';
 	import { getFasilitasPajakBpa1 } from '../../fasilitasPajak.remote';
 	import { getJenisDokumenEbupot } from '../../jenisDokumen.remote';
 	import { getObjekPajakBpa1 } from '../../objekPajakBpa1.remote';
@@ -175,518 +185,35 @@
 </script>
 
 {#snippet formContent()}
-	<div class="tw:flex tw:flex-col tw:gap-5 tw:w-full">
-		<Card>
-			{#snippet head()}
-				<span class="tw:text-xl">Informasi Umum</span>
-			{/snippet}
-			{#snippet body()}
-				<div class="tw:flex tw:flex-col tw:gap-3 tw:px-3">
-					<Label>
-						<span>Bekerja di Lebih dari Satu Pemberi Kerja</span>
-						<Select
-							name="bekerjaDiLebihDariSatuPemberiKerja"
-							id={getContext('id')}
-							bind:value={bekerjaLebihState}
-							disabled={!bpa1.canEdit}
-						>
-							<option value="false">Tidak</option>
-							<option value="true">Ya</option>
-						</Select>
-					</Label>
-					<Label>
-						<span>Masa Pajak Awal</span>
-						<div class="tw:flex tw:flex-row tw:gap-2">
-							<Select
-								name="masaPajakAwal"
-								id={getContext('id')}
-								bind:value={masaPajakAwalState}
-								disabled={!bpa1.canEdit}
-							>
-								{#each months as m (m)}
-									<option value={m}>{formatMonth(m)}</option>
-								{/each}
-							</Select>
-							<Input
-								name="tahunAwal"
-								type="number"
-								bind:value={tahunAwalState}
-								disabled={!bpa1.canEdit}
-								class="tw:w-30"
-							/>
-						</div>
-					</Label>
-					<Label>
-						<span>Masa Pajak Akhir</span>
-						<div class="tw:flex tw:flex-row tw:gap-2">
-							<Select
-								name="masaPajakAkhir"
-								id={getContext('id')}
-								bind:value={masaPajakAkhirState}
-								disabled={!bpa1.canEdit}
-							>
-								{#each months as m (m)}
-									<option value={m}>{formatMonth(m)}</option>
-								{/each}
-							</Select>
-							<Input
-								name="tahunAkhir"
-								type="number"
-								bind:value={tahunAkhirState}
-								disabled={!bpa1.canEdit}
-								class="tw:w-30"
-							/>
-						</div>
-					</Label>
-					<Label>
-						<span>Status</span>
-						<Input type="text" id={getContext('id')} value={bpa1.status} disabled />
-					</Label>
-					<Label>
-						<span>Pegawai Asing</span>
-						<Select
-							name="pegawaiAsing"
-							id={getContext('id')}
-							bind:value={pegawaiAsingState}
-							disabled={!bpa1.canEdit}
-						>
-							<option value="false">Tidak</option>
-							<option value="true">Ya</option>
-						</Select>
-					</Label>
-					<Label>
-						<span>Nomor Identitas WP</span>
-						<div class="tw:flex tw:flex-row">
-							<Input
-								class={bpa1.canEdit ? 'tw:rounded-e-none! tw:border-e-0' : ''}
-								name="nomorIdentitasWp"
-								type="text"
-								id={getContext('id')}
-								bind:value={nomorIdentitasWpState}
-								disabled={!bpa1.canEdit}
-							/>
-							{#if bpa1.canEdit}
-								<Button
-									type="button"
-									color="#FFD230"
-									class="tw:rounded-s-none! tw:w-30"
-									onclick={cariNpwpPenerima}
-								>
-									Cari NPWP
-								</Button>
-							{/if}
-						</div>
-					</Label>
-					<Label>
-						<span>Nama</span>
-						<Input
-							name="nama"
-							type="text"
-							id={getContext('id')}
-							bind:value={namaState}
-							disabled={!bpa1.canEdit}
-						/>
-					</Label>
-					<Label>
-						<span>Status PTKP</span>
-						<Select
-							name="statusPtkp"
-							id={getContext('id')}
-							bind:value={statusPtkpState}
-							disabled={!bpa1.canEdit}
-						>
-							<option value="" disabled>Please select</option>
-							{#each bpa1PtkpOptions as p (p.value)}
-								<option value={p.value}>{p.label}</option>
-							{/each}
-						</Select>
-					</Label>
-					<Label>
-						<span>Jabatan</span>
-						<Input
-							name="jabatan"
-							type="text"
-							id={getContext('id')}
-							bind:value={jabatanState}
-							disabled={!bpa1.canEdit}
-						/>
-					</Label>
-					<Label>
-						<span>Nama Objek Pajak</span>
-						<Select
-							name="kodeObjekPajakId"
-							id={getContext('id')}
-							bind:value={kodeObjekPajakIdState}
-							disabled={!bpa1.canEdit}
-						>
-							<option value="" disabled>Please select</option>
-							{#each objekPajakOptions as o (o.id)}
-								<option value={o.id}>{o.nama}</option>
-							{/each}
-						</Select>
-					</Label>
-					<Label>
-						<span>Jenis Pajak</span>
-						<Input type="text" id={getContext('id')} value={selectedObjekPajak?.pasal ?? ''} disabled />
-					</Label>
-					<Label>
-						<span>Kode Objek Pajak</span>
-						<Input type="text" id={getContext('id')} value={selectedObjekPajak?.kode ?? ''} disabled />
-					</Label>
-					<Label>
-						<span>Jenis Pemotongan</span>
-						<Select
-							name="jenisPemotongan"
-							id={getContext('id')}
-							bind:value={jenisPemotonganState}
-							disabled={!bpa1.canEdit}
-						>
-							<option value="" disabled>Please select</option>
-							{#each jenisPemotonganOptions as j (j.value)}
-								<option value={j.value}>{j.label}</option>
-							{/each}
-						</Select>
-					</Label>
-					{#if isDisetahunkan}
-						<Label>
-							<span>Number Of Months</span>
-							<Input
-								name="jumlahBulan"
-								type="number"
-								min="1"
-								max="12"
-								step="1"
-								id={getContext('id')}
-								bind:value={jumlahBulanState}
-								required
-								disabled={!bpa1.canEdit}
-							/>
-						</Label>
-					{/if}
-				</div>
-			{/snippet}
-		</Card>
-
-		<Card>
-			{#snippet head()}
-				<span class="tw:text-xl">Penghasilan Bruto</span>
-			{/snippet}
-			{#snippet body()}
-				<div class="tw:flex tw:flex-col tw:gap-3 tw:px-3">
-					<Label>
-						<span>Gaji/Pensiun atau THT/JHT (Rp)</span>
-						<Input
-							name="gajiPensiunThtJht"
-							type="rupiah"
-							id={getContext('id')}
-							bind:value={gajiState}
-							disabled={!bpa1.canEdit}
-						/>
-					</Label>
-					<Label>
-						<span>Tunjangan PPh (Rp)</span>
-						<Input
-							name="tunjanganPph"
-							type="rupiah"
-							id={getContext('id')}
-							bind:value={tunjanganPphState}
-							disabled={!bpa1.canEdit}
-						/>
-					</Label>
-					<Label>
-						<span>Tunjangan Lainnya, Uang Lembur dan Sebagainya (Rp)</span>
-						<Input
-							name="tunjanganLainnya"
-							type="rupiah"
-							id={getContext('id')}
-							bind:value={tunjanganLainnyaState}
-							disabled={!bpa1.canEdit}
-						/>
-					</Label>
-					<Label>
-						<span>Honorarium dan Imbalan Lain Sejenisnya (Rp)</span>
-						<Input
-							name="honorarium"
-							type="rupiah"
-							id={getContext('id')}
-							bind:value={honorariumState}
-							disabled={!bpa1.canEdit}
-						/>
-					</Label>
-					<Label>
-						<span>Premi Asuransi yang Dibayar Pemberi Kerja (Rp)</span>
-						<Input
-							name="premiAsuransi"
-							type="rupiah"
-							id={getContext('id')}
-							bind:value={premiAsuransiState}
-							disabled={!bpa1.canEdit}
-						/>
-					</Label>
-					<Label>
-						<span>Penerimaan Dalam bentuk Natura dan Kenikmatan Lainnya (Rp)</span>
-						<Input
-							name="natura"
-							type="rupiah"
-							id={getContext('id')}
-							bind:value={naturaState}
-							disabled={!bpa1.canEdit}
-						/>
-					</Label>
-					<Label>
-						<span>Tantiem, Bonus, Gratifikasi, Jasa Produksi dan THR (Rp)</span>
-						<Input
-							name="tantiemBonus"
-							type="rupiah"
-							id={getContext('id')}
-							bind:value={tantiemBonusState}
-							disabled={!bpa1.canEdit}
-						/>
-					</Label>
-					<Label>
-						<span>Jumlah Penghasilan Bruto (Rp)</span>
-						<Input type="text" id={getContext('id')} value={formatRupiahDerived(jumlahPenghasilanBruto)} disabled />
-					</Label>
-				</div>
-			{/snippet}
-		</Card>
-
-		<Card>
-			{#snippet head()}
-				<span class="tw:text-xl">Pengurang</span>
-			{/snippet}
-			{#snippet body()}
-				<div class="tw:flex tw:flex-col tw:gap-3 tw:px-3">
-					<Label>
-						<span>Biaya Jabatan / Biaya Pensiun (Rp)</span>
-						<Input type="text" id={getContext('id')} value={formatRupiahDerived(biayaJabatan)} disabled />
-					</Label>
-					<Label>
-						<span>Iuran terkait Pensiun atau Hari Tua (Rp)</span>
-						<Input
-							name="iuranPensiun"
-							type="rupiah"
-							id={getContext('id')}
-							bind:value={iuranPensiunState}
-							disabled={!bpa1.canEdit}
-						/>
-					</Label>
-					<Label>
-						<span>Zakat atau Sumbangan Keagamaan yang Bersifat Wajib (Rp)</span>
-						<Input
-							name="zakat"
-							type="rupiah"
-							id={getContext('id')}
-							bind:value={zakatState}
-							disabled={!bpa1.canEdit}
-						/>
-					</Label>
-					<Label>
-						<span>Jumlah Pengurangan (Rp)</span>
-						<Input type="text" id={getContext('id')} value={formatRupiahDerived(jumlahPengurangan)} disabled />
-					</Label>
-					<Label>
-						<span>Jumlah Penghasilan Neto (Rp)</span>
-						<Input type="text" id={getContext('id')} value={formatRupiahDerived(penghasilanNeto)} disabled />
-					</Label>
-				</div>
-			{/snippet}
-		</Card>
-
-		<Card>
-			{#snippet head()}
-				<span class="tw:text-xl">Penghitungan PPh Pasal 21</span>
-			{/snippet}
-			{#snippet body()}
-				<div class="tw:flex tw:flex-col tw:gap-3 tw:px-3">
-					<Label>
-						<span>Nomor Bukti Pemotongan BPA1 dari Pemberi Kerja Sebelumnya (Apabila ada)</span>
-						<Input
-							name="nomorBuktiSebelumnya"
-							type="text"
-							id={getContext('id')}
-							bind:value={nomorBuktiSebelumnyaState}
-							disabled={!bpa1.canEdit}
-						/>
-					</Label>
-					<Label>
-						<span>Penghasilan Neto dari Pemotongan Sebelumnya (Rp)</span>
-						<Input
-							name="penghasilanNetoSebelumnya"
-							type="rupiah"
-							id={getContext('id')}
-							bind:value={penghasilanNetoSebelumnyaState}
-							disabled={!bpa1.canEdit}
-						/>
-					</Label>
-					<Label>
-						<span>Jumlah Penghasilan Neto untuk Perhitungan PPh Pasal 21 (Setahun/Disetahunkan) (Rp)</span>
-						<Input
-							type="text"
-							id={getContext('id')}
-							value={formatRupiahDerived(penghasilanNetoSetahunDisetahunkan)}
-							disabled
-						/>
-					</Label>
-					<Label>
-						<span>Penghasilan Tidak Kena Pajak (Rp)</span>
-						<Input type="text" id={getContext('id')} value={formatRupiahDerived(penghasilanTidakKenaPajak)} disabled />
-					</Label>
-					<Label>
-						<span>Penghasilan Kena Pajak Setahun / Disetahunkan (Rp)</span>
-						<Input type="text" id={getContext('id')} value={formatRupiahDerived(penghasilanKenaPajak)} disabled />
-					</Label>
-					<Label>
-						<span>Tarif (%)</span>
-						<Input type="text" id={getContext('id')} value={resolvedTax.tarif} disabled />
-					</Label>
-					<Label>
-						<span>PPh Pasal 21 atas Penghasilan Kena Pajak Setahun/Disetahunkan (Rp)</span>
-						<Input type="text" id={getContext('id')} value={formatRupiahDerived(resolvedTax.pajakPenghasilan)} disabled />
-					</Label>
-					<Label>
-						<span>PPh Pasal 21 Terutang (Rp)</span>
-						<Input type="text" id={getContext('id')} value={formatRupiahDerived(pphPasal21Terutang)} disabled />
-					</Label>
-					<Label>
-						<span>PPh Pasal 21 Dipotong dari Bukti Pemotongan Sebelumnya (Rp)</span>
-						<Input
-							name="pphPasal21DipotongSebelumnya"
-							type="rupiah"
-							id={getContext('id')}
-							bind:value={pphDipotongSebelumnyaState}
-							disabled={!bpa1.canEdit}
-						/>
-					</Label>
-					<Label>
-						<span>PPh Pasal 21 Terutang pada Bukti Pemotongan Ini (Dapat Dikreditkan Pada SPT Tahunan) (Rp)</span>
-						<Input type="text" id={getContext('id')} value={formatRupiahDerived(pphTerutangPadaIni)} disabled />
-					</Label>
-					<Label>
-						<span>PPh Pasal 21 yang Dipotong/Ditanggung Pemerintah (Rp)</span>
-						<Input type="text" id={getContext('id')} value={formatRupiahDerived(pphDitanggungPemerintah)} disabled />
-					</Label>
-					<Label>
-						<span>PPh Pasal 21 Kurang (Lebih) Dipotong pada Masa Pajak Desember / Masa Pajak Terakhir (Rp)</span>
-						<Input type="text" id={getContext('id')} value={formatRupiahDerived(pphKurangLebihDesember)} disabled />
-					</Label>
-					<Label>
-						<span>Jenis Fasilitas pada Masa Pajak Desember/Masa Pajak Terakhir</span>
-						<Select
-							name="fasilitasPajakId"
-							id={getContext('id')}
-							bind:value={fasilitasPajakIdState}
-							disabled={!bpa1.canEdit}
-						>
-							<option value="" disabled>Please select</option>
-							{#each fasilitasOptions as f (f.id)}
-								<option value={f.id}>{f.nama}</option>
-							{/each}
-						</Select>
-					</Label>
-					<Label>
-						<span>KAP-KJS</span>
-						<Input type="text" id={getContext('id')} value={selectedObjekPajak?.kap ?? ''} disabled />
-					</Label>
-					<Label>
-						<span>NITKU/Nomor Identitas Sub Unit Organisasi</span>
-						<Input type="text" id={getContext('id')} value={nitkuPemotong} disabled />
-					</Label>
-					<p class="tw:text-sm tw:text-gray-500">
-						Jenis Fasilitas "PPh Pasal 21 Ditanggung Pemerintah (DTP)" memindahkan PPh Terutang
-						pada Bukti Potong ini ke "Ditanggung Pemerintah" alih-alih dipotong dari penerima.
-						"Kurang (Lebih) Dipotong pada Masa Pajak Desember" dihitung sebagai PPh Terutang pada
-						Bukti Ini dikurangi PPh Ditanggung Pemerintah -- aplikasi ini belum memiliki riwayat
-						pemotongan bulanan (Bukti Pemotongan Bulanan Pegawai Tetap), sehingga jika penerima
-						sudah dipotong PPh 21 bulanan sepanjang tahun berjalan, angka pada aplikasi ini akan
-						lebih tinggi dari yang sebenarnya di Coretax.
-					</p>
-				</div>
-			{/snippet}
-		</Card>
-
-		<Card>
-			{#snippet head()}
-				<span class="tw:text-xl">Dokumen Referensi</span>
-			{/snippet}
-			{#snippet body()}
-				<div class="tw:flex tw:flex-col tw:gap-3 tw:px-3">
-					<Label>
-						<span>Jenis Dokumen</span>
-						<Select
-							name="jenisDokumenId"
-							id={getContext('id')}
-							bind:value={jenisDokumenIdState}
-							disabled={!bpa1.canEdit}
-						>
-							<option value="" disabled>Please select</option>
-							{#each jenisDokumenOptions as d (d.id)}
-								<option value={d.id}>{d.nama}</option>
-							{/each}
-						</Select>
-					</Label>
-					<Label>
-						<span>Nomor Dokumen</span>
-						<Input
-							name="nomorDokumen"
-							type="text"
-							id={getContext('id')}
-							bind:value={nomorDokumenState}
-							disabled={!bpa1.canEdit}
-						/>
-					</Label>
-					<Label>
-						<span>Tanggal Dokumen</span>
-						<Input
-							name="tanggalDokumen"
-							type="date"
-							id={getContext('id')}
-							bind:value={tanggalDokumenState}
-							disabled={!bpa1.canEdit}
-						/>
-					</Label>
-				</div>
-			{/snippet}
-		</Card>
-
-		{#if bpa1.canEdit}
-			<div class="tw:flex tw:flex-row tw:justify-end tw:items-center tw:gap-2">
-				<a href="/ebupot/bpa1" class="tw:text-black!"><Button type="button">Kembali</Button></a>
-				<Button type="submit" class="tw:text-white" color="var(--color-secondary)">
-					Simpan Konsep
-				</Button>
-			</div>
-		{:else}
-			<div class="tw:flex tw:flex-row tw:justify-end">
-				<a href="/ebupot/bpa1" class="tw:text-black!"><Button type="button">Kembali</Button></a>
-			</div>
-		{/if}
-	</div>
+	<Stack gap="16px">
+		<FormSection number="01" title="Informasi Umum" bordered><FieldGrid columns={2}>
+			<SelectField label="Bekerja di Lebih dari Satu Pemberi Kerja" name="bekerjaDiLebihDariSatuPemberiKerja" bind:value={bekerjaLebihState} disabled={!bpa1.canEdit} options={[{value:'false',label:'Tidak'},{value:'true',label:'Ya'}]} />
+			<SelectField label="Pegawai Asing" name="pegawaiAsing" bind:value={pegawaiAsingState} disabled={!bpa1.canEdit} options={[{value:'false',label:'Tidak'},{value:'true',label:'Ya'}]} />
+			<SelectField label="Masa Pajak Awal" name="masaPajakAwal" bind:value={masaPajakAwalState} disabled={!bpa1.canEdit} options={months.map((m) => ({value:m,label:formatMonth(m)}))} />
+			<FormField label="Tahun Awal" name="tahunAwal" type="number" bind:value={() => String(tahunAwalState), (v) => (tahunAwalState = Number(v))} disabled={!bpa1.canEdit} />
+			<SelectField label="Masa Pajak Akhir" name="masaPajakAkhir" bind:value={masaPajakAkhirState} disabled={!bpa1.canEdit} options={months.map((m) => ({value:m,label:formatMonth(m)}))} />
+			<FormField label="Tahun Akhir" name="tahunAkhir" type="number" bind:value={() => String(tahunAkhirState), (v) => (tahunAkhirState = Number(v))} disabled={!bpa1.canEdit} />
+			<FormField label="Status" value={bpa1.status} disabled />
+			<LookupField label="Nomor Identitas WP" name="nomorIdentitasWp" bind:value={nomorIdentitasWpState} buttonLabel="Cari NPWP" buttonVisible={bpa1.canEdit} disabled={!bpa1.canEdit} inputmode="numeric" maxlength={16} onlookup={cariNpwpPenerima} />
+			<FormField label="Nama" name="nama" bind:value={namaState} disabled={!bpa1.canEdit} />
+			<SelectField label="Status PTKP" name="statusPtkp" bind:value={statusPtkpState} disabled={!bpa1.canEdit} options={bpa1PtkpOptions.map((p) => ({value:p.value,label:p.label}))} />
+			<FormField label="Jabatan" name="jabatan" bind:value={jabatanState} disabled={!bpa1.canEdit} />
+			<SelectField label="Nama Objek Pajak" name="kodeObjekPajakId" bind:value={kodeObjekPajakIdState} disabled={!bpa1.canEdit} options={objekPajakOptions.map((o) => ({value:o.id,label:o.nama}))} />
+			<FormField label="Jenis Pajak" value={selectedObjekPajak?.pasal ?? ''} disabled /><FormField label="Kode Objek Pajak" value={selectedObjekPajak?.kode ?? ''} disabled />
+			<SelectField label="Jenis Pemotongan" name="jenisPemotongan" bind:value={jenisPemotonganState} disabled={!bpa1.canEdit} options={jenisPemotonganOptions} />
+			{#if isDisetahunkan}<FormField label="Number Of Months" name="jumlahBulan" type="number" min="1" max="12" step="1" bind:value={() => jumlahBulanState === undefined ? '' : String(jumlahBulanState), (v) => (jumlahBulanState = v === '' ? undefined : Number(v))} required disabled={!bpa1.canEdit} />{/if}
+		</FieldGrid></FormSection>
+		<FormSection number="02" title="Penghasilan Bruto" bordered><FieldGrid columns={2}>
+			<RupiahField label="Gaji/Pensiun atau THT/JHT (Rp)" name="gajiPensiunThtJht" bind:value={gajiState} disabled={!bpa1.canEdit} /><RupiahField label="Tunjangan PPh (Rp)" name="tunjanganPph" bind:value={tunjanganPphState} disabled={!bpa1.canEdit} /><RupiahField label="Tunjangan Lainnya, Uang Lembur dan Sebagainya (Rp)" name="tunjanganLainnya" bind:value={tunjanganLainnyaState} disabled={!bpa1.canEdit} /><RupiahField label="Honorarium dan Imbalan Lain Sejenisnya (Rp)" name="honorarium" bind:value={honorariumState} disabled={!bpa1.canEdit} /><RupiahField label="Premi Asuransi yang Dibayar Pemberi Kerja (Rp)" name="premiAsuransi" bind:value={premiAsuransiState} disabled={!bpa1.canEdit} /><RupiahField label="Penerimaan Dalam bentuk Natura dan Kenikmatan Lainnya (Rp)" name="natura" bind:value={naturaState} disabled={!bpa1.canEdit} /><RupiahField label="Tantiem, Bonus, Gratifikasi, Jasa Produksi dan THR (Rp)" name="tantiemBonus" bind:value={tantiemBonusState} disabled={!bpa1.canEdit} /><RupiahField label="Jumlah Penghasilan Bruto (Rp)" value={jumlahPenghasilanBruto} disabled />
+		</FieldGrid></FormSection>
+		<FormSection number="03" title="Pengurang" bordered><FieldGrid columns={2}>
+			<RupiahField label="Biaya Jabatan / Biaya Pensiun (Rp)" value={biayaJabatan} disabled /><RupiahField label="Iuran terkait Pensiun atau Hari Tua (Rp)" name="iuranPensiun" bind:value={iuranPensiunState} disabled={!bpa1.canEdit} /><RupiahField label="Zakat atau Sumbangan Keagamaan yang Bersifat Wajib (Rp)" name="zakat" bind:value={zakatState} disabled={!bpa1.canEdit} /><RupiahField label="Jumlah Pengurangan (Rp)" value={jumlahPengurangan} disabled /><RupiahField label="Jumlah Penghasilan Neto (Rp)" value={penghasilanNeto} disabled />
+		</FieldGrid></FormSection>
+		<FormSection number="04" title="Penghitungan PPh Pasal 21" bordered><FieldGrid columns={2}>
+			<FormField label="Nomor Bukti Pemotongan BPA1 dari Pemberi Kerja Sebelumnya (Apabila ada)" name="nomorBuktiSebelumnya" bind:value={nomorBuktiSebelumnyaState} disabled={!bpa1.canEdit} /><RupiahField label="Penghasilan Neto dari Pemotongan Sebelumnya (Rp)" name="penghasilanNetoSebelumnya" bind:value={penghasilanNetoSebelumnyaState} disabled={!bpa1.canEdit} /><RupiahField label="Jumlah Penghasilan Neto untuk Perhitungan PPh Pasal 21 (Setahun/Disetahunkan) (Rp)" value={penghasilanNetoSetahunDisetahunkan} disabled /><RupiahField label="Penghasilan Tidak Kena Pajak (Rp)" value={penghasilanTidakKenaPajak} disabled /><RupiahField label="Penghasilan Kena Pajak Setahun / Disetahunkan (Rp)" value={penghasilanKenaPajak} disabled /><FormField label="Tarif (%)" value={String(resolvedTax.tarif)} disabled /><RupiahField label="PPh Pasal 21 atas Penghasilan Kena Pajak Setahun/Disetahunkan (Rp)" value={resolvedTax.pajakPenghasilan} disabled /><RupiahField label="PPh Pasal 21 Terutang (Rp)" value={pphPasal21Terutang} disabled /><RupiahField label="PPh Pasal 21 Dipotong dari Bukti Pemotongan Sebelumnya (Rp)" name="pphPasal21DipotongSebelumnya" bind:value={pphDipotongSebelumnyaState} disabled={!bpa1.canEdit} /><RupiahField label="PPh Pasal 21 Terutang pada Bukti Pemotongan Ini (Dapat Dikreditkan Pada SPT Tahunan) (Rp)" value={pphTerutangPadaIni} disabled /><RupiahField label="PPh Pasal 21 yang Dipotong/Ditanggung Pemerintah (Rp)" value={pphDitanggungPemerintah} disabled /><RupiahField label="PPh Pasal 21 Kurang (Lebih) Dipotong pada Masa Pajak Desember / Masa Pajak Terakhir (Rp)" value={pphKurangLebihDesember} disabled /><SelectField label="Jenis Fasilitas pada Masa Pajak Desember/Masa Pajak Terakhir" name="fasilitasPajakId" bind:value={fasilitasPajakIdState} disabled={!bpa1.canEdit} options={fasilitasOptions.map((f) => ({value:f.id,label:f.nama}))} /><FormField label="KAP-KJS" value={selectedObjekPajak?.kap ?? ''} disabled /><FormField label="NITKU/Nomor Identitas Sub Unit Organisasi" value={nitkuPemotong} disabled />
+		</FieldGrid><InlineAlert title="Informasi perhitungan" message="Fasilitas PPh Pasal 21 Ditanggung Pemerintah memindahkan PPh Terutang ke Ditanggung Pemerintah. Perhitungan belum memiliki riwayat pemotongan bulanan." tone="info" /></FormSection>
+		<FormSection number="05" title="Dokumen Referensi" bordered><FieldGrid columns={2}><SelectField label="Jenis Dokumen" name="jenisDokumenId" bind:value={jenisDokumenIdState} disabled={!bpa1.canEdit} options={jenisDokumenOptions.map((d) => ({value:d.id,label:d.nama}))} /><FormField label="Nomor Dokumen" name="nomorDokumen" bind:value={nomorDokumenState} disabled={!bpa1.canEdit} /><FormField label="Tanggal Dokumen" name="tanggalDokumen" type="date" bind:value={tanggalDokumenState} disabled={!bpa1.canEdit} /></FieldGrid></FormSection>
+	</Stack>
 {/snippet}
 
-<div class="tw:w-full tw:p-25">
-	<div class="tw:text-2xl tw:mb-5">EBUPOT BPA1</div>
-	{#if bpa1.canEdit}
-		<form {...updateBpa1}>{@render formContent()}</form>
-		<div class="tw:flex tw:flex-row tw:justify-end tw:items-center tw:mt-3 tw:gap-2">
-			{#if bpa1.status !== 'SUBMITTED'}
-				<form {...submitBpa1}>
-					<Button type="submit" class="tw:text-white" color="var(--color-danger)">Submit</Button>
-				</form>
-			{:else}
-				<form {...terbitkanBpa1.for(bpa1.id)}>
-					<Button type="submit" class="tw:text-white" color="var(--color-secondary)">
-						Terbitkan
-					</Button>
-				</form>
-			{/if}
-		</div>
-	{:else}
-		{#if bpa1.nomorPemotongan}
-			<p class="tw:text-sm tw:text-gray-600 tw:mb-3">
-				Nomor Pemotongan: <span class="tw:font-mono">{bpa1.nomorPemotongan}</span>
-			</p>
-		{/if}
-		{@render formContent()}
-	{/if}
-</div>
+<PageLayout contentWidth="1540px"><Stack gap="16px"><Breadcrumbs separator="›" items={[{label:'Beranda',href:'/'},{label:'e-Bupot'},{label:'BPA1'}]} /><ServiceWorkspace identity={{eyebrow:'Wajib Pajak',name:String(appPage.data.user?.name ?? 'Wajib Pajak'),identifier:String(appPage.data.user?.username ?? ''),mark:'EB'}} groups={[{label:'e-Bupot',links:[{label:'Bukti Potong Saya',href:'/ebupot/bukti-potong-saya'},{label:'BPPU',href:'/ebupot/bpu'},{label:'BP21',href:'/ebupot/bp21'},{label:'BP26',href:'/ebupot/bp26'},{label:'BPA1',href:'/ebupot/bpa1',active:true},{label:'BPA2',href:'/ebupot/bpa2'},{label:'Bukti Pemotongan Bulanan Pegawai Tetap',href:'/ebupot/mp'}]}]}><DocumentWorkspace>{#if bpa1.canEdit}<form {...updateBpa1}>{@render formContent()}<FormActions><a href="/ebupot/bpa1"><ActionButton tone="quiet">Kembali</ActionButton></a><ActionButton type="submit">Simpan Konsep</ActionButton></FormActions></form><FormActions>{#if bpa1.status !== 'SUBMITTED'}<form {...submitBpa1}><ActionButton type="submit" tone="danger">Submit</ActionButton></form>{:else}<form {...terbitkanBpa1.for(bpa1.id)}><ActionButton type="submit">Terbitkan</ActionButton></form>{/if}</FormActions>{:else}{#if bpa1.nomorPemotongan}<p>Nomor Pemotongan: <span>{bpa1.nomorPemotongan}</span></p>{/if}{@render formContent()}{/if}</DocumentWorkspace></ServiceWorkspace></Stack></PageLayout>

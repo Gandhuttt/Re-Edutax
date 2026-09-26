@@ -1,125 +1,56 @@
 <script lang="ts">
-	import Button from '$lib/components/Button.svelte';
-	import Table from '$lib/components/Table.svelte';
+	import { page as appPage } from '$app/state';
 	import { formatMonth } from '$lib/helpers/date';
+	import { ActionButton, Breadcrumbs, DataTableBody, DataTableViewport, DataWorkspace, PageLayout, PaginationBar, ServiceWorkspace, Stack, StatusBadge, TableActions, TabbedSection } from '$lib/re-ui-components';
 	import { deleteBpa1 } from './deleteBpa1.remote';
 	import { listBpa1 } from './listBpa1.remote';
 	import { newEmpty } from './newEmpty.remote';
 	import { terbitkanBpa1 } from './terbitkanBpa1.remote';
 
 	const rupiah = new Intl.NumberFormat('id-ID', { minimumFractionDigits: 0 });
-
-	const statusLabel = {
-		NORMAL: 'Normal',
-		SAVEDINVALID: 'Disimpan Tidak Valid',
-		SUBMITTED: 'Disimpan'
-	} as const;
-
+	const statusLabel = { NORMAL: 'Normal', SAVEDINVALID: 'Disimpan Tidak Valid', SUBMITTED: 'Disimpan' } as const;
 	const tabs = ['Belum Terbit', 'Telah Terbit', 'Tidak Valid'] as const;
-	let activeTab: (typeof tabs)[number] = $state('Belum Terbit');
-
-	function filterRows(
-		rows: Awaited<ReturnType<typeof listBpa1>>,
-		tab: (typeof tabs)[number]
-	) {
-		if (tab === 'Telah Terbit') return rows.filter((r) => r.diterbitkan);
-		if (tab === 'Tidak Valid') return [];
-		return rows.filter((r) => !r.diterbitkan);
-	}
+	let activeTab = $state<(typeof tabs)[number]>('Belum Terbit');
+	let sidebarOpen = $state(false);
+	let currentPage = $state(1);
+	let pageSize = $state(10);
+	const rows = $derived(await listBpa1());
+	const accountName = $derived(String(appPage.data.user?.name ?? 'Wajib Pajak'));
+	const accountNpwp = $derived(String(appPage.data.user?.username ?? ''));
+	const filteredRows = $derived(rows.filter((r) => activeTab === 'Telah Terbit' ? r.diterbitkan : activeTab === 'Tidak Valid' ? false : !r.diterbitkan));
+	const pagedRows = $derived(filteredRows.slice((currentPage - 1) * pageSize, currentPage * pageSize));
+	$effect(() => { activeTab; currentPage = 1; });
+	function submitHiddenForm(id: string) { const form = document.getElementById(id); if (form instanceof HTMLFormElement) form.requestSubmit(); }
 </script>
 
-<div class="tw:w-full tw:p-25">
-	<div class="tw:text-2xl tw:h-10 tw:flex tw:items-center tw:mb-3">eBupot BPA1</div>
+<svelte:head>
+	<title>e-Bupot BPA1</title>
+</svelte:head>
+<PageLayout contentWidth="1540px">
+	<Stack gap="16px">
+		<Breadcrumbs separator="›" items={[{ label: 'Beranda', href: '/' }, { label: 'e-Bupot' }, { label: 'BPA1' }]} />
+		<ServiceWorkspace bind:sidebarOpen identity={{ eyebrow: 'Wajib Pajak', name: accountName, identifier: accountNpwp, mark: 'EB' }} groups={[{ label: 'e-Bupot', links: [
+			{ label: 'Bukti Potong Saya', href: '/ebupot/bukti-potong-saya' }, { label: 'BPPU', href: '/ebupot/bpu' }, { label: 'BP21', href: '/ebupot/bp21' }, { label: 'BP26', href: '/ebupot/bp26' }, { label: 'BPA1', href: '/ebupot/bpa1', active: true }, { label: 'BPA2', href: '/ebupot/bpa2' }, { label: 'Bukti Pemotongan Bulanan Pegawai Tetap', href: '/ebupot/mp' }
+		]}]}>
+			<DataWorkspace title="e-Bupot BPA1" primaryActions={activeTab === 'Belum Terbit' ? workspaceActions : undefined}>
+				<TabbedSection tabs={tabs} bind:active={activeTab} ariaLabel="Status BPA1">
+					{#snippet children()}
+						<DataTableViewport label="Daftar BPA1" minWidth="1250px" framed={false} headerTone="yellow" density="compact" stickyFirstColumn>
+							<table><thead><tr><th>Aksi</th><th>Masa Pajak</th><th>Nomor Identitas WP</th><th>Nama</th><th>Objek Pajak</th><th>PPh 21 Terutang (Rp)</th><th>Status</th></tr></thead>
+								<DataTableBody items={pagedRows} getKey={(row) => row.id} emptyColspan={7} emptyText="Tidak ada data yang ditemukan.">
+									{#snippet row(row)}
+										{@const hapus = deleteBpa1.for(row.id)} {@const terbitkan = terbitkanBpa1.for(row.id)}
+										<td><form {...hapus} id={`hapus-bpa1-${row.id}`} hidden></form><form {...terbitkan} id={`terbit-bpa1-${row.id}`} hidden></form><TableActions visibleCount={3} actions={[{label:'Buka',href:`/ebupot/bpa1/${row.id}`},...(row.diterbitkan ? [] : row.status === 'SUBMITTED' ? [{label:'Terbitkan',onclick:() => submitHiddenForm(`terbit-bpa1-${row.id}`)}] : []),...(!row.diterbitkan ? [{label:'Hapus',danger:true,onclick:() => submitHiddenForm(`hapus-bpa1-${row.id}`)}] : [])]} /></td>
+										<td>{formatMonth(row.masaPajakAwal)} {row.tahunAwal} - {formatMonth(row.masaPajakAkhir)} {row.tahunAkhir}</td><td>{row.nomorIdentitasWp}</td><td>{row.nama}</td><td>{row.namaObjekPajak ?? ''}</td><td>{rupiah.format(row.pphPasal21TerutangPadaIni)}</td><td><StatusBadge label={row.diterbitkan ? 'Telah Terbit' : statusLabel[row.status]} tone={row.diterbitkan ? 'success' : row.status === 'SAVEDINVALID' ? 'error' : 'neutral'} /></td>
+									{/snippet}
+								</DataTableBody></table>
+						</DataTableViewport>
+						<PaginationBar bind:page={currentPage} bind:pageSize totalItems={filteredRows.length} itemLabel="BPA1" />
+					{/snippet}
+				</TabbedSection>
+			</DataWorkspace>
+		</ServiceWorkspace>
+	</Stack>
+</PageLayout>
 
-	<div class="tw:flex tw:flex-row tw:gap-5">
-		<div class="tw:w-[12rem] tw:shrink-0 tw:rounded-sm tw:bg-gray-100 tw:border tw:border-[#a9a9a9]">
-			<div class="tw:px-3 tw:py-2 tw:font-semibold tw:border-b tw:border-b-[#a9a9a9]">BPA1</div>
-			<div class="tw:flex tw:flex-col">
-				{#each tabs as tab (tab)}
-					<button
-						type="button"
-						class="tw:text-left tw:px-3 tw:py-2"
-						class:tw:bg-amber-100={activeTab === tab}
-						onclick={() => (activeTab = tab)}
-					>
-						{tab}
-					</button>
-				{/each}
-			</div>
-		</div>
-
-		<div class="tw:grow tw:min-h-100 tw:overflow-scroll tw:rounded-sm tw:bg-gray-100 tw:border tw:border-[#a9a9a9]">
-			<div
-				class="tw:px-3 tw:py-2 tw:font-semibold tw:border-b tw:border-b-[#a9a9a9] tw:flex tw:flex-row tw:justify-between tw:items-center"
-			>
-				<span class="tw:uppercase">EBUPOT BPA1 {activeTab}</span>
-				{#if activeTab === 'Belum Terbit'}
-					<form {...newEmpty}><Button type="submit">+ Create eBupot BPA1</Button></form>
-				{/if}
-			</div>
-			<Table class="tw:w-full">
-				{#snippet head()}
-					<tr>
-						<th class="tw:w-[20rem]">Action</th>
-						<th class="tw:w-[14rem]">Masa Pajak</th>
-						<th class="tw:w-[15rem]">Nomor Identitas WP</th>
-						<th class="tw:w-[15rem]">Nama</th>
-						<th class="tw:w-[20rem]">Objek Pajak</th>
-						<th class="tw:w-[10rem]">PPh 21 Terutang (Rp)</th>
-						<th class="tw:w-[10rem]">Status</th>
-					</tr>
-				{/snippet}
-				{#snippet body()}
-					{#each filterRows(await listBpa1(), activeTab) as row}
-						{@const hapusBpa1 = deleteBpa1.for(row.id)}
-						{@const terbitkanRow = terbitkanBpa1.for(row.id)}
-						<tr>
-							<td>
-								<div class="tw:flex tw:flex-row tw:gap-1">
-									<a href="/ebupot/bpa1/{row.id}" class="tw:text-black!">
-										<Button>Buka</Button>
-									</a>
-									{#if !row.diterbitkan}
-										{#if row.status === 'SUBMITTED'}
-											<form {...terbitkanRow}>
-												<Button color="var(--color-secondary)" class="tw:text-white">
-													Terbitkan
-												</Button>
-											</form>
-										{/if}
-										<form {...hapusBpa1}>
-											<Button color="var(--color-danger)" class="tw:text-white">Hapus</Button>
-										</form>
-									{/if}
-								</div>
-							</td>
-							<td>
-								{formatMonth(row.masaPajakAwal)} {row.tahunAwal} - {formatMonth(row.masaPajakAkhir)}
-								{row.tahunAkhir}
-							</td>
-							<td>{row.nomorIdentitasWp}</td>
-							<td>{row.nama}</td>
-							<td>{row.namaObjekPajak ?? ''}</td>
-							<td>{rupiah.format(row.pphPasal21TerutangPadaIni)}</td>
-							<td>
-								{row.diterbitkan ? 'Telah Terbit' : statusLabel[row.status]}
-							</td>
-						</tr>
-					{:else}
-						<tr>
-							<td colspan="7">Tidak ada data yang ditemukan.</td>
-						</tr>
-					{/each}
-				{/snippet}
-			</Table>
-		</div>
-	</div>
-</div>
-
-<style>
-	th,
-	td {
-		padding-block: 0.5rem;
-		padding-inline: 1rem;
-	}
-</style>
+{#snippet workspaceActions()}<form {...newEmpty}><ActionButton type="submit" pending={newEmpty.pending > 0} pendingLabel="Membuka...">Buat e-Bupot BPA1</ActionButton></form>{/snippet}
