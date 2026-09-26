@@ -1,80 +1,332 @@
 <script lang="ts">
+	import { ActionButton, FormField, ReUiRoot } from '$lib/re-ui-components';
 	import { login } from './login.remote';
 </script>
 
 <svelte:head>
-	<title>Login</title>
+	<title>Masuk | EduTax</title>
+	<meta
+		name="description"
+		content="Masuk ke EduTax untuk mengakses layanan administrasi perpajakan."
+	/>
 </svelte:head>
 
-<div class="tw:flex tw:min-h-[50vh] tw:justify-center tw:items-center">
-	<form class="tw:w-[25rem] tw:max-sm:w-[40rem]" {...login}>
-		<h1>Login</h1>
-		<div>
-			<input
-				{...login.fields.npwp.as('text')}
-				inputmode="numeric"
-				autocomplete="username"
-				class="form-control tw:max-sm:h-[5rem]"
-				placeholder="NPWP"
-				required
-			/>
-		</div>
-		<div>
-			<input
-				{...login.fields._password.as('password')}
-				autocomplete="current-password"
-				class="form-control tw:max-sm:h-[5rem]"
-				placeholder="Password"
-				required
-			/>
-		</div>
+<ReUiRoot>
+	<main class="login-shell">
+		<section class="brand-panel" aria-labelledby="brand-heading">
+			<div class="brand-lockup">
+				<span class="brand-mark" aria-hidden="true">ET</span>
+				<span class="brand-name">
+					<strong>EduTax</strong>
+					<small>Layanan Administrasi Perpajakan</small>
+				</span>
+			</div>
 
-		{#if login.fields.allIssues()?.[0]}
-			<p class="error">{login.fields.allIssues()?.[0]?.message}</p>
-		{/if}
+			<div class="brand-message">
+				<p class="eyebrow">Portal layanan perpajakan</p>
+				<h1 id="brand-heading">Satu ruang kerja untuk kewajiban pajak Anda.</h1>
+				<p>
+					Kelola faktur, bukti potong, dan pelaporan pajak melalui alur kerja yang tertata.
+				</p>
+			</div>
 
-		<div>
-			<button class="btn btn-success tw:w-full tw:max-sm:h-[5rem]" disabled={login.pending > 0}>
-				{login.pending > 0 ? 'Masuk...' : 'Login'}
-			</button>
-		</div>
-	</form>
-</div>
+			<p class="environment-note">Lingkungan simulasi edukasi perpajakan</p>
+		</section>
+
+		<section class="form-panel" aria-labelledby="login-heading">
+			<div class="login-card">
+				<div class="mobile-brand" aria-hidden="true">
+					<span class="brand-mark">ET</span>
+					<strong>EduTax</strong>
+				</div>
+
+				<header class="form-heading">
+					<p class="eyebrow">Akses akun</p>
+					<h2 id="login-heading">Masuk ke EduTax</h2>
+					<p>Gunakan NPWP dan password yang terdaftar pada akun Anda.</p>
+				</header>
+
+				<form class="login-form" {...login}>
+					<FormField
+						label="NPWP"
+						field={login.fields.npwp}
+						type="text"
+						inputmode="numeric"
+						autocomplete="username"
+						placeholder="Masukkan 15 atau 16 digit NPWP"
+						required
+					/>
+
+					<FormField
+						label="Password"
+						field={login.fields._password}
+						type="password"
+						autocomplete="current-password"
+						placeholder="Masukkan password"
+						required
+					/>
+
+					<div class="submit-action">
+						<ActionButton
+							type="submit"
+							pending={login.pending > 0}
+							pendingLabel="Memproses..."
+						>
+							Masuk
+						</ActionButton>
+					</div>
+				</form>
+
+				<p class="support-note">
+					Pastikan NPWP ditulis tanpa tanda baca atau spasi.
+				</p>
+			</div>
+		</section>
+	</main>
+</ReUiRoot>
 
 <style>
-	div {
-		margin: 1rem 0;
+	.login-shell {
+		min-height: 100svh;
+		display: grid;
+		grid-template-columns: minmax(360px, 0.9fr) minmax(480px, 1.1fr);
+		background: var(--ui-paper);
 	}
 
-	h1 {
-		margin: 0 0 2rem;
-		color: var(--color-text);
-		font-size: 3rem;
+	.brand-panel {
+		position: relative;
+		isolation: isolate;
+		display: flex;
+		min-height: 100svh;
+		padding: clamp(32px, 5vw, 76px);
+		flex-direction: column;
+		overflow: hidden;
+		background:
+			linear-gradient(145deg, rgba(255, 255, 255, 0.04), transparent 45%),
+			var(--ui-navy);
+		color: white;
+	}
+
+	.brand-panel::before {
+		position: absolute;
+		z-index: -1;
+		inset: 0;
+		background-image:
+			linear-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px),
+			linear-gradient(90deg, rgba(255, 255, 255, 0.045) 1px, transparent 1px);
+		background-size: 46px 46px;
+		content: '';
+		mask-image: linear-gradient(to bottom right, transparent 8%, black 75%);
+	}
+
+	.brand-panel::after {
+		position: absolute;
+		z-index: -1;
+		right: clamp(-150px, -9vw, -70px);
+		bottom: clamp(-170px, -10vw, -90px);
+		width: clamp(330px, 35vw, 560px);
+		aspect-ratio: 1;
+		border: 1px solid rgba(244, 197, 66, 0.35);
+		border-radius: 50%;
+		box-shadow:
+			0 0 0 52px rgba(244, 197, 66, 0.06),
+			0 0 0 104px rgba(244, 197, 66, 0.035);
+		content: '';
+	}
+
+	.brand-lockup,
+	.mobile-brand {
+		display: flex;
+		align-items: center;
+		gap: 13px;
+	}
+
+	.brand-mark {
+		width: 46px;
+		height: 46px;
+		display: grid;
+		flex: 0 0 auto;
+		place-items: center;
+		border: 1px solid var(--ui-yellow-deep);
+		border-radius: 2px;
+		background: var(--ui-yellow);
+		color: var(--ui-navy-strong);
+		font-size: 17px;
+		font-weight: 900;
+		letter-spacing: -0.03em;
+	}
+
+	.brand-name {
+		display: grid;
+		gap: 1px;
+	}
+
+	.brand-name strong {
+		font-family: var(--ui-font-display);
+		font-size: 24px;
+		line-height: 1.05;
+	}
+
+	.brand-name small {
+		color: rgba(255, 255, 255, 0.72);
+		font-size: 12px;
+		letter-spacing: 0.04em;
+	}
+
+	.brand-message {
+		width: min(590px, 100%);
+		margin: auto 0;
+		padding: 88px 0;
+	}
+
+	.eyebrow {
+		margin: 0 0 12px;
+		color: var(--ui-yellow);
+		font-size: 12px;
+		font-weight: 800;
+		letter-spacing: 0.16em;
+		text-transform: uppercase;
+	}
+
+	.brand-message h1 {
+		max-width: 560px;
+		margin: 0;
+		font-family: var(--ui-font-display);
+		font-size: clamp(38px, 4.2vw, 64px);
 		font-weight: 700;
-		text-align: center;
+		letter-spacing: -0.035em;
+		line-height: 1.05;
 	}
 
-	input {
+	.brand-message > p:last-child {
+		max-width: 520px;
+		margin: 24px 0 0;
+		color: rgba(255, 255, 255, 0.76);
+		font-size: clamp(16px, 1.25vw, 19px);
+		line-height: 1.7;
+	}
+
+	.environment-note {
+		margin: 0;
+		color: rgba(255, 255, 255, 0.62);
+		font-size: 12px;
+		letter-spacing: 0.05em;
+	}
+
+	.form-panel {
+		display: grid;
+		min-height: 100svh;
+		padding: clamp(28px, 6vw, 96px);
+		place-items: center;
+		background:
+			radial-gradient(circle at 85% 12%, rgba(244, 197, 66, 0.13), transparent 24%),
+			var(--ui-paper);
+	}
+
+	.login-card {
+		width: min(430px, 100%);
+		padding: clamp(32px, 4vw, 52px);
+		border: 1px solid var(--ui-line);
+		border-top: 5px solid var(--ui-yellow);
+		border-radius: 3px;
+		background: #fffefa;
+		box-shadow: 0 24px 60px rgba(24, 49, 79, 0.13);
+	}
+
+	.mobile-brand {
+		display: none;
+		margin-bottom: 34px;
+		color: var(--ui-navy);
+		font-family: var(--ui-font-display);
+		font-size: 23px;
+	}
+
+	.form-heading {
+		margin-bottom: 30px;
+	}
+
+	.form-heading .eyebrow {
+		margin-bottom: 8px;
+		color: var(--ui-yellow-deep);
+	}
+
+	.form-heading h2 {
+		margin: 0;
+		color: var(--ui-navy);
+		font-family: var(--ui-font-display);
+		font-size: clamp(30px, 3vw, 40px);
+		font-weight: 700;
+		letter-spacing: -0.025em;
+		line-height: 1.15;
+	}
+
+	.form-heading > p:last-child {
+		margin: 12px 0 0;
+		color: var(--ui-muted);
+		font-size: 15px;
+		line-height: 1.6;
+	}
+
+	.login-form {
+		display: grid;
+		gap: 20px;
+	}
+
+	.submit-action {
+		margin-top: 4px;
+	}
+
+	.submit-action :global(button) {
 		width: 100%;
+		min-height: 44px;
 	}
 
-	input,
-	button {
-		font-size: 16px;
+	.support-note {
+		margin: 22px 0 0;
+		padding-top: 18px;
+		border-top: 1px solid var(--ui-line);
+		color: var(--ui-muted);
+		font-size: 12px;
+		line-height: 1.5;
 	}
 
-	button {
-		background-color: var(--color-theme-2);
-		border: 0;
+	@media (max-width: 880px) {
+		.login-shell {
+			grid-template-columns: 1fr;
+		}
+
+		.brand-panel {
+			display: none;
+		}
+
+		.form-panel {
+			padding: 28px 20px;
+		}
+
+		.mobile-brand {
+			display: flex;
+		}
 	}
 
-	button:hover {
-		background-color: var(--color-theme-1);
+	@media (max-width: 480px) {
+		.form-panel {
+			align-items: start;
+			padding: 0;
+			background: #fffefa;
+		}
+
+		.login-card {
+			min-height: 100svh;
+			padding: 32px 24px;
+			border: 0;
+			border-top: 5px solid var(--ui-yellow);
+			box-shadow: none;
+		}
 	}
 
-	.error {
-		margin: 0 0 1rem;
-		color: #b42318;
-		font-size: 0.95rem;
+	@media (prefers-reduced-motion: reduce) {
+		.brand-panel::after {
+			box-shadow: none;
+		}
 	}
 </style>

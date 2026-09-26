@@ -4,17 +4,14 @@
 	import { page } from '$app/state';
 	import '../app.css';
 	import '../app.scss';
-	import Header from './Header.svelte';
 	import ReUiAppShell from './ReUiAppShell.svelte';
 	import type { LayoutProps } from './$types';
 	import { dismissBsModalsForNavigation } from '$lib/helpers/bsModal';
 
 	let { data, children }: LayoutProps = $props();
+	const isLoginPage = $derived(page.url.pathname === '/auth/login');
 	const isDevUi = $derived(
 		page.url.pathname === '/dev/ui' || page.url.pathname.startsWith('/dev/ui/')
-	);
-	const usesReUiShell = $derived(
-		isDevUi || Boolean((page.data as { reUi?: boolean }).reUi)
 	);
 
 	onMount(() => {
@@ -35,29 +32,17 @@
 <svelte:head>
 </svelte:head>
 
-{#if isDevUi}
+{#if isLoginPage}
+	{@render children()}
+{:else if isDevUi}
 	<div class="dev-ui-canvas">
 		{@render children()}
 	</div>
-{:else if usesReUiShell}
+{:else}
 	<div class="re-ui-canvas">
-		<ReUiAppShell user={data.user}>
+		<ReUiAppShell user={data.user} isAdmin={data.isAdmin ?? false}>
 			{@render children()}
 		</ReUiAppShell>
-	</div>
-{:else}
-	<div class="app">
-		<Header
-			authenticated={!!data.user}
-			loggedUsername={data.user?.name ?? 'guest'}
-			isAdmin={data.isAdmin ?? false}
-		/>
-
-		<main>
-			{@render children()}
-		</main>
-
-		<footer></footer>
 	</div>
 {/if}
 

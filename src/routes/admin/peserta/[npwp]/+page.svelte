@@ -1,197 +1,222 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import Button from '$lib/components/Button.svelte';
-	import Card from '$lib/components/Card.svelte';
-	import Input from '$lib/components/Input.svelte';
-	import Label from '$lib/components/Label.svelte';
-	import Table from '$lib/components/Table.svelte';
 	import { formatMonth } from '$lib/helpers/date';
+	import {
+		ActionButton,
+		Breadcrumbs,
+		DataTableBody,
+		DataTableViewport,
+		FieldGrid,
+		FormActions,
+		FormField,
+		FormSection,
+		InlineAlert,
+		PageHeading,
+		PageLayout,
+		Stack,
+		StatusBadge,
+		SummaryStrip,
+	} from '$lib/re-ui-components';
 	import { updatePeserta } from '../../updatePeserta.remote';
 	import { getPesertaDetail } from './getPesertaDetail.remote';
 
 	const rupiah = new Intl.NumberFormat('id-ID');
 	const npwp = $derived(page.params.npwp ?? '');
 	const detail = $derived(await getPesertaDetail(npwp));
+	const jumlahFaktur = $derived(detail.fakturKeluaran.length + detail.fakturMasukan.length);
 </script>
 
 <svelte:head>
-	<title>Peserta {npwp}</title>
+	<title>Peserta {npwp} | EduTax</title>
 </svelte:head>
 
-<div class="tw:w-full tw:p-25 tw:flex tw:flex-col tw:gap-6">
-	<a href="/admin" class="tw:w-fit">&larr; Kembali ke dasbor</a>
+<PageLayout contentWidth="1540px">
+	<Stack gap="18px">
+		<Breadcrumbs
+			items={[
+				{ label: 'Administrasi', href: '/admin' },
+				{ label: 'Peserta' },
+				{ label: detail.akun.npwp },
+			]}
+		/>
+		<PageHeading
+			eyebrow="Administrasi peserta"
+			title={detail.akun.nama}
+			description={`NPWP ${detail.akun.npwp} · ${detail.profil?.batchNama ?? 'Tanpa batch'}`}
+		>
+			{#snippet actions()}
+				<StatusBadge
+					label={detail.akun.banned ? 'Akun Nonaktif' : 'Akun Aktif'}
+					tone={detail.akun.banned ? 'error' : 'success'}
+				/>
+			{/snippet}
+		</PageHeading>
 
-	<Card>
-		{#snippet head()}
-			<span class="tw:text-2xl tw:h-10 tw:flex tw:items-center">
-				{detail.akun.nama} ({detail.akun.npwp})
-			</span>
-		{/snippet}
-		{#snippet body()}
+		<SummaryStrip
+			columns={4}
+			items={[
+				{ label: 'SPT PPh Badan', value: detail.sptPphBadan.length },
+				{ label: 'SPT PPN', value: detail.sptPpn.length },
+				{ label: 'Faktur', value: jumlahFaktur },
+				{ label: 'Batch', value: detail.profil?.batchNama ?? 'Tanpa batch' },
+			]}
+		/>
+
+		<FormSection
+			title="Informasi Akun"
+			description="Perbarui data identitas dan kontak peserta."
+			bordered
+		>
 			<form
 				{...updatePeserta.enhance(async (form) => {
 					await form.submit();
 					await getPesertaDetail(npwp).refresh();
 				})}
-				class="tw:flex tw:flex-col tw:gap-2 tw:max-w-[45rem]"
 			>
 				<input type="hidden" name="userId" value={detail.akun.id} />
-				<Label class="tw:flex! tw:flex-row tw:items-center">
-					<span class="tw:block tw:w-[14rem]">Nama</span>
-					<Input type="text" name="nama" value={detail.akun.nama} required />
-				</Label>
-				<Label class="tw:flex! tw:flex-row tw:items-center">
-					<span class="tw:block tw:w-[14rem]">Email</span>
-					<Input type="email" name="email" value={detail.akun.email} required />
-				</Label>
-				<Label class="tw:flex! tw:flex-row tw:items-center">
-					<span class="tw:block tw:w-[14rem]">Nomor telepon</span>
-					<Input type="text" name="nomorTelepon" value={detail.profil?.nomor_telepon ?? ''} />
-				</Label>
-				<Label class="tw:flex! tw:flex-row tw:items-center">
-					<span class="tw:block tw:w-[14rem]">Batch</span>
-					<span>{detail.profil?.batchNama ?? 'Tanpa batch'}</span>
-				</Label>
-				<Label class="tw:flex! tw:flex-row tw:items-center">
-					<span class="tw:block tw:w-[14rem]">Status akun</span>
-					<span>{detail.akun.banned ? 'Nonaktif' : 'Aktif'}</span>
-				</Label>
+				<Stack gap="18px">
+					<FieldGrid columns={3}>
+						<FormField label="Nama" name="nama" value={detail.akun.nama} required />
+						<FormField label="Email" name="email" type="email" value={detail.akun.email} required />
+						<FormField
+							label="Nomor telepon"
+							name="nomorTelepon"
+							type="tel"
+							value={detail.profil?.nomor_telepon ?? ''}
+						/>
+						<FormField label="NPWP" value={detail.akun.npwp} disabled />
+						<FormField label="Batch" value={detail.profil?.batchNama ?? 'Tanpa batch'} disabled />
+						<FormField label="Status akun" value={detail.akun.banned ? 'Nonaktif' : 'Aktif'} disabled />
+					</FieldGrid>
 
-				{#if updatePeserta.fields.allIssues()?.[0]}
-					<p class="pesan-galat">{updatePeserta.fields.allIssues()?.[0]?.message}</p>
-				{:else if updatePeserta.result?.message}
-					<p class="pesan-sukses">{updatePeserta.result.message}</p>
-				{/if}
+					{#if updatePeserta.fields.allIssues()?.[0]}
+						<InlineAlert
+							tone="error"
+							title="Perubahan belum disimpan"
+							message={updatePeserta.fields.allIssues()?.[0]?.message}
+						/>
+					{:else if updatePeserta.result?.message}
+						<InlineAlert tone="success" message={updatePeserta.result.message} />
+					{/if}
 
-				<Button class="tw:w-[15rem]" disabled={updatePeserta.pending > 0}>
-					{updatePeserta.pending > 0 ? 'Menyimpan...' : 'Simpan Perubahan'}
-				</Button>
+					<FormActions>
+						<ActionButton type="submit" pending={updatePeserta.pending > 0} pendingLabel="Menyimpan...">
+							Simpan Perubahan
+						</ActionButton>
+					</FormActions>
+				</Stack>
 			</form>
-		{/snippet}
-	</Card>
+		</FormSection>
 
-	<Card>
-		{#snippet head()}
-			<span class="tw:text-2xl tw:h-10 tw:flex tw:items-center">SPT Tahunan PPh Badan</span>
-		{/snippet}
-		{#snippet body()}
-			<Table class="tw:w-full">
-				{#snippet head()}
-					<tr>
-						<th class="tw:w-[8rem]">Tahun</th>
-						<th class="tw:w-[10rem]">Pembetulan</th>
-						<th class="tw:w-[12rem]">Status SPT</th>
-						<th class="tw:w-[12rem]">Status Draft</th>
-						<th class="tw:w-[16rem]">Kurang/Lebih Bayar</th>
-						<th class="tw:w-[14rem]">Dilaporkan</th>
-					</tr>
-				{/snippet}
-				{#snippet body()}
-					{#each detail.sptPphBadan as row}
+		<FormSection title="SPT Tahunan PPh Badan" bordered padded={false}>
+			<DataTableViewport label="SPT Tahunan PPh Badan" minWidth="880px" framed={false} headerTone="navy">
+				<table>
+					<thead>
 						<tr>
-							<td>{row.tahunPajak}</td>
+							<th>Tahun</th>
+							<th>Pembetulan</th>
+							<th>Status SPT</th>
+							<th>Status Draft</th>
+							<th class="number">Kurang/Lebih Bayar</th>
+							<th>Dilaporkan</th>
+						</tr>
+					</thead>
+					<DataTableBody
+						items={detail.sptPphBadan}
+						getKey={(row) => `${row.tahunPajak}-${row.pembetulanKe}`}
+						emptyColspan={6}
+						emptyText="Belum ada SPT PPh Badan."
+					>
+						{#snippet row(row)}
+							<td><strong>{row.tahunPajak}</strong></td>
 							<td>{row.pembetulanKe}</td>
 							<td>{row.statusSpt}</td>
 							<td>{row.statusDraft}</td>
-							<td>{rupiah.format(row.pphKurangLebihBayar)}</td>
-							<td>{row.tanggalDilaporkan ?? '-'}</td>
-						</tr>
-					{:else}
-						<tr><td colspan="6">Belum ada SPT PPh Badan.</td></tr>
-					{/each}
-				{/snippet}
-			</Table>
-		{/snippet}
-	</Card>
+							<td class="number">{rupiah.format(row.pphKurangLebihBayar)}</td>
+							<td>{row.tanggalDilaporkan ?? '—'}</td>
+						{/snippet}
+					</DataTableBody>
+				</table>
+			</DataTableViewport>
+		</FormSection>
 
-	<Card>
-		{#snippet head()}
-			<span class="tw:text-2xl tw:h-10 tw:flex tw:items-center">SPT Masa PPN</span>
-		{/snippet}
-		{#snippet body()}
-			<Table class="tw:w-full">
-				{#snippet head()}
-					<tr>
-						<th class="tw:w-[12rem]">Masa Pajak</th>
-						<th class="tw:w-[8rem]">Tahun</th>
-						<th class="tw:w-[10rem]">Pembetulan</th>
-						<th class="tw:w-[12rem]">Status</th>
-						<th class="tw:w-[16rem]">Kurang/Lebih Bayar</th>
-						<th class="tw:w-[14rem]">Dilaporkan</th>
-					</tr>
-				{/snippet}
-				{#snippet body()}
-					{#each detail.sptPpn as row}
+		<FormSection title="SPT Masa PPN" bordered padded={false}>
+			<DataTableViewport label="SPT Masa PPN" minWidth="880px" framed={false} headerTone="navy">
+				<table>
+					<thead>
 						<tr>
-							<td>{formatMonth(row.masaPajak)}</td>
+							<th>Masa Pajak</th>
+							<th>Tahun</th>
+							<th>Pembetulan</th>
+							<th>Status</th>
+							<th class="number">Kurang/Lebih Bayar</th>
+							<th>Dilaporkan</th>
+						</tr>
+					</thead>
+					<DataTableBody
+						items={detail.sptPpn}
+						getKey={(row) => `${row.tahun}-${row.masaPajak}-${row.pembetulanKe}`}
+						emptyColspan={6}
+						emptyText="Belum ada SPT PPN."
+					>
+						{#snippet row(row)}
+							<td><strong>{formatMonth(row.masaPajak)}</strong></td>
 							<td>{row.tahun}</td>
 							<td>{row.pembetulanKe}</td>
 							<td>{row.status}</td>
-							<td>{rupiah.format(row.ppnKurangLebihBayar)}</td>
-							<td>{row.tanggalDilaporkan ?? '-'}</td>
-						</tr>
-					{:else}
-						<tr><td colspan="6">Belum ada SPT PPN.</td></tr>
-					{/each}
-				{/snippet}
-			</Table>
-		{/snippet}
-	</Card>
+							<td class="number">{rupiah.format(row.ppnKurangLebihBayar)}</td>
+							<td>{row.tanggalDilaporkan ?? '—'}</td>
+						{/snippet}
+					</DataTableBody>
+				</table>
+			</DataTableViewport>
+		</FormSection>
 
-	<Card>
-		{#snippet head()}
-			<span class="tw:text-2xl tw:h-10 tw:flex tw:items-center">Faktur Pajak</span>
-		{/snippet}
-		{#snippet body()}
-			<Table class="tw:w-full">
-				{#snippet head()}
-					<tr>
-						<th class="tw:w-[10rem]">Jenis</th>
-						<th class="tw:w-[18rem]">Nomor Faktur</th>
-						<th class="tw:w-[8rem]">Kode</th>
-						<th class="tw:w-[16rem]">Lawan Transaksi</th>
-						<th class="tw:w-[12rem]">Tanggal</th>
-						<th class="tw:w-[10rem]">Diupload</th>
-						<th class="tw:w-[10rem]">Dikreditkan</th>
-					</tr>
-				{/snippet}
-				{#snippet body()}
-					{#each [...detail.fakturKeluaran, ...detail.fakturMasukan] as row}
-						{@const keluaran = row.npwpPenjual === detail.akun.npwp}
+		<FormSection title="Faktur Pajak" bordered padded={false}>
+			<DataTableViewport label="Faktur Pajak peserta" minWidth="1040px" framed={false} headerTone="yellow">
+				<table>
+					<thead>
 						<tr>
-							<td>{keluaran ? 'Keluaran' : 'Masukan'}</td>
-							<td>{row.nomorFaktur || '-'}</td>
+							<th>Jenis</th>
+							<th>Nomor Faktur</th>
+							<th>Kode</th>
+							<th>Lawan Transaksi</th>
+							<th>Tanggal</th>
+							<th>Diupload</th>
+							<th>Dikreditkan</th>
+						</tr>
+					</thead>
+					<DataTableBody
+						items={[...detail.fakturKeluaran, ...detail.fakturMasukan]}
+						getKey={(row) => row.id}
+						emptyColspan={7}
+						emptyText="Belum ada faktur."
+					>
+						{#snippet row(row)}
+							{@const keluaran = row.npwpPenjual === detail.akun.npwp}
+							<td><StatusBadge label={keluaran ? 'Keluaran' : 'Masukan'} tone={keluaran ? 'attention' : 'neutral'} /></td>
+							<td><code>{row.nomorFaktur || '—'}</code></td>
 							<td>{row.kodeTransaksi}</td>
-							<td>{keluaran ? row.npwpPembeli || '-' : row.npwpPenjual}</td>
+							<td>{keluaran ? row.npwpPembeli || '—' : row.npwpPenjual}</td>
 							<td>{row.tanggalFaktur}</td>
 							<td>{row.diupload ? 'Ya' : 'Tidak'}</td>
 							<td>{row.dikreditkan ? 'Ya' : 'Tidak'}</td>
-						</tr>
-					{:else}
-						<tr><td colspan="7">Belum ada faktur.</td></tr>
-					{/each}
-				{/snippet}
-			</Table>
-		{/snippet}
-	</Card>
-</div>
+						{/snippet}
+					</DataTableBody>
+				</table>
+			</DataTableViewport>
+		</FormSection>
+	</Stack>
+</PageLayout>
 
 <style>
-	th,
-	td {
-		padding-block: 0.5rem;
-		padding-inline: 1rem;
+	.number {
+		text-align: right;
+		font-variant-numeric: tabular-nums;
 	}
 
-	.pesan-galat {
-		margin: 0;
-		color: #b42318;
-		font-size: 0.95rem;
-	}
-
-	.pesan-sukses {
-		margin: 0;
-		color: #067647;
-		font-size: 0.95rem;
+	code {
+		font-family: var(--ui-font-mono);
+		font-size: 12px;
 	}
 </style>

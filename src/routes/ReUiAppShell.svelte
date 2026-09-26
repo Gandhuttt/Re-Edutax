@@ -18,19 +18,21 @@
 
 	let {
 		user = null,
+		isAdmin = false,
 		children,
 	}: {
 		user?: Account;
+		isAdmin?: boolean;
 		children: Snippet;
 	} = $props();
 
 	let logoutForm = $state<HTMLFormElement>();
 
 	const accountName = $derived(
-		String(user?.name ?? "Wajib Pajak").replaceAll("'", ""),
+		String(user?.name ?? (isAdmin ? "Administrator" : "Wajib Pajak")).replaceAll("'", ""),
 	);
-	const accountNpwp = $derived(
-		String(user?.username ?? "NPWP tidak tersedia"),
+	const accountRole = $derived(
+		isAdmin ? "Administrator" : String(user?.username ?? "NPWP tidak tersedia"),
 	);
 	const accountInitials = $derived(
 		accountName
@@ -38,7 +40,7 @@
 			.filter(Boolean)
 			.slice(0, 2)
 			.map((word) => word[0]?.toUpperCase())
-			.join("") || "WP",
+			.join("") || (isAdmin ? "AD" : "WP"),
 	);
 
 	const fakturMenu: NavDropdownSection[] = [
@@ -240,6 +242,15 @@
 			],
 		},
 	];
+
+	const adminProfileGroups: ProfileMenuGroup[] = [
+		{
+			label: "Administrasi",
+			items: [
+				{ label: "Dasbor Administrator", href: "/admin" },
+			],
+		},
+	];
 </script>
 
 <ReUiRoot>
@@ -248,22 +259,26 @@
 		brand="EduTax"
 		subtitle="Layanan Administrasi Perpajakan"
 		mark="ET"
-		homeHref="/"
-		homeLabel="Beranda EduTax"
+		homeHref={isAdmin ? "/admin" : "/"}
+		homeLabel={isAdmin ? "Dasbor Administrator EduTax" : "Beranda EduTax"}
 		contentWidth="1500px"
 	>
 		{#snippet navigation()}
-			<NavLink href="/">Beranda</NavLink>
-			<NavDropdown label="Faktur" sections={fakturMenu} columns={1} />
-			<NavDropdown label="SPT" sections={sptMenu} columns={1} />
-			<NavDropdown label="eBupot" sections={ebupotMenu} />
+			{#if isAdmin}
+				<NavLink href="/admin">Administrasi</NavLink>
+			{:else}
+				<NavLink href="/">Beranda</NavLink>
+				<NavDropdown label="Faktur" sections={fakturMenu} columns={1} />
+				<NavDropdown label="SPT" sections={sptMenu} columns={1} />
+				<NavDropdown label="eBupot" sections={ebupotMenu} />
+			{/if}
 		{/snippet}
 		{#snippet account()}
 			<ProfileMenu
 				name={accountName}
-				role={accountNpwp}
+				role={accountRole}
 				initials={accountInitials}
-				groups={profileGroups}
+				groups={isAdmin ? adminProfileGroups : profileGroups}
 				onlogout={() => logoutForm?.requestSubmit()}
 			/>
 		{/snippet}
