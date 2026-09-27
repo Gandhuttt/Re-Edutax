@@ -1,5 +1,12 @@
 import { form, getRequestEvent } from '$app/server';
-import { decimalString, digitsString, isRealIsoDate, requiredString } from '$lib/helpers/valibot-schema';
+import {
+	decimalString,
+	digitsString,
+	isRealIsoDate,
+	requiredString,
+	rupiahString
+} from '$lib/helpers/valibot-schema';
+import { computeFakturAmounts } from '$lib/helpers/fakturAmounts';
 import { db } from '$lib/server/db';
 import {
 	faktur_pajak,
@@ -19,6 +26,7 @@ const UpdateFakturSchema = v.object({
 	dokumenTransaksi: v.object({
 		uangMuka: v.optional(v.boolean()),
 		pelunasan: v.optional(v.boolean()),
+		nilaiUangMuka: v.optional(rupiahString('Nilai uang muka'), '0'),
 		kodeTransaksi: v.number(),
 		tanggalFaktur: v.pipe(
 			v.string(),
@@ -200,6 +208,24 @@ export const updateFaktur = form(UpdateFakturSchema, async (input, issue) => {
 			};
 		})
 	);
+	const uangMuka = Boolean(input.dokumenTransaksi.uangMuka);
+	const pelunasan = Boolean(input.dokumenTransaksi.pelunasan);
+	const nilaiUangMuka = Number(input.dokumenTransaksi.nilaiUangMuka);
+	const { gross } = computeFakturAmounts(validatedTransaksi);
+
+	if (uangMuka && pelunasan) {
+		invalid(issue.dokumenTransaksi.uangMuka('Pilih uang muka atau pelunasan, bukan keduanya'));
+	}
+
+	if ((uangMuka || pelunasan) && nilaiUangMuka <= 0) {
+		invalid(issue.dokumenTransaksi.nilaiUangMuka('Nilai uang muka harus lebih dari 0'));
+	}
+
+	if ((uangMuka || pelunasan) && nilaiUangMuka > gross.dpp) {
+		invalid(
+			issue.dokumenTransaksi.nilaiUangMuka('Nilai uang muka tidak boleh melebihi jumlah DPP')
+		);
+	}
 
 	// D1 has no real multi-statement transaction over the Workers binding, only db.batch()
 	// (which requires every statement to be built upfront, no reading results back mid-batch).
@@ -207,8 +233,9 @@ export const updateFaktur = form(UpdateFakturSchema, async (input, issue) => {
 		db
 			.update(faktur_pajak)
 			.set({
-				uangMuka: Boolean(input.dokumenTransaksi.uangMuka),
-				pelunasan: Boolean(input.dokumenTransaksi.pelunasan),
+				uangMuka,
+				pelunasan,
+				nilaiUangMuka: uangMuka || pelunasan ? nilaiUangMuka : 0,
 				kodeTransaksiId: kodeTransaksi.id,
 				tanggalFaktur,
 				masaPajak: tanggal.getUTCMonth() + 1,

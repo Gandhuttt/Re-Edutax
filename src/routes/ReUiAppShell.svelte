@@ -57,6 +57,16 @@
 					description: "Buat dan kelola faktur penjualan",
 					href: "/faktur-pajak/keluaran",
 				},
+				{
+					label: "Retur Pajak Masukan",
+					description: "Buat dan unggah nota retur pembelian",
+					href: "/faktur-pajak/retur-masukan",
+				},
+				{
+					label: "Retur Pajak Keluaran",
+					description: "Tinjau nota retur dari pembeli",
+					href: "/faktur-pajak/retur-keluaran",
+				},
 			],
 		},
 	];

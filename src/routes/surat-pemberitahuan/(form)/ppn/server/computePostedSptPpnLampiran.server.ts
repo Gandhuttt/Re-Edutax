@@ -1,4 +1,5 @@
 import { db } from '$lib/server/db';
+import { computeFakturAmounts, type FakturLineAmountsInput } from '$lib/helpers/fakturAmounts';
 import {
 	faktur_pajak,
 	kode_transaksi_faktur_pajak,
@@ -7,7 +8,6 @@ import {
 } from '$lib/server/db/schema';
 import { alias } from 'drizzle-orm/sqlite-core';
 import { and, eq, or } from 'drizzle-orm';
-import { computeFakturLineAmounts } from './computeFakturLineAmounts';
 
 type LampiranRow = {
 	fakturPajakId: string;
@@ -64,6 +64,9 @@ export async function computePostedSptPpnLampiran({
 			nomorFaktur: faktur_pajak.nomorFaktur,
 			tanggalFaktur: faktur_pajak.tanggalFaktur,
 			kodeTransaksi: kode_transaksi_faktur_pajak.kode,
+			uangMuka: faktur_pajak.uangMuka,
+			pelunasan: faktur_pajak.pelunasan,
+			nilaiUangMuka: faktur_pajak.nilaiUangMuka,
 			kuantitas: transaksi_faktur_pajak.kuantitas,
 			hargaSatuan: transaksi_faktur_pajak.hargaSatuan,
 			hargaPotongan: transaksi_faktur_pajak.hargaPotongan,
@@ -91,27 +94,25 @@ export async function computePostedSptPpnLampiran({
 			)
 		);
 
-	const invoices = new Map<string, (typeof rows)[number] & { amounts: ReturnType<typeof computeFakturLineAmounts> }>();
+	type InvoiceGroup = {
+		header: (typeof rows)[number];
+		lines: FakturLineAmountsInput[];
+	};
+	const invoices = new Map<string, InvoiceGroup>();
 
 	for (const row of rows) {
-		const amounts = computeFakturLineAmounts(row);
-		const existing = invoices.get(row.fakturPajakId);
-
-		if (existing) {
-			existing.amounts.dpp += amounts.dpp;
-			existing.amounts.dppNilaiLain += amounts.dppNilaiLain;
-			existing.amounts.ppn += amounts.ppn;
-			existing.amounts.ppnbm += amounts.ppnbm;
-		} else {
-			invoices.set(row.fakturPajakId, { ...row, amounts });
-		}
+		const group = invoices.get(row.fakturPajakId) ?? { header: row, lines: [] };
+		group.lines.push(row);
+		invoices.set(row.fakturPajakId, group);
 	}
 
 	const a2: LampiranRow[] = [];
 	const b2: LampiranRow[] = [];
 	const c: LampiranCRow[] = [];
 
-	for (const invoice of invoices.values()) {
+	for (const group of invoices.values()) {
+		const invoice = group.header;
+		const amounts = computeFakturAmounts(group.lines, invoice).taxable;
 		const isSeller = invoice.npwpPenjual === npwp;
 		const isCreditedBuyer = invoice.npwpPembeli === npwp && invoice.dikreditkan;
 
@@ -123,10 +124,10 @@ export async function computePostedSptPpnLampiran({
 				nomorFaktur: invoice.nomorFaktur ?? '',
 				tanggalFaktur: invoice.tanggalFaktur,
 				kodeTransaksi: invoice.kodeTransaksi,
-				hargaJual: invoice.amounts.dpp,
-				dppNilaiLain: invoice.amounts.dppNilaiLain,
-				ppn: invoice.amounts.ppn,
-				ppnbm: invoice.amounts.ppnbm
+				hargaJual: amounts.dpp,
+				dppNilaiLain: amounts.dppNilaiLain,
+				ppn: amounts.ppn,
+				ppnbm: amounts.ppnbm
 			});
 		}
 
@@ -138,10 +139,10 @@ export async function computePostedSptPpnLampiran({
 				nomorFaktur: invoice.nomorFaktur ?? '',
 				tanggalFaktur: invoice.tanggalFaktur,
 				kodeTransaksi: invoice.kodeTransaksi,
-				hargaJual: invoice.amounts.dpp,
-				dppNilaiLain: invoice.amounts.dppNilaiLain,
-				ppn: invoice.amounts.ppn,
-				ppnbm: invoice.amounts.ppnbm
+				hargaJual: amounts.dpp,
+				dppNilaiLain: amounts.dppNilaiLain,
+				ppn: amounts.ppn,
+				ppnbm: amounts.ppnbm
 			});
 		}
 
@@ -155,10 +156,10 @@ export async function computePostedSptPpnLampiran({
 				nomorFaktur: invoice.nomorFaktur ?? '',
 				tanggalFaktur: invoice.tanggalFaktur,
 				kodeTransaksi: invoice.kodeTransaksi,
-				hargaJual: invoice.amounts.dpp,
-				dppNilaiLain: invoice.amounts.dppNilaiLain,
-				ppn: invoice.amounts.ppn,
-				ppnbm: invoice.amounts.ppnbm
+				hargaJual: amounts.dpp,
+				dppNilaiLain: amounts.dppNilaiLain,
+				ppn: amounts.ppn,
+				ppnbm: amounts.ppnbm
 			});
 		}
 	}

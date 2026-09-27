@@ -9,7 +9,6 @@ import {
 } from '$lib/server/db/schema';
 import { error } from '@sveltejs/kit';
 import { asc, eq } from 'drizzle-orm';
-import { getOrCreateCurrentSptPpn } from './server/getOrCreateCurrentSptPpn.server';
 import { getOwnedSptPpn } from './server/getOwnedSptPpn.server';
 import { getTaxpayerForSptPpn } from './server/getTaxpayerForSptPpn.server';
 
@@ -22,10 +21,12 @@ export const getSptPpn = query(async () => {
 		error(401, 'Belum login');
 	}
 
+	if (!requestedId) {
+		error(400, 'Pilih atau buat konsep SPT Masa PPN terlebih dahulu');
+	}
+
 	const taxpayer = await getTaxpayerForSptPpn(activeNpwp);
-	const sptPpn = requestedId
-		? await getOwnedSptPpn(requestedId, activeNpwp)
-		: await getOrCreateCurrentSptPpn(activeNpwp, taxpayer.nama);
+	const sptPpn = await getOwnedSptPpn(requestedId, activeNpwp);
 
 	// Bagian I and II live on their own child tables (see spt_ppn_penyerahan/
 	// spt_ppn_perolehan), so they're joined back in here and flattened onto a

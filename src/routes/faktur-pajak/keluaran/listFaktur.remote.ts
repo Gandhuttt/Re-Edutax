@@ -1,4 +1,5 @@
 import { getRequestEvent, query } from '$app/server';
+import { applyFakturPaymentAdjustment } from '$lib/helpers/fakturAmounts';
 import { db } from '$lib/server/db';
 import {
 	faktur_pajak,
@@ -37,6 +38,9 @@ export const listFaktur = query(async () => {
 			masaPajak: faktur_pajak.masaPajak,
 			tahun: faktur_pajak.tahun,
 			referensi: faktur_pajak.referensi,
+			uangMuka: faktur_pajak.uangMuka,
+			pelunasan: faktur_pajak.pelunasan,
+			nilaiUangMuka: faktur_pajak.nilaiUangMuka,
 			dpp: sql<number>`coalesce(sum(${dppPerItem}), 0)`.mapWith(Number),
 			dppNilaiLain:
 				sql<number>`coalesce(sum(${transaksi_faktur_pajak.dppNilaiLain}), 0)`.mapWith(Number),
@@ -85,9 +89,23 @@ export const listFaktur = query(async () => {
 			faktur_pajak.masaPajak,
 			faktur_pajak.tahun,
 			faktur_pajak.referensi,
+			faktur_pajak.uangMuka,
+			faktur_pajak.pelunasan,
+			faktur_pajak.nilaiUangMuka,
 			faktur_pajak.dikreditkan,
 			faktur_pajak.diupload
 		);
 
-	return rows;
+	return rows.map((row) => ({
+		...row,
+		...applyFakturPaymentAdjustment(
+			{
+				dpp: row.dpp,
+				dppNilaiLain: row.dppNilaiLain,
+				ppn: row.ppn,
+				ppnbm: row.ppnbm
+			},
+			row
+		)
+	}));
 });

@@ -1,4 +1,9 @@
 <script lang="ts">
+	import {
+		applyFakturPaymentAdjustment,
+		computeFakturAmounts
+	} from '$lib/helpers/fakturAmounts';
+	import { applyRupiahInput, formatRupiah } from '$lib/helpers/rupiahInput';
 	import { DataTableBody, DataTableViewport, TableActions } from '$lib/re-ui-components';
 	import type { UpdateFakturFields } from '../updateFaktur.remote';
 
@@ -25,16 +30,57 @@
 		requestEdit,
 		values,
 		canEdit,
-		transactionFields
+		transactionFields,
+		uangMuka,
+		pelunasan,
+		nilaiUangMuka,
+		onNilaiUangMukaChange,
+		paymentField
 	}: {
 		requestEdit: (index: number) => void;
 		requestDelete: (index: number) => void;
 		values: FakturTransaksi[];
 		canEdit: boolean;
 		transactionFields: UpdateFakturFields['transaksi'];
+		uangMuka: boolean;
+		pelunasan: boolean;
+		nilaiUangMuka: number;
+		onNilaiUangMukaChange: (value: number) => void;
+		paymentField: UpdateFakturFields['dokumenTransaksi']['nilaiUangMuka'];
 	} = $props();
 
 	const number = new Intl.NumberFormat('id-ID', { maximumFractionDigits: 2 });
+	const amounts = $derived(
+		computeFakturAmounts(
+			values.map((item) => ({
+				kuantitas: item.kuantitas,
+				hargaSatuan: item.hargaSatuan,
+				hargaPotongan: item.hargaPotongan,
+				dppNilaiLain: item.dppNilaiLain,
+				tarifPpn: item.tarifPPN,
+				tarifPpnBm: item.tarifPPnBM
+			})),
+			{ uangMuka, pelunasan, nilaiUangMuka }
+		)
+	);
+	const advanceAmounts = $derived(
+		applyFakturPaymentAdjustment(amounts.gross, {
+			uangMuka: true,
+			nilaiUangMuka
+		})
+	);
+	const advanceBalance = $derived({
+		dpp: Math.max(0, amounts.gross.dpp - advanceAmounts.dpp),
+		dppNilaiLain: Math.max(0, amounts.gross.dppNilaiLain - advanceAmounts.dppNilaiLain),
+		ppn: Math.max(0, amounts.gross.ppn - advanceAmounts.ppn),
+		ppnbm: Math.max(0, amounts.gross.ppnbm - advanceAmounts.ppnbm)
+	});
+
+	function changeAdvanceValue(event: Event & { currentTarget: HTMLInputElement }) {
+		const value = applyRupiahInput(event);
+		onNilaiUangMukaChange(value);
+		paymentField.set(event.currentTarget.value as never);
+	}
 </script>
 
 <DataTableViewport
@@ -115,5 +161,110 @@
 				<td class="number amount">{number.format(ppnbm)}</td>
 			{/snippet}
 		</DataTableBody>
+		<tfoot>
+			<tr class="summary-row">
+				<th colspan="9" scope="row">Jumlah</th>
+				<td class="number amount">{number.format(amounts.gross.dpp)}</td>
+				<td class="number">{number.format(amounts.gross.dppNilaiLain)}</td>
+				<td></td>
+				<td class="number amount">{number.format(amounts.gross.ppn)}</td>
+				<td></td>
+				<td class="number amount">{number.format(amounts.gross.ppnbm)}</td>
+			</tr>
+			{#if uangMuka || pelunasan}
+				<tr class="payment-row">
+					<th colspan="9" scope="row">Uang Muka</th>
+					<td class="number amount">
+						{#if canEdit}
+							<label class="advance-input">
+								<span class="visually-hidden">Nilai uang muka</span>
+								<input
+									type="text"
+									inputmode="numeric"
+									name={paymentField.as('text').name}
+									value={formatRupiah(nilaiUangMuka)}
+									placeholder="0"
+									oninput={changeAdvanceValue}
+								/>
+							</label>
+						{:else}
+							{number.format(advanceAmounts.dpp)}
+						{/if}
+					</td>
+					<td class="number">{number.format(advanceAmounts.dppNilaiLain)}</td>
+					<td></td>
+					<td class="number amount">{number.format(advanceAmounts.ppn)}</td>
+					<td></td>
+					<td class="number amount">{number.format(advanceAmounts.ppnbm)}</td>
+				</tr>
+				<tr class="payment-row">
+					<th colspan="9" scope="row">DPP</th>
+					<td class="number amount">{number.format(amounts.taxable.dpp)}</td>
+					<td class="number">{number.format(amounts.taxable.dppNilaiLain)}</td>
+					<td></td>
+					<td class="number amount">{number.format(amounts.taxable.ppn)}</td>
+					<td></td>
+					<td class="number amount">{number.format(amounts.taxable.ppnbm)}</td>
+				</tr>
+				<tr class="payment-row">
+					<th colspan="9" scope="row">Saldo Uang Muka</th>
+					<td class="number amount">{number.format(pelunasan ? 0 : advanceBalance.dpp)}</td>
+					<td class="number">{number.format(pelunasan ? 0 : advanceBalance.dppNilaiLain)}</td>
+					<td></td>
+					<td class="number amount">{number.format(pelunasan ? 0 : advanceBalance.ppn)}</td>
+					<td></td>
+					<td class="number amount">{number.format(pelunasan ? 0 : advanceBalance.ppnbm)}</td>
+				</tr>
+			{/if}
+		</tfoot>
 	</table>
 </DataTableViewport>
+
+<style>
+	tfoot th,
+	tfoot td {
+		padding: 9px 11px;
+		border-top: 1px solid var(--ui-line);
+		background: var(--ui-paper-deep);
+	}
+
+	tfoot th {
+		text-align: right;
+		color: var(--ui-navy);
+		font-size: 11px;
+		letter-spacing: 0.03em;
+		text-transform: uppercase;
+	}
+
+	.summary-row th,
+	.summary-row td {
+		border-top-color: var(--ui-line-strong);
+		font-weight: 800;
+	}
+
+	.payment-row th,
+	.payment-row td {
+		background: #f8f6ee;
+	}
+
+	.advance-input {
+		display: block;
+	}
+
+	.advance-input input {
+		width: 112px;
+		height: 32px;
+		padding: 5px 8px;
+		border: 1px solid var(--ui-line-strong);
+		border-radius: 2px;
+		background: #fffefa;
+		color: var(--ui-ink);
+		font: 700 12px var(--ui-font-mono);
+		text-align: right;
+	}
+
+	.advance-input input:focus {
+		outline: 3px solid var(--ui-yellow-soft);
+		border-color: var(--ui-navy);
+	}
+</style>

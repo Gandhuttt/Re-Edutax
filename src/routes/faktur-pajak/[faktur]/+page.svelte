@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { page as appPage } from '$app/state';
+	import { computeFakturAmounts } from '$lib/helpers/fakturAmounts';
 	import {
 		ActionButton,
 		Breadcrumbs,
@@ -35,6 +36,9 @@
 	let selectedTransaksi = $state<number | null>(null);
 	let transactionModalOpen = $state(false);
 	let sidebarOpen = $state(false);
+	let uangMuka = $state(faktur.uangMuka);
+	let pelunasan = $state(faktur.pelunasan);
+	let nilaiUangMuka = $state(faktur.nilaiUangMuka);
 
 	const rupiah = new Intl.NumberFormat('id-ID', { maximumFractionDigits: 2 });
 	const accountName = $derived(String(appPage.data.user?.name ?? 'Wajib Pajak'));
@@ -44,27 +48,31 @@
 	const documentStatus = $derived(
 		!faktur.diupload ? 'Draf' : faktur.dikreditkan ? 'Dikreditkan' : 'Diunggah'
 	);
-	const totals = $derived.by(() => {
-		const dpp = transaksi.reduce(
-			(sum, item) => sum + item.kuantitas * item.hargaSatuan - item.hargaPotongan,
-			0
-		);
-		const ppn = transaksi.reduce((sum, item) => {
-			const rowDpp = item.kuantitas * item.hargaSatuan - item.hargaPotongan;
-			return sum + ((item.dppNilaiLain > 0 ? item.dppNilaiLain : rowDpp) * item.tarifPPN) / 100;
-		}, 0);
-		const ppnbm = transaksi.reduce((sum, item) => {
-			const rowDpp = item.kuantitas * item.hargaSatuan - item.hargaPotongan;
-			return sum + (rowDpp * item.tarifPPnBM) / 100;
-		}, 0);
-
-		return [
-			{ label: 'Jumlah DPP', value: `Rp ${rupiah.format(dpp)}` },
-			{ label: 'Jumlah PPN', value: `Rp ${rupiah.format(ppn)}` },
-			{ label: 'Jumlah PPnBM', value: `Rp ${rupiah.format(ppnbm)}` },
-			{ label: 'Total faktur', value: `Rp ${rupiah.format(dpp + ppn + ppnbm)}`, emphasis: true }
-		];
-	});
+	const amounts = $derived.by(() =>
+		computeFakturAmounts(
+			transaksi.map((item) => ({
+				kuantitas: item.kuantitas,
+				hargaSatuan: item.hargaSatuan,
+				hargaPotongan: item.hargaPotongan,
+				dppNilaiLain: item.dppNilaiLain,
+				tarifPpn: item.tarifPPN,
+				tarifPpnBm: item.tarifPPnBM
+			})),
+			{ uangMuka, pelunasan, nilaiUangMuka }
+		)
+	);
+	const totals = $derived([
+		{ label: 'Jumlah DPP', value: `Rp ${rupiah.format(amounts.taxable.dpp)}` },
+		{ label: 'Jumlah PPN', value: `Rp ${rupiah.format(amounts.taxable.ppn)}` },
+		{ label: 'Jumlah PPnBM', value: `Rp ${rupiah.format(amounts.taxable.ppnbm)}` },
+		{
+			label: 'Total faktur',
+			value: `Rp ${rupiah.format(
+				amounts.taxable.dpp + amounts.taxable.ppn + amounts.taxable.ppnbm
+			)}`,
+			emphasis: true
+		}
+	]);
 
 	function createTransaction() {
 		selectedTransaksi = null;
@@ -81,6 +89,26 @@
 		else transaksi[selectedTransaksi] = item;
 		selectedTransaksi = null;
 	}
+
+	function changeUangMuka(checked: boolean) {
+		uangMuka = checked;
+		if (!checked) {
+			if (!pelunasan) nilaiUangMuka = 0;
+			return;
+		}
+		pelunasan = false;
+		updateFakturForm.fields.dokumenTransaksi.pelunasan.set(false);
+	}
+
+	function changePelunasan(checked: boolean) {
+		pelunasan = checked;
+		if (!checked) {
+			if (!uangMuka) nilaiUangMuka = 0;
+			return;
+		}
+		uangMuka = false;
+		updateFakturForm.fields.dokumenTransaksi.uangMuka.set(false);
+	}
 </script>
 
 <svelte:head><title>{documentKind}</title></svelte:head>
@@ -92,8 +120,8 @@
 {#snippet documentFields()}
 	<DokumenTransaksi
 		canEdit={faktur.canEdit}
-		uangMuka={faktur.uangMuka}
-		pelunasan={faktur.pelunasan}
+		uangMuka={uangMuka}
+		pelunasan={pelunasan}
 		nomorFaktur={faktur.nomorFaktur}
 		kodeTransaksi={faktur.kodeTransaksi}
 		tanggalFaktur={faktur.tanggalFaktur}
@@ -106,6 +134,8 @@
 		{transactionCodeOptions}
 		{additionalInfoOptions}
 		formFields={updateFakturForm.fields.dokumenTransaksi}
+		onUangMukaChange={changeUangMuka}
+		onPelunasanChange={changePelunasan}
 	/>
 {/snippet}
 
@@ -130,6 +160,11 @@
 		requestEdit={editTransaction}
 		requestDelete={(index) => transaksi.splice(index, 1)}
 		transactionFields={updateFakturForm.fields.transaksi}
+		uangMuka={uangMuka}
+		pelunasan={pelunasan}
+		nilaiUangMuka={nilaiUangMuka}
+		onNilaiUangMukaChange={(value) => (nilaiUangMuka = value)}
+		paymentField={updateFakturForm.fields.dokumenTransaksi.nilaiUangMuka}
 	/>
 {/snippet}
 
@@ -171,7 +206,9 @@
 					label: 'e-Faktur',
 					links: [
 						{ label: 'Pajak Keluaran', href: '/faktur-pajak/keluaran', active: isOutputInvoice },
-						{ label: 'Pajak Masukan', href: '/faktur-pajak/masukan', active: !isOutputInvoice }
+						{ label: 'Pajak Masukan', href: '/faktur-pajak/masukan', active: !isOutputInvoice },
+						{ label: 'Retur Pajak Masukan', href: '/faktur-pajak/retur-masukan' },
+						{ label: 'Retur Pajak Keluaran', href: '/faktur-pajak/retur-keluaran' }
 					]
 				}
 			]}

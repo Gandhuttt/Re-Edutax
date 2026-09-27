@@ -14,6 +14,8 @@ export * from './transactional/wajib_pajak/wajib_pajak';
 export * from './transactional/wajib_pajak/tempat_kegiatan_usaha';
 export * from './transactional/faktur/faktur_pajak';
 export * from './transactional/faktur/informasi_tambahan_faktur_pajak';
+export * from './transactional/faktur/retur_faktur_pajak_masukan';
+export * from './transactional/faktur/retur_faktur_pajak_masukan_detail';
 export * from './transactional/transaksi_faktur/transaksi_faktur_pajak';
 export * from './transactional/surat_pemberitahuan/spt_ppn/spt_ppn';
 export * from './transactional/surat_pemberitahuan/spt_ppn/penyerahan';

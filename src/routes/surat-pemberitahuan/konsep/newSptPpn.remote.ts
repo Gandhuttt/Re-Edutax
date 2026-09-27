@@ -1,7 +1,7 @@
 import { form, getRequestEvent } from '$app/server';
 import { error, redirect } from '@sveltejs/kit';
 import * as v from 'valibot';
-import { getOrCreateSptPpnForPeriod } from '../(form)/ppn/server/getOrCreateCurrentSptPpn.server';
+import { createSptPpnForPractice } from '../(form)/ppn/server/getOrCreateCurrentSptPpn.server';
 import { getTaxpayerForSptPpn } from '../(form)/ppn/server/getTaxpayerForSptPpn.server';
 
 const numericField = (message: string, min: number, max: number) =>
@@ -28,7 +28,7 @@ export const newSptPpn = form(NewSptPpnSchema, async ({ masaPajak, tahun }) => {
 	}
 
 	const taxpayer = await getTaxpayerForSptPpn(activeNpwp);
-	const sptPpn = await getOrCreateSptPpnForPeriod(activeNpwp, taxpayer.nama, masaPajak, tahun);
+	const sptPpn = await createSptPpnForPractice(activeNpwp, taxpayer.nama, masaPajak, tahun);
 
 	redirect(303, `/surat-pemberitahuan/ppn?id=${sptPpn.id}`);
 });

@@ -19,6 +19,7 @@
 	import { listSptPphBadan } from '../listSptPphBadan.remote';
 	import { listSptPphOrangPribadi } from '../listSptPphOrangPribadi.remote';
 	import { listSptPpn } from '../listSptPpn.remote';
+	import { deleteSptPpn } from './deleteSptPpn.remote';
 	import { deleteSptPphBadan } from './deleteSptPphBadan.remote';
 	import { deleteSptPphOrangPribadi } from './deleteSptPphOrangPribadi.remote';
 	import { newSptPphBadan } from './newSptPphBadan.remote';
@@ -192,11 +193,15 @@
 						>
 							{#snippet row(row)}
 								<td class="action-cell">
-									{#if row.kind === 'pph-badan'}
+									{#if row.kind === 'ppn'}
+										<form {...deleteSptPpn} id={`delete-spt-ppn-${row.id}`} hidden>
+											<input type="hidden" name="id" value={row.id} />
+										</form>
+									{:else if row.kind === 'pph-badan'}
 										<form {...deleteSptPphBadan} id={`delete-spt-pph-badan-${row.id}`} hidden>
 											<input type="hidden" name="id" value={row.id} />
 										</form>
-									{:else if row.kind === 'pph-orang-pribadi'}
+									{:else}
 										<form {...deleteSptPphOrangPribadi} id={`delete-spt-pph-op-${row.id}`} hidden>
 											<input type="hidden" name="id" value={row.id} />
 										</form>
@@ -205,20 +210,31 @@
 										visibleCount={2}
 										actions={[
 											{ label: 'Buka', href: detailHref(row) },
-											...(row.kind === 'pph-badan'
+											...(row.kind === 'ppn'
 												? [
 														{
 															label: 'Hapus',
 															danger: true,
 															onclick: () =>
 																submitForm(
-																	`delete-spt-pph-badan-${row.id}`,
-																	'Hapus konsep SPT PPh Badan ini?'
+																	`delete-spt-ppn-${row.id}`,
+																	'Hapus konsep SPT Masa PPN ini?'
 																)
 														}
 													]
-												: row.kind === 'pph-orang-pribadi'
+												: row.kind === 'pph-badan'
 													? [
+															{
+																label: 'Hapus',
+																danger: true,
+																onclick: () =>
+																	submitForm(
+																		`delete-spt-pph-badan-${row.id}`,
+																		'Hapus konsep SPT PPh Badan ini?'
+																	)
+															}
+														]
+													: [
 															{
 																label: 'Hapus',
 																danger: true,
@@ -228,8 +244,7 @@
 																		'Hapus konsep SPT PPh Orang Pribadi ini?'
 																	)
 															}
-														]
-													: [])
+														])
 										]}
 									/>
 								</td>

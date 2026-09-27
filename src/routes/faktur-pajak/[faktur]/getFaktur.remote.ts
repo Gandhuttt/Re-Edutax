@@ -37,6 +37,7 @@ export const getFaktur = query(async () => {
 			alamat: faktur_pajak.alamat,
 			uangMuka: faktur_pajak.uangMuka,
 			pelunasan: faktur_pajak.pelunasan,
+			nilaiUangMuka: faktur_pajak.nilaiUangMuka,
 			tanggalFaktur: faktur_pajak.tanggalFaktur,
 			masaPajak: faktur_pajak.masaPajak,
 			tahun: faktur_pajak.tahun,

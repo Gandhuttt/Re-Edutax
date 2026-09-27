@@ -22,6 +22,7 @@ export const faktur_pajak = sqliteTable('faktur_pajak', {
 
 	uangMuka: integer('uang_muka', { mode: 'boolean' }).notNull().default(false),
 	pelunasan: integer('pelunasan', { mode: 'boolean' }).notNull().default(false),
+	nilaiUangMuka: integer('nilai_uang_muka').notNull().default(0),
 
 	// pls change to sql functions
 	tanggalFaktur: text('tanggal_faktur')

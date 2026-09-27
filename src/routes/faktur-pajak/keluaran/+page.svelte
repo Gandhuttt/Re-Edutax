@@ -259,7 +259,9 @@
 					label: 'e-Faktur',
 					links: [
 						{ label: 'Pajak Keluaran', href: '/faktur-pajak/keluaran', active: true },
-						{ label: 'Pajak Masukan', href: '/faktur-pajak/masukan' }
+						{ label: 'Pajak Masukan', href: '/faktur-pajak/masukan' },
+						{ label: 'Retur Pajak Masukan', href: '/faktur-pajak/retur-masukan' },
+						{ label: 'Retur Pajak Keluaran', href: '/faktur-pajak/retur-keluaran' }
 					]
 				}
 			]}

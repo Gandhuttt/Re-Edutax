@@ -24,7 +24,8 @@
 	let {
 		canEdit, uangMuka, pelunasan, nomorFaktur, kodeTransaksi, tanggalFaktur,
 		jenisFaktur, referensi, alamat, idtku, informasiTambahan, dokumenPendukung,
-		transactionCodeOptions, additionalInfoOptions, formFields
+		transactionCodeOptions, additionalInfoOptions, formFields, onUangMukaChange,
+		onPelunasanChange
 	}: {
 		canEdit: boolean;
 		uangMuka: boolean;
@@ -41,6 +42,8 @@
 		transactionCodeOptions: TransactionCodeOption[];
 		additionalInfoOptions: AdditionalInfoOption[];
 		formFields: UpdateFakturFields['dokumenTransaksi'];
+		onUangMukaChange?: (checked: boolean) => void;
+		onPelunasanChange?: (checked: boolean) => void;
 	} = $props();
 
 	let kodeTransaksiState = $state<number>(untrack(() => kodeTransaksi));
@@ -87,8 +90,22 @@
 
 <Stack gap="16px">
 	<Stack direction="horizontal" gap="12px" wrap>
-		<CheckboxField label="Uang muka" field={canEdit ? formFields.uangMuka : undefined} checked={uangMuka} disabled={!canEdit} compact />
-		<CheckboxField label="Pelunasan" field={canEdit ? formFields.pelunasan : undefined} checked={pelunasan} disabled={!canEdit} compact />
+		<CheckboxField
+			label="Uang muka"
+			field={canEdit ? formFields.uangMuka : undefined}
+			checked={uangMuka}
+			disabled={!canEdit || pelunasan}
+			compact
+			onchange={(event) => onUangMukaChange?.(event.currentTarget.checked)}
+		/>
+		<CheckboxField
+			label="Pelunasan"
+			field={canEdit ? formFields.pelunasan : undefined}
+			checked={pelunasan}
+			disabled={!canEdit || uangMuka}
+			compact
+			onchange={(event) => onPelunasanChange?.(event.currentTarget.checked)}
+		/>
 	</Stack>
 
 	<FieldGrid gap="14px 16px">
