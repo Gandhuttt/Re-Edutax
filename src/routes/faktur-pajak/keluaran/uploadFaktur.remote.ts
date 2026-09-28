@@ -8,6 +8,11 @@ import * as v from 'valibot';
 const FakturIdSchema = v.object({
 	id: v.string()
 });
+function createInvoiceNumber() {
+	const chunks = crypto.getRandomValues(new Uint32Array(2));
+	return Array.from(chunks, (chunk) => String(chunk % 100_000_000).padStart(8, '0')).join('');
+}
+
 
 export const uploadFaktur = form(FakturIdSchema, async ({ id }) => {
 	const event = getRequestEvent();
@@ -22,7 +27,7 @@ export const uploadFaktur = form(FakturIdSchema, async ({ id }) => {
 		.set({
 			diupload: true,
 			dikreditkan: false,
-			nomorFaktur: '0000000000000000'
+			nomorFaktur: createInvoiceNumber()
 		})
 		.where(
 			and(
