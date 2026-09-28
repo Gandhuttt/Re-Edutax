@@ -13,6 +13,8 @@ export const faktur_pajak = sqliteTable('faktur_pajak', {
 	npwpPembeli: text('npwp_pembeli').default(''),
 
 	nomorFaktur: text('nomor_faktur').default(''),
+	fakturReferensiId: text('faktur_referensi_id').notNull().default(''),
+
 	kodeTransaksiId: text('kode_transaksi_id')
 		.notNull()
 		.references(() => kode_transaksi_faktur_pajak.id),

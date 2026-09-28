@@ -123,6 +123,8 @@
 		uangMuka={uangMuka}
 		pelunasan={pelunasan}
 		nomorFaktur={faktur.nomorFaktur}
+		fakturReferensiId={faktur.fakturReferensiId}
+		previousInvoices={faktur.previousInvoices}
 		kodeTransaksi={faktur.kodeTransaksi}
 		tanggalFaktur={faktur.tanggalFaktur}
 		jenisFaktur="Normal"
@@ -136,6 +138,8 @@
 		formFields={updateFakturForm.fields.dokumenTransaksi}
 		onUangMukaChange={changeUangMuka}
 		onPelunasanChange={changePelunasan}
+		nilaiUangMuka={nilaiUangMuka}
+		onNilaiUangMukaChange={(value) => (nilaiUangMuka = value)}
 	/>
 {/snippet}
 
@@ -163,8 +167,6 @@
 		uangMuka={uangMuka}
 		pelunasan={pelunasan}
 		nilaiUangMuka={nilaiUangMuka}
-		onNilaiUangMukaChange={(value) => (nilaiUangMuka = value)}
-		paymentField={updateFakturForm.fields.dokumenTransaksi.nilaiUangMuka}
 	/>
 {/snippet}
 

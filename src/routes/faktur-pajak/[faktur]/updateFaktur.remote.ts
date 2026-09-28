@@ -27,6 +27,7 @@ const UpdateFakturSchema = v.object({
 		uangMuka: v.optional(v.boolean()),
 		pelunasan: v.optional(v.boolean()),
 		nilaiUangMuka: v.optional(rupiahString('Nilai uang muka'), '0'),
+		fakturReferensiId: v.optional(v.string(), ''),
 		kodeTransaksi: v.number(),
 		tanggalFaktur: v.pipe(
 			v.string(),
@@ -211,6 +212,7 @@ export const updateFaktur = form(UpdateFakturSchema, async (input, issue) => {
 	const uangMuka = Boolean(input.dokumenTransaksi.uangMuka);
 	const pelunasan = Boolean(input.dokumenTransaksi.pelunasan);
 	const nilaiUangMuka = Number(input.dokumenTransaksi.nilaiUangMuka);
+	const fakturReferensiId = input.dokumenTransaksi.fakturReferensiId.trim();
 	const { gross } = computeFakturAmounts(validatedTransaksi);
 
 	if (uangMuka && pelunasan) {
@@ -226,6 +228,35 @@ export const updateFaktur = form(UpdateFakturSchema, async (input, issue) => {
 			issue.dokumenTransaksi.nilaiUangMuka('Nilai uang muka tidak boleh melebihi jumlah DPP')
 		);
 	}
+	if (pelunasan && !fakturReferensiId) {
+		invalid(issue.dokumenTransaksi.fakturReferensiId('Nomor faktur sebelumnya harus dipilih'));
+	}
+
+	if (fakturReferensiId) {
+		const [referencedInvoice] = await db
+			.select({
+				id: faktur_pajak.id,
+				nomorFaktur: faktur_pajak.nomorFaktur
+			})
+			.from(faktur_pajak)
+			.where(
+				and(
+					eq(faktur_pajak.id, fakturReferensiId),
+					eq(faktur_pajak.npwpPenjual, activeNpwp),
+					eq(faktur_pajak.diupload, true)
+				)
+			)
+			.limit(1);
+
+		if (!referencedInvoice?.nomorFaktur) {
+			invalid(
+				issue.dokumenTransaksi.fakturReferensiId(
+					'Nomor faktur sebelumnya tidak valid atau belum diunggah'
+				)
+			);
+		}
+	}
+
 
 	// D1 has no real multi-statement transaction over the Workers binding, only db.batch()
 	// (which requires every statement to be built upfront, no reading results back mid-batch).
@@ -236,6 +267,7 @@ export const updateFaktur = form(UpdateFakturSchema, async (input, issue) => {
 				uangMuka,
 				pelunasan,
 				nilaiUangMuka: uangMuka || pelunasan ? nilaiUangMuka : 0,
+				fakturReferensiId: uangMuka || pelunasan ? fakturReferensiId : '',
 				kodeTransaksiId: kodeTransaksi.id,
 				tanggalFaktur,
 				masaPajak: tanggal.getUTCMonth() + 1,

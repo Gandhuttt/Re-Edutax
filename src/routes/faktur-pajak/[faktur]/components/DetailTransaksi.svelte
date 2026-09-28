@@ -3,7 +3,6 @@
 		applyFakturPaymentAdjustment,
 		computeFakturAmounts
 	} from '$lib/helpers/fakturAmounts';
-	import { applyRupiahInput, formatRupiah } from '$lib/helpers/rupiahInput';
 	import { DataTableBody, DataTableViewport, TableActions } from '$lib/re-ui-components';
 	import type { UpdateFakturFields } from '../updateFaktur.remote';
 
@@ -33,9 +32,7 @@
 		transactionFields,
 		uangMuka,
 		pelunasan,
-		nilaiUangMuka,
-		onNilaiUangMukaChange,
-		paymentField
+		nilaiUangMuka
 	}: {
 		requestEdit: (index: number) => void;
 		requestDelete: (index: number) => void;
@@ -45,8 +42,6 @@
 		uangMuka: boolean;
 		pelunasan: boolean;
 		nilaiUangMuka: number;
-		onNilaiUangMukaChange: (value: number) => void;
-		paymentField: UpdateFakturFields['dokumenTransaksi']['nilaiUangMuka'];
 	} = $props();
 
 	const number = new Intl.NumberFormat('id-ID', { maximumFractionDigits: 2 });
@@ -75,12 +70,6 @@
 		ppn: Math.max(0, amounts.gross.ppn - advanceAmounts.ppn),
 		ppnbm: Math.max(0, amounts.gross.ppnbm - advanceAmounts.ppnbm)
 	});
-
-	function changeAdvanceValue(event: Event & { currentTarget: HTMLInputElement }) {
-		const value = applyRupiahInput(event);
-		onNilaiUangMukaChange(value);
-		paymentField.set(event.currentTarget.value as never);
-	}
 </script>
 
 <DataTableViewport
@@ -174,23 +163,7 @@
 			{#if uangMuka || pelunasan}
 				<tr class="payment-row">
 					<th colspan="9" scope="row">Uang Muka</th>
-					<td class="number amount">
-						{#if canEdit}
-							<label class="advance-input">
-								<span class="visually-hidden">Nilai uang muka</span>
-								<input
-									type="text"
-									inputmode="numeric"
-									name={paymentField.as('text').name}
-									value={formatRupiah(nilaiUangMuka)}
-									placeholder="0"
-									oninput={changeAdvanceValue}
-								/>
-							</label>
-						{:else}
-							{number.format(advanceAmounts.dpp)}
-						{/if}
-					</td>
+					<td class="number amount">{number.format(advanceAmounts.dpp)}</td>
 					<td class="number">{number.format(advanceAmounts.dppNilaiLain)}</td>
 					<td></td>
 					<td class="number amount">{number.format(advanceAmounts.ppn)}</td>
@@ -247,24 +220,4 @@
 		background: #f8f6ee;
 	}
 
-	.advance-input {
-		display: block;
-	}
-
-	.advance-input input {
-		width: 112px;
-		height: 32px;
-		padding: 5px 8px;
-		border: 1px solid var(--ui-line-strong);
-		border-radius: 2px;
-		background: #fffefa;
-		color: var(--ui-ink);
-		font: 700 12px var(--ui-font-mono);
-		text-align: right;
-	}
-
-	.advance-input input:focus {
-		outline: 3px solid var(--ui-yellow-soft);
-		border-color: var(--ui-navy);
-	}
 </style>

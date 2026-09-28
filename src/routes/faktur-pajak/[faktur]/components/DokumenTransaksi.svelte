@@ -6,6 +6,7 @@
 		DateField,
 		FieldGrid,
 		FormField,
+		RupiahField,
 		SelectField,
 		Stack
 	} from '$lib/re-ui-components';
@@ -20,17 +21,29 @@
 		informasiTambahan: string;
 		requiresDocument: boolean;
 	};
+	type PreviousInvoice = {
+		id: string;
+		nomorFaktur: string | null;
+		tanggalFaktur: string;
+		npwpPembeli: string | null;
+		uangMuka: boolean;
+		pelunasan: boolean;
+	};
+
 
 	let {
-		canEdit, uangMuka, pelunasan, nomorFaktur, kodeTransaksi, tanggalFaktur,
-		jenisFaktur, referensi, alamat, idtku, informasiTambahan, dokumenPendukung,
-		transactionCodeOptions, additionalInfoOptions, formFields, onUangMukaChange,
-		onPelunasanChange
+		canEdit, uangMuka, pelunasan, nomorFaktur, fakturReferensiId, previousInvoices,
+		kodeTransaksi, tanggalFaktur, jenisFaktur, referensi, alamat, idtku,
+		informasiTambahan, dokumenPendukung, transactionCodeOptions, additionalInfoOptions,
+		formFields, onUangMukaChange, onPelunasanChange, nilaiUangMuka,
+		onNilaiUangMukaChange
 	}: {
 		canEdit: boolean;
 		uangMuka: boolean;
 		pelunasan: boolean;
 		nomorFaktur: string | undefined;
+		fakturReferensiId: string;
+		previousInvoices: PreviousInvoice[];
 		kodeTransaksi: number;
 		tanggalFaktur: string;
 		jenisFaktur: string;
@@ -44,6 +57,8 @@
 		formFields: UpdateFakturFields['dokumenTransaksi'];
 		onUangMukaChange?: (checked: boolean) => void;
 		onPelunasanChange?: (checked: boolean) => void;
+		nilaiUangMuka: number;
+		onNilaiUangMukaChange?: (value: number) => void;
 	} = $props();
 
 	let kodeTransaksiState = $state<number>(untrack(() => kodeTransaksi));
@@ -51,6 +66,7 @@
 		untrack(() => informasiTambahan ?? '')
 	);
 	let tanggalFakturState = $state(untrack(() => tanggalFaktur));
+	let fakturReferensiState = $state(untrack(() => fakturReferensiId));
 
 	const selectedKodeTransaksiId = $derived(
 		transactionCodeOptions.find((transaction) => transaction.key === Number(kodeTransaksiState))?.id
@@ -109,7 +125,36 @@
 	</Stack>
 
 	<FieldGrid gap="14px 16px">
-		<FormField label="Nomor faktur" value={nomorFaktur || 'Terbentuk setelah diunggah'} disabled />
+		{#if uangMuka || pelunasan}
+			<SelectField
+				label="Nomor faktur"
+				field={canEdit ? formFields.fakturReferensiId : undefined}
+				value={fakturReferensiState}
+				disabled={!canEdit}
+				required={pelunasan}
+				placeholder={previousInvoices.length
+					? 'Pilih faktur yang sudah diunggah'
+					: 'Belum ada faktur yang sudah diunggah'}
+				options={previousInvoices.map((invoice) => ({
+					value: invoice.id,
+					label: `${invoice.nomorFaktur} — ${invoice.tanggalFaktur} — Pembeli ${invoice.npwpPembeli ?? '-'}${invoice.uangMuka ? ' — Uang muka' : invoice.pelunasan ? ' — Pelunasan' : ''}`,
+					searchText: `${invoice.nomorFaktur} ${invoice.tanggalFaktur} ${invoice.npwpPembeli ?? ''}`
+				}))}
+				onchange={(value) => (fakturReferensiState = String(value))}
+			/>
+			<RupiahField
+				label="Nilai uang muka"
+				field={canEdit ? formFields.nilaiUangMuka : undefined}
+				value={nilaiUangMuka}
+				disabled={!canEdit}
+				required
+				hint="Masukkan nilai DPP uang muka yang diperhitungkan pada faktur ini."
+				oninput={(event) =>
+					onNilaiUangMukaChange?.(Number(event.currentTarget.value.replace(/\D/g, '')))}
+			/>
+		{:else}
+			<FormField label="Nomor faktur" value={nomorFaktur || 'Terbentuk setelah diunggah'} disabled />
+		{/if}
 		<SelectField
 			label="Kode transaksi"
 			field={canEdit ? formFields.kodeTransaksi : undefined}

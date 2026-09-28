@@ -1,0 +1,1 @@
+ALTER TABLE `faktur_pajak` ADD `faktur_referensi_id` text DEFAULT '' NOT NULL;

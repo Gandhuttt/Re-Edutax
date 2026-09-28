@@ -11,7 +11,7 @@ import {
 	transaksi_faktur_pajak
 } from '$lib/server/db/schema';
 import { error } from '@sveltejs/kit';
-import { and, eq, or } from 'drizzle-orm';
+import { and, desc, eq, ne, or } from 'drizzle-orm';
 
 export const getFaktur = query(async () => {
 	const event = getRequestEvent();
@@ -32,6 +32,7 @@ export const getFaktur = query(async () => {
 			npwpPenjual: faktur_pajak.npwpPenjual,
 			npwpPembeli: faktur_pajak.npwpPembeli,
 			nomorFaktur: faktur_pajak.nomorFaktur,
+			fakturReferensiId: faktur_pajak.fakturReferensiId,
 			kodeTransaksi: kode_transaksi_faktur_pajak.kode,
 			referensi: faktur_pajak.referensi,
 			alamat: faktur_pajak.alamat,
@@ -60,6 +61,29 @@ export const getFaktur = query(async () => {
 	if (!faktur) {
 		error(404, 'Faktur tidak ditemukan');
 	}
+	const previousInvoices =
+		faktur.npwpPenjual === activeNpwp
+			? await db
+					.select({
+						id: faktur_pajak.id,
+						nomorFaktur: faktur_pajak.nomorFaktur,
+						tanggalFaktur: faktur_pajak.tanggalFaktur,
+						npwpPembeli: faktur_pajak.npwpPembeli,
+						uangMuka: faktur_pajak.uangMuka,
+						pelunasan: faktur_pajak.pelunasan
+					})
+					.from(faktur_pajak)
+					.where(
+						and(
+							eq(faktur_pajak.npwpPenjual, activeNpwp),
+							eq(faktur_pajak.diupload, true),
+							ne(faktur_pajak.id, faktur.id),
+							ne(faktur_pajak.nomorFaktur, '')
+						)
+					)
+					.orderBy(desc(faktur_pajak.tanggalFaktur), desc(faktur_pajak.nomorFaktur))
+			: [];
+
 
 	const transaksi = await db
 		.select({
@@ -116,6 +140,7 @@ export const getFaktur = query(async () => {
 		nomorFaktur: faktur.nomorFaktur ?? '',
 		npwpPembeli: faktur.npwpPembeli ?? '',
 		canEdit: faktur.npwpPenjual === activeNpwp && !faktur.diupload,
+		previousInvoices,
 		transaksi: transaksi.map((item) => {
 			const { jenisItemKode, ...transaksiItem } = item;
 			const hargaTotal = item.kuantitas * item.hargaSatuan;

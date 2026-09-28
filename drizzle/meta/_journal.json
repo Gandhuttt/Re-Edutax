@@ -253,6 +253,13 @@
       "when": 1790529424832,
       "tag": "0035_rainy_monster_badoon",
       "breakpoints": true
+    },
+    {
+      "idx": 36,
+      "version": "6",
+      "when": 1790580325484,
+      "tag": "0036_low_changeling",
+      "breakpoints": true
     }
   ]
 }
