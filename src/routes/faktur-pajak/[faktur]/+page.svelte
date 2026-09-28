@@ -16,6 +16,7 @@
 	import InformasiPembeli from './components/InformasiPembeli.svelte';
 	import ModalTransaksi from './components/ModalTransaksi.svelte';
 	import { getFaktur } from './getFaktur.remote';
+	import { getFakturReferensi } from './getFakturReferensi.remote';
 	import { getJenisInformasiTambahanFaktur } from '../jenisInformasiTambahan.remote';
 	import { getKodeItemTransaksiFaktur } from '../kodeItemTransaksi.remote';
 	import { getKodeTransaksiFaktur } from '../kodeTransaksi.remote';
@@ -39,6 +40,12 @@
 	let uangMuka = $state(faktur.uangMuka);
 	let pelunasan = $state(faktur.pelunasan);
 	let nilaiUangMuka = $state(faktur.nilaiUangMuka);
+	let fakturReferensiId = $state(faktur.fakturReferensiId);
+	let totalUangMukaSebelumnya = $state(faktur.totalUangMukaSebelumnya);
+	let npwpPembeli = $state(faktur.npwpPembeli);
+	let referenceLoading = $state(false);
+	let referenceError = $state('');
+	let referenceRequest = 0;
 
 	const rupiah = new Intl.NumberFormat('id-ID', { maximumFractionDigits: 2 });
 	const accountName = $derived(String(appPage.data.user?.name ?? 'Wajib Pajak'));
@@ -90,6 +97,32 @@
 		selectedTransaksi = null;
 	}
 
+	async function changeFakturReferensi(id: string) {
+		fakturReferensiId = id;
+		referenceError = '';
+		if (!id) return;
+
+		const request = ++referenceRequest;
+		referenceLoading = true;
+		try {
+			const reference = await getFakturReferensi({ id });
+			if (request !== referenceRequest) return;
+
+			transaksi = reference.transaksi;
+			npwpPembeli = reference.npwpPembeli;
+			updateFakturForm.fields.informasiPembeli.npwpPembeli.set(npwpPembeli);
+			nilaiUangMuka = pelunasan ? reference.totalUangMukaSebelumnya : 0;
+			totalUangMukaSebelumnya = reference.totalUangMukaSebelumnya;
+			updateFakturForm.fields.dokumenTransaksi.nilaiUangMuka.set(String(nilaiUangMuka));
+		} catch (error) {
+			if (request !== referenceRequest) return;
+			referenceError =
+				error instanceof Error ? error.message : 'Detail faktur referensi gagal dimuat';
+		} finally {
+			if (request === referenceRequest) referenceLoading = false;
+		}
+	}
+
 	function changeUangMuka(checked: boolean) {
 		uangMuka = checked;
 		if (!checked) {
@@ -108,6 +141,7 @@
 		}
 		uangMuka = false;
 		updateFakturForm.fields.dokumenTransaksi.uangMuka.set(false);
+		if (fakturReferensiId) void changeFakturReferensi(fakturReferensiId);
 	}
 </script>
 
@@ -123,7 +157,7 @@
 		uangMuka={uangMuka}
 		pelunasan={pelunasan}
 		nomorFaktur={faktur.nomorFaktur}
-		fakturReferensiId={faktur.fakturReferensiId}
+		fakturReferensiId={fakturReferensiId}
 		previousInvoices={faktur.previousInvoices}
 		kodeTransaksi={faktur.kodeTransaksi}
 		tanggalFaktur={faktur.tanggalFaktur}
@@ -138,15 +172,16 @@
 		formFields={updateFakturForm.fields.dokumenTransaksi}
 		onUangMukaChange={changeUangMuka}
 		onPelunasanChange={changePelunasan}
-		nilaiUangMuka={nilaiUangMuka}
-		onNilaiUangMukaChange={(value) => (nilaiUangMuka = value)}
+		onFakturReferensiChange={(id) => void changeFakturReferensi(id)}
+		{referenceLoading}
+		{referenceError}
 	/>
 {/snippet}
 
 {#snippet buyerFields()}
 	<InformasiPembeli
 		canEdit={faktur.canEdit}
-		npwpPembeli={faktur.npwpPembeli}
+		bind:npwpPembeli
 		formFields={updateFakturForm.fields.informasiPembeli}
 	/>
 {/snippet}
@@ -164,9 +199,12 @@
 		requestEdit={editTransaction}
 		requestDelete={(index) => transaksi.splice(index, 1)}
 		transactionFields={updateFakturForm.fields.transaksi}
+		nilaiUangMukaField={updateFakturForm.fields.dokumenTransaksi.nilaiUangMuka}
 		uangMuka={uangMuka}
 		pelunasan={pelunasan}
 		nilaiUangMuka={nilaiUangMuka}
+		{totalUangMukaSebelumnya}
+		onNilaiUangMukaChange={(value) => (nilaiUangMuka = value)}
 	/>
 {/snippet}
 

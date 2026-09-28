@@ -10,6 +10,7 @@ import {
 	satuan_ukur_transaksi_faktur,
 	transaksi_faktur_pajak
 } from '$lib/server/db/schema';
+import { getFakturReferenceChain } from '$lib/server/fakturPayment';
 import { error } from '@sveltejs/kit';
 import { and, desc, eq, ne, or } from 'drizzle-orm';
 
@@ -77,12 +78,16 @@ export const getFaktur = query(async () => {
 						and(
 							eq(faktur_pajak.npwpPenjual, activeNpwp),
 							eq(faktur_pajak.diupload, true),
+							eq(faktur_pajak.pelunasan, false),
 							ne(faktur_pajak.id, faktur.id),
 							ne(faktur_pajak.nomorFaktur, '')
 						)
 					)
 					.orderBy(desc(faktur_pajak.tanggalFaktur), desc(faktur_pajak.nomorFaktur))
 			: [];
+	const referenceChain = faktur.fakturReferensiId
+		? await getFakturReferenceChain(faktur.fakturReferensiId, faktur.npwpPenjual)
+		: null;
 
 
 	const transaksi = await db
@@ -141,6 +146,7 @@ export const getFaktur = query(async () => {
 		npwpPembeli: faktur.npwpPembeli ?? '',
 		canEdit: faktur.npwpPenjual === activeNpwp && !faktur.diupload,
 		previousInvoices,
+		totalUangMukaSebelumnya: referenceChain?.totalUangMuka ?? 0,
 		transaksi: transaksi.map((item) => {
 			const { jenisItemKode, ...transaksiItem } = item;
 			const hargaTotal = item.kuantitas * item.hargaSatuan;

@@ -6,7 +6,6 @@
 		DateField,
 		FieldGrid,
 		FormField,
-		RupiahField,
 		SelectField,
 		Stack
 	} from '$lib/re-ui-components';
@@ -35,8 +34,8 @@
 		canEdit, uangMuka, pelunasan, nomorFaktur, fakturReferensiId, previousInvoices,
 		kodeTransaksi, tanggalFaktur, jenisFaktur, referensi, alamat, idtku,
 		informasiTambahan, dokumenPendukung, transactionCodeOptions, additionalInfoOptions,
-		formFields, onUangMukaChange, onPelunasanChange, nilaiUangMuka,
-		onNilaiUangMukaChange
+		formFields, onUangMukaChange, onPelunasanChange, onFakturReferensiChange,
+		referenceLoading, referenceError
 	}: {
 		canEdit: boolean;
 		uangMuka: boolean;
@@ -57,8 +56,9 @@
 		formFields: UpdateFakturFields['dokumenTransaksi'];
 		onUangMukaChange?: (checked: boolean) => void;
 		onPelunasanChange?: (checked: boolean) => void;
-		nilaiUangMuka: number;
-		onNilaiUangMukaChange?: (value: number) => void;
+		onFakturReferensiChange?: (id: string) => void;
+		referenceLoading: boolean;
+		referenceError: string;
 	} = $props();
 
 	let kodeTransaksiState = $state<number>(untrack(() => kodeTransaksi));
@@ -130,27 +130,30 @@
 				label="Nomor faktur"
 				field={canEdit ? formFields.fakturReferensiId : undefined}
 				value={fakturReferensiState}
-				disabled={!canEdit}
+				disabled={!canEdit || referenceLoading}
 				required={pelunasan}
 				placeholder={previousInvoices.length
 					? 'Pilih faktur yang sudah diunggah'
 					: 'Belum ada faktur yang sudah diunggah'}
-				options={previousInvoices.map((invoice) => ({
-					value: invoice.id,
-					label: `${invoice.nomorFaktur} — ${invoice.tanggalFaktur} — Pembeli ${invoice.npwpPembeli ?? '-'}${invoice.uangMuka ? ' — Uang muka' : invoice.pelunasan ? ' — Pelunasan' : ''}`,
-					searchText: `${invoice.nomorFaktur} ${invoice.tanggalFaktur} ${invoice.npwpPembeli ?? ''}`
-				}))}
-				onchange={(value) => (fakturReferensiState = String(value))}
-			/>
-			<RupiahField
-				label="Nilai uang muka"
-				field={canEdit ? formFields.nilaiUangMuka : undefined}
-				value={nilaiUangMuka}
-				disabled={!canEdit}
-				required
-				hint="Masukkan nilai DPP uang muka yang diperhitungkan pada faktur ini."
-				oninput={(event) =>
-					onNilaiUangMukaChange?.(Number(event.currentTarget.value.replace(/\D/g, '')))}
+				hint={referenceLoading ? 'Memuat detail transaksi faktur...' : ''}
+				error={referenceError}
+				options={[
+					{
+						value: '',
+						label: previousInvoices.length
+							? 'Pilih faktur yang sudah diunggah'
+							: 'Belum ada faktur yang sudah diunggah'
+					},
+					...previousInvoices.map((invoice) => ({
+						value: invoice.id,
+						label: `${invoice.nomorFaktur} — ${invoice.tanggalFaktur} — Pembeli ${invoice.npwpPembeli ?? '-'}${invoice.uangMuka ? ' — Uang muka' : invoice.pelunasan ? ' — Pelunasan' : ''}`,
+						searchText: `${invoice.nomorFaktur} ${invoice.tanggalFaktur} ${invoice.npwpPembeli ?? ''}`
+					}))
+				]}
+				onchange={(value) => {
+					fakturReferensiState = String(value);
+					onFakturReferensiChange?.(fakturReferensiState);
+				}}
 			/>
 		{:else}
 			<FormField label="Nomor faktur" value={nomorFaktur || 'Terbentuk setelah diunggah'} disabled />

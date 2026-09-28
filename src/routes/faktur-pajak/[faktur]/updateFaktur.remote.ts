@@ -18,6 +18,7 @@ import {
 	satuan_ukur_transaksi_faktur,
 	transaksi_faktur_pajak
 } from '$lib/server/db/schema';
+import { getFakturReferenceChain } from '$lib/server/fakturPayment';
 import { error, invalid, redirect } from '@sveltejs/kit';
 import { and, eq, isNull } from 'drizzle-orm';
 import * as v from 'valibot';
@@ -211,50 +212,57 @@ export const updateFaktur = form(UpdateFakturSchema, async (input, issue) => {
 	);
 	const uangMuka = Boolean(input.dokumenTransaksi.uangMuka);
 	const pelunasan = Boolean(input.dokumenTransaksi.pelunasan);
-	const nilaiUangMuka = Number(input.dokumenTransaksi.nilaiUangMuka);
+	let nilaiUangMuka = Number(input.dokumenTransaksi.nilaiUangMuka);
 	const fakturReferensiId = input.dokumenTransaksi.fakturReferensiId.trim();
 	const { gross } = computeFakturAmounts(validatedTransaksi);
 
 	if (uangMuka && pelunasan) {
 		invalid(issue.dokumenTransaksi.uangMuka('Pilih uang muka atau pelunasan, bukan keduanya'));
 	}
-
-	if ((uangMuka || pelunasan) && nilaiUangMuka <= 0) {
-		invalid(issue.dokumenTransaksi.nilaiUangMuka('Nilai uang muka harus lebih dari 0'));
-	}
-
-	if ((uangMuka || pelunasan) && nilaiUangMuka > gross.dpp) {
-		invalid(
-			issue.dokumenTransaksi.nilaiUangMuka('Nilai uang muka tidak boleh melebihi jumlah DPP')
-		);
-	}
 	if (pelunasan && !fakturReferensiId) {
 		invalid(issue.dokumenTransaksi.fakturReferensiId('Nomor faktur sebelumnya harus dipilih'));
 	}
 
-	if (fakturReferensiId) {
-		const [referencedInvoice] = await db
-			.select({
-				id: faktur_pajak.id,
-				nomorFaktur: faktur_pajak.nomorFaktur
-			})
-			.from(faktur_pajak)
-			.where(
-				and(
-					eq(faktur_pajak.id, fakturReferensiId),
-					eq(faktur_pajak.npwpPenjual, activeNpwp),
-					eq(faktur_pajak.diupload, true)
-				)
-			)
-			.limit(1);
-
-		if (!referencedInvoice?.nomorFaktur) {
+	let totalUangMukaSebelumnya = 0;
+	if ((uangMuka || pelunasan) && fakturReferensiId) {
+		const reference = await getFakturReferenceChain(fakturReferensiId, activeNpwp);
+		if (!reference || reference.invoice.pelunasan) {
 			invalid(
 				issue.dokumenTransaksi.fakturReferensiId(
 					'Nomor faktur sebelumnya tidak valid atau belum diunggah'
 				)
 			);
 		}
+		totalUangMukaSebelumnya = reference.totalUangMuka;
+	}
+
+	if (pelunasan) {
+		if (totalUangMukaSebelumnya <= 0) {
+			invalid(
+				issue.dokumenTransaksi.fakturReferensiId(
+					'Faktur sebelumnya belum memiliki uang muka untuk dilunasi'
+				)
+			);
+		}
+		nilaiUangMuka = totalUangMukaSebelumnya;
+	}
+
+	if ((uangMuka || pelunasan) && nilaiUangMuka <= 0) {
+		invalid(issue.dokumenTransaksi.nilaiUangMuka('Nilai uang muka harus lebih dari 0'));
+	}
+
+	const batasUangMuka = gross.dpp - (uangMuka ? totalUangMukaSebelumnya : 0);
+	if (uangMuka && nilaiUangMuka > batasUangMuka) {
+		invalid(
+			issue.dokumenTransaksi.nilaiUangMuka(
+				'Nilai uang muka tidak boleh melebihi sisa DPP setelah uang muka sebelumnya'
+			)
+		);
+	}
+	if (pelunasan && nilaiUangMuka > gross.dpp) {
+		invalid(
+			issue.dokumenTransaksi.nilaiUangMuka('Nilai uang muka sebelumnya melebihi jumlah DPP')
+		);
 	}
 
 

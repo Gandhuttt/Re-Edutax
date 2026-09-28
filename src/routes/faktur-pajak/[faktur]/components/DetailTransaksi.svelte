@@ -3,7 +3,7 @@
 		applyFakturPaymentAdjustment,
 		computeFakturAmounts
 	} from '$lib/helpers/fakturAmounts';
-	import { DataTableBody, DataTableViewport, TableActions } from '$lib/re-ui-components';
+	import { DataTableBody, DataTableViewport, RupiahField, TableActions } from '$lib/re-ui-components';
 	import type { UpdateFakturFields } from '../updateFaktur.remote';
 
 	type FakturTransaksi = {
@@ -30,18 +30,24 @@
 		values,
 		canEdit,
 		transactionFields,
+		nilaiUangMukaField,
 		uangMuka,
 		pelunasan,
-		nilaiUangMuka
+		nilaiUangMuka,
+		totalUangMukaSebelumnya,
+		onNilaiUangMukaChange
 	}: {
 		requestEdit: (index: number) => void;
 		requestDelete: (index: number) => void;
 		values: FakturTransaksi[];
 		canEdit: boolean;
 		transactionFields: UpdateFakturFields['transaksi'];
+		nilaiUangMukaField: UpdateFakturFields['dokumenTransaksi']['nilaiUangMuka'];
 		uangMuka: boolean;
 		pelunasan: boolean;
 		nilaiUangMuka: number;
+		totalUangMukaSebelumnya: number;
+		onNilaiUangMukaChange?: (value: number) => void;
 	} = $props();
 
 	const number = new Intl.NumberFormat('id-ID', { maximumFractionDigits: 2 });
@@ -64,11 +70,25 @@
 			nilaiUangMuka
 		})
 	);
+	const previousAdvanceAmounts = $derived(
+		applyFakturPaymentAdjustment(amounts.gross, {
+			uangMuka: true,
+			nilaiUangMuka: totalUangMukaSebelumnya
+		})
+	);
 	const advanceBalance = $derived({
-		dpp: Math.max(0, amounts.gross.dpp - advanceAmounts.dpp),
-		dppNilaiLain: Math.max(0, amounts.gross.dppNilaiLain - advanceAmounts.dppNilaiLain),
-		ppn: Math.max(0, amounts.gross.ppn - advanceAmounts.ppn),
-		ppnbm: Math.max(0, amounts.gross.ppnbm - advanceAmounts.ppnbm)
+		dpp: Math.max(0, amounts.gross.dpp - previousAdvanceAmounts.dpp - advanceAmounts.dpp),
+		dppNilaiLain: Math.max(
+			0,
+			amounts.gross.dppNilaiLain -
+				previousAdvanceAmounts.dppNilaiLain -
+				advanceAmounts.dppNilaiLain
+		),
+		ppn: Math.max(0, amounts.gross.ppn - previousAdvanceAmounts.ppn - advanceAmounts.ppn),
+		ppnbm: Math.max(
+			0,
+			amounts.gross.ppnbm - previousAdvanceAmounts.ppnbm - advanceAmounts.ppnbm
+		)
 	});
 </script>
 
@@ -161,9 +181,45 @@
 				<td class="number amount">{number.format(amounts.gross.ppnbm)}</td>
 			</tr>
 			{#if uangMuka || pelunasan}
+				{#if uangMuka && totalUangMukaSebelumnya > 0}
+					<tr class="payment-row">
+						<th colspan="9" scope="row">Uang Muka Sebelumnya</th>
+						<td class="number amount">{number.format(previousAdvanceAmounts.dpp)}</td>
+						<td class="number">{number.format(previousAdvanceAmounts.dppNilaiLain)}</td>
+						<td></td>
+						<td class="number amount">{number.format(previousAdvanceAmounts.ppn)}</td>
+						<td></td>
+						<td class="number amount">{number.format(previousAdvanceAmounts.ppnbm)}</td>
+					</tr>
+				{/if}
 				<tr class="payment-row">
 					<th colspan="9" scope="row">Uang Muka</th>
-					<td class="number amount">{number.format(advanceAmounts.dpp)}</td>
+					<td class="number amount">
+						{#if uangMuka && canEdit}
+							<div class="payment-input">
+								<RupiahField
+									label="Nilai uang muka"
+									field={nilaiUangMukaField}
+									value={nilaiUangMuka}
+									currencyPrefix=""
+									required
+									oninput={(event) =>
+										onNilaiUangMukaChange?.(
+											Number(event.currentTarget.value.replace(/\D/g, ''))
+										)}
+								/>
+							</div>
+						{:else}
+							{number.format(advanceAmounts.dpp)}
+						{/if}
+						{#if pelunasan && canEdit}
+							<input
+								type="hidden"
+								name={nilaiUangMukaField.as('text').name}
+								value={String(nilaiUangMuka)}
+							/>
+						{/if}
+					</td>
 					<td class="number">{number.format(advanceAmounts.dppNilaiLain)}</td>
 					<td></td>
 					<td class="number amount">{number.format(advanceAmounts.ppn)}</td>
@@ -220,4 +276,25 @@
 		background: #f8f6ee;
 	}
 
+	.payment-input {
+		min-width: 120px;
+	}
+	.payment-input :global(.label) {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		padding: 0;
+		margin: -1px;
+		overflow: hidden;
+		clip: rect(0, 0, 0, 0);
+		white-space: nowrap;
+		border: 0;
+	}
+	.payment-input :global(.prefix:empty) {
+		display: none;
+	}
+	.payment-input :global(input) {
+		min-width: 0;
+		text-align: right;
+	}
 </style>

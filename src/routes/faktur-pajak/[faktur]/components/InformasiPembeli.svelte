@@ -14,9 +14,24 @@
 	} = $props();
 
 	let wpPembeli = $state(await getWajibPajak({ npwp: npwpPembeli }));
+	let loadedNpwp = npwpPembeli;
+	let lookupRequest = 0;
+
+	async function loadBuyer(npwp: string) {
+		const request = ++lookupRequest;
+		loadedNpwp = npwp;
+		const profile = await getWajibPajak({ npwp });
+		if (request === lookupRequest) wpPembeli = profile;
+	}
+
+	$effect(() => {
+		const currentNpwp = npwpPembeli;
+		if (currentNpwp === loadedNpwp) return;
+		void loadBuyer(currentNpwp);
+	});
 
 	async function lookupBuyer() {
-		wpPembeli = await getWajibPajak({ npwp: npwpPembeli });
+		await loadBuyer(npwpPembeli);
 	}
 </script>
 
