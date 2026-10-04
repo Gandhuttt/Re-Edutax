@@ -45,7 +45,7 @@
 <PageLayout contentWidth="1320px">
 	<Breadcrumbs
 		items={[
-			{ label: "Portal Saya", href: "/" },
+			{ label: "Portal Saya", href: "/dashboard" },
 			{ label: "Pendaftaran Objek Pajak PBB P5L" },
 		]}
 	/>

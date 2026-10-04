@@ -50,7 +50,7 @@
 <svelte:head><title>Perubahan Data Objek Pajak PBB P5L</title></svelte:head>
 
 <PageLayout contentWidth="1320px">
-	<Breadcrumbs items={[{ label: "Perubahan Data", href: "/" }, { label: "Objek Pajak PBB P5L" }]} />
+	<Breadcrumbs items={[{ label: "Perubahan Data", href: "/dashboard" }, { label: "Objek Pajak PBB P5L" }]} />
 	<PageHeading eyebrow="Perubahan Data" title="Perubahan Data Objek Pajak PBB P5L" />
 
 	<form onsubmit={save}>

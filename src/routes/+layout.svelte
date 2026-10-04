@@ -10,6 +10,7 @@
 
 	let { data, children }: LayoutProps = $props();
 	const isLoginPage = $derived(page.url.pathname === '/auth/login');
+	const isLandingPage = $derived(page.url.pathname === '/');
 	const isDevUi = $derived(
 		page.url.pathname === '/dev/ui' || page.url.pathname.startsWith('/dev/ui/')
 	);
@@ -32,7 +33,7 @@
 <svelte:head>
 </svelte:head>
 
-{#if isLoginPage}
+{#if isLoginPage || isLandingPage}
 	{@render children()}
 {:else if isDevUi}
 	<div class="dev-ui-canvas">

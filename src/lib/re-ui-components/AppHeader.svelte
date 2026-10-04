@@ -5,7 +5,7 @@
 		brand,
 		subtitle = "",
 		mark = "",
-		homeHref = "/",
+		homeHref = "/dashboard",
 		homeLabel = brand,
 		navigation,
 		navigationLabel = "Navigasi utama",

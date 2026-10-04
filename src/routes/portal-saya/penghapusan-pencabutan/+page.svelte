@@ -42,7 +42,7 @@
 <PageLayout contentWidth="1180px">
 	<Breadcrumbs
 		items={[
-			{ label: "Portal Saya", href: "/" },
+			{ label: "Portal Saya", href: "/dashboard" },
 			{ label: "Penghapusan dan Pencabutan" },
 		]}
 	/>

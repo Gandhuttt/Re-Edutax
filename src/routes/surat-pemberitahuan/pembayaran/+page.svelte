@@ -98,7 +98,7 @@
 		<Breadcrumbs
 			separator="›"
 			items={[
-				{ label: 'Beranda', href: '/' },
+				{ label: 'Beranda', href: '/dashboard' },
 				{ label: 'Surat Pemberitahuan' },
 				{ label: 'Menunggu Pembayaran' }
 			]}

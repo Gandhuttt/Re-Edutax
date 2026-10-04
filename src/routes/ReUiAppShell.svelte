@@ -269,7 +269,7 @@
 		brand="EduTax"
 		subtitle="Layanan Administrasi Perpajakan"
 		mark="ET"
-		homeHref={isAdmin ? "/admin" : "/"}
+		homeHref={isAdmin ? "/admin" : "/dashboard"}
 		homeLabel={isAdmin ? "Dasbor Administrator EduTax" : "Beranda EduTax"}
 		contentWidth="1500px"
 	>
@@ -277,7 +277,7 @@
 			{#if isAdmin}
 				<NavLink href="/admin">Administrasi</NavLink>
 			{:else}
-				<NavLink href="/">Beranda</NavLink>
+				<NavLink href="/dashboard">Beranda</NavLink>
 				<NavDropdown label="Faktur" sections={fakturMenu} columns={1} />
 				<NavDropdown label="SPT" sections={sptMenu} columns={1} />
 				<NavDropdown label="eBupot" sections={ebupotMenu} />

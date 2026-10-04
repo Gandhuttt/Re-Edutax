@@ -22,7 +22,7 @@ route supplies only content and state:
 <ReUiRoot>
 	<AppHeader brand="EduTax" subtitle="Layanan Administrasi" mark="ET" />
 	<PageLayout>
-		<Breadcrumbs items={[{ label: "Beranda", href: "/" }, { label: "SPT" }]} />
+		<Breadcrumbs items={[{ label: "Beranda", href: "/dashboard" }, { label: "SPT" }]} />
 		<PageHeading
 			eyebrow="Pelaporan"
 			title="Surat Pemberitahuan"

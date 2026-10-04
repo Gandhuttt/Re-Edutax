@@ -57,7 +57,7 @@
 {/snippet}
 
 <PageLayout contentWidth="1500px">
-	<Breadcrumbs items={[{ label: "Portal Saya", href: "/" }, { label: "Kasus Berjalan Saya" }]} />
+	<Breadcrumbs items={[{ label: "Portal Saya", href: "/dashboard" }, { label: "Kasus Berjalan Saya" }]} />
 	<PageHeading eyebrow="Portal Saya" title="Kasus Saya yang Jatuh Tempo" description="Pantau kasus aktif dan tenggat waktu penyelesaiannya." />
 	<Stack gap="18px">
 		{#if notice}

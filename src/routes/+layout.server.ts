@@ -4,19 +4,20 @@ import type { LayoutServerLoad } from './$types';
 
 export const load: LayoutServerLoad = async ({ locals, url }) => {
 	const isLoginPage = url.pathname === '/auth/login';
+	const isLandingPage = url.pathname === '/';
 
-	if (!locals.user && !isLoginPage) {
+	if (!locals.user && !isLoginPage && !isLandingPage) {
 		throw redirect(303, '/auth/login');
 	}
 
 	const admin = isAdmin(locals.user);
 
 	if (locals.user && isLoginPage) {
-		throw redirect(303, admin ? '/admin' : '/');
+		throw redirect(303, admin ? '/admin' : '/dashboard');
 	}
 
-	// Admins have no wajib_pajak profile, so the peserta home page has nothing to show them.
-	if (admin && url.pathname === '/') {
+	// Admins have no wajib_pajak profile, so the peserta dashboard has nothing to show them.
+	if (admin && url.pathname === '/dashboard') {
 		throw redirect(303, '/admin');
 	}
 

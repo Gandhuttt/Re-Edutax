@@ -25,5 +25,5 @@ export const login = form(LoginSchema, async ({ npwp, _password }, issue) => {
 		invalid(issue.npwp('NPWP atau password salah.'));
 	}
 
-	redirect(303, '/');
+	redirect(303, '/dashboard');
 });

@@ -59,7 +59,7 @@
 
 <PageLayout contentWidth="1540px">
 	<Stack gap="16px">
-		<Breadcrumbs separator="›" items={[{ label: 'Beranda', href: '/' }, { label: 'e-Bupot' }, { label: 'BPPU' }]} />
+		<Breadcrumbs separator="›" items={[{ label: 'Beranda', href: '/dashboard' }, { label: 'e-Bupot' }, { label: 'BPPU' }]} />
 		<ServiceWorkspace
 			bind:sidebarOpen
 			identity={{ eyebrow: 'Wajib Pajak', name: accountName, identifier: accountNpwp, mark: 'EB' }}

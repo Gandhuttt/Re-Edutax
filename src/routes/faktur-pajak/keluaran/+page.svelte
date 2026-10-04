@@ -240,7 +240,7 @@
 		<Breadcrumbs
 			separator="›"
 			items={[
-				{ label: 'Beranda', href: '/' },
+				{ label: 'Beranda', href: '/dashboard' },
 				{ label: 'e-Faktur' },
 				{ label: 'Pajak Keluaran' }
 			]}

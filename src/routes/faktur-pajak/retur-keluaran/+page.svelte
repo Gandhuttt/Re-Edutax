@@ -37,7 +37,7 @@
 
 <PageLayout contentWidth="1540px">
 	<Stack gap="16px">
-		<Breadcrumbs separator="›" items={[{ label: 'Beranda', href: '/' }, { label: 'e-Faktur' }, { label: 'Retur Pajak Keluaran' }]} />
+		<Breadcrumbs separator="›" items={[{ label: 'Beranda', href: '/dashboard' }, { label: 'e-Faktur' }, { label: 'Retur Pajak Keluaran' }]} />
 		<ServiceWorkspace
 			bind:sidebarOpen
 			identity={{ eyebrow: 'Wajib Pajak', name: accountName, identifier: accountNpwp, mark: 'EF' }}

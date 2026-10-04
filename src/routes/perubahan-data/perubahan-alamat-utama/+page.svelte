@@ -45,7 +45,7 @@
 <svelte:head><title>Perubahan Alamat Utama</title></svelte:head>
 
 <PageLayout contentWidth="1320px">
-	<Breadcrumbs items={[{ label: "Perubahan Data", href: "/" }, { label: "Perubahan Alamat Utama" }]} />
+	<Breadcrumbs items={[{ label: "Perubahan Data", href: "/dashboard" }, { label: "Perubahan Alamat Utama" }]} />
 	<PageHeading eyebrow="Perubahan Data" title="Perubahan Alamat Utama" />
 
 	<form onsubmit={save}>

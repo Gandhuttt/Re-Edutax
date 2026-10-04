@@ -40,7 +40,7 @@
 <svelte:head><title>Perubahan Data Pemungut PPN PMSE</title></svelte:head>
 
 <PageLayout contentWidth="1320px">
-	<Breadcrumbs items={[{ label: "Perubahan Data", href: "/" }, { label: "Pemungut PPN PMSE" }]} />
+	<Breadcrumbs items={[{ label: "Perubahan Data", href: "/dashboard" }, { label: "Pemungut PPN PMSE" }]} />
 	<PageHeading eyebrow="Perubahan Data" title="Perubahan Data Pemungut PPN PMSE dengan Kepdirjen" />
 
 	<form onsubmit={save}>

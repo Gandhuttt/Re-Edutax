@@ -212,7 +212,7 @@
 
 <PageLayout contentWidth="1540px">
 	<Stack gap="16px">
-		<Breadcrumbs separator="›" items={[{ label: 'Beranda', href: '/' }, { label: 'e-Bupot' }, { label: 'BPA2' }]} />
+		<Breadcrumbs separator="›" items={[{ label: 'Beranda', href: '/dashboard' }, { label: 'e-Bupot' }, { label: 'BPA2' }]} />
 		<ServiceWorkspace
 			identity={{ eyebrow: 'Wajib Pajak', name: String(appPage.data.user?.name ?? 'Wajib Pajak'), identifier: String(appPage.data.user?.username ?? ''), mark: 'EB' }}
 			groups={[{ label: 'e-Bupot', links: [

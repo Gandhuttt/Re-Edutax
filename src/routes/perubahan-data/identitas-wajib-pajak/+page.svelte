@@ -52,7 +52,7 @@
 <svelte:head><title>Perubahan Identitas Wajib Pajak</title></svelte:head>
 
 <PageLayout contentWidth="1320px">
-	<Breadcrumbs items={[{ label: "Perubahan Data", href: "/" }, { label: "Identitas Wajib Pajak" }]} />
+	<Breadcrumbs items={[{ label: "Perubahan Data", href: "/dashboard" }, { label: "Identitas Wajib Pajak" }]} />
 	<PageHeading eyebrow="Perubahan Data" title="Perubahan Identitas Wajib Pajak" />
 
 	<form onsubmit={save}>

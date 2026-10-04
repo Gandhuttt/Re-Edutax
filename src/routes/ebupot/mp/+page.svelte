@@ -60,7 +60,7 @@
 
 <PageLayout contentWidth="1540px">
 	<Stack gap="16px">
-		<Breadcrumbs separator="›" items={[{ label: 'Beranda', href: '/' }, { label: 'e-Bupot' }, { label: 'Bukti Pemotongan Bulanan Pegawai Tetap' }]} />
+		<Breadcrumbs separator="›" items={[{ label: 'Beranda', href: '/dashboard' }, { label: 'e-Bupot' }, { label: 'Bukti Pemotongan Bulanan Pegawai Tetap' }]} />
 		<ServiceWorkspace bind:sidebarOpen identity={{ eyebrow: 'Wajib Pajak', name: accountName, identifier: accountNpwp, mark: 'EB' }} groups={[{ label: 'e-Bupot', links: [
 			{ label: 'Bukti Potong Saya', href: '/ebupot/bukti-potong-saya' },
 			{ label: 'BPPU', href: '/ebupot/bpu' },

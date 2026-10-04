@@ -82,7 +82,7 @@
 	</FormSection>
 	{#if bp26.canEdit}<FormActions><ActionButton type="button" tone="quiet" onclick={() => history.back()}>Kembali</ActionButton><ActionButton type="submit" tone="primary">Simpan Konsep</ActionButton></FormActions>{:else}<FormActions><ActionButton type="button" tone="quiet" onclick={() => history.back()}>Kembali</ActionButton></FormActions>{/if}
 {/snippet}
-<PageLayout contentWidth="1540px"><Stack gap="16px"><Breadcrumbs separator="›" items={[{ label: 'Beranda', href: '/' }, { label: 'e-Bupot' }, { label: 'BP26' }, { label: bp26.nama }]} />
+<PageLayout contentWidth="1540px"><Stack gap="16px"><Breadcrumbs separator="›" items={[{ label: 'Beranda', href: '/dashboard' }, { label: 'e-Bupot' }, { label: 'BP26' }, { label: bp26.nama }]} />
 <ServiceWorkspace bind:sidebarOpen identity={{ eyebrow: 'Wajib Pajak', name: accountName, identifier: accountNpwp, mark: 'EB' }} groups={[{ label: 'e-Bupot', links: [
 	{ label: 'Bukti Potong Saya', href: '/ebupot/bukti-potong-saya' }, { label: 'BPPU', href: '/ebupot/bpu' }, { label: 'BP21', href: '/ebupot/bp21' }, { label: 'BP26', href: '/ebupot/bp26', active: true }, { label: 'BPA1', href: '/ebupot/bpa1' }, { label: 'BPA2', href: '/ebupot/bpa2' }, { label: 'Bukti Pemotongan Bulanan Pegawai Tetap', href: '/ebupot/mp' }
 ] }]}>

@@ -111,7 +111,7 @@
 <PageLayout contentWidth="1500px">
 	<Breadcrumbs
 		items={[
-			{ label: 'Beranda', href: '/' },
+			{ label: 'Beranda', href: '/dashboard' },
 			{ label: 'Surat Pemberitahuan', href: '/surat-pemberitahuan/konsep' },
 			{ label: 'SPT Masa PPN' }
 		]}

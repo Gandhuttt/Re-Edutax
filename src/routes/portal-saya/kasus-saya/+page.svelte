@@ -103,7 +103,7 @@
 {/snippet}
 
 <PageLayout contentWidth="1500px">
-	<Breadcrumbs items={[{ label: "Portal Saya", href: "/" }, { label: "Kasus Saya" }]} />
+	<Breadcrumbs items={[{ label: "Portal Saya", href: "/dashboard" }, { label: "Kasus Saya" }]} />
 	<PageHeading
 		eyebrow="Portal Saya"
 		title="Kasus Saya"

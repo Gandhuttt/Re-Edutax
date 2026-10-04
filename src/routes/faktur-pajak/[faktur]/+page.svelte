@@ -223,7 +223,7 @@
 		<Breadcrumbs
 			separator="›"
 			items={[
-				{ label: 'Beranda', href: '/' },
+				{ label: 'Beranda', href: '/dashboard' },
 				{ label: 'e-Faktur' },
 				{
 					label: isOutputInvoice ? 'Pajak Keluaran' : 'Pajak Masukan',
