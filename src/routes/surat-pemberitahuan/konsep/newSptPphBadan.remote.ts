@@ -8,10 +8,7 @@ import {
 import { error, redirect } from '@sveltejs/kit';
 import { and, eq } from 'drizzle-orm';
 import * as v from 'valibot';
-
-// This implementation follows tax-year-2025 rules specifically (rates, facilities,
-// thresholds) - restrict creation to that year until a future year is verified.
-const SUPPORTED_TAHUN_PAJAK = 2025;
+import { TAHUN_PAJAK_PPH_BADAN } from './tahunPajakPphBadan';
 
 const NewSptPphBadanSchema = v.object({
 	tahunPajak: v.pipe(
@@ -19,7 +16,10 @@ const NewSptPphBadanSchema = v.object({
 		v.nonEmpty('Tahun pajak'),
 		v.transform(Number),
 		v.integer('Tahun pajak harus berupa bilangan bulat'),
-		v.value(SUPPORTED_TAHUN_PAJAK, `Tahun pajak yang didukung saat ini hanya ${SUPPORTED_TAHUN_PAJAK}`)
+		v.picklist(
+			TAHUN_PAJAK_PPH_BADAN,
+			`Tahun pajak yang didukung: ${TAHUN_PAJAK_PPH_BADAN.join(', ')}`
+		)
 	)
 });
 

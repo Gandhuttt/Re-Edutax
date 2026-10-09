@@ -919,7 +919,7 @@
 						<L13C bind:currentTab />
 					</div>
 					<div id="spt-panel-l14" role="tabpanel" hidden={currentTab.tab !== 'L14'}>
-						<L14 bind:currentTab />
+						<L14 bind:currentTab tahunPajak={spt.tahunPajak} />
 					</div>
 
 					{#if saveError}

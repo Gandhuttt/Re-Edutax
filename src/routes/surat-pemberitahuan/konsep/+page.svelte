@@ -25,6 +25,7 @@
 	import { newSptPphBadan } from './newSptPphBadan.remote';
 	import { newSptPphOrangPribadi } from './newSptPphOrangPribadi.remote';
 	import { newSptPpn } from './newSptPpn.remote';
+	import { TAHUN_PAJAK_PPH_BADAN, TAHUN_PAJAK_PPH_BADAN_DEFAULT } from './tahunPajakPphBadan';
 
 	type JenisSpt = 'ppn' | 'pph-badan' | 'pph-orang-pribadi';
 	type ConceptRow = {
@@ -43,7 +44,7 @@
 	const today = new Date();
 	const months = Array.from({ length: 12 }, (_, index) => index + 1);
 	const years = Array.from({ length: 6 }, (_, index) => today.getFullYear() - 3 + index);
-	// Both PPh implementations currently follow verified tax-year-2025 rules only.
+	// PPh Orang Pribadi masih mengikuti aturan tahun pajak 2025 saja.
 	const pphTahunPajakOptions = [2025];
 	const jenisSptOptions: { value: JenisSpt; label: string }[] = [
 		{ value: 'ppn', label: 'SPT Masa PPN' },
@@ -97,7 +98,7 @@
 	let jenisSpt = $state<JenisSpt>('ppn');
 	let masaPajak = $state(today.getMonth() + 1);
 	let tahun = $state(today.getFullYear());
-	let tahunPajakBadan = $state(pphTahunPajakOptions[0]);
+	let tahunPajakBadan = $state<number>(TAHUN_PAJAK_PPH_BADAN_DEFAULT);
 	let tahunPajakOrangPribadi = $state(pphTahunPajakOptions[0]);
 	let currentPage = $state(1);
 	let pageSize = $state(10);
@@ -312,7 +313,7 @@
 					label="Tahun Pajak"
 					name="tahunPajak"
 					bind:value={tahunPajakBadan}
-					options={pphTahunPajakOptions.map((yearOption) => ({
+					options={TAHUN_PAJAK_PPH_BADAN.map((yearOption) => ({
 						value: yearOption,
 						label: String(yearOption)
 					}))}

@@ -12,9 +12,10 @@
 			tab: string;
 			title: string;
 		};
+		tahunPajak: number;
 	}
 
-	let { currentTab = $bindable() }: Props = $props();
+	let { currentTab = $bindable(), tahunPajak }: Props = $props();
 
 	$effect(() => {
 		currentTab.title = currentTab.tab === "L14"
@@ -22,7 +23,7 @@
 			: currentTab.title;
 	});
 
-	const currentYear = new Date().getFullYear();
+	const currentYear = $derived(tahunPajak);
 </script>
 
 <div class:hidden={currentTab.tab !== "L14"}>
