@@ -112,6 +112,9 @@
 				const rect = current.getBoundingClientRect();
 				return { left: rect.left, top: rect.top };
 			}
+			// A modal <dialog> lives in the top layer: its containing block is the
+			// viewport, so transformed ancestors above it must not offset the panel.
+			if (current.matches(":modal")) return { left: 0, top: 0 };
 			current = current.parentElement;
 		}
 		return { left: 0, top: 0 };

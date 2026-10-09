@@ -59,7 +59,7 @@
 		<FieldGrid columns={2} gap="16px 18px">
 			<FormField label="Kode Harta" type="text" bind:value={data.kodeHarta} disabled={readonly} />
 			<SelectField
-				label="Jenis Harta *"
+				label="Jenis Harta"
 				bind:value={data.jenisHarta}
 				options={jenisHartaChoices}
 				required
