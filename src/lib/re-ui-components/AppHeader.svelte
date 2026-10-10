@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { Snippet } from "svelte";
+	import BrandIdentity from "./BrandIdentity.svelte";
 
 	let {
 		brand,
@@ -11,6 +12,9 @@
 		navigationLabel = "Navigasi utama",
 		account,
 		contentWidth = "1320px",
+		sticky = false,
+		skipLinkTarget = "",
+		skipLinkLabel = "Lewati ke konten utama",
 	}: {
 		brand: string;
 		subtitle?: string;
@@ -21,17 +25,21 @@
 		navigationLabel?: string;
 		account?: Snippet;
 		contentWidth?: string;
+		/** Keep the header pinned to the top of the viewport while scrolling. */
+		sticky?: boolean;
+		/** Fragment such as `#main-content`; renders a keyboard skip link when set. */
+		skipLinkTarget?: string;
+		skipLinkLabel?: string;
 	} = $props();
 </script>
 
-<header class="app-header" style:--header-content-width={contentWidth}>
-	<a class="identity" href={homeHref} aria-label={homeLabel}>
-		{#if mark}<span class="mark" aria-hidden="true">{mark}</span>{/if}
-		<span class="brand-copy">
-			<strong>{brand}</strong>
-			{#if subtitle}<small>{subtitle}</small>{/if}
-		</span>
-	</a>
+{#if skipLinkTarget}
+	<a class="skip-link" href={skipLinkTarget}>{skipLinkLabel}</a>
+{/if}
+<header class="app-header" class:sticky style:--header-content-width={contentWidth}>
+	<div class="identity">
+		<BrandIdentity {brand} {subtitle} {mark} href={homeHref} label={homeLabel} />
+	</div>
 	{#if navigation}
 		<nav class="navigation" aria-label={navigationLabel}>
 			{@render navigation()}
@@ -52,40 +60,14 @@
 		border-bottom: 4px solid var(--ui-yellow);
 		font: inherit;
 	}
+	.sticky {
+		position: sticky;
+		z-index: 40;
+		top: 0;
+	}
 	.identity {
 		display: flex;
-		align-items: center;
-		gap: 11px;
 		min-width: 255px;
-		color: white;
-		text-decoration: none;
-	}
-	.mark {
-		display: grid;
-		place-items: center;
-		width: 38px;
-		height: 38px;
-		border: 2px solid var(--ui-yellow);
-		color: var(--ui-yellow);
-		font-size: 12px;
-		font-weight: 900;
-		letter-spacing: 0.08em;
-	}
-	.brand-copy strong,
-	.brand-copy small {
-		display: block;
-	}
-	.brand-copy strong {
-		font-family: var(--ui-font-display);
-		font-size: 20px;
-		letter-spacing: 0.01em;
-	}
-	.brand-copy small {
-		margin-top: 1px;
-		color: #ccd6e0;
-		font-size: 10px;
-		letter-spacing: 0.07em;
-		text-transform: uppercase;
 	}
 	.navigation {
 		align-self: stretch;
@@ -97,6 +79,23 @@
 		align-self: stretch;
 		display: flex;
 		align-items: center;
+	}
+	.skip-link {
+		position: fixed;
+		z-index: 100;
+		top: 12px;
+		left: 12px;
+		padding: 10px 16px;
+		transform: translateY(-160%);
+		border: 2px solid var(--ui-yellow);
+		background: white;
+		color: var(--ui-navy);
+		font-size: 14px;
+		font-weight: 800;
+		text-decoration: none;
+	}
+	.skip-link:focus {
+		transform: none;
 	}
 	@media (max-width: 900px) {
 		.app-header {
@@ -113,9 +112,6 @@
 		}
 		.identity {
 			min-width: 0;
-		}
-		.brand-copy small {
-			display: none;
 		}
 	}
 </style>

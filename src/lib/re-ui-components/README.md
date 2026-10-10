@@ -56,6 +56,51 @@ and `ConditionalField` components rather than Faktur-only CSS. Lower-level
 layouts such as `ContentSection`, `FieldGrid`, `ResponsiveGrid`, `KeyValueGrid`,
 `LabeledGroup`, and `Stack` can be combined for other workflows.
 
+## Public site pages
+
+Marketing pages (the landing page at `/`) use the same tokens with larger
+type. `SiteSection` owns the content width and vertical rhythm; its `inverse`
+tone (and `CtaBand tone="inverse"`, featured `OfferCard`, `SiteFooter`) adds the
+`ui-surface-inverse` class, which flips the `--ui-surface-*` tokens so every
+nested component adapts without extra props. Surfaces follow the library's
+square style: 2px radius panels with a 4px navy or yellow top rule.
+
+```svelte
+<ReUiRoot>
+	<AppHeader brand="EduTax" mark="ET" homeHref="/" sticky skipLinkTarget="#main">
+		{#snippet account()}
+			<LinkButton href="/daftar" tone="accent" size="sm" shortLabel="Daftar">Daftar kelas</LinkButton>
+		{/snippet}
+	</AppHeader>
+	<main id="main" tabindex="-1">
+		<SiteSection spacing="lg" aria-labelledby="hero-title">
+			<SplitLayout columns="minmax(0, 1.2fr) minmax(320px, 0.8fr)">
+				{#snippet start()}
+					<DisplayHeading level={1} size="hero" headingId="hero-title" title="Belajar pajak" emphasis="lewat praktik.">
+						<LinkButton href="/daftar">Daftar</LinkButton>
+					</DisplayHeading>
+				{/snippet}
+				{#snippet end()}
+					<OfferCard featured live label="Pendaftaran dibuka" title="Batch 19" href="/daftar" actionLabel="Daftar Batch 19">
+						<BulletList items={["Kasus nyata", "Praktik Coretax"]} />
+					</OfferCard>
+				{/snippet}
+			</SplitLayout>
+		</SiteSection>
+		<SiteSection id="program" tone="inverse" aria-labelledby="program-title">
+			<DisplayHeading layout="split" headingId="program-title" eyebrow="Program" title={"Fondasi lengkap.\nLatihan terarah."} />
+			<NumberedGrid items={subjects} columns={3} />
+		</SiteSection>
+	</main>
+	<SiteFooter brand="EduTax" mark="ET" links={[{ label: "Program", href: "#program" }]} />
+</ReUiRoot>
+```
+
+Other building blocks: `Eyebrow`, `FeatureImage` (intrinsic size, optional
+caption and `zoom` crop), `StatementStrip`, `StepList`, `CredentialCard`
+(details rendered with `KeyValueGrid`), `CtaBand` (`paper`, `inverse`, or
+`accent`), and `BrandIdentity` (shared by `AppHeader` and `SiteFooter`).
+
 ## Root and form fields
 
 ```svelte

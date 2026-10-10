@@ -36,6 +36,15 @@
 		--ui-font-display: "TeX Gyre Pagella", FreeSerif, Georgia, serif;
 		--ui-font-mono: Iosevka, "DejaVu Sans Mono", monospace;
 
+		/* Surface-relative colours. Containers on dark surfaces add the
+		   `ui-surface-inverse` class so nested components adapt without props. */
+		--ui-surface-heading: var(--ui-navy-strong);
+		--ui-surface-text: var(--ui-muted);
+		--ui-surface-accent: #87640c;
+		--ui-surface-emphasis: #2b557c;
+		--ui-surface-line: var(--ui-line);
+		--ui-surface-card: #fffefb;
+
 		min-width: 0;
 		min-height: 100vh;
 		background: var(--ui-canvas);
@@ -50,5 +59,14 @@
 	.re-ui-root :global(*::before),
 	.re-ui-root :global(*::after) {
 		box-sizing: border-box;
+	}
+
+	.re-ui-root :global(.ui-surface-inverse) {
+		--ui-surface-heading: white;
+		--ui-surface-text: #b9c7d3;
+		--ui-surface-accent: #f5d776;
+		--ui-surface-emphasis: var(--ui-yellow);
+		--ui-surface-line: rgba(255, 255, 255, 0.16);
+		--ui-surface-card: rgba(255, 255, 255, 0.04);
 	}
 </style>
