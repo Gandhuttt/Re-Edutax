@@ -266,11 +266,11 @@
 <ReUiRoot>
 	<form {...logout} bind:this={logoutForm} hidden></form>
 	<AppHeader
-		brand="EduTax"
+		brand="Edutaxindo Praktika"
 		subtitle="Layanan Administrasi Perpajakan"
-		mark="ET"
+		logoSrc="/brand/wsd-mark-inverse.svg"
 		homeHref={isAdmin ? "/admin" : "/dashboard"}
-		homeLabel={isAdmin ? "Dasbor Administrator EduTax" : "Beranda EduTax"}
+		homeLabel={isAdmin ? "Dasbor Administrator Edutaxindo Praktika" : "Beranda Edutaxindo Praktika"}
 		contentWidth="1500px"
 	>
 		{#snippet navigation()}

@@ -45,10 +45,10 @@
 </script>
 
 <svelte:head>
-	<title>Beranda | EduTax</title>
+	<title>Beranda | Edutaxindo Praktika</title>
 	<meta
 		name="description"
-		content="Beranda layanan administrasi perpajakan EduTax."
+		content="Beranda layanan administrasi perpajakan Edutaxindo Praktika."
 	/>
 </svelte:head>
 
@@ -70,7 +70,7 @@
 		/>
 
 		<InlineAlert
-			title="Lingkungan simulasi EduTax"
+			title="Lingkungan simulasi Edutaxindo Praktika"
 			message="Gunakan data latihan yang tersedia untuk mempelajari alur administrasi perpajakan."
 		/>
 

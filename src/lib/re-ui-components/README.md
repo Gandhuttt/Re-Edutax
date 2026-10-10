@@ -1,6 +1,6 @@
 # Re UI components
 
-Reusable Svelte 5 components for the EduTax interface. Import from the barrel
+Reusable Svelte 5 components for the Edutaxindo Praktika interface. Import from the barrel
 module and place the UI inside `ReUiRoot` so the shared design tokens are
 available to every component.
 
@@ -20,7 +20,7 @@ route supplies only content and state:
 
 ```svelte
 <ReUiRoot>
-	<AppHeader brand="EduTax" subtitle="Layanan Administrasi" mark="ET" />
+	<AppHeader brand="Edutaxindo Praktika" subtitle="Layanan Administrasi" logoSrc="/brand/wsd-mark-inverse.svg" />
 	<PageLayout>
 		<Breadcrumbs items={[{ label: "Beranda", href: "/dashboard" }, { label: "SPT" }]} />
 		<PageHeading
@@ -67,7 +67,7 @@ square style: 2px radius panels with a 4px navy or yellow top rule.
 
 ```svelte
 <ReUiRoot>
-	<AppHeader brand="EduTax" mark="ET" homeHref="/" sticky skipLinkTarget="#main">
+	<AppHeader brand="Edutaxindo Praktika" logoSrc="/brand/wsd-mark-inverse.svg" homeHref="/" sticky skipLinkTarget="#main">
 		{#snippet account()}
 			<LinkButton href="/daftar" tone="accent" size="sm" shortLabel="Daftar">Daftar kelas</LinkButton>
 		{/snippet}
@@ -92,14 +92,17 @@ square style: 2px radius panels with a 4px navy or yellow top rule.
 			<NumberedGrid items={subjects} columns={3} />
 		</SiteSection>
 	</main>
-	<SiteFooter brand="EduTax" mark="ET" links={[{ label: "Program", href: "#program" }]} />
+	<SiteFooter brand="Edutaxindo Praktika" logoSrc="/brand/wsd-mark-inverse.svg" links={[{ label: "Program", href: "#program" }]} />
 </ReUiRoot>
 ```
 
 Other building blocks: `Eyebrow`, `FeatureImage` (intrinsic size, optional
 caption and `zoom` crop), `StatementStrip`, `StepList`, `CredentialCard`
 (details rendered with `KeyValueGrid`), `CtaBand` (`paper`, `inverse`, or
-`accent`), and `BrandIdentity` (shared by `AppHeader` and `SiteFooter`).
+`accent`), and `BrandIdentity` (shared by `AppHeader` and `SiteFooter`; pass
+`logoSrc` for an image logo or `mark` for a text monogram). Brand logos live in
+`static/brand/`: `wsd-mark.svg` for light surfaces and the favicon,
+`wsd-mark-inverse.svg` for navy surfaces.
 
 ## Root and form fields
 

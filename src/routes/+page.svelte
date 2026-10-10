@@ -159,20 +159,20 @@
 </script>
 
 <svelte:head>
-	<title>Brevet Pajak Praktik A & B | EduTax</title>
+	<title>Brevet Pajak Praktik A & B | Edutaxindo Praktika</title>
 	<meta
 		name="description"
-		content="Belajar Brevet Pajak A & B melalui contoh kasus, praktik Coretax, dan latihan pelaporan bersama EduTax."
+		content="Belajar Brevet Pajak A & B melalui contoh kasus, praktik Coretax, dan latihan pelaporan bersama Edutaxindo Praktika."
 	/>
 </svelte:head>
 
 <ReUiRoot style="--ui-canvas: #f5f2ea">
 	<AppHeader
-		brand="EduTax"
+		brand="Edutaxindo Praktika"
 		subtitle="Brevet Pajak Praktik"
-		mark="ET"
+		logoSrc="/brand/wsd-mark-inverse.svg"
 		homeHref="/"
-		homeLabel="EduTax — beranda"
+		homeLabel="Edutaxindo Praktika — beranda"
 		contentWidth="1240px"
 		sticky
 		skipLinkTarget="#main-content"
@@ -226,11 +226,11 @@
 			</SplitLayout>
 		</SiteSection>
 
-		<SiteSection spacing="none" aria-label="Suasana kelas EduTax">
+		<SiteSection spacing="none" aria-label="Suasana kelas Edutaxindo Praktika">
 			<Stack gap="32px">
 				<FeatureImage
 					src="/landing/classroom-session.png"
-					alt="Peserta EduTax mengikuti sesi praktik Brevet Pajak"
+					alt="Peserta Edutaxindo Praktika mengikuti sesi praktik Brevet Pajak"
 					width={722}
 					height={153}
 					caption="Brevet A & B — konsep, kasus, aplikasi"
@@ -264,13 +264,13 @@
 					<Stack gap="16px">
 						<FeatureImage
 							src="/landing/classroom-group.png"
-							alt="Peserta EduTax mengerjakan latihan aplikasi bersama"
+							alt="Peserta Edutaxindo Praktika mengerjakan latihan aplikasi bersama"
 							width={240}
 							height={120}
 						/>
 						<FeatureImage
 							src="/landing/classroom-coretax.png"
-							alt="Peserta dan instruktur dalam kelas Brevet Pajak EduTax"
+							alt="Peserta dan instruktur dalam kelas Brevet Pajak Edutaxindo Praktika"
 							width={240}
 							height={120}
 							caption="Ruang belajar untuk mencoba, bertanya, dan menyelesaikan kasus."
@@ -309,9 +309,9 @@
 				<DisplayHeading
 					layout="split"
 					headingId="legal-title"
-					eyebrow="Legalitas EduTax"
+					eyebrow="Legalitas lembaga"
 					title={'Identitas jelas.\nLegalitas tercatat.'}
-					description="EduTax diselenggarakan oleh badan hukum terdaftar dan memiliki izin penyelenggaraan satuan pendidikan nonformal. Informasi berikut merujuk pada dokumen resmi EduTax."
+					description="Edutaxindo Praktika diselenggarakan oleh badan hukum terdaftar dan memiliki izin penyelenggaraan satuan pendidikan nonformal. Informasi berikut merujuk pada dokumen resmi lembaga."
 				/>
 				<ResponsiveGrid columns={2} gap="16px">
 					{#each legalDocuments as document}
@@ -344,7 +344,7 @@
 				headingId="business-title"
 				eyebrow="Untuk pemilik usaha"
 				title="Butuh bantuan untuk administrasi pajak usaha?"
-				description="EduTax juga mendampingi UMKM dan usaha menengah untuk menata rutinitas administrasi perpajakan dari bulan ke bulan."
+				description="Edutaxindo Praktika juga mendampingi UMKM dan usaha menengah untuk menata rutinitas administrasi perpajakan dari bulan ke bulan."
 			>
 				<BulletList items={businessServices} columns={2} />
 				{#snippet action()}
@@ -359,7 +359,7 @@
 				headingId="final-cta-title"
 				eyebrow="Batch berikutnya"
 				title="Siap belajar pajak lewat praktik?"
-				description="Mulai kelas Brevet Pajak A & B bersama EduTax."
+				description="Mulai kelas Brevet Pajak A & B bersama Edutaxindo Praktika."
 			>
 				{#snippet action()}
 					<LinkButton href={registrationUrl}>{nextBatch.cta}</LinkButton>
@@ -369,10 +369,10 @@
 	</main>
 
 	<SiteFooter
-		brand="EduTax"
+		brand="Edutaxindo Praktika"
 		subtitle="Brevet Pajak Praktik"
-		mark="ET"
-		homeLabel="EduTax — beranda"
+		logoSrc="/brand/wsd-mark-inverse.svg"
+		homeLabel="Edutaxindo Praktika — beranda"
 		tagline="Belajar pajak untuk bisa mengerjakannya."
 		links={footerLinks}
 		legal={`© ${new Date().getFullYear()} PT WSD Edutaxindo Praktika`}

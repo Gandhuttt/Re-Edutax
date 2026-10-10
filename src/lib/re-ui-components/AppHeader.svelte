@@ -6,6 +6,7 @@
 		brand,
 		subtitle = "",
 		mark = "",
+		logoSrc = "",
 		homeHref = "/dashboard",
 		homeLabel = brand,
 		navigation,
@@ -19,6 +20,8 @@
 		brand: string;
 		subtitle?: string;
 		mark?: string;
+		/** Logo for the navy header; replaces the text mark. */
+		logoSrc?: string;
 		homeHref?: string;
 		homeLabel?: string;
 		navigation?: Snippet;
@@ -38,7 +41,7 @@
 {/if}
 <header class="app-header" class:sticky style:--header-content-width={contentWidth}>
 	<div class="identity">
-		<BrandIdentity {brand} {subtitle} {mark} href={homeHref} label={homeLabel} />
+		<BrandIdentity {brand} {subtitle} {mark} {logoSrc} href={homeHref} label={homeLabel} />
 	</div>
 	{#if navigation}
 		<nav class="navigation" aria-label={navigationLabel}>

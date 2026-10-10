@@ -259,9 +259,9 @@
 
 <ReUiRoot>
 	<AppHeader
-		brand="EduTax"
+		brand="Edutaxindo Praktika"
 		subtitle="Layanan Administrasi Perpajakan"
-		mark="ET"
+		logoSrc="/brand/wsd-mark-inverse.svg"
 		homeHref="/dev/ui"
 		homeLabel="Beranda UI Lab"
 	>

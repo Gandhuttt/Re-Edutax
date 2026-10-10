@@ -4,7 +4,10 @@
 	export type BrandIdentityProps = {
 		brand: string;
 		subtitle?: string;
+		/** Text monogram shown when no `logoSrc` is given. */
 		mark?: string;
+		/** Logo image (ideally SVG) drawn for dark surfaces; replaces the text mark. */
+		logoSrc?: string;
 		href?: string;
 		label?: string;
 	} & Omit<HTMLAnchorAttributes, "href" | "children">;
@@ -15,6 +18,7 @@
 		brand,
 		subtitle = "",
 		mark = "",
+		logoSrc = "",
 		href = "/",
 		label = brand,
 		class: className,
@@ -23,7 +27,11 @@
 </script>
 
 <a {...props} class="brand-identity {className ?? ""}" {href} aria-label={label}>
-	{#if mark}<span class="brand-mark" aria-hidden="true">{mark}</span>{/if}
+	{#if logoSrc}
+		<img class="brand-logo" src={logoSrc} alt="" width="50" height="40" />
+	{:else if mark}
+		<span class="brand-mark" aria-hidden="true">{mark}</span>
+	{/if}
 	<span class="copy">
 		<strong>{brand}</strong>
 		{#if subtitle}<small>{subtitle}</small>{/if}
@@ -54,6 +62,12 @@
 		font-size: 12px;
 		font-weight: 900;
 		letter-spacing: 0.08em;
+	}
+	.brand-logo {
+		display: block;
+		flex: 0 0 auto;
+		width: auto;
+		height: 40px;
 	}
 	.copy {
 		min-width: 0;

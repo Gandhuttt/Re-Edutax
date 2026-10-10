@@ -27,7 +27,7 @@
 </script>
 
 <svelte:head>
-	<title>Peserta {npwp} | EduTax</title>
+	<title>Peserta {npwp} | Edutaxindo Praktika</title>
 </svelte:head>
 
 <PageLayout contentWidth="1540px">

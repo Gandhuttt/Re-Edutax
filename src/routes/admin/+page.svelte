@@ -57,7 +57,7 @@
 </script>
 
 <svelte:head>
-	<title>Dasbor Administrator | EduTax</title>
+	<title>Dasbor Administrator | Edutaxindo Praktika</title>
 </svelte:head>
 
 <PageLayout contentWidth="1540px">

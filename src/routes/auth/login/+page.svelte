@@ -4,10 +4,10 @@
 </script>
 
 <svelte:head>
-	<title>Masuk | EduTax</title>
+	<title>Masuk | Edutaxindo Praktika</title>
 	<meta
 		name="description"
-		content="Masuk ke EduTax untuk mengakses layanan administrasi perpajakan."
+		content="Masuk ke Edutaxindo Praktika untuk mengakses layanan administrasi perpajakan."
 	/>
 </svelte:head>
 
@@ -15,9 +15,9 @@
 	<main class="login-shell">
 		<section class="brand-panel" aria-labelledby="brand-heading">
 			<div class="brand-lockup">
-				<span class="brand-mark" aria-hidden="true">ET</span>
+				<img class="brand-logo" src="/brand/wsd-mark-inverse.svg" alt="" width="57" height="46" />
 				<span class="brand-name">
-					<strong>EduTax</strong>
+					<strong>Edutaxindo Praktika</strong>
 					<small>Layanan Administrasi Perpajakan</small>
 				</span>
 			</div>
@@ -36,13 +36,13 @@
 		<section class="form-panel" aria-labelledby="login-heading">
 			<div class="login-card">
 				<div class="mobile-brand" aria-hidden="true">
-					<span class="brand-mark">ET</span>
-					<strong>EduTax</strong>
+					<img class="brand-logo" src="/brand/wsd-mark.svg" alt="" width="45" height="36" />
+					<strong>Edutaxindo Praktika</strong>
 				</div>
 
 				<header class="form-heading">
 					<p class="eyebrow">Akses akun</p>
-					<h2 id="login-heading">Masuk ke EduTax</h2>
+					<h2 id="login-heading">Masuk ke Edutaxindo Praktika</h2>
 					<p>Gunakan NPWP dan password yang terdaftar pada akun Anda.</p>
 				</header>
 
@@ -141,19 +141,15 @@
 		gap: 13px;
 	}
 
-	.brand-mark {
-		width: 46px;
-		height: 46px;
-		display: grid;
+	.brand-logo {
+		display: block;
 		flex: 0 0 auto;
-		place-items: center;
-		border: 1px solid var(--ui-yellow-deep);
-		border-radius: 2px;
-		background: var(--ui-yellow);
-		color: var(--ui-navy-strong);
-		font-size: 17px;
-		font-weight: 900;
-		letter-spacing: -0.03em;
+		width: auto;
+		height: 46px;
+	}
+
+	.mobile-brand .brand-logo {
+		height: 36px;
 	}
 
 	.brand-name {

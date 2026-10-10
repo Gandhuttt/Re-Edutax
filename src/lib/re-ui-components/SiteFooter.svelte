@@ -7,6 +7,8 @@
 		brand: string;
 		subtitle?: string;
 		mark?: string;
+		/** Logo for the navy footer; replaces the text mark. */
+		logoSrc?: string;
 		homeHref?: string;
 		homeLabel?: string;
 		tagline?: string;
@@ -25,6 +27,7 @@
 		brand,
 		subtitle = "",
 		mark = "",
+		logoSrc = "",
 		homeHref = "/",
 		homeLabel = brand,
 		tagline = "",
@@ -44,7 +47,7 @@
 >
 	<div class="inner">
 		<div class="top">
-			<BrandIdentity {brand} {subtitle} {mark} href={homeHref} label={homeLabel} />
+			<BrandIdentity {brand} {subtitle} {mark} {logoSrc} href={homeHref} label={homeLabel} />
 			{#if tagline}<p class="tagline">{tagline}</p>{/if}
 			{#if links.length}
 				<nav aria-label={linksLabel}>
