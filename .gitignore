@@ -52,3 +52,10 @@ src/routes/test/
 # leave dependant PII unredacted was conditional on docs/ not being tracked.
 # Regenerate from the live form if one is needed; do not commit one.
 /docs/**/a11y-*.txt
+
+# ISO 27001 audit working folder (reports, evidence); kept local.
+/audit-iso27001/
+
+# Legal documents (SK LKP, certificate); kept local.
+/SK LKP Edutaxindo Praktika.pdf
+/surat-sertifikat-41230917330174451.pdf
