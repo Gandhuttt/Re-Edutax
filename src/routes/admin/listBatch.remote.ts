@@ -22,7 +22,8 @@ export const listBatch = query(async () => {
 
 	const daftar = await Promise.all(
 		batches.map(async (batch) => {
-			const alokasi = await nextNpwpForBatch(batch.id);
+			// A NIK batch issues no numbers, so there is no "next" one to preview.
+			const alokasi = batch.penomoran === 'urut' ? await nextNpwpForBatch(batch.id) : null;
 
 			return {
 				...batch,

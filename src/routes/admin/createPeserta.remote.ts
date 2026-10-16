@@ -1,8 +1,12 @@
 import { form } from '$app/server';
+import { validasiNik } from '$lib/helpers/nik';
 import { serialFromLoneNpwp, urutFromNpwp } from '$lib/helpers/npwp';
 import { npwpPattern } from '$lib/helpers/username';
+import { db } from '$lib/server/db';
+import { batch_peserta } from '$lib/server/db/schema';
+import { eq } from 'drizzle-orm';
 import { requireAdmin } from '$lib/server/admin';
-import { nextNpwpForBatch, nextNpwpForLone, type NpwpAllocation } from '$lib/server/batch';
+import { nextNpwpForBatch, nextNpwpForLone } from '$lib/server/batch';
 import { createPesertaAccount } from '$lib/server/peserta';
 import { invalid } from '@sveltejs/kit';
 import * as v from 'valibot';
@@ -34,9 +38,30 @@ export const createPeserta = form(
 	async ({ batchId, nama, email, _password, npwp }) => {
 		const { headers } = requireAdmin();
 
-		let alokasi: NpwpAllocation | null;
+		const [batch] = batchId
+			? await db
+					.select({ penomoran: batch_peserta.penomoran })
+					.from(batch_peserta)
+					.where(eq(batch_peserta.id, batchId))
+					.limit(1)
+			: [];
 
-		if (npwp) {
+		if (batchId && !batch) {
+			invalid('Batch tidak ditemukan');
+		}
+
+		let alokasi: { npwp: string; urut: number | null } | null;
+
+		if (batch?.penomoran === 'nik') {
+			// A NIK batch issues no numbers: the NPWP is the peserta's own NIK, typed here.
+			const pesanNik = npwp ? validasiNik(npwp) : 'NIK peserta harus diisi untuk batch ini';
+
+			if (pesanNik) {
+				invalid(pesanNik);
+			}
+
+			alokasi = { npwp, urut: null };
+		} else if (npwp) {
 			const urut = batchId ? urutFromNpwp(npwp) : serialFromLoneNpwp(npwp);
 
 			if (Number.isNaN(urut)) {

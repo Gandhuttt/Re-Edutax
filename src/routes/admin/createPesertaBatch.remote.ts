@@ -35,6 +35,12 @@ export const createPesertaBatch = form(
 			error(404, 'Batch tidak ditemukan');
 		}
 
+		if (batch.penomoran === 'nik') {
+			invalid(
+				'Batch ini memakai NIK sebagai NPWP, jadi tidak bisa ditambah dari daftar nama. Tambahkan satu per satu dengan NIK, atau lewat pendaftaran online.'
+			);
+		}
+
 		const nama = daftarNama
 			.split(/\r?\n/)
 			.map((line) => line.trim())

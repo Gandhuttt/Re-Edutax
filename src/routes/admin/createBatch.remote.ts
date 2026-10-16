@@ -5,11 +5,17 @@ import { db } from '$lib/server/db';
 import { batch_peserta } from '$lib/server/db/schema';
 import { invalid } from '@sveltejs/kit';
 import * as v from 'valibot';
+import { pendaftaranDiaktifkan } from '$lib/server/pendaftaran';
 import { listBatch } from './listBatch.remote';
 
 /**
- * `nomor` is assigned by the system (highest so far + 1) and never chosen by the admin: it is
- * baked into every member's NPWP, and batches are never deleted, so the sequence only grows.
+ * `nomor` is assigned by the system (highest so far + 1) and never chosen by the admin; batches
+ * are never deleted, so the sequence only grows.
+ *
+ * Once registration is released (PENDAFTARAN_AKTIF), every batch created numbers its peserta by NIK
+ * (`penomoran: 'nik'`): the peserta's own NIK is the NPWP. Until then, and for every batch that
+ * existed before, peserta get issued numbers (`urut`), so an unreleased deployment behaves as it
+ * always did.
  */
 const CreateBatchSchema = v.object({
 	nama: v.optional(v.string(), ''),
@@ -38,7 +44,13 @@ export const createBatch = form(
 
 		const namaBatch = nama.trim() || `Batch ${String(nomor).padStart(2, '0')}`;
 
-		await db.insert(batch_peserta).values({ nomor, nama: namaBatch, polaEmail, passwordDefault });
+		await db.insert(batch_peserta).values({
+			nomor,
+			nama: namaBatch,
+			polaEmail,
+			passwordDefault,
+			penomoran: pendaftaranDiaktifkan() ? 'nik' : 'urut'
+		});
 
 		await listBatch().refresh();
 
