@@ -4,6 +4,7 @@ import { db } from '$lib/server/db';
 import { spt_ppn } from '$lib/server/db/schema';
 import { error } from '@sveltejs/kit';
 import { and, eq } from 'drizzle-orm';
+import { listSptPpn } from '../listSptPpn.remote';
 import * as v from 'valibot';
 
 const DeleteSptPpnSchema = v.object({ id: requiredString('SPT Masa PPN') });
@@ -23,4 +24,6 @@ export const deleteSptPpn = form(DeleteSptPpnSchema, async ({ id }) => {
 	if (record.status !== 'konsep') error(400, 'Hanya SPT berstatus konsep yang dapat dihapus');
 
 	await db.delete(spt_ppn).where(eq(spt_ppn.id, id));
+
+	await listSptPpn({ status: 'konsep' }).refresh();
 });

@@ -157,12 +157,12 @@
 							{#snippet row(row)}
 								<td class="action-cell">
 									{#if row.kind === 'pph-badan'}
-										<form {...newPembetulanSptPphBadan} id={`correct-spt-pph-badan-${row.id}`} hidden>
+										<form {...newPembetulanSptPphBadan.for(row.id)} id={`correct-spt-pph-badan-${row.id}`} hidden>
 											<input type="hidden" name="id" value={row.id} />
 										</form>
 									{:else if row.kind === 'pph-orang-pribadi'}
 										<form
-											{...newPembetulanSptPphOrangPribadi}
+											{...newPembetulanSptPphOrangPribadi.for(row.id)}
 											id={`correct-spt-pph-op-${row.id}`}
 											hidden
 										>

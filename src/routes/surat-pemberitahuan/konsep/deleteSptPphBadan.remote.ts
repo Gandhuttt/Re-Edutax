@@ -4,6 +4,7 @@ import { db } from '$lib/server/db';
 import { spt_pph_badan } from '$lib/server/db/schema';
 import { error } from '@sveltejs/kit';
 import { and, eq } from 'drizzle-orm';
+import { listSptPphBadan } from '../listSptPphBadan.remote';
 import * as v from 'valibot';
 
 const DeleteSptPphBadanSchema = v.object({
@@ -33,4 +34,6 @@ export const deleteSptPphBadan = form(DeleteSptPphBadanSchema, async ({ id }) =>
 	}
 
 	await db.delete(spt_pph_badan).where(eq(spt_pph_badan.id, id));
+
+	await listSptPphBadan({ status: 'konsep' }).refresh();
 });

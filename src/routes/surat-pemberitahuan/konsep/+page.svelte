@@ -52,11 +52,12 @@
 		{ value: 'pph-orang-pribadi', label: 'SPT Tahunan PPh Orang Pribadi' }
 	];
 
-	const [sptPpn, sptPphBadan, sptPphOrangPribadi] = await Promise.all([
-		listSptPpn({ status: 'konsep' }),
-		listSptPphBadan({ status: 'konsep' }),
-		listSptPphOrangPribadi({ status: 'konsep' })
-	]);
+	// $derived so a refresh() pushed back by deleteSptPpn/deleteSptPphBadan/
+	// deleteSptPphOrangPribadi updates the table; a plain `const x = await ...`
+	// is read once and would keep showing the deleted row.
+	const sptPpn = $derived(await listSptPpn({ status: 'konsep' }));
+	const sptPphBadan = $derived(await listSptPphBadan({ status: 'konsep' }));
+	const sptPphOrangPribadi = $derived(await listSptPphOrangPribadi({ status: 'konsep' }));
 	const rows = $derived.by((): ConceptRow[] => [
 		...sptPpn.map((row) => ({
 			id: row.id,
@@ -195,15 +196,15 @@
 							{#snippet row(row)}
 								<td class="action-cell">
 									{#if row.kind === 'ppn'}
-										<form {...deleteSptPpn} id={`delete-spt-ppn-${row.id}`} hidden>
+										<form {...deleteSptPpn.for(row.id)} id={`delete-spt-ppn-${row.id}`} hidden>
 											<input type="hidden" name="id" value={row.id} />
 										</form>
 									{:else if row.kind === 'pph-badan'}
-										<form {...deleteSptPphBadan} id={`delete-spt-pph-badan-${row.id}`} hidden>
+										<form {...deleteSptPphBadan.for(row.id)} id={`delete-spt-pph-badan-${row.id}`} hidden>
 											<input type="hidden" name="id" value={row.id} />
 										</form>
 									{:else}
-										<form {...deleteSptPphOrangPribadi} id={`delete-spt-pph-op-${row.id}`} hidden>
+										<form {...deleteSptPphOrangPribadi.for(row.id)} id={`delete-spt-pph-op-${row.id}`} hidden>
 											<input type="hidden" name="id" value={row.id} />
 										</form>
 									{/if}
