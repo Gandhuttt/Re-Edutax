@@ -22,7 +22,6 @@
 		disabled?: boolean;
 		layout?: "stacked" | "inline";
 		labelHidden?: boolean;
-		floatingPanel?: boolean;
 		searchable?: boolean;
 		searchPlaceholder?: string;
 		searchLabel?: string;
@@ -50,7 +49,6 @@
 		disabled = false,
 		layout = "stacked",
 		labelHidden = false,
-		floatingPanel = false,
 		searchable = false,
 		searchPlaceholder = "Cari pilihan...",
 		searchLabel = `Cari ${label}`,
@@ -98,29 +96,8 @@
 		);
 	});
 	const expanded = $derived(open && !closing);
-	function fixedContainingBlockOrigin() {
-		let current = trigger?.parentElement;
-		while (current) {
-			const style = getComputedStyle(current);
-			if (
-				style.transform !== "none" ||
-				style.perspective !== "none" ||
-				style.filter !== "none" ||
-				style.contain !== "none" ||
-				style.willChange.includes("transform")
-			) {
-				const rect = current.getBoundingClientRect();
-				return { left: rect.left, top: rect.top };
-			}
-			// A modal <dialog> lives in the top layer: its containing block is the
-			// viewport, so transformed ancestors above it must not offset the panel.
-			if (current.matches(":modal")) return { left: 0, top: 0 };
-			current = current.parentElement;
-		}
-		return { left: 0, top: 0 };
-	}
 	function positionFloatingPanel() {
-		if (!floatingPanel || !trigger) return;
+		if (!trigger) return;
 		const margin = 8;
 		const gap = 5;
 		const triggerRect = trigger.getBoundingClientRect();
@@ -129,7 +106,6 @@
 			window.innerWidth - margin * 2,
 		);
 		const panelHeight = optionPanel?.offsetHeight || 240;
-		const origin = fixedContainingBlockOrigin();
 		const spaceBelow = window.innerHeight - triggerRect.bottom - margin;
 		const spaceAbove = triggerRect.top - margin;
 		const opensAbove = spaceBelow < Math.min(panelHeight, 180) && spaceAbove > spaceBelow;
@@ -138,20 +114,20 @@
 			(opensAbove ? spaceAbove : spaceBelow) - gap,
 		);
 
+		// The panel lives in the top layer (popover), so its containing block is
+		// the viewport: trigger viewport coordinates are used as-is.
 		floatingWidth = width;
-		floatingLeft =
-			Math.min(
-				Math.max(margin, triggerRect.left),
-				window.innerWidth - width - margin,
-			) - origin.left;
+		floatingLeft = Math.min(
+			Math.max(margin, triggerRect.left),
+			window.innerWidth - width - margin,
+		);
 		floatingListHeight = Math.min(230, availableHeight - (searchable ? 52 : 0));
-		floatingTop =
-			(opensAbove
-				? Math.max(
-						margin,
-						triggerRect.top - Math.min(panelHeight, availableHeight) - gap,
-					)
-				: triggerRect.bottom + gap) - origin.top;
+		floatingTop = opensAbove
+			? Math.max(
+					margin,
+					triggerRect.top - Math.min(panelHeight, availableHeight) - gap,
+				)
+			: triggerRect.bottom + gap;
 	}
 	async function openPanel() {
 		clearTimeout(closeTimer);
@@ -161,8 +137,11 @@
 			options.findIndex((option) => option.value === resolvedValue),
 		);
 		closing = false;
+		// Width first, so the height measured below is not of a zero-width panel.
+		if (trigger) floatingWidth = Math.max(trigger.getBoundingClientRect().width, 180);
 		open = true;
 		await tick();
+		optionPanel?.showPopover();
 		positionFloatingPanel();
 		if (searchable) searchInput?.focus();
 	}
@@ -243,12 +222,7 @@
 			closePanel();
 	}
 	function handleDocumentScroll(event: Event) {
-		if (
-			floatingPanel &&
-			expanded &&
-			root &&
-			!root.contains(event.target as Node)
-		) {
+		if (expanded && root && !root.contains(event.target as Node)) {
 			positionFloatingPanel();
 		}
 	}
@@ -299,9 +273,9 @@
 	{#if open}
 		<div
 			bind:this={optionPanel}
+			popover="manual"
 			class="option-panel"
 			class:closing
-			class:floating={floatingPanel}
 			id="{id}-listbox"
 			role="listbox"
 			aria-labelledby="{id}-label"
@@ -377,9 +351,6 @@
 		padding: 0 8px;
 		font-size: 10px;
 	}
-	.label-hidden .option-panel {
-		top: 35px;
-	}
 	.field-label em {
 		margin-left: 3px;
 		color: #9b2f28;
@@ -450,17 +421,24 @@
 		color: var(--ui-yellow-deep);
 		transform: translateY(2px);
 	}
+	/* A manual popover: rendered in the top layer, so no ancestor's overflow,
+	   stacking context or transform can clip or cover it. Coordinates are
+	   viewport-relative and set by positionFloatingPanel(). */
 	.option-panel {
-		position: absolute;
-		z-index: 30;
-		top: 64px;
-		left: 0;
-		right: 0;
+		position: fixed;
+		inset: auto;
+		margin: 0;
+		padding: 0;
+		top: var(--floating-top);
+		left: var(--floating-left);
+		width: var(--floating-width);
+		height: auto;
 		overflow: hidden;
 		border: 1px solid var(--ui-line-strong);
 		border-top: 3px solid var(--ui-yellow);
 		border-radius: 2px;
 		background: #fffefa;
+		color: inherit;
 		box-shadow: 0 12px 24px rgba(15, 34, 55, 0.16);
 		transform-origin: top;
 		animation: panel-enter 170ms cubic-bezier(0.2, 0.8, 0.2, 1);
@@ -468,17 +446,6 @@
 	.option-panel.closing {
 		pointer-events: none;
 		animation: panel-leave 140ms ease-in forwards;
-	}
-	.option-panel.floating {
-		position: fixed;
-		z-index: 80;
-		top: var(--floating-top);
-		left: var(--floating-left);
-		right: auto;
-		width: var(--floating-width);
-	}
-	.option-panel.floating .option-list {
-		max-height: var(--floating-list-height);
 	}
 	.option-search {
 		padding: 7px;
@@ -513,7 +480,7 @@
 		cursor: pointer;
 	}
 	.option-list {
-		max-height: 230px;
+		max-height: var(--floating-list-height);
 		padding: 5px;
 		overflow: auto;
 	}

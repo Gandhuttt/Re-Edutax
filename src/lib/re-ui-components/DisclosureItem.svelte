@@ -187,7 +187,10 @@
 	.content-inner.content-settled {
 		overflow: visible;
 	}
-	.content-settled .body-motion {
+	/* Must out-rank `.open .body-motion` below: a lingering translateY(0) makes
+	   every open body its own stacking context, so a later section paints over
+	   an earlier section's absolutely positioned select panel. */
+	.content-inner.content-settled .body-motion {
 		transform: none;
 	}
 	.disclosure-body {

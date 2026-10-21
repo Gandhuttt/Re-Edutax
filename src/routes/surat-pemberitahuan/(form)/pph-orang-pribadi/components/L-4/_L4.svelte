@@ -164,7 +164,6 @@
                                         ]}
                                         disabled={readonly || sectionBGated}
                                         labelHidden
-                                        floatingPanel
                                     />
                                 </td>
                             </tr>
@@ -319,7 +318,6 @@
                                             ]}
                                             disabled={readonly}
                                             labelHidden
-                                            floatingPanel
                                         />
                                     </td>
                                 </tr>

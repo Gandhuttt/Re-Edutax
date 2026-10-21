@@ -154,7 +154,6 @@
                 ...(referensi.l5_c_jenis ?? []).map((opsi) => ({ value: opsi, label: opsi }))
             ]}
             error={errors.jenisPengurang}
-            floatingPanel
             required
         />
         <RupiahField

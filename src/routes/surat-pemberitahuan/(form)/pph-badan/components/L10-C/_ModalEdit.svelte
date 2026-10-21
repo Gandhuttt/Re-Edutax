@@ -57,7 +57,6 @@
 			options={jenisTransaksiChoices}
 			required
 			disabled={readonly}
-			floatingPanel
 		/>
 		<SelectField
 			label="Negara"
@@ -66,7 +65,6 @@
 			required
 			disabled={readonly}
 			searchable
-			floatingPanel
 		/>
 		<RupiahField
 			label="Nilai Transaksi *"

@@ -169,7 +169,6 @@
 				label="Tipe"
 				value={tipe}
 				disabled={!canEdit}
-				floatingPanel
 				options={[
 					{ value: 0, label: 'Barang' },
 					{ value: 1, label: 'Jasa' }
@@ -181,7 +180,6 @@
 				bind:value={kodeItem}
 				disabled={!canEdit}
 				searchable
-				floatingPanel
 				searchPlaceholder="Cari kode atau nama item"
 				options={[
 					{ value: '', label: 'Pilih kode barang atau jasa' },
@@ -198,7 +196,6 @@
 				bind:value={satuanUkur}
 				disabled={!canEdit}
 				searchable
-				floatingPanel
 				options={satuanOptions.map((option) => ({
 					value: option.index,
 					label: `${option.index} — ${option.label}`

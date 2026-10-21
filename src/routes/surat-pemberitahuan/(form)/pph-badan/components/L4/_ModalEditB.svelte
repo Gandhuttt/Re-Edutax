@@ -39,7 +39,6 @@
 			placeholder="Pilih jenis penghasilan"
 			required
 			searchable
-			floatingPanel
 		/>
 		<FormField label="Sumber Penghasilan" bind:value={data.sumberPenghasilan!} required />
 		<RupiahField

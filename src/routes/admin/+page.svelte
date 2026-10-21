@@ -337,7 +337,6 @@
 											name="batchId"
 											value={pendaftaranOnline.batchPerKelas[kelas.kode] ?? ''}
 											options={batchKelasOptions}
-											floatingPanel
 										/>
 										<ActionButton type="submit" pending={formKelas.pending > 0} pendingLabel="Menyimpan...">
 											Simpan

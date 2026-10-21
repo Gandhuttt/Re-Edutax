@@ -173,7 +173,6 @@
                         <SelectField
                             label="Jawaban pertanyaan 1.b.2"
                             labelHidden
-                            floatingPanel
                             bind:value={b1b2Oppt}
                             options={opptOptions}
                             disabled={readonly}
@@ -187,7 +186,6 @@
                         <SelectField
                             label="Jawaban pertanyaan 1.b.3"
                             labelHidden
-                            floatingPanel
                             bind:value={b1b3Norma}
                             options={normaOptions}
                             disabled={readonly}
@@ -202,7 +200,6 @@
                             <SelectField
                                 label="Sektor usaha"
                                 labelHidden
-                                floatingPanel
                                 bind:value={b1b4Sektor}
                                 options={sektorOptions}
                                 disabled={readonly}

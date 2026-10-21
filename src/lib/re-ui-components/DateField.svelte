@@ -14,7 +14,6 @@
 		required?: boolean;
 		disabled?: boolean;
 		labelHidden?: boolean;
-		floatingPanel?: boolean;
 		locale?: string;
 		weekdays?: readonly string[];
 		calendarLabel?: string;
@@ -45,7 +44,6 @@
 		required = false,
 		disabled = false,
 		labelHidden = false,
-		floatingPanel = false,
 		locale = "id-ID",
 		weekdays = ["Sen", "Sel", "Rab", "Kam", "Jum", "Sab", "Min"],
 		calendarLabel = `Pilih ${label}`,
@@ -103,26 +101,8 @@
 			...Array.from({ length: days }, (_, index) => index + 1),
 		];
 	});
-	function fixedContainingBlockOrigin() {
-		let current = trigger?.parentElement;
-		while (current) {
-			const style = getComputedStyle(current);
-			if (
-				style.transform !== "none" ||
-				style.perspective !== "none" ||
-				style.filter !== "none" ||
-				style.contain !== "none" ||
-				style.willChange.includes("transform")
-			) {
-				const rect = current.getBoundingClientRect();
-				return { left: rect.left, top: rect.top };
-			}
-			current = current.parentElement;
-		}
-		return { left: 0, top: 0 };
-	}
 	function positionFloatingPanel() {
-		if (!floatingPanel || !trigger) return;
+		if (!trigger) return;
 		const margin = 8;
 		const gap = 5;
 		const triggerRect = trigger.getBoundingClientRect();
@@ -130,22 +110,21 @@
 		const panelHeight = calendarPanel?.offsetHeight || 330;
 		const spaceBelow = window.innerHeight - triggerRect.bottom - margin;
 		const spaceAbove = triggerRect.top - margin;
-		const origin = fixedContainingBlockOrigin();
 
+		// The panel lives in the top layer (popover), so its containing block is
+		// the viewport: trigger viewport coordinates are used as-is.
 		opensAbove = spaceBelow < panelHeight && spaceAbove > spaceBelow;
 		calendarWidth = width;
-		calendarLeft =
-			Math.min(
-				Math.max(margin, triggerRect.left),
-				window.innerWidth - width - margin,
-			) - origin.left;
-		calendarTop =
-			(opensAbove
-				? Math.max(margin, triggerRect.top - panelHeight - gap)
-				: Math.min(
-						triggerRect.bottom + gap,
-						window.innerHeight - panelHeight - margin,
-					)) - origin.top;
+		calendarLeft = Math.min(
+			Math.max(margin, triggerRect.left),
+			window.innerWidth - width - margin,
+		);
+		calendarTop = opensAbove
+			? Math.max(margin, triggerRect.top - panelHeight - gap)
+			: Math.min(
+					triggerRect.bottom + gap,
+					window.innerHeight - panelHeight - margin,
+				);
 	}
 	function toIso(year: number, month: number, day: number) {
 		return `${year}-${String(month + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`;
@@ -173,6 +152,7 @@
 		closing = false;
 		open = true;
 		await tick();
+		calendarPanel?.showPopover();
 		positionFloatingPanel();
 	}
 	function closePanel() {
@@ -214,12 +194,7 @@
 			closePanel();
 	}
 	function handleDocumentScroll(event: Event) {
-		if (
-			floatingPanel &&
-			expanded &&
-			root &&
-			!root.contains(event.target as Node)
-		) {
+		if (expanded && root && !root.contains(event.target as Node)) {
 			positionFloatingPanel();
 		}
 	}
@@ -272,9 +247,9 @@
 	{#if open}
 		<div
 			bind:this={calendarPanel}
+			popover="manual"
 			class="calendar-panel"
 			class:closing
-			class:floating={floatingPanel}
 			class:opens-above={opensAbove}
 			id="{id}-calendar"
 			role="dialog"
@@ -374,9 +349,6 @@
 		width: 17px;
 		height: 17px;
 	}
-	.label-hidden .calendar-panel {
-		top: 35px;
-	}
 	.field-label em {
 		margin-left: 3px;
 		color: #9b2f28;
@@ -459,17 +431,24 @@
 		height: 3px;
 		background: var(--ui-yellow-deep);
 	}
+	/* A manual popover: rendered in the top layer, so no ancestor's overflow,
+	   stacking context or transform can clip or cover it. Coordinates are
+	   viewport-relative and set by positionFloatingPanel(). */
 	.calendar-panel {
-		position: absolute;
-		z-index: 34;
-		top: 64px;
-		left: 0;
-		width: 310px;
+		position: fixed;
+		inset: auto;
+		margin: 0;
+		padding: 0;
+		top: var(--calendar-top);
+		left: var(--calendar-left);
+		width: var(--calendar-width);
+		height: auto;
 		overflow: hidden;
 		border: 1px solid var(--ui-line-strong);
 		border-top: 3px solid var(--ui-yellow);
 		border-radius: 2px;
 		background: #fffefa;
+		color: inherit;
 		box-shadow: 0 14px 28px rgba(15, 34, 55, 0.18);
 		transform-origin: top;
 		animation: calendar-enter 180ms cubic-bezier(0.2, 0.8, 0.2, 1);
@@ -478,14 +457,7 @@
 		pointer-events: none;
 		animation: calendar-leave 150ms ease-in forwards;
 	}
-	.calendar-panel.floating {
-		position: fixed;
-		z-index: 80;
-		top: var(--calendar-top);
-		left: var(--calendar-left);
-		width: var(--calendar-width);
-	}
-	.calendar-panel.floating.opens-above {
+	.calendar-panel.opens-above {
 		transform-origin: bottom;
 	}
 	.calendar-head {
@@ -671,12 +643,6 @@
 		to {
 			opacity: 1;
 			transform: none;
-		}
-	}
-	@media (max-width: 420px) {
-		.calendar-panel {
-			right: 0;
-			width: min(310px, calc(100vw - 40px));
 		}
 	}
 	@media (prefers-reduced-motion: reduce) {

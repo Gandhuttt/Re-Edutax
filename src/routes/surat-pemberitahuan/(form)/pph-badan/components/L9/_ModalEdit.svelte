@@ -65,7 +65,6 @@
 				required
 				disabled={readonly}
 				searchable
-				floatingPanel
 			/>
 			<FormField
 				label="Bulan / Tahun Perolehan *"
@@ -88,14 +87,12 @@
 					bind:value={data.metodePenyusutanKomersial}
 					options={metodeKomersialChoices}
 					disabled={readonly}
-					floatingPanel
 				/>
 				<SelectField
 					label="Fiskal"
 					bind:value={data.metodePenyusutanFiskal}
 					options={metodeFiskalChoices}
 					disabled={readonly}
-					floatingPanel
 				/>
 			</FieldGrid>
 		</FormSection>

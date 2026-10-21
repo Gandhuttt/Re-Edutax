@@ -69,7 +69,6 @@
                     <SelectField
                         label="Status Penghasilan Tidak Kena Pajak"
                         labelHidden
-                        floatingPanel
                         bind:value={c5PtkpStatus}
                         options={ptkpOptions}
                         disabled={readonly || phMt}

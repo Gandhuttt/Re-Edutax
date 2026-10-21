@@ -309,7 +309,6 @@
 									<SelectField
 										label="Filter kode transaksi"
 										labelHidden
-										floatingPanel
 										bind:value={transactionFilter}
 										options={[
 											{ value: '', label: 'Semua kode' },
@@ -327,7 +326,6 @@
 									<DateField
 										label="Filter tanggal faktur"
 										labelHidden
-										floatingPanel
 										placeholder="Tanggal"
 										bind:value={invoiceDateFilter}
 									/>
@@ -336,7 +334,6 @@
 									<SelectField
 										label="Filter masa pajak"
 										labelHidden
-										floatingPanel
 										bind:value={monthFilter}
 										options={[
 											{ value: '', label: 'Semua masa' },
@@ -351,7 +348,6 @@
 									<SelectField
 										label="Filter tahun pajak"
 										labelHidden
-										floatingPanel
 										bind:value={yearFilter}
 										options={[{ value: '', label: 'Semua' }, ...yearOptions]}
 									/>
@@ -360,7 +356,6 @@
 									<SelectField
 										label="Filter status"
 										labelHidden
-										floatingPanel
 										bind:value={statusFilter}
 										options={[
 											{ value: '', label: 'Semua status' },

@@ -67,7 +67,6 @@
 				options={negaraChoices}
 				disabled={readonly}
 				searchable
-				floatingPanel
 			/>
 			<SelectField
 				label="Bentuk Hubungan"
@@ -75,7 +74,6 @@
 				options={bentukHubunganChoices}
 				required
 				disabled={readonly}
-				floatingPanel
 			/>
 			<FormField
 				label="Kegiatan Usaha"
@@ -89,7 +87,6 @@
 				options={jenisTransaksiChoices}
 				required
 				disabled={readonly}
-				floatingPanel
 			/>
 			<RupiahField
 				label="Nilai Transaksi *"
@@ -102,7 +99,6 @@
 				options={metodeHargaTransferChoices}
 				required
 				disabled={readonly}
-				floatingPanel
 			/>
 		</FieldGrid>
 		<FormField

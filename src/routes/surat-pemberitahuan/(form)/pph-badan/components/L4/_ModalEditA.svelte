@@ -56,7 +56,6 @@
 			placeholder="Pilih objek pajak"
 			required
 			searchable
-			floatingPanel
 		/>
 		<RupiahField
 			label="Dasar Pengenaan Pajak"

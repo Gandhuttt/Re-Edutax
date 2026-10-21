@@ -173,7 +173,7 @@
 	<FieldGrid>
 		<FormField label="Nama Sumber/Pemberi Penghasilan" bind:value={draft.namaSumber} required error={errors.namaSumber} />
 		<SelectField label="Negara Sumber/Pemberi Penghasilan" bind:value={draft.negara} options={negaraOptions} searchable required error={errors.negara} />
-		<DateField label="Tanggal Transaksi" bind:value={draft.tanggalTransaksi} required error={errors.tanggalTransaksi} floatingPanel />
+		<DateField label="Tanggal Transaksi" bind:value={draft.tanggalTransaksi} required error={errors.tanggalTransaksi} />
 		<SelectField label="Jenis Penghasilan" bind:value={draft.jenisPenghasilan} options={jenisOptions} searchable required error={errors.jenisPenghasilan} />
 		<FormField label="Kode Penghasilan" value={kode} readonly />
 		<RupiahField label="Penghasilan Neto" bind:value={draft.penghasilanNeto} required error={errors.penghasilanNeto} />
