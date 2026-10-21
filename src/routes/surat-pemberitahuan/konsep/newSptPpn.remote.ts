@@ -3,6 +3,7 @@ import { error, redirect } from '@sveltejs/kit';
 import * as v from 'valibot';
 import { createSptPpnForPractice } from '../(form)/ppn/server/getOrCreateCurrentSptPpn.server';
 import { getTaxpayerForSptPpn } from '../(form)/ppn/server/getTaxpayerForSptPpn.server';
+import { TAHUN_SPT } from './tahunSpt';
 
 const numericField = (message: string, min: number, max: number) =>
 	v.pipe(
@@ -16,7 +17,13 @@ const numericField = (message: string, min: number, max: number) =>
 
 const NewSptPpnSchema = v.object({
 	masaPajak: numericField('Masa pajak', 1, 12),
-	tahun: numericField('Tahun', 2000, 2100)
+	tahun: v.pipe(
+		v.string(),
+		v.nonEmpty('Tahun'),
+		v.transform(Number),
+		v.integer('Tahun harus berupa bilangan bulat'),
+		v.picklist(TAHUN_SPT, `Tahun yang didukung: ${TAHUN_SPT.join(', ')}`)
+	)
 });
 
 export const newSptPpn = form(NewSptPpnSchema, async ({ masaPajak, tahun }) => {

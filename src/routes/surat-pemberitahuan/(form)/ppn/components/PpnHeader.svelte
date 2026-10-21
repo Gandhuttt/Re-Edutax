@@ -8,16 +8,14 @@
 		Stack
 	} from '$lib/re-ui-components';
 	import { untrack } from 'svelte';
+	import { TAHUN_SPT } from '../../../konsep/tahunSpt';
 
 	const currentDate = new Date();
 	const monthOptions = Array.from({ length: 12 }, (_, index) => ({
 		value: index + 1,
 		label: formatMonth(index + 1)
 	}));
-	const yearOptions = Array.from({ length: 6 }, (_, index) => ({
-		value: currentDate.getFullYear() - 3 + index,
-		label: String(currentDate.getFullYear() - 3 + index)
-	}));
+	const yearOptions = TAHUN_SPT.map((year) => ({ value: year, label: String(year) }));
 
 	const {
 		namaPKP = '',

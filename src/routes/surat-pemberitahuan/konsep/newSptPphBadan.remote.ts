@@ -8,7 +8,7 @@ import {
 import { error, redirect } from '@sveltejs/kit';
 import { and, eq } from 'drizzle-orm';
 import * as v from 'valibot';
-import { TAHUN_PAJAK_PPH_BADAN } from './tahunPajakPphBadan';
+import { TAHUN_SPT } from './tahunSpt';
 
 const NewSptPphBadanSchema = v.object({
 	tahunPajak: v.pipe(
@@ -16,10 +16,7 @@ const NewSptPphBadanSchema = v.object({
 		v.nonEmpty('Tahun pajak'),
 		v.transform(Number),
 		v.integer('Tahun pajak harus berupa bilangan bulat'),
-		v.picklist(
-			TAHUN_PAJAK_PPH_BADAN,
-			`Tahun pajak yang didukung: ${TAHUN_PAJAK_PPH_BADAN.join(', ')}`
-		)
+		v.picklist(TAHUN_SPT, `Tahun pajak yang didukung: ${TAHUN_SPT.join(', ')}`)
 	)
 });
 

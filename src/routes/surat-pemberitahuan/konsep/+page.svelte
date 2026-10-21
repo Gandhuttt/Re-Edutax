@@ -25,7 +25,7 @@
 	import { newSptPphBadan } from './newSptPphBadan.remote';
 	import { newSptPphOrangPribadi } from './newSptPphOrangPribadi.remote';
 	import { newSptPpn } from './newSptPpn.remote';
-	import { TAHUN_PAJAK_PPH_BADAN, TAHUN_PAJAK_PPH_BADAN_DEFAULT } from './tahunPajakPphBadan';
+	import { TAHUN_SPT, TAHUN_SPT_DEFAULT } from './tahunSpt';
 
 	type JenisSpt = 'ppn' | 'pph-badan' | 'pph-orang-pribadi';
 	type ConceptRow = {
@@ -43,9 +43,10 @@
 	const rupiah = new Intl.NumberFormat('id-ID');
 	const today = new Date();
 	const months = Array.from({ length: 12 }, (_, index) => index + 1);
-	const years = Array.from({ length: 6 }, (_, index) => today.getFullYear() - 3 + index);
-	// PPh Orang Pribadi masih mengikuti aturan tahun pajak 2025 saja.
-	const pphTahunPajakOptions = [2025];
+	const tahunOptions = TAHUN_SPT.map((yearOption) => ({
+		value: yearOption,
+		label: String(yearOption)
+	}));
 	const jenisSptOptions: { value: JenisSpt; label: string }[] = [
 		{ value: 'ppn', label: 'SPT Masa PPN' },
 		{ value: 'pph-badan', label: 'SPT Tahunan PPh Badan' },
@@ -98,9 +99,13 @@
 	let createDialogOpen = $state(false);
 	let jenisSpt = $state<JenisSpt>('ppn');
 	let masaPajak = $state(today.getMonth() + 1);
-	let tahun = $state(today.getFullYear());
-	let tahunPajakBadan = $state<number>(TAHUN_PAJAK_PPH_BADAN_DEFAULT);
-	let tahunPajakOrangPribadi = $state(pphTahunPajakOptions[0]);
+	let tahun = $state<number>(
+		(TAHUN_SPT as readonly number[]).includes(today.getFullYear())
+			? today.getFullYear()
+			: TAHUN_SPT_DEFAULT
+	);
+	let tahunPajakBadan = $state<number>(TAHUN_SPT_DEFAULT);
+	let tahunPajakOrangPribadi = $state<number>(TAHUN_SPT_DEFAULT);
 	let currentPage = $state(1);
 	let pageSize = $state(10);
 
@@ -303,7 +308,7 @@
 						label="Tahun"
 						name="tahun"
 						bind:value={tahun}
-						options={years.map((yearOption) => ({ value: yearOption, label: String(yearOption) }))}
+						options={tahunOptions}
 						required
 					/>
 				</Stack>
@@ -314,10 +319,7 @@
 					label="Tahun Pajak"
 					name="tahunPajak"
 					bind:value={tahunPajakBadan}
-					options={TAHUN_PAJAK_PPH_BADAN.map((yearOption) => ({
-						value: yearOption,
-						label: String(yearOption)
-					}))}
+					options={tahunOptions}
 					required
 				/>
 			</form>
@@ -327,10 +329,7 @@
 					label="Tahun Pajak"
 					name="tahunPajak"
 					bind:value={tahunPajakOrangPribadi}
-					options={pphTahunPajakOptions.map((yearOption) => ({
-						value: yearOption,
-						label: String(yearOption)
-					}))}
+					options={tahunOptions}
 					required
 				/>
 			</form>

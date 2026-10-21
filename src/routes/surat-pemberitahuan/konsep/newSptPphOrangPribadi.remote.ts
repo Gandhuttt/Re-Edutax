@@ -4,11 +4,7 @@ import { spt_pph_orang_pribadi } from '$lib/server/db/schema';
 import { error, redirect } from '@sveltejs/kit';
 import { and, eq } from 'drizzle-orm';
 import * as v from 'valibot';
-
-// The PTKP amounts and the progressive tariff implemented in the Induk engine are
-// tax-year-2025 figures, so creation is restricted to that year until another is
-// verified against the source. Same restriction as the Badan side.
-const SUPPORTED_TAHUN_PAJAK = 2025;
+import { TAHUN_SPT } from './tahunSpt';
 
 const NewSptPphOrangPribadiSchema = v.object({
 	tahunPajak: v.pipe(
@@ -16,7 +12,7 @@ const NewSptPphOrangPribadiSchema = v.object({
 		v.nonEmpty('Tahun pajak'),
 		v.transform(Number),
 		v.integer('Tahun pajak harus berupa bilangan bulat'),
-		v.value(SUPPORTED_TAHUN_PAJAK, `Tahun pajak yang didukung saat ini hanya ${SUPPORTED_TAHUN_PAJAK}`)
+		v.picklist(TAHUN_SPT, `Tahun pajak yang didukung: ${TAHUN_SPT.join(', ')}`)
 	)
 });
 
