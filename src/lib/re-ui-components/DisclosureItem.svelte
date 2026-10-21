@@ -170,6 +170,10 @@
 	}
 	.content-grid {
 		display: grid;
+		/* `auto` columns size to min-content, so a wide child (a table with a
+		   min-width) would stretch the track past the card once the inner
+		   wrapper turns overflow: visible. Pin the track to the container. */
+		grid-template-columns: minmax(0, 1fr);
 		grid-template-rows: 0fr;
 		opacity: 0;
 		transition:
@@ -181,6 +185,7 @@
 		opacity: 1;
 	}
 	.content-inner {
+		min-width: 0;
 		min-height: 0;
 		overflow: hidden;
 	}

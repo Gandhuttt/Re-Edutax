@@ -52,6 +52,7 @@
 <style>
 	.collapsible-panel {
 		display: grid;
+		grid-template-columns: minmax(0, 1fr);
 		grid-template-rows: 0fr;
 		opacity: 0;
 		visibility: hidden;
@@ -78,6 +79,7 @@
 	}
 
 	.clip {
+		min-width: 0;
 		min-height: 0;
 		overflow: hidden;
 	}
