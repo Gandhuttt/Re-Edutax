@@ -1,6 +1,7 @@
 import { getRequestEvent, query } from '$app/server';
 import { db } from '$lib/server/db';
 import { spt_pph_orang_pribadi } from '$lib/server/db/schema';
+import { urutanSptPphOrangPribadi } from '$lib/server/db/helpers/urutanSpt';
 import { error } from '@sveltejs/kit';
 import { and, desc, eq } from 'drizzle-orm';
 import * as v from 'valibot';
@@ -22,6 +23,8 @@ export const listSptPphOrangPribadi = query(ListSptPphOrangPribadiSchema, async 
 			id: spt_pph_orang_pribadi.id,
 			tahunPajak: spt_pph_orang_pribadi.tahunPajak,
 			pembetulanKe: spt_pph_orang_pribadi.pembetulanKe,
+			dibuat: spt_pph_orang_pribadi.createdAt,
+			...urutanSptPphOrangPribadi,
 			statusSpt: spt_pph_orang_pribadi.statusSpt,
 			statusDraft: spt_pph_orang_pribadi.statusDraft,
 			pphKurangLebihBayar: spt_pph_orang_pribadi.pphKurangLebihBayar,
@@ -32,5 +35,9 @@ export const listSptPphOrangPribadi = query(ListSptPphOrangPribadiSchema, async 
 		.where(
 			and(eq(spt_pph_orang_pribadi.npwp, activeNpwp), eq(spt_pph_orang_pribadi.statusDraft, status))
 		)
-		.orderBy(desc(spt_pph_orang_pribadi.tahunPajak), desc(spt_pph_orang_pribadi.pembetulanKe));
+		.orderBy(
+			desc(spt_pph_orang_pribadi.tahunPajak),
+			desc(spt_pph_orang_pribadi.pembetulanKe),
+			desc(spt_pph_orang_pribadi.createdAt)
+		);
 });

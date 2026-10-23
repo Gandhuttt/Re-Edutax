@@ -267,6 +267,13 @@
       "when": 1791966564310,
       "tag": "0037_pendaftaran",
       "breakpoints": true
+    },
+    {
+      "idx": 38,
+      "version": "6",
+      "when": 1792752354871,
+      "tag": "0038_spt_multi_per_tahun",
+      "breakpoints": true
     }
   ]
 }

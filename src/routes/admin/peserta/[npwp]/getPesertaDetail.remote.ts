@@ -59,6 +59,7 @@ export const getPesertaDetail = query(GetPesertaDetailSchema, async (npwp) => {
 				id: spt_pph_badan.id,
 				tahunPajak: spt_pph_badan.tahunPajak,
 				pembetulanKe: spt_pph_badan.pembetulanKe,
+				dibuat: spt_pph_badan.createdAt,
 				statusSpt: spt_pph_badan.statusSpt,
 				statusDraft: spt_pph_badan.statusDraft,
 				pphKurangLebihBayar: spt_pph_badan.pphKurangLebihBayar,
@@ -73,6 +74,7 @@ export const getPesertaDetail = query(GetPesertaDetailSchema, async (npwp) => {
 				masaPajak: spt_ppn.masaPajak,
 				tahun: spt_ppn.tahun,
 				pembetulanKe: spt_ppn.pembetulanKe,
+				dibuat: spt_ppn.createdAt,
 				status: spt_ppn.status,
 				ppnKurangLebihBayar: spt_ppn.iiiE,
 				tanggalDilaporkan: spt_ppn.tanggalDilaporkan

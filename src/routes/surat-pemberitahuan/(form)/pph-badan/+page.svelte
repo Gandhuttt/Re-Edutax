@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { isHttpError } from '@sveltejs/kit';
 	import { tick } from 'svelte';
+	import { keteranganSpt } from '$lib/helpers/sptUrutan';
 	import {
 		ActionButton,
 		Breadcrumbs,
@@ -567,7 +568,7 @@
 		]}
 	/>
 	<PageHeading
-		eyebrow={`Tahun Pajak ${spt.tahunPajak}`}
+		eyebrow={`Tahun Pajak ${spt.tahunPajak} · ${keteranganSpt(spt)}`}
 		title="SPT Tahunan PPh Badan"
 		actions={headingActions}
 	/>

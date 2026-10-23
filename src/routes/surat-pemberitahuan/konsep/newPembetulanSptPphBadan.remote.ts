@@ -30,7 +30,7 @@ import {
 	spt_pph_badan_lampiran_13b_d_penghitungan
 } from '$lib/server/db/schema';
 import { error, redirect } from '@sveltejs/kit';
-import { and, desc, eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import * as v from 'valibot';
 
 const NewPembetulanSptPphBadanSchema = v.object({
@@ -63,34 +63,20 @@ export const newPembetulanSptPphBadan = form(NewPembetulanSptPphBadanSchema, asy
 		error(400, 'Hanya SPT yang sudah dilaporkan yang dapat dibetulkan');
 	}
 
-	const [latest] = await db
-		.select({ pembetulanKe: spt_pph_badan.pembetulanKe })
+	// Only the last SPT of a chain can be amended. The chain is linked explicitly through
+	// pembetulanDariId: with several normal SPT allowed per tahun pajak,
+	// (npwp, tahunPajak, pembetulanKe) no longer identifies a single predecessor.
+	const [successor] = await db
+		.select({ id: spt_pph_badan.id })
 		.from(spt_pph_badan)
-		.where(and(eq(spt_pph_badan.npwp, activeNpwp), eq(spt_pph_badan.tahunPajak, source.tahunPajak)))
-		.orderBy(desc(spt_pph_badan.pembetulanKe))
+		.where(and(eq(spt_pph_badan.npwp, activeNpwp), eq(spt_pph_badan.pembetulanDariId, id)))
 		.limit(1);
 
-	if (!latest || latest.pembetulanKe !== source.pembetulanKe) {
+	if (successor) {
 		error(400, 'Hanya SPT dengan pembetulan terakhir yang dapat dibetulkan');
 	}
 
 	const nextPembetulanKe = source.pembetulanKe + 1;
-
-	const [existingNext] = await db
-		.select({ id: spt_pph_badan.id })
-		.from(spt_pph_badan)
-		.where(
-			and(
-				eq(spt_pph_badan.npwp, activeNpwp),
-				eq(spt_pph_badan.tahunPajak, source.tahunPajak),
-				eq(spt_pph_badan.pembetulanKe, nextPembetulanKe)
-			)
-		)
-		.limit(1);
-
-	if (existingNext) {
-		redirect(303, `/surat-pemberitahuan/pph-badan?id=${existingNext.id}`);
-	}
 
 	// D1 has no real multi-statement transaction over the Workers binding, only db.batch()
 	// (which requires every statement to be built upfront, no reading generated ids back
@@ -110,6 +96,7 @@ export const newPembetulanSptPphBadan = form(NewPembetulanSptPphBadanSchema, asy
 			...rest,
 			id: newSptId,
 			pembetulanKe: nextPembetulanKe,
+			pembetulanDariId: id,
 			statusSpt: 'pembetulan',
 			statusDraft: 'konsep',
 			tanggalPosting: null,

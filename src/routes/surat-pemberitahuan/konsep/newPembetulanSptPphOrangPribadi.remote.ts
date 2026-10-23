@@ -29,7 +29,7 @@ import {
 	spt_pph_orang_pribadi_sumber_penghasilan
 } from '$lib/server/db/schema';
 import { error, redirect } from '@sveltejs/kit';
-import { and, desc, eq } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import * as v from 'valibot';
 
 const NewPembetulanSptPphOrangPribadiSchema = v.object({
@@ -64,39 +64,25 @@ export const newPembetulanSptPphOrangPribadi = form(
 			error(400, 'Hanya SPT yang sudah dilaporkan yang dapat dibetulkan');
 		}
 
-		const [latest] = await db
-			.select({ pembetulanKe: spt_pph_orang_pribadi.pembetulanKe })
-			.from(spt_pph_orang_pribadi)
-			.where(
-				and(
-					eq(spt_pph_orang_pribadi.npwp, activeNpwp),
-					eq(spt_pph_orang_pribadi.tahunPajak, source.tahunPajak)
-				)
-			)
-			.orderBy(desc(spt_pph_orang_pribadi.pembetulanKe))
-			.limit(1);
-
-		if (!latest || latest.pembetulanKe !== source.pembetulanKe) {
-			error(400, 'Hanya SPT dengan pembetulan terakhir yang dapat dibetulkan');
-		}
-
-		const nextPembetulanKe = source.pembetulanKe + 1;
-
-		const [existingNext] = await db
+		// Only the last SPT of a chain can be amended. The chain is linked explicitly through
+		// pembetulanDariId: with several normal SPT allowed per tahun pajak,
+		// (npwp, tahunPajak, pembetulanKe) no longer identifies a single predecessor.
+		const [successor] = await db
 			.select({ id: spt_pph_orang_pribadi.id })
 			.from(spt_pph_orang_pribadi)
 			.where(
 				and(
 					eq(spt_pph_orang_pribadi.npwp, activeNpwp),
-					eq(spt_pph_orang_pribadi.tahunPajak, source.tahunPajak),
-					eq(spt_pph_orang_pribadi.pembetulanKe, nextPembetulanKe)
+					eq(spt_pph_orang_pribadi.pembetulanDariId, id)
 				)
 			)
 			.limit(1);
 
-		if (existingNext) {
-			redirect(303, `/surat-pemberitahuan/pph-orang-pribadi?id=${existingNext.id}`);
+		if (successor) {
+			error(400, 'Hanya SPT dengan pembetulan terakhir yang dapat dibetulkan');
 		}
+
+		const nextPembetulanKe = source.pembetulanKe + 1;
 
 		// D1 has no real multi-statement transaction over the Workers binding, only db.batch()
 		// (which requires every statement to be built upfront, no reading generated ids back
@@ -120,6 +106,7 @@ export const newPembetulanSptPphOrangPribadi = form(
 				...rest,
 				id: newSptId,
 				pembetulanKe: nextPembetulanKe,
+				pembetulanDariId: id,
 				statusSpt: 'pembetulan',
 				statusDraft: 'konsep',
 				tanggalPosting: null,

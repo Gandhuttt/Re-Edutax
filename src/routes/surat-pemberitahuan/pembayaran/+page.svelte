@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { page as appPage } from '$app/state';
-	import { formatMonth } from '$lib/helpers/date';
+	import { formatMonth, formatTanggalWaktu } from '$lib/helpers/date';
+	import { labelUrutanSpt } from '$lib/helpers/sptUrutan';
 	import {
 		Breadcrumbs,
 		DataTableBody,
@@ -28,6 +29,8 @@
 		masaPajak: string;
 		tahun: number;
 		pembetulanKe: number;
+		dibuat: Date;
+		urutan: string;
 		kurangBayar: number;
 		tanggalPosting: Date | null;
 	};
@@ -46,6 +49,8 @@
 			masaPajak: formatMonth(row.masaPajak),
 			tahun: row.tahun,
 			pembetulanKe: row.pembetulanKe,
+			dibuat: row.dibuat,
+			urutan: labelUrutanSpt(row),
 			kurangBayar: row.ppnKurangLebihBayar,
 			tanggalPosting: row.tanggalPosting
 		})),
@@ -56,6 +61,8 @@
 			masaPajak: '—',
 			tahun: row.tahunPajak,
 			pembetulanKe: row.pembetulanKe,
+			dibuat: row.dibuat,
+			urutan: labelUrutanSpt(row),
 			kurangBayar: row.pphKurangLebihBayar,
 			tanggalPosting: row.tanggalPosting
 		})),
@@ -66,6 +73,8 @@
 			masaPajak: '—',
 			tahun: row.tahunPajak,
 			pembetulanKe: row.pembetulanKe,
+			dibuat: row.dibuat,
+			urutan: labelUrutanSpt(row),
 			kurangBayar: row.pphKurangLebihBayar,
 			tanggalPosting: row.tanggalPosting
 		}))
@@ -145,6 +154,7 @@
 								<th style="width: 130px">Masa Pajak</th>
 								<th style="width: 90px">Tahun</th>
 								<th style="width: 110px">Pembetulan</th>
+								<th style="width: 170px">Dibuat</th>
 								<th class="right" style="width: 160px">Kurang Bayar</th>
 								<th style="width: 150px">Tanggal Posting</th>
 							</tr>
@@ -152,7 +162,7 @@
 						<DataTableBody
 							items={pagedRows}
 							getKey={(row) => `${row.kind}-${row.id}`}
-							emptyColspan={8}
+							emptyColspan={9}
 							emptyText="Belum ada SPT yang menunggu pembayaran."
 						>
 							{#snippet row(row)}
@@ -186,10 +196,11 @@
 									/>
 								</td>
 								<td><StatusBadge label="Menunggu Pembayaran" tone="attention" /></td>
-								<td><strong>{row.jenis}</strong></td>
+								<td><strong>{row.jenis}</strong>{#if row.urutan} <StatusBadge label={row.urutan} />{/if}</td>
 								<td>{row.masaPajak}</td>
 								<td class="number">{row.tahun}</td>
 								<td class="number">{row.pembetulanKe}</td>
+								<td class="number">{formatTanggalWaktu(row.dibuat)}</td>
 								<td class="right amount">{rupiah.format(row.kurangBayar)}</td>
 								<td class="number">{row.tanggalPosting?.toLocaleDateString('id-ID') ?? '—'}</td>
 							{/snippet}

@@ -6,7 +6,7 @@ import {
 	spt_pph_badan
 } from '$lib/server/db/schema';
 import { error, redirect } from '@sveltejs/kit';
-import { and, eq } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 import * as v from 'valibot';
 import { TAHUN_SPT } from './tahunSpt';
 
@@ -31,39 +31,27 @@ export const newSptPphBadan = form(NewSptPphBadanSchema, async ({ tahunPajak }) 
 	const mataUang = await getOrCreateMataUangRupiah();
 	const sektorUsaha = await getOrCreateSektorUsahaUmum();
 
-	let [existing] = await db
-		.select({ id: spt_pph_badan.id })
-		.from(spt_pph_badan)
-		.where(
-			and(
-				eq(spt_pph_badan.npwp, activeNpwp),
-				eq(spt_pph_badan.tahunPajak, tahunPajak),
-				eq(spt_pph_badan.pembetulanKe, 0)
-			)
-		)
-		.limit(1);
+	// Every call opens a new normal SPT (pembetulanKe 0): a taxpayer may file more than
+	// one per tahun pajak. Amendments are a separate flow (newPembetulanSptPphBadan).
+	const [created] = await db
+		.insert(spt_pph_badan)
+		.values({
+			npwp: activeNpwp,
+			tahunPajak,
+			periodePembukuanMulai: `${tahunPajak}-01-01`,
+			periodePembukuanSelesai: `${tahunPajak}-12-31`,
+			metodePembukuan: 'akrual',
+			mataUangPembukuanId: mataUang.id,
+			sektorUsahaId: sektorUsaha.id,
+			menerimaPenghasilanPp23: false,
+			hanyaPenghasilanPp23: false,
+			menerimaPenghasilanFinal: false,
+			menerimaPenghasilanBukanObjekPajak: false,
+			tarifPajak: 'pasal_17_1_b'
+		})
+		.returning({ id: spt_pph_badan.id });
 
-	if (!existing) {
-		[existing] = await db
-			.insert(spt_pph_badan)
-			.values({
-				npwp: activeNpwp,
-				tahunPajak,
-				periodePembukuanMulai: `${tahunPajak}-01-01`,
-				periodePembukuanSelesai: `${tahunPajak}-12-31`,
-				metodePembukuan: 'akrual',
-				mataUangPembukuanId: mataUang.id,
-				sektorUsahaId: sektorUsaha.id,
-				menerimaPenghasilanPp23: false,
-				hanyaPenghasilanPp23: false,
-				menerimaPenghasilanFinal: false,
-				menerimaPenghasilanBukanObjekPajak: false,
-				tarifPajak: 'pasal_17_1_b'
-			})
-			.returning({ id: spt_pph_badan.id });
-	}
-
-	redirect(303, `/surat-pemberitahuan/pph-badan?id=${existing.id}`);
+	redirect(303, `/surat-pemberitahuan/pph-badan?id=${created.id}`);
 });
 
 async function getOrCreateMataUangRupiah() {

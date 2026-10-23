@@ -1,12 +1,14 @@
 <script lang="ts">
 	import { page as appPage } from '$app/state';
-	import { formatMonth } from '$lib/helpers/date';
+	import { formatMonth, formatTanggalWaktu } from '$lib/helpers/date';
+	import { labelUrutanSpt } from '$lib/helpers/sptUrutan';
 	import {
 		ActionButton,
 		Breadcrumbs,
 		DataTableBody,
 		DataTableViewport,
 		DataWorkspace,
+		InlineAlert,
 		InstitutionalModal,
 		PageLayout,
 		PaginationBar,
@@ -19,6 +21,7 @@
 	import { listSptPphBadan } from '../listSptPphBadan.remote';
 	import { listSptPphOrangPribadi } from '../listSptPphOrangPribadi.remote';
 	import { listSptPpn } from '../listSptPpn.remote';
+	import { listPeriodeSpt } from './listPeriodeSpt.remote';
 	import { deleteSptPpn } from './deleteSptPpn.remote';
 	import { deleteSptPphBadan } from './deleteSptPphBadan.remote';
 	import { deleteSptPphOrangPribadi } from './deleteSptPphOrangPribadi.remote';
@@ -35,6 +38,8 @@
 		masaPajak: string;
 		tahun: number;
 		pembetulanKe: number;
+		dibuat: Date;
+		urutan: string;
 		ppnKeluaran: number | null;
 		ppnMasukan: number | null;
 		kurangLebihBayar: number;
@@ -59,6 +64,7 @@
 	const sptPpn = $derived(await listSptPpn({ status: 'konsep' }));
 	const sptPphBadan = $derived(await listSptPphBadan({ status: 'konsep' }));
 	const sptPphOrangPribadi = $derived(await listSptPphOrangPribadi({ status: 'konsep' }));
+	const periodeSpt = $derived(await listPeriodeSpt());
 	const rows = $derived.by((): ConceptRow[] => [
 		...sptPpn.map((row) => ({
 			id: row.id,
@@ -67,6 +73,8 @@
 			masaPajak: formatMonth(row.masaPajak),
 			tahun: row.tahun,
 			pembetulanKe: row.pembetulanKe,
+			dibuat: row.dibuat,
+			urutan: labelUrutanSpt(row),
 			ppnKeluaran: row.totalPpnKeluaran,
 			ppnMasukan: row.totalPpnMasukan,
 			kurangLebihBayar: row.ppnKurangLebihBayar
@@ -78,6 +86,8 @@
 			masaPajak: '—',
 			tahun: row.tahunPajak,
 			pembetulanKe: row.pembetulanKe,
+			dibuat: row.dibuat,
+			urutan: labelUrutanSpt(row),
 			ppnKeluaran: null,
 			ppnMasukan: null,
 			kurangLebihBayar: row.pphKurangLebihBayar
@@ -89,6 +99,8 @@
 			masaPajak: '—',
 			tahun: row.tahunPajak,
 			pembetulanKe: row.pembetulanKe,
+			dibuat: row.dibuat,
+			urutan: labelUrutanSpt(row),
 			ppnKeluaran: null,
 			ppnMasukan: null,
 			kurangLebihBayar: row.pphKurangLebihBayar
@@ -108,6 +120,34 @@
 	let tahunPajakOrangPribadi = $state<number>(TAHUN_SPT_DEFAULT);
 	let currentPage = $state(1);
 	let pageSize = $state(10);
+
+	// How many normal SPT the taxpayer already holds for the period picked in the dialog, so
+	// that opening another one is a deliberate choice rather than a surprise.
+	const periodeDipilih = $derived(
+		jenisSpt === 'ppn'
+			? { tahun: Number(tahun), masaPajak: Number(masaPajak) }
+			: {
+					tahun: Number(jenisSpt === 'pph-badan' ? tahunPajakBadan : tahunPajakOrangPribadi),
+					masaPajak: null
+				}
+	);
+	const jumlahSudahAda = $derived(
+		(jenisSpt === 'ppn'
+			? periodeSpt.ppn.filter(
+					(row) => row.tahun === periodeDipilih.tahun && row.masaPajak === periodeDipilih.masaPajak
+				)
+			: (jenisSpt === 'pph-badan' ? periodeSpt.badan : periodeSpt.orangPribadi).filter(
+					(row) => row.tahun === periodeDipilih.tahun
+				)
+		).length
+	);
+	const catatanSudahAda = $derived(
+		`Anda sudah memiliki ${jumlahSudahAda} ${jenisSptOptions.find((option) => option.value === jenisSpt)?.label} untuk ${
+			periodeDipilih.masaPajak === null
+				? `tahun pajak ${periodeDipilih.tahun}`
+				: `${formatMonth(periodeDipilih.masaPajak)} ${periodeDipilih.tahun}`
+		}. SPT baru akan dibuat sebagai SPT ke-${jumlahSudahAda + 1}, bukan pembetulan.`
+	);
 
 	const accountName = $derived(String(appPage.data.user?.name ?? 'Wajib Pajak'));
 	const accountNpwp = $derived(String(appPage.data.user?.username ?? ''));
@@ -187,6 +227,7 @@
 								<th style="width: 130px">Masa Pajak</th>
 								<th style="width: 90px">Tahun</th>
 								<th style="width: 110px">Pembetulan</th>
+								<th style="width: 170px">Dibuat</th>
 								<th class="right" style="width: 150px">PPN Keluaran</th>
 								<th class="right" style="width: 150px">PPN Masukan</th>
 								<th class="right" style="width: 180px">Kurang/Lebih Bayar</th>
@@ -195,7 +236,7 @@
 						<DataTableBody
 							items={pagedRows}
 							getKey={(row) => `${row.kind}-${row.id}`}
-							emptyColspan={9}
+							emptyColspan={10}
 							emptyText="Belum ada konsep SPT."
 						>
 							{#snippet row(row)}
@@ -256,10 +297,11 @@
 									/>
 								</td>
 								<td><StatusBadge label="Konsep" tone="attention" /></td>
-								<td><strong>{row.jenis}</strong></td>
+								<td><strong>{row.jenis}</strong>{#if row.urutan} <StatusBadge label={row.urutan} />{/if}</td>
 								<td>{row.masaPajak}</td>
 								<td class="number">{row.tahun}</td>
 								<td class="number">{row.pembetulanKe}</td>
+								<td class="number">{formatTanggalWaktu(row.dibuat)}</td>
 								<td class="right amount">{row.ppnKeluaran === null ? '—' : rupiah.format(row.ppnKeluaran)}</td>
 								<td class="right amount">{row.ppnMasukan === null ? '—' : rupiah.format(row.ppnMasukan)}</td>
 								<td class="right amount">{rupiah.format(row.kurangLebihBayar)}</td>
@@ -333,6 +375,10 @@
 					required
 				/>
 			</form>
+		{/if}
+
+		{#if jumlahSudahAda > 0}
+			<InlineAlert tone="info" compact message={catatanSudahAda} />
 		{/if}
 	</Stack>
 

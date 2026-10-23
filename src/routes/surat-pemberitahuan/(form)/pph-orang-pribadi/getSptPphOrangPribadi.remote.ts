@@ -1,12 +1,13 @@
 import { getRequestEvent, query } from '$app/server';
 import { db } from '$lib/server/db';
+import { urutanSptPphOrangPribadi } from '$lib/server/db/helpers/urutanSpt';
 import {
 	spt_pph_orang_pribadi,
 	spt_pph_orang_pribadi_sumber_penghasilan,
 	wajib_pajak
 } from '$lib/server/db/schema';
 import { error } from '@sveltejs/kit';
-import { and, eq } from 'drizzle-orm';
+import { and, eq, getTableColumns } from 'drizzle-orm';
 import { getLampiranL1 } from './components/L-1/getLampiranL1.server';
 import { getLampiranL2 } from './components/L-2/getLampiranL2.server';
 import { getLampiranL3A } from './components/L-3A/getLampiranL3A.server';
@@ -31,7 +32,10 @@ export const getSptPphOrangPribadi = query(async () => {
 	}
 
 	const [spt] = await db
-		.select()
+		.select({
+			...getTableColumns(spt_pph_orang_pribadi),
+			...urutanSptPphOrangPribadi
+		})
 		.from(spt_pph_orang_pribadi)
 		.where(and(eq(spt_pph_orang_pribadi.id, id), eq(spt_pph_orang_pribadi.npwp, activeNpwp)))
 		.limit(1);
@@ -81,15 +85,14 @@ export const getSptPphOrangPribadi = query(async () => {
 		getLampiranL5(id, spt.tahunPajak),
 		// Row 12a is read from the SPT being amended rather than typed, matching the
 		// Badan pembetulan mechanic.
-		spt.pembetulanKe > 0
+		spt.pembetulanDariId
 			? db
 					.select({ pphKurangLebihBayar: spt_pph_orang_pribadi.pphKurangLebihBayar })
 					.from(spt_pph_orang_pribadi)
 					.where(
 						and(
-							eq(spt_pph_orang_pribadi.npwp, spt.npwp),
-							eq(spt_pph_orang_pribadi.tahunPajak, spt.tahunPajak),
-							eq(spt_pph_orang_pribadi.pembetulanKe, spt.pembetulanKe - 1)
+							eq(spt_pph_orang_pribadi.id, spt.pembetulanDariId),
+							eq(spt_pph_orang_pribadi.npwp, spt.npwp)
 						)
 					)
 					.limit(1)

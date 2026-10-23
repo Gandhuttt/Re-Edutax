@@ -1,6 +1,7 @@
 import { getRequestEvent, query } from '$app/server';
 import { db } from '$lib/server/db';
 import {
+	spt_ppn,
 	spt_ppn_lampiran_a2,
 	spt_ppn_lampiran_b2,
 	spt_ppn_lampiran_c,
@@ -11,6 +12,7 @@ import { error } from '@sveltejs/kit';
 import { asc, eq } from 'drizzle-orm';
 import { getOwnedSptPpn } from './server/getOwnedSptPpn.server';
 import { getTaxpayerForSptPpn } from './server/getTaxpayerForSptPpn.server';
+import { urutanSptPpn } from '$lib/server/db/helpers/urutanSpt';
 
 export const getSptPpn = query(async () => {
 	const event = getRequestEvent();
@@ -61,12 +63,18 @@ export const getSptPpn = query(async () => {
 		.where(eq(spt_ppn_lampiran_c.sptPpnId, sptPpn.id))
 		.orderBy(asc(spt_ppn_lampiran_c.nomorUrut));
 
+	const [urutan] = await db
+		.select({ urutanKe: urutanSptPpn.urutanKe, urutanDari: urutanSptPpn.urutanDari })
+		.from(spt_ppn)
+		.where(eq(spt_ppn.id, sptPpn.id))
+		.limit(1);
+
 	return {
 		id: sptPpn.id,
 		status: sptPpn.status,
 		readonly: sptPpn.status !== 'konsep',
 		taxpayer,
-		spt: { ...penyerahan, ...perolehan, ...sptPpn },
+		spt: { ...penyerahan, ...perolehan, ...sptPpn, ...urutan },
 		lampiranA2,
 		lampiranB2,
 		lampiranC

@@ -1,5 +1,5 @@
 import { createdAt, updatedAt } from '$lib/server/db/helpers/timestamps';
-import { integer, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
+import { type AnySQLiteColumn, integer, sqliteTable, text } from 'drizzle-orm/sqlite-core';
 import { mata_uang_spt_pph_badan } from '../../../references/spt_pph_badan/mata_uang';
 import { opini_auditor_spt_pph_badan } from '../../../references/spt_pph_badan/opini_auditor';
 import { sektor_usaha_spt_pph_badan } from '../../../references/spt_pph_badan/sektor_usaha';
@@ -17,6 +17,12 @@ export const spt_pph_badan = sqliteTable(
 			.references(() => wajib_pajak.npwp),
 		tahunPajak: integer('tahun_pajak').notNull(),
 		pembetulanKe: integer('pembetulan_ke').notNull().default(0),
+		// The SPT this one amends. Several normal SPT (pembetulanKe 0) may exist for the
+		// same npwp and tahun, so the amendment chain cannot be derived from
+		// (npwp, tahunPajak, pembetulanKe) and is linked explicitly instead.
+		pembetulanDariId: text('pembetulan_dari_id').references((): AnySQLiteColumn => spt_pph_badan.id, {
+			onDelete: 'set null'
+		}),
 		statusSpt: text('status_spt', { enum: ['normal', 'pembetulan'] })
 			.notNull()
 			.default('normal'),
@@ -94,6 +100,5 @@ export const spt_pph_badan = sqliteTable(
 		tanggalDilaporkan: integer('tanggal_dilaporkan', { mode: 'timestamp_ms' }),
 		createdAt: createdAt(),
 		updatedAt: updatedAt()
-	},
-	(t) => [uniqueIndex('spt_pph_badan_period_unique').on(t.npwp, t.tahunPajak, t.pembetulanKe)]
+	}
 );

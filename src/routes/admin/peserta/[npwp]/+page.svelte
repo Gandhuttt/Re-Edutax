@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { formatMonth } from '$lib/helpers/date';
+	import { formatMonth, formatTanggalWaktu } from '$lib/helpers/date';
 	import {
 		ActionButton,
 		Breadcrumbs,
@@ -115,6 +115,7 @@
 						<tr>
 							<th>Tahun</th>
 							<th>Pembetulan</th>
+							<th>Dibuat</th>
 							<th>Status SPT</th>
 							<th>Status Draft</th>
 							<th class="number">Kurang/Lebih Bayar</th>
@@ -123,13 +124,14 @@
 					</thead>
 					<DataTableBody
 						items={detail.sptPphBadan}
-						getKey={(row) => `${row.tahunPajak}-${row.pembetulanKe}`}
-						emptyColspan={6}
+						getKey={(row) => row.id}
+						emptyColspan={7}
 						emptyText="Belum ada SPT PPh Badan."
 					>
 						{#snippet row(row)}
 							<td><strong>{row.tahunPajak}</strong></td>
 							<td>{row.pembetulanKe}</td>
+							<td>{formatTanggalWaktu(row.dibuat)}</td>
 							<td>{row.statusSpt}</td>
 							<td>{row.statusDraft}</td>
 							<td class="number">{rupiah.format(row.pphKurangLebihBayar)}</td>
@@ -148,6 +150,7 @@
 							<th>Masa Pajak</th>
 							<th>Tahun</th>
 							<th>Pembetulan</th>
+							<th>Dibuat</th>
 							<th>Status</th>
 							<th class="number">Kurang/Lebih Bayar</th>
 							<th>Dilaporkan</th>
@@ -155,14 +158,15 @@
 					</thead>
 					<DataTableBody
 						items={detail.sptPpn}
-						getKey={(row) => `${row.tahun}-${row.masaPajak}-${row.pembetulanKe}`}
-						emptyColspan={6}
+						getKey={(row) => row.id}
+						emptyColspan={7}
 						emptyText="Belum ada SPT PPN."
 					>
 						{#snippet row(row)}
 							<td><strong>{formatMonth(row.masaPajak)}</strong></td>
 							<td>{row.tahun}</td>
 							<td>{row.pembetulanKe}</td>
+							<td>{formatTanggalWaktu(row.dibuat)}</td>
 							<td>{row.status}</td>
 							<td class="number">{rupiah.format(row.ppnKurangLebihBayar)}</td>
 							<td>{row.tanggalDilaporkan ?? '—'}</td>

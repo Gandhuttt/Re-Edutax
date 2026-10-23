@@ -2,7 +2,6 @@ import { form, getRequestEvent } from '$app/server';
 import { db } from '$lib/server/db';
 import { spt_pph_orang_pribadi } from '$lib/server/db/schema';
 import { error, redirect } from '@sveltejs/kit';
-import { and, eq } from 'drizzle-orm';
 import * as v from 'valibot';
 import { TAHUN_SPT } from './tahunSpt';
 
@@ -24,32 +23,20 @@ export const newSptPphOrangPribadi = form(NewSptPphOrangPribadiSchema, async ({ 
 		error(401, 'Belum login');
 	}
 
-	let [existing] = await db
-		.select({ id: spt_pph_orang_pribadi.id })
-		.from(spt_pph_orang_pribadi)
-		.where(
-			and(
-				eq(spt_pph_orang_pribadi.npwp, activeNpwp),
-				eq(spt_pph_orang_pribadi.tahunPajak, tahunPajak),
-				eq(spt_pph_orang_pribadi.pembetulanKe, 0)
-			)
-		)
-		.limit(1);
+	// Every call opens a new normal SPT (pembetulanKe 0): a taxpayer may file more than
+	// one per tahun pajak. Amendments are a separate flow (newPembetulanSptPphOrangPribadi).
+	const [created] = await db
+		.insert(spt_pph_orang_pribadi)
+		.values({
+			npwp: activeNpwp,
+			tahunPajak,
+			// Pencatatan is the default the captured draft used, and it is the
+			// common case for an orang pribadi.
+			metodePembukuan: 'pencatatan',
+			periodeBulanMulai: 1,
+			periodeBulanSelesai: 12
+		})
+		.returning({ id: spt_pph_orang_pribadi.id });
 
-	if (!existing) {
-		[existing] = await db
-			.insert(spt_pph_orang_pribadi)
-			.values({
-				npwp: activeNpwp,
-				tahunPajak,
-				// Pencatatan is the default the captured draft used, and it is the
-				// common case for an orang pribadi.
-				metodePembukuan: 'pencatatan',
-				periodeBulanMulai: 1,
-				periodeBulanSelesai: 12
-			})
-			.returning({ id: spt_pph_orang_pribadi.id });
-	}
-
-	redirect(303, `/surat-pemberitahuan/pph-orang-pribadi?id=${existing.id}`);
+	redirect(303, `/surat-pemberitahuan/pph-orang-pribadi?id=${created.id}`);
 });

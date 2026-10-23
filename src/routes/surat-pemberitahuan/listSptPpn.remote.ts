@@ -1,6 +1,7 @@
 import { getRequestEvent, query } from '$app/server';
 import { db } from '$lib/server/db';
 import { spt_ppn, spt_ppn_penyerahan, spt_ppn_perolehan } from '$lib/server/db/schema';
+import { urutanSptPpn } from '$lib/server/db/helpers/urutanSpt';
 import { error } from '@sveltejs/kit';
 import { and, desc, eq } from 'drizzle-orm';
 import * as v from 'valibot';
@@ -23,6 +24,8 @@ export const listSptPpn = query(ListSptPpnSchema, async ({ status }) => {
 			masaPajak: spt_ppn.masaPajak,
 			tahun: spt_ppn.tahun,
 			pembetulanKe: spt_ppn.pembetulanKe,
+			dibuat: spt_ppn.createdAt,
+			...urutanSptPpn,
 			status: spt_ppn.status,
 			totalPpnKeluaran: spt_ppn_penyerahan.iAJumlahPpn,
 			totalPpnMasukan: spt_ppn_perolehan.iiGPpn,
@@ -34,5 +37,10 @@ export const listSptPpn = query(ListSptPpnSchema, async ({ status }) => {
 		.leftJoin(spt_ppn_penyerahan, eq(spt_ppn_penyerahan.sptPpnId, spt_ppn.id))
 		.leftJoin(spt_ppn_perolehan, eq(spt_ppn_perolehan.sptPpnId, spt_ppn.id))
 		.where(and(eq(spt_ppn.npwp, activeNpwp), eq(spt_ppn.status, status)))
-		.orderBy(desc(spt_ppn.tahun), desc(spt_ppn.masaPajak), desc(spt_ppn.pembetulanKe));
+		.orderBy(
+			desc(spt_ppn.tahun),
+			desc(spt_ppn.masaPajak),
+			desc(spt_ppn.pembetulanKe),
+			desc(spt_ppn.createdAt)
+		);
 });

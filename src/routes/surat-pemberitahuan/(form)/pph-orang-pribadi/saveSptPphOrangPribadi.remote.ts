@@ -143,6 +143,7 @@ export const saveSptPphOrangPribadi = form(SaveSptPphOrangPribadiSchema, async (
 			npwp: spt_pph_orang_pribadi.npwp,
 			tahunPajak: spt_pph_orang_pribadi.tahunPajak,
 			pembetulanKe: spt_pph_orang_pribadi.pembetulanKe,
+			pembetulanDariId: spt_pph_orang_pribadi.pembetulanDariId,
 			statusDraft: spt_pph_orang_pribadi.statusDraft
 		})
 		.from(spt_pph_orang_pribadi)
@@ -171,22 +172,20 @@ export const saveSptPphOrangPribadi = form(SaveSptPphOrangPribadiSchema, async (
 	}
 
 	// Row 12a is read from the SPT being amended, never from the submitted form.
-	const f12a =
-		spt.pembetulanKe > 0
-			? ((
-					await db
-						.select({ pphKurangLebihBayar: spt_pph_orang_pribadi.pphKurangLebihBayar })
-						.from(spt_pph_orang_pribadi)
-						.where(
-							and(
-								eq(spt_pph_orang_pribadi.npwp, spt.npwp),
-								eq(spt_pph_orang_pribadi.tahunPajak, spt.tahunPajak),
-								eq(spt_pph_orang_pribadi.pembetulanKe, spt.pembetulanKe - 1)
-							)
+	const f12a = spt.pembetulanDariId
+		? ((
+				await db
+					.select({ pphKurangLebihBayar: spt_pph_orang_pribadi.pphKurangLebihBayar })
+					.from(spt_pph_orang_pribadi)
+					.where(
+						and(
+							eq(spt_pph_orang_pribadi.id, spt.pembetulanDariId),
+							eq(spt_pph_orang_pribadi.npwp, spt.npwp)
 						)
-						.limit(1)
-				)[0]?.pphKurangLebihBayar ?? 0)
-			: 0;
+					)
+					.limit(1)
+			)[0]?.pphKurangLebihBayar ?? 0)
+		: 0;
 
 	// Each lampiran persists its own rows and reports the figures it feeds
 	// upward, all derived from the rows about to be written.

@@ -1,5 +1,6 @@
 import { getRequestEvent, query } from '$app/server';
 import { db } from '$lib/server/db';
+import { urutanSptPphBadan } from '$lib/server/db/helpers/urutanSpt';
 import {
 	mata_uang_spt_pph_badan,
 	opini_auditor_spt_pph_badan,
@@ -42,6 +43,9 @@ export const getSptPphBadan = query(async () => {
 			npwp: spt_pph_badan.npwp,
 			tahunPajak: spt_pph_badan.tahunPajak,
 			pembetulanKe: spt_pph_badan.pembetulanKe,
+			pembetulanDariId: spt_pph_badan.pembetulanDariId,
+			createdAt: spt_pph_badan.createdAt,
+			...urutanSptPphBadan,
 			statusSpt: spt_pph_badan.statusSpt,
 			statusDraft: spt_pph_badan.statusDraft,
 			periodePembukuanMulai: spt_pph_badan.periodePembukuanMulai,
@@ -127,15 +131,14 @@ export const getSptPphBadan = query(async () => {
 		getLampiranL10C(id),
 		getLampiranL10D(id),
 		getLampiranL13B(id),
-		spt.pembetulanKe > 0
+		spt.pembetulanDariId
 			? db
 					.select({ pphKurangLebihBayar: spt_pph_badan.pphKurangLebihBayar })
 					.from(spt_pph_badan)
 					.where(
 						and(
-							eq(spt_pph_badan.npwp, spt.npwp),
-							eq(spt_pph_badan.tahunPajak, spt.tahunPajak),
-							eq(spt_pph_badan.pembetulanKe, spt.pembetulanKe - 1)
+							eq(spt_pph_badan.id, spt.pembetulanDariId),
+							eq(spt_pph_badan.npwp, spt.npwp)
 						)
 					)
 					.limit(1)

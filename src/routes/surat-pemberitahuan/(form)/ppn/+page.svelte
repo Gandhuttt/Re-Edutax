@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { formatMonth } from '$lib/helpers/date';
+	import { keteranganSpt } from '$lib/helpers/sptUrutan';
 	import {
 		Breadcrumbs,
 		DisclosureItem,
@@ -117,7 +118,7 @@
 		]}
 	/>
 	<PageHeading
-		eyebrow={`Masa Pajak ${formatMonth(spt.masaPajak)} ${spt.tahun}`}
+		eyebrow={`Masa Pajak ${formatMonth(spt.masaPajak)} ${spt.tahun} · ${keteranganSpt(spt)}`}
 		title="SPT Masa PPN"
 		actions={headingActions}
 	/>
