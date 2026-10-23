@@ -1,5 +1,10 @@
 import { form, getRequestEvent } from '$app/server';
-import { booleanRadio, decimalInput, requiredString } from '$lib/helpers/valibot-schema';
+import {
+	booleanRadio,
+	booleanRadioNullable,
+	decimalInput,
+	requiredString
+} from '$lib/helpers/valibot-schema';
 import { db, type Statement } from '$lib/server/db';
 import {
 	spt_pph_orang_pribadi,
@@ -45,8 +50,8 @@ const SaveSptPphOrangPribadiSchema = v.object({
 	a7StatusKewajibanSuamiIstri: optionalPicklist(['ph', 'mt']),
 	a8NpwpSuamiIstri: v.optional(v.string(), ''),
 
-	b1aPenghasilanPekerjaan: booleanRadio(false),
-	b1b1PenghasilanUsaha: booleanRadio(false),
+	b1aPenghasilanPekerjaan: booleanRadioNullable,
+	b1b1PenghasilanUsaha: booleanRadioNullable,
 	b1b2Oppt: optionalPicklist(['tidak', 'peredaran_bruto_tertentu', 'pengusaha_tertentu']),
 	b1b3Norma: optionalPicklist(['tidak_pembukuan', 'tidak_final_tanpa_pembukuan', 'ya_norma']),
 	b1b4Sektor: optionalPicklist(['dagang', 'jasa', 'industri']),

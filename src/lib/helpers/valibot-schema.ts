@@ -46,5 +46,17 @@ export const booleanRadio = (fallback: boolean) =>
 		fallback
 	);
 
+// Same as booleanRadio, but a blank answer stays null instead of turning into a value.
+// For questions where "not answered yet" is different from Tidak, such as OP rows 1.a and
+// 1.b.1: answering both Tidak clears the Sumber Penghasilan, so an unanswered pair must
+// not be saved as that answer.
+export const booleanRadioNullable = v.optional(
+	v.union([
+		v.boolean(),
+		v.pipe(v.picklist(['true', 'false']), v.transform((value) => value === 'true')),
+		v.pipe(v.literal(''), v.transform(() => null))
+	])
+);
+
 export const jsonRows = <TItem extends v.GenericSchema>(itemSchema: TItem) =>
 	v.optional(v.pipe(v.string(), v.parseJson(undefined, 'Data tidak valid'), v.array(itemSchema)), '[]');
