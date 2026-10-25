@@ -1141,15 +1141,27 @@ SPT. The wizard blocked a second Normal return for an existing period.
 All 17 source fixtures and four SPT fixtures were removed afterward, with
 zero remaining fixture records. Migration application was local only.
 
-UI refinement: the PPh 21/26 page contains no local stylesheet or inline styles.
-Identity/status use KeyValueGrid, details use DisclosureItem, and monetary
-summaries use the reusable AmountSummary inside ResponsiveGrid. Shared form
-fields and FormActions replace route-specific controls and CSS.
-Browser smoke at 1440px and 390px checked nonempty and empty source panels,
-horizontal table scrolling without document overflow, changed-select dirty
-blocking, and persisted scenario/SP2D/declaration values. A Rp500,000 source
-less Rp123,456 SP2D posted Rp376,544 due and enabled simulated reporting.
-The UI-smoke SPT and its single source fixture were removed afterward.
+UI alignment follows the live Coretax structure, not a separate summary layout:
+tabs Induk/L-IA/L-IB/L-II/L-III above the form; Induk sections HEADER,
+A. IDENTITAS PEMOTONG, B. PAJAK PENGHASILAN PASAL 21,
+C. PAJAK PENGHASILAN PASAL 26, and D. PERNYATAAN DAN TANDA TANGAN.
+Article tables retain Coretax's numbered rows, KAP-KJS, and separate DTP table.
+Each annex has HEADER and LIST sections, source-specific columns, column filters,
+and totals. No summary cards, scenario selector, technical panels, or extra
+SP2D description field are displayed. Existing saved taxpayer classification
+controls SP2D availability; it is not inferred from the taxpayer's name.
+The route and its tax/annex components have no local stylesheets or inline styles.
+
+New source previews/postings capture reference-backed presentation metadata.
+Missing source facts are displayed as unavailable, not fabricated; old snapshots
+are not rewritten. Address comes only from the canonical headquarters NITKU.
+Local browser smoke checked all annexes, desktop and 390px layouts, column
+filtering without dirty state or changed totals, and save/posting dirty guards.
+A 2.5% MP tariff remained 2.5%; a zero-tax DTP source retained Rp2,000,000
+in the DTP gross total. MP and BP21 posted Rp750,000 due; government SP2D of
+Rp100,000 with an empty description reduced it to Rp650,000.
+All three source fixtures and the SPT created for this UI smoke were removed;
+queries by their UUIDs returned zero remaining rows.
 
 
 No DJP signing, billing, NTPN or official filing is produced. Testing creation

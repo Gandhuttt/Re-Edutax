@@ -42,6 +42,23 @@ export type Spt2126Source = {
 	dtpTahunan: number | null;
 	nomor: string;
 	status: string;
+	/** Absent on snapshots posted before metadata was captured. */
+	meta?: Spt2126SourceMeta;
+};
+
+/** Presentation-only facts copied from the authentic bukti potong and reference rows; null when the source type has no such data. */
+export type Spt2126SourceMeta = {
+	/** ISO date as stored on the bukti potong (BP21/BP26 only). */
+	tanggalPemotongan: string | null;
+	tarif: number | null;
+	namaObjek: string | null;
+	fasilitas: string | null;
+	/** Facility reference code (e.g. '4'/'11' = DTP); lets DTP bruto be classified even when tax is zero. */
+	fasilitasKode?: string | null;
+	negara: string | null;
+	nitku: string | null;
+	/** BPA1/BPA2 income period, `MM-YYYY s.d. MM-YYYY`. */
+	periodePenghasilan: string | null;
 };
 export type Spt2126Summary = { bruto: number; pajak: number; dtp: number; jumlah: number };
 export type Spt2126Article = Spt2126Summary & {
@@ -84,6 +101,9 @@ export type Spt2126Detail = {
 	posted: boolean;
 	sourcesChanged: boolean;
 	sourceSignature: string | null;
+	/** From the pemotong's profile; null when not recorded. */
+	alamatPemotong: string | null;
+	teleponPemotong: string | null;
 	kredit21: number;
 	kredit26: number;
 	input: Spt2126Input;
@@ -133,9 +153,6 @@ export function validateSpt2126Input(input: Spt2126Input): Spt2126Input {
 	}
 	for (const id of [input.kompensasi21SumberId, input.kompensasi26SumberId]) {
 		if (id !== null && (typeof id !== 'string' || !id || id.length > 64)) throw new Spt2126Error('Sumber kompensasi tidak valid.');
-	}
-	if ((input.sp2d21 || input.sp2d26) && !input.sp2dKeterangan.trim()) {
-		throw new Spt2126Error('SP2D simulator wajib disertai keterangan; bukan validasi SP2D DJP.');
 	}
 	if ((input.kompensasi21 > 0 && !input.kompensasi21SumberId) || (input.kompensasi26 > 0 && !input.kompensasi26SumberId)) {
 		throw new Spt2126Error('Pilih sumber kompensasi.');

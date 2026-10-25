@@ -8,6 +8,7 @@
 		field?: ReUiRemoteField<string>;
 		hint?: string;
 		error?: string;
+		labelHidden?: boolean;
 	} & Omit<HTMLInputAttributes, "value">;
 </script>
 
@@ -22,6 +23,7 @@
 		field,
 		hint = "",
 		error,
+		labelHidden = false,
 		required = false,
 		disabled = false,
 		name,
@@ -52,7 +54,7 @@
 </script>
 
 <label for={id}
-	><span class="label">{label}{#if required}<em aria-hidden="true">*</em>{/if}</span><input
+	><span class="label" class:label-hidden={labelHidden}>{label}{#if required}<em aria-hidden="true">*</em>{/if}</span><input
 		{...inputProps}
 		{id}
 		name={resolvedName}
@@ -69,6 +71,7 @@
 
 <style>
 	label {
+		position: relative;
 		display: grid;
 		gap: 6px;
 		align-content: start;
@@ -77,6 +80,19 @@
 		color: var(--ui-ink);
 		font-size: 14px;
 		font-weight: 700;
+	}
+	.label-hidden {
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 1px;
+		height: 1px;
+		padding: 0;
+		margin: -1px;
+		overflow: hidden;
+		clip-path: inset(50%);
+		white-space: nowrap;
+		border: 0;
 	}
 	.label em {
 		margin-left: 3px;

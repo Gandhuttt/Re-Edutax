@@ -56,11 +56,11 @@ and `ConditionalField` components rather than Faktur-only CSS. Lower-level
 layouts such as `ContentSection`, `FieldGrid`, `ResponsiveGrid`, `KeyValueGrid`,
 `LabeledGroup`, and `Stack` can be combined for other workflows.
 
-`AmountSummary` displays a formatted amount with a label, optional description,
-and optional `status` snippet. Pair it with `ResponsiveGrid` for side-by-side
-financial summaries that stack on narrow containers. Keep formatting and amount
-semantics in the caller; the component does not calculate or alter values.
-The PPh 21/26 route composes shared components without page CSS or inline styles.
+The PPh 21/26 route follows the shared SPT composition: `DocumentTabs` above
+`DisclosureItem` sections, `FieldGrid` for identity fields, `DataTableViewport`
+for numbered tax tables, and `FormActions` for saving/reporting. It has no page
+CSS or inline styles. `FormField labelHidden` keeps accessible labels on table
+inputs and column filters without adding visible labels inside cells.
 
 ## Public site pages
 

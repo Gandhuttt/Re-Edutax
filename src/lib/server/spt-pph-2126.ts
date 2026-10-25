@@ -1,8 +1,8 @@
 import { db, type Statement } from '$lib/server/db';
-import { spt_pph_2126 as t, spt_pph_2126_kompensasi as ledger, wajib_pajak, bukti_potong_mp, bukti_potong_bpa1, bukti_potong_bpa2, bukti_potong_bp21, bukti_potong_bp26 } from '$lib/server/db/schema';
-import { and, eq, desc, sql, getTableColumns, type SQL } from 'drizzle-orm';
+import { spt_pph_2126 as t, spt_pph_2126_kompensasi as ledger, wajib_pajak, tempat_kegiatan_usaha, kode_objek_pajak_pph, fasilitas_pajak_ebupot, negara_spt_pph_badan, bukti_potong_mp, bukti_potong_bpa1, bukti_potong_bpa2, bukti_potong_bp21, bukti_potong_bp26 } from '$lib/server/db/schema';
+import { and, eq, desc, inArray, sql, getTableColumns, type SQL } from 'drizzle-orm';
 import type { SQLiteTable } from 'drizzle-orm/sqlite-core';
-import { aggregateSpt2126, emptySpt2126Input, isActiveSpt2126Source, lastPeriodSpt2126Gross, rupiah, SPT2126_YEARS, Spt2126Error, validateSpt2126Input, type Spt2126Input, type Spt2126Source, type Spt2126Detail, type Spt2126Status, type Spt2126Compensation } from '$lib/helpers/spt-pph-2126';
+import { aggregateSpt2126, emptySpt2126Input, isActiveSpt2126Source, lastPeriodSpt2126Gross, rupiah, SPT2126_YEARS, Spt2126Error, validateSpt2126Input, type Spt2126Input, type Spt2126Source, type Spt2126SourceMeta, type Spt2126Detail, type Spt2126Status, type Spt2126Compensation } from '$lib/helpers/spt-pph-2126';
 export { Spt2126Error } from '$lib/helpers/spt-pph-2126';
 type Row = typeof t.$inferSelect;
 const guard = (condition: SQL): Statement => db.select({ g: sql<number>`CASE WHEN ${condition} THEN 1 ELSE abs(-9223372036854775808) END` }).from(sql`(SELECT 1) AS spt_guard`);
@@ -39,6 +39,19 @@ function sourceExpression(owner: string, month: number, year: number): SQL<strin
 function record(value: unknown): Record<string, unknown> { if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Spt2126Error('Sumber bukti potong rusak.'); return Object.fromEntries(Object.entries(value)); }
 function n(row: Record<string, unknown>, key: string): number { const value = row[key]; if (typeof value !== 'number') throw new Spt2126Error(`Sumber ${key} tidak valid.`); return rupiah(value, true); }
 function s(row: Record<string, unknown>, key: string): string { const value = row[key]; return value == null ? '' : String(value); }
+/** Display names from real reference tables, keyed by the ids already present in the source rows. Read outside the signature expression so signatures stay stable. */
+async function referenceNames(groups: Map<string, Record<string, unknown>[]>) {
+	const ids = (key: string) => [...new Set([...groups.values()].flat().map(source => source[key]).filter((value): value is string => typeof value === 'string' && value !== ''))];
+	const objectIds = ids('kodeObjekPajakId'), facilityIds = ids('fasilitasPajakId'), countryIds = ids('negaraAsalId');
+	const [objects, facilities, countries, bpa2Facility] = await Promise.all([
+		objectIds.length ? db.select({ id: kode_objek_pajak_pph.id, nama: kode_objek_pajak_pph.nama }).from(kode_objek_pajak_pph).where(inArray(kode_objek_pajak_pph.id, objectIds)) : [],
+		facilityIds.length ? db.select({ id: fasilitas_pajak_ebupot.id, nama: fasilitas_pajak_ebupot.nama }).from(fasilitas_pajak_ebupot).where(inArray(fasilitas_pajak_ebupot.id, facilityIds)) : [],
+		countryIds.length ? db.select({ id: negara_spt_pph_badan.id, nama: negara_spt_pph_badan.nama }).from(negara_spt_pph_badan).where(inArray(negara_spt_pph_badan.id, countryIds)) : [],
+		(groups.get('BPA2')?.length ?? 0) ? db.select({ nama: fasilitas_pajak_ebupot.nama }).from(fasilitas_pajak_ebupot).where(eq(fasilitas_pajak_ebupot.kode, '9')).limit(1) : []
+	]);
+	const names = (rows: { id: string; nama: string }[]) => new Map(rows.map(item => [item.id, item.nama]));
+	return { objek: names(objects), facility: names(facilities), negara: names(countries), facilityByCode: new Map(bpa2Facility.map(item => ['9', item.nama])) };
+}
 async function sourceData(row: Row) {
 	const expression = sourceExpression(row.npwpPemotong, row.masaPajak, row.tahun);
 	const [result] = await db.select({ signature: expression }).from(sql`(SELECT 1) AS source_read`);
@@ -50,6 +63,7 @@ async function sourceData(row: Row) {
 		if (!Array.isArray(value)) throw new Spt2126Error('Sumber bukti tidak valid.');
 		groups.set(kind, value.map(record).filter(source => isActiveSpt2126Source(s(source,'status'), source.diterbitkan === 1)));
 	}
+	const references = await referenceNames(groups);
 	const sources: Spt2126Source[] = [];
 	const annualKeys = new Set<string>();
 	for (const kind of ['MP', 'BPA1', 'BPA2', 'BP21', 'BP26'] as const) for (const raw of groups.get(kind) ?? []) {
@@ -82,7 +96,22 @@ async function sourceData(row: Row) {
 			bruto = lastPeriodSpt2126Gross(bruto, priorMonthlyGross);
 		}
 		const isDtp = ['4', '11'].includes(s(raw, 'facilityCode'));
-		sources.push({ id: s(raw, 'id'), jenis: kind, nama: s(raw, kind === 'BP21' ? 'namaPenerima' : 'nama'), identitas: s(raw, 'nomorIdentitasWp'), kodeObjek: s(raw, 'objectCode'), masaPajak: month, tahun: row.tahun, bruto, pajak, dtp: isDtp ? pajak : 0, brutoTahunan: annualGross, pajakTahunan: annualTax, dtpTahunan: annual ? (isDtp ? annualTax : 0) : null, nomor: s(raw, 'nomorPemotongan'), status: s(raw, 'status') });
+		const metaKey = (key: string) => raw[key] == null ? null : String(raw[key]);
+		const rawTarif = raw.tarif;
+		const tarif = kind !== 'BPA1' && kind !== 'BPA2' && typeof rawTarif === 'number' && Number.isFinite(rawTarif) ? rawTarif : null;
+		const facilityId = kind === 'BPA2' ? references.facilityByCode.get('9') : references.facility.get(s(raw, 'fasilitasPajakId'));
+		const period = annual ? `${String(n(raw, 'masaPajakAwal')).padStart(2, '0')}-${n(raw, 'tahunAwal')} s.d. ${String(n(raw, 'masaPajakAkhir')).padStart(2, '0')}-${n(raw, 'tahunAkhir')}` : null;
+		const meta: Spt2126SourceMeta = {
+			tanggalPemotongan: metaKey('tanggalPemotongan'),
+			tarif,
+			namaObjek: references.objek.get(s(raw, 'kodeObjekPajakId')) ?? null,
+			fasilitas: facilityId ?? null,
+			fasilitasKode: metaKey('facilityCode'),
+			negara: references.negara.get(s(raw, 'negaraAsalId')) ?? null,
+			nitku: metaKey('nitkuPemotong'),
+			periodePenghasilan: period
+		};
+		sources.push({ id: s(raw, 'id'), jenis: kind, nama: s(raw, kind === 'BP21' ? 'namaPenerima' : 'nama'), identitas: s(raw, 'nomorIdentitasWp'), kodeObjek: s(raw, 'objectCode'), masaPajak: month, tahun: row.tahun, bruto, pajak, dtp: isDtp ? pajak : 0, brutoTahunan: annualGross, pajakTahunan: annualTax, dtpTahunan: annual ? (isDtp ? annualTax : 0) : null, nomor: s(raw, 'nomorPemotongan'), status: s(raw, 'status'), meta });
 	}
 	return { sources, signature, expression };
 }
@@ -123,7 +152,10 @@ export async function getSpt2126(owner: string, id: string): Promise<Spt2126Deta
 		sourcesChanged = row.sourceSignature !== live.signature;
 	}
 	if (!preview) throw new Spt2126Error('Snapshot SPT tidak tersedia.',409);
-	return { ...row, posted: row.snapshot !== null, sourcesChanged, preview, kompensasiTersedia: await available(row), kurangLebihBayar: Math.max(0,preview.pasal21.harusDibayar)+Math.max(0,preview.pasal26.harusDibayar) };
+	const [profile] = await db.select({ telepon: wajib_pajak.nomor_telepon, alamat: tempat_kegiatan_usaha.alamat }).from(wajib_pajak)
+		.leftJoin(tempat_kegiatan_usaha, and(eq(tempat_kegiatan_usaha.wajib_pajak, wajib_pajak.id), eq(tempat_kegiatan_usaha.nitku, `${owner}000000`)))
+		.where(eq(wajib_pajak.npwp, owner)).limit(1);
+	return { ...row, alamatPemotong: profile?.alamat || null, teleponPemotong: profile?.telepon || null, posted: row.snapshot !== null, sourcesChanged, preview, kompensasiTersedia: await available(row), kurangLebihBayar: Math.max(0,preview.pasal21.harusDibayar)+Math.max(0,preview.pasal26.harusDibayar) };
 }
 export async function listSpt2126(owner: string, status?: Spt2126Status) {
 	const rows = await db.select().from(t).where(and(eq(t.npwpPemotong,owner),status ? eq(t.status,status) : undefined)).orderBy(desc(t.createdAt));

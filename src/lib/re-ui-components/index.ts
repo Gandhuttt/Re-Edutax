@@ -1,5 +1,4 @@
 export { default as ActionButton } from "./ActionButton.svelte";
-export { default as AmountSummary } from "./AmountSummary.svelte";
 export { default as ActionMenu } from "./ActionMenu.svelte";
 export { default as ActionShowcase } from "./ActionShowcase.svelte";
 export { default as AnnouncementBar } from "./AnnouncementBar.svelte";
