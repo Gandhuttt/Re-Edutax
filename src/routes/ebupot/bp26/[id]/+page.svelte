@@ -26,7 +26,6 @@
 	import { getNegara } from '../../negara.remote';
 	import { getObjekPajakBp26 } from '../../objekPajakBp26.remote';
 	import { getBpLookupContext, lookupBpInvoice } from '../../bpLookup.remote';
-	import { terbitkanBp26 } from '../terbitkanBp26.remote';
 	import { getBp26 } from './getBp26.remote';
 	import { updateBp26 } from './updateBp26.remote';
 
@@ -313,5 +312,5 @@
 		})}
 	>{@render formContent()}</form>
 {:else}{@render formContent()}{/if}
-{#if bp26.canEdit && bp26.status === 'SUBMITTED'}<FormActions><form {...terbitkanBp26.for(bp26.id)}><input type="hidden" name="id" value={bp26.id} /><ActionButton type="submit">Terbitkan</ActionButton></form></FormActions>{:else if bp26.nomorPemotongan}<p>Nomor Pemotongan: <strong>{bp26.nomorPemotongan}</strong></p>{/if}
+{#if bp26.nomorPemotongan}<p>Nomor Pemotongan: <strong>{bp26.nomorPemotongan}</strong></p>{/if}
 </DocumentWorkspace></ServiceWorkspace></Stack></PageLayout>

@@ -973,6 +973,13 @@ production when removed).
   dropdown labels retain wrapping.
   Mutations accept at most 50 IDs and reject the whole operation for an unowned,
   missing, stale or ineligible row. D1 batches also guard state transitions.
+- Editable BP21/BP26 forms expose only Kembali, Simpan Konsep and Submit;
+  there is no separate Terbitkan action below the form, including after Submit.
+  Submit validates/saves and returns to the list. Issuance stays on the list:
+  Terbitkan per row or Terbitkan Terpilih, with confirmation for submitted records.
+  The old detail-only issuance endpoints were removed; list lifecycle mutations
+  remain the single issuance path for BP21/BP26. This does not implement or claim
+  parity with official electronic-signature dialogs.
 - Delete is soft (`DELETED`). Amendment creates a linked draft; the source remains
   active until the replacement is issued atomically, then becomes `AMENDED`.
   Cancellation sets `CANCELLED`. Recipient lists/recaps include only issued
@@ -1055,6 +1062,11 @@ bruto is absent from the template and must be completed before Submit where need
   saves unchanged. BP26 Faktur Pajak locked then unlocked date on number lookup.
   Actual-helper smoke verified ignored automatic overrides, manual DPP150,
   manual final-tax0, and calculated tax when no manual final-tax is supplied.
+- Action-placement smoke used isolated local SUBMITTED fixtures in both forms:
+  desktop 1365px and mobile 390px showed one form with Kembali, Simpan Konsep
+  and Submit, no Terbitkan and no document-level horizontal overflow.
+  Both lists still opened the Terbitkan confirmation; each was cancelled without
+  issuing. Fixtures were removed after inspection.
 - This is input-level verification, not official-backend acceptance parity.
   Full Submit still requires positive bruto locally; official acceptance of
   zero was not tested. DJP receipt/certificate checks, taxpayer type/PTKP lookup

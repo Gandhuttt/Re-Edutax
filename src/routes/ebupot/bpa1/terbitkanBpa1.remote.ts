@@ -5,8 +5,7 @@ import { error, redirect } from '@sveltejs/kit';
 import { and, eq } from 'drizzle-orm';
 import * as v from 'valibot';
 
-// Simulated Terbitkan, same as terbitkanBp21.remote.ts -- this app never
-// calls the real Coretax issuance action.
+// Simulated Terbitkan -- this app never calls the real Coretax issuance action.
 const generateNomorPemotongan = () => {
 	const random = crypto.getRandomValues(new Uint32Array(1))[0];
 	return String(random).padStart(10, '0').slice(0, 10);

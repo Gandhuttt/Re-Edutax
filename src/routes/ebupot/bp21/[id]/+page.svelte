@@ -9,7 +9,6 @@
 	import { getObjekPajakBp21 } from '../../objekPajakBp21.remote';
 	import { getBpLookupContext, lookupBpInvoice } from '../../bpLookup.remote';
 	import { getBp21 } from './getBp21.remote';
-	import { terbitkanBp21 } from '../terbitkanBp21.remote';
 	import { updateBp21 } from './updateBp21.remote';
 	import { ActionButton, Breadcrumbs, DateField, DocumentWorkspace, FieldGrid, FormActions, FormField, FormIssueSummary, FormSection, InlineAlert, LookupField, PageLayout, RupiahField, SelectField, ServiceWorkspace, Stack, StatusBadge } from '$lib/re-ui-components';
 
@@ -255,13 +254,6 @@
 	{#if bp21.nomorPemotongan}<p>Nomor Pemotongan: <code>{bp21.nomorPemotongan}</code> <StatusBadge label="Telah Terbit" tone="success" /></p>{/if}
 	{#if editable}
 		<form {...updateBp21}>{@render formContent()}</form>
-		{#if bp21.status === 'SUBMITTED'}
-			<form {...terbitkanBp21.for(bp21.id)} class="issue-form">
-				<input type="hidden" name="id" value={bp21.id} />
-				{#if dirty}<p class="hint">Ada perubahan yang belum disimpan. Klik Submit terlebih dahulu sebelum menerbitkan.</p>{/if}
-				<ActionButton type="submit" tone="secondary" disabled={dirty}>Terbitkan</ActionButton>
-			</form>
-		{/if}
 	{:else}
 		{@render formContent()}
 	{/if}
@@ -270,6 +262,4 @@
 <style>
 .form-stack { display: grid; gap: 18px; min-width: 0; }
 .wide { grid-column: 1 / -1; }
-.hint { color: var(--ui-muted); font-size: 13px; }
-.issue-form { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 14px; }
 </style>
