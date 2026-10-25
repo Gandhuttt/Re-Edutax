@@ -7,7 +7,7 @@
 	import { getFasilitasPajakBp21 } from '../../fasilitasPajak.remote';
 	import { getJenisDokumenEbupot } from '../../jenisDokumen.remote';
 	import { getObjekPajakBp21 } from '../../objekPajakBp21.remote';
-	import { getBpLocalContext, lookupBpInvoice } from '../../referensiLokal.remote';
+	import { getBpLookupContext, lookupBpInvoice } from '../../bpLookup.remote';
 	import { getBp21 } from './getBp21.remote';
 	import { terbitkanBp21 } from '../terbitkanBp21.remote';
 	import { updateBp21 } from './updateBp21.remote';
@@ -20,7 +20,7 @@
 
 	const bp21 = await getBp21();
 	const [objekPajakOptions, fasilitasOptions, jenisDokumenOptions] = await Promise.all([getObjekPajakBp21(), getFasilitasPajakBp21(), getJenisDokumenEbupot()]);
-	const initialContext = await getBpLocalContext({ tin: bp21.nomorIdentitasWp, tahun: bp21.tahun, masaPajak: bp21.masaPajak });
+	const initialContext = await getBpLookupContext({ tin: bp21.nomorIdentitasWp });
 	const editable = bp21.canEdit;
 	const today = todayIso();
 
@@ -55,8 +55,8 @@
 	const tahunState = $derived(Number(periodeState.slice(0, 4)));
 	const masaPajakState = $derived(Number(periodeState.slice(5, 7)));
 	const periodValue = (o: { tahun: number; masaPajak: number }) => `${o.tahun}-${pad(o.masaPajak)}`;
-	const allowedPeriods = $derived(periodOptions(ctx.government));
-	const periodOutOfRange = $derived(!isAllowedPeriod(tahunState, masaPajakState, ctx.government));
+	const allowedPeriods = periodOptions();
+	const periodOutOfRange = $derived(!isAllowedPeriod(tahunState, masaPajakState));
 	const periodSelectOptions = $derived([
 		...(periodOutOfRange ? [{ value: periodeState, label: `${periodeState} (di luar rentang yang diizinkan)` }] : []),
 		...allowedPeriods.map((o) => ({ value: periodValue(o), label: o.label }))
@@ -64,9 +64,7 @@
 
 	const selectedFasilitas = $derived(fasilitasOptions.find((f) => f.id === fasilitasPajakIdState));
 	const selectedObjekPajak = $derived(objekPajakOptions.find((o) => o.id === kodeObjekPajakIdState));
-	const certificateAvailable = (kode: string) => kode === '9' || ctx.certificates.some((c) => c.fasilitasKode === kode);
-	const fasilitasSelectOptions = $derived(fasilitasOptions.filter((f) => certificateAvailable(f.kode) || f.id === fasilitasPajakIdState).map((f) => ({ value: f.id, label: certificateAvailable(f.kode) ? f.nama : `${f.nama} (sertifikat lokal tidak tersedia)` })));
-	const fasilitasUnavailable = $derived(Boolean(selectedFasilitas) && !certificateAvailable(selectedFasilitas!.kode));
+	const fasilitasSelectOptions = fasilitasOptions.map((f) => ({ value: f.id, label: f.nama }));
 	const objekAvailableIds = $derived(new Set(selectedFasilitas ? objekPajakOptions.filter((o) => isObjectAvailable(o, selectedFasilitas.kode, tahunState, masaPajakState)).map((o) => o.id) : []));
 	const objekSelectOptions = $derived(objekPajakOptions.filter((o) => objekAvailableIds.has(o.id) || o.id === kodeObjekPajakIdState).map((o) => ({ value: o.id, label: `${o.kode} — ${o.nama}` })));
 	const objekMismatch = $derived(Boolean(selectedObjekPajak) && !objekAvailableIds.has(selectedObjekPajak!.id));
@@ -103,17 +101,15 @@
 		pajakPenghasilanManualState = 0;
 	}
 
-	async function refreshContext(tin: string, periode = periodeState) {
+	async function refreshContext(tin: string) {
 		committedTin = tin;
-		ctx = await getBpLocalContext({ tin, tahun: Number(periode.slice(0, 4)), masaPajak: Number(periode.slice(5, 7)) });
+		ctx = await getBpLookupContext({ tin });
 		if (nitkuPenerimaState && !ctx.recipientBranches.some((b) => b.nitku === nitkuPenerimaState)) nitkuPenerimaState = '';
 	}
-	async function changePeriode(value: string) {
+	function changePeriode(value: string) {
 		touch();
 		periodeState = value;
 		clearObjectAndDerived();
-		await refreshContext(committedTin, value);
-		if (selectedFasilitas && !certificateAvailable(selectedFasilitas.kode)) fasilitasPajakIdState = '';
 	}
 	function changeFasilitas(value: string) {
 		touch();
@@ -142,14 +138,8 @@
 		lookupMessage = '';
 		const tin = nomorIdentitasWpState.trim();
 		await refreshContext(tin);
-		const profile = ctx.recipientProfile;
-		if (profile) {
-			namaPenerimaState = profile.nama;
-			if (profile.jenisWp !== 'orang_pribadi') lookupMessage = `Profil lokal penerima berjenis ${profile.jenisWp === 'badan' ? 'Badan' : 'Luar Negeri'}; BP21 tidak dapat disubmit untuk penerima ini.`;
-			else if (profile.statusPtkp) changePtkp(profile.statusPtkp);
-		} else if (ctx.knownTaxpayer) {
+		if (ctx.knownTaxpayer) {
 			namaPenerimaState = ctx.knownTaxpayer.nama;
-			lookupMessage = 'Wajib pajak ditemukan, tetapi jenis (orang pribadi) dan PTKP belum dikonfirmasi pada Referensi Lokal. Pilih Status PTKP secara manual.';
 		} else if (tin && tin !== GENERIC_TIN && confirm(`TIN ${tin} saat ini belum terdaftar dalam sistem. Sistem akan otomatis menggunakan TIN ${GENERIC_TIN} sebagai TIN penerima penghasilan.`)) {
 			namaPenerimaState = `PENERIMA PENGHASILAN#${tin}`;
 			nomorIdentitasWpState = GENERIC_TIN;
@@ -181,11 +171,8 @@
 <svelte:head><title>e-Bupot BP21</title></svelte:head>
 {#snippet formContent()}
 	<div class="form-stack">
-		<InlineAlert tone="info" title="Simulasi Pendidikan — Bukan Verifikasi DJP">
-			Referensi (cabang NITKU, profil penerima, sertifikat, SKD, faktur) diambil dari registri lokal akun Anda, bukan dari DJP. <a href="/ebupot/referensi-lokal"><strong>Kelola Referensi Lokal</strong></a> sebelum mengisi bukti potong.
-		</InlineAlert>
 		{#if !editable}
-			<InlineAlert tone="warning" title={bp21.diterbitkan ? 'Telah diterbitkan (simulasi)' : `Status ${statusLabel[bp21.status] ?? bp21.status}`}>Bukti potong ini tidak dapat diubah.</InlineAlert>
+			<InlineAlert tone="warning" title={bp21.diterbitkan ? 'Telah diterbitkan' : `Status ${statusLabel[bp21.status] ?? bp21.status}`}>Bukti potong ini tidak dapat diubah.</InlineAlert>
 		{/if}
 		{#if editable}<FormIssueSummary source={updateBp21.fields} />{/if}
 
@@ -198,10 +185,10 @@
 					<div class="wide"><InlineAlert tone="info" title={`Pembetulan ke-${bp21.pembetulanKe}`}>{#if bp21.pembetulanDari}Pembetulan dari <a href={`/ebupot/bp21/${bp21.pembetulanDari.id}`}>{bp21.pembetulanDari.nomorPemotongan ?? 'bukti potong asal'}</a>.{:else}Bukti potong asal tidak dapat ditampilkan.{/if}</InlineAlert></div>
 				{/if}
 				<FormField label="NPWP/NIK Pemotong" value={accountNpwp} disabled />
-				<SelectField label="NITKU Pemotong" name="nitkuPemotong" value={nitkuPemotongState} disabled={!editable} options={ownBranchOptions} placeholder="Pilih NITKU pemotong" error={issue('nitkuPemotong')} hint={ctx.ownBranches.length === 0 ? 'Belum ada NITKU terdaftar pada akun Anda (Referensi Lokal).' : ''} onchange={(v) => { touch(); nitkuPemotongState = String(v); }} />
+				<SelectField label="NITKU Pemotong" name="nitkuPemotong" value={nitkuPemotongState} disabled={!editable} options={ownBranchOptions} placeholder="Pilih NITKU pemotong" error={issue('nitkuPemotong')} hint={ctx.ownBranches.length === 0 ? 'Belum ada NITKU. Tambahkan di Profil Saya › Tempat Kegiatan Usaha.' : ''} onchange={(v) => { touch(); nitkuPemotongState = String(v); }} />
 				<LookupField label="Nomor Identitas WP (Penerima)" name="nomorIdentitasWp" bind:value={nomorIdentitasWpState} buttonLabel="Cari NPWP" buttonVisible={editable} disabled={!editable} inputmode="numeric" maxlength={16} error={issue('nomorIdentitasWp')} hint={lookupMessage} onlookup={cariNpwpPenerima} onvaluechange={touch} onblur={() => { if (editable && nomorIdentitasWpState.trim() !== committedTin) refreshContext(nomorIdentitasWpState.trim()); }} />
 				<FormField label="Nama Penerima" name="namaPenerima" maxlength={100} bind:value={namaPenerimaState} disabled={!editable} error={issue('namaPenerima')} oninput={touch} />
-				<SelectField label="NITKU Penerima Penghasilan" name="nitkuPenerima" value={nitkuPenerimaState} disabled={!editable} options={recipientBranchOptions} placeholder="Pilih NITKU penerima" error={issue('nitkuPenerima')} hint={ctx.recipientBranches.length === 0 ? 'Konsep boleh disimpan tanpa NITKU. Untuk Submit, penerima perlu mendaftarkan cabang melalui Referensi Lokal akunnya.' : ''} onchange={(v) => { touch(); nitkuPenerimaState = String(v); }} />
+				<SelectField label="NITKU Penerima Penghasilan" name="nitkuPenerima" value={nitkuPenerimaState} disabled={!editable} options={recipientBranchOptions} placeholder="Pilih NITKU penerima" error={issue('nitkuPenerima')} onchange={(v) => { touch(); nitkuPenerimaState = String(v); }} />
 				<DateField label="Tanggal Pemotongan" name="tanggalPemotongan" bind:value={tanggalPemotonganState} max={today} disabled={!editable} error={issue('tanggalPemotongan')} onchange={touch} />
 			</FieldGrid>
 		</FormSection>
@@ -209,7 +196,7 @@
 		<FormSection number="02" title="Pajak Penghasilan (Rp)" bordered>
 			<FieldGrid>
 				<SelectField label="Status PTKP" name="statusPtkp" value={statusPtkpState} disabled={!editable} placeholder="Pilih Status PTKP" options={ptkpEbupotOptions.map((p) => ({ value: p.value, label: p.label }))} error={issue('statusPtkp')} onchange={(v) => changePtkp(String(v))} />
-				<SelectField label="Fasilitas Pajak yang Dimiliki oleh Penerima Penghasilan" name="fasilitasPajakId" value={fasilitasPajakIdState} disabled={!editable} placeholder="Pilih fasilitas pajak" options={fasilitasSelectOptions} error={issue('fasilitasPajakId') || (fasilitasUnavailable ? 'Tidak ada sertifikat lokal aktif untuk fasilitas ini pada masa pajak tersebut.' : '')} hint="Fasilitas selain Tanpa Fasilitas memerlukan sertifikat pada Referensi Lokal." onchange={(v) => changeFasilitas(String(v))} />
+				<SelectField label="Fasilitas Pajak yang Dimiliki oleh Penerima Penghasilan" name="fasilitasPajakId" value={fasilitasPajakIdState} disabled={!editable} placeholder="Pilih fasilitas pajak" options={fasilitasSelectOptions} error={issue('fasilitasPajakId')} onchange={(v) => changeFasilitas(String(v))} />
 				<SelectField label="Nama Objek Pajak" name="kodeObjekPajakId" value={kodeObjekPajakIdState} disabled={!editable} searchable placeholder={selectedFasilitas ? 'Pilih objek pajak' : 'Pilih fasilitas pajak terlebih dahulu'} options={objekSelectOptions} error={issue('kodeObjekPajakId') || (objekMismatch ? 'Objek pajak tersimpan tidak berlaku untuk fasilitas/masa pajak ini, pilih ulang.' : '')} onchange={(v) => changeObjek(String(v))} />
 				<FormField label="Jenis Pajak" value={selectedObjekPajak?.pasal ?? ''} disabled />
 				<FormField label="Kode Objek Pajak" value={selectedObjekPajak?.kode ?? ''} disabled />
@@ -246,15 +233,15 @@
 		{/if}
 	</div>
 {/snippet}
-<PageLayout contentWidth="1540px"><Stack gap="16px"><Breadcrumbs separator="›" items={[{ label: 'Beranda', href: '/dashboard' }, { label: 'e-Bupot', href: '/ebupot/bp21' }, { label: 'BP21' }]} /><ServiceWorkspace bind:sidebarOpen identity={{ eyebrow: 'Wajib Pajak', name: accountName, identifier: accountNpwp, mark: 'EB' }} groups={[{ label: 'e-Bupot', links: [{ label: 'Bukti Potong Saya', href: '/ebupot/bukti-potong-saya' }, { label: 'BPPU', href: '/ebupot/bpu' }, { label: 'BP21', href: '/ebupot/bp21', active: true }, { label: 'BP26', href: '/ebupot/bp26' }, { label: 'BPA1', href: '/ebupot/bpa1' }, { label: 'BPA2', href: '/ebupot/bpa2' }, { label: 'Bukti Pemotongan Bulanan Pegawai Tetap', href: '/ebupot/mp' }, { label: 'Referensi Lokal', href: '/ebupot/referensi-lokal' }]}]}><DocumentWorkspace>
-	{#if bp21.nomorPemotongan}<p>Nomor Pemotongan (simulasi): <code>{bp21.nomorPemotongan}</code> <StatusBadge label="Telah Terbit (Simulasi)" tone="success" /></p>{/if}
+<PageLayout contentWidth="1540px"><Stack gap="16px"><Breadcrumbs separator="›" items={[{ label: 'Beranda', href: '/dashboard' }, { label: 'e-Bupot', href: '/ebupot/bp21' }, { label: 'BP21' }]} /><ServiceWorkspace bind:sidebarOpen identity={{ eyebrow: 'Wajib Pajak', name: accountName, identifier: accountNpwp, mark: 'EB' }} groups={[{ label: 'e-Bupot', links: [{ label: 'Bukti Potong Saya', href: '/ebupot/bukti-potong-saya' }, { label: 'BPPU', href: '/ebupot/bpu' }, { label: 'BP21', href: '/ebupot/bp21', active: true }, { label: 'BP26', href: '/ebupot/bp26' }, { label: 'BPA1', href: '/ebupot/bpa1' }, { label: 'BPA2', href: '/ebupot/bpa2' }, { label: 'Bukti Pemotongan Bulanan Pegawai Tetap', href: '/ebupot/mp' }]}]}><DocumentWorkspace>
+	{#if bp21.nomorPemotongan}<p>Nomor Pemotongan: <code>{bp21.nomorPemotongan}</code> <StatusBadge label="Telah Terbit" tone="success" /></p>{/if}
 	{#if editable}
 		<form {...updateBp21}>{@render formContent()}</form>
 		{#if bp21.status === 'SUBMITTED'}
 			<form {...terbitkanBp21.for(bp21.id)} class="issue-form">
 				<input type="hidden" name="id" value={bp21.id} />
 				{#if dirty}<p class="hint">Ada perubahan yang belum disimpan. Klik Submit terlebih dahulu sebelum menerbitkan.</p>{/if}
-				<ActionButton type="submit" tone="secondary" disabled={dirty}>Terbitkan Simulasi</ActionButton>
+				<ActionButton type="submit" tone="secondary" disabled={dirty}>Terbitkan</ActionButton>
 			</form>
 		{/if}
 	{:else}

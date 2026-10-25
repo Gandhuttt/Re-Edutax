@@ -159,7 +159,7 @@
 		{disabled}
 		onclick={togglePanel}
 	>
-		<span class:placeholder={resolvedValue.length === 0} id="{id}-summary"
+		<span class:is-placeholder={resolvedValue.length === 0} id="{id}-summary"
 			>{summary}</span
 		>
 		<span class="trigger-meta"
@@ -264,7 +264,7 @@
 		text-overflow: ellipsis;
 		white-space: nowrap;
 	}
-	.placeholder {
+	.is-placeholder {
 		color: var(--ui-muted);
 	}
 	.trigger-meta {

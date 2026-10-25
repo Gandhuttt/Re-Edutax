@@ -909,43 +909,47 @@ cancelled/deleted and verified as `DELETED`. Official issuance/upload was not te
   supporting fields and bruto above an object's ceiling. It saves `SAVEDINVALID`.
   Submit requires complete valid data and enforces the ceiling. Issued, cancelled,
   deleted and superseded records cannot be edited.
-- Sender NITKU comes from the account's actual `tempat_kegiatan_usaha` records.
-  BP21 recipient NITKU must belong to the recipient WP and is required for Submit.
-  If missing, the recipient must configure a branch in their own account; a draft
-  may still be saved. No synthetic `NPWP + 000000` fallback is used.
-- Local recipient profiles explicitly distinguish individuals, entities and foreign
-  recipients, with PTKP for individuals. Government status controls the simulated
-  future-period allowance. Periods begin January 2025; real calendar dates and
-  identity/name/rate/date bounds are checked server-side.
+- NITKU comes from Profil Saya › Tempat Kegiatan Usaha (`/profile/tempat-kegiatan-usaha`,
+  table `tempat_kegiatan_usaha`), the same place Coretax keeps TKU. Sender NITKU must
+  be one of the account's own TKU; BP21 recipient NITKU must belong to the recipient
+  WP and is required for Submit (the recipient adds it in their own profile). A draft
+  may still be saved without it. No synthetic `NPWP + 000000` fallback is used.
+- Cari NPWP fills the recipient name from registered taxpayers; Status PTKP is chosen
+  in the form. Periods begin January 2025 and end at the current month; real calendar
+  dates and identity/name/rate/date bounds are checked server-side.
+- Facility certificates (SKB/DTP/Fasilitas Lainnya) and BP26 SKD receipts are issued by
+  DJP in Coretax and looked up there. This app has no such registry, so the facility is
+  selected directly and the SKD Receipt Number is entered on the form with a format
+  check only; it is not matched against any list.
 - Reference invoices must be issued local invoices from the income recipient
   (seller) to the withholder (buyer). Their dates are derived and locked; unrelated
   invoices are not disclosed by lookup.
 
-### Local registries are not DJP verification
-
-`/ebupot/referensi-lokal` manages account-owned branches, recipient profiles/PTKP,
-facility certificates and SKD receipts. Certificate/receipt checks require an active
-entry valid at the selected period end. Receipt numbers use the mandatory
-`SIM-SKD-` prefix. BP26 SKD lookup fills identity/address/country from that account's
-receipt and is rechecked on Submit. Another account cannot read or reuse the
-private receipt. No DJP session token or registry API is used.
+The earlier `/ebupot/referensi-lokal` page (local branches, recipient profiles,
+certificates, SKD receipts, government flag) was removed because Coretax has no such
+page; migration `0040_drop_bp_local_registry.sql` drops its four tables (all empty in
+production when removed).
 
 ### Lists, lifecycle and exports
 
-- Lists have Belum Terbit, Telah Terbit, Tidak Valid and Histori tabs, period/status
-  filters, selection across filtered pages, and owner-scoped bulk operations.
+- Lists have Belum Terbit, Telah Terbit, Tidak Valid and Histori tabs, a per-column
+  filter row (masa pajak, identitas, nama, objek, nomor pemotongan, status), selection
+  across filtered pages, and owner-scoped bulk operations.
+  Table rows and filter values (including “Semua masa”) stay on one line.
+  The positioned table viewport contains horizontal overflow on mobile; form
+  dropdown labels retain wrapping.
   Mutations accept at most 50 IDs and reject the whole operation for an unowned,
   missing, stale or ineligible row. D1 batches also guard state transitions.
 - Delete is soft (`DELETED`). Amendment creates a linked draft; the source remains
   active until the replacement is issued atomically, then becomes `AMENDED`.
   Cancellation sets `CANCELLED`. Recipient lists/recaps include only issued
   current versions, not superseded/cancelled/deleted records.
-- Issuance is explicitly an educational simulation. Numbers start with `SIM-BP21-`
-  or `SIM-BP26-`; they are not official DJP numbers or electronic signatures.
-- Selected records can be exported as CSV, a real XLSX workbook, or printable HTML
-  labelled `SIMULASI PENDIDIKAN—BUKAN DOKUMEN RESMI DJP`. The print action is
-  **Cetak / Simpan PDF**, not a pretend PDF download. Export is owner-scoped and
-  rejects mixed-owner ID sets rather than silently omitting records.
+- Issuance numbers start with `SIM-BP21-` or `SIM-BP26-`; they are not official DJP
+  numbers or electronic signatures. The screens carry no simulation notices.
+- Selected records can be exported from the **Ekspor** menu as CSV, a real XLSX
+  workbook, or printable HTML (**Cetak / Simpan PDF**). Exported/printed documents keep
+  the `SIMULASI PENDIDIKAN—BUKAN DOKUMEN RESMI DJP` watermark so a printout cannot be
+  mistaken for an official slip. Export is owner-scoped and rejects mixed-owner ID sets.
 
 ### Official-template XML import, local destination only
 
@@ -959,7 +963,7 @@ official country codes, PTKP codes and nil fields. Limit: 100 rows and 1 MiB.
 Unknown fields, DTD/entities, owner-TIN mismatches and invalid rows reject the
 whole file before persistence. Automatic Deemed/Rate must match local reference
 calculations; sample numbers in a template are not assumed valid tax examples.
-BP21 names come from local recipient profiles/registered WPs. Prior cumulative
+BP21 names come from registered WPs (left blank otherwise). Prior cumulative
 bruto is absent from the template and must be completed before Submit where needed.
 
 ### Exercised verification
@@ -974,15 +978,25 @@ bruto is absent from the template and must be completed before Submit where need
 - Amendment/issuance/cancellation and soft deletion exercised on local fixtures.
   The recipient saw only the BP21 replacement (Rp600,000), then no version after
   cancellation. Mixed-owner bulk/exports/detail access and mixed-state issuance
-  were rejected. Receipt ownership/expiry and unrelated-invoice lookup returned null.
+  were rejected. Unrelated-invoice lookup returned null. Receipt ownership/expiry
+  checks belonged to the removed registry and no longer apply: SKD receipt input
+  is format-checked only, not verified against DJP.
 - Official-shaped BP21 XML imported successfully through the UI; inconsistent
   automatic rates were rejected. Parser smoke covered both official templates,
   nil passport fields, decimal rates, owner mismatch and entity rejection.
 - CSV and parsed XLSX exports exercised on both Vite and the built Cloudflare
   Worker running locally with D1; printable output was checked for simulation labels.
+- After registry removal, UI Submit persisted BP21 as `SUBMITTED` with PPh
+  Rp300,000 and BP26 SKD as `SUBMITTED` with PPh Rp5,000,000. The freely entered
+  receipt `SKD-UI/2026.777`, DPP 50% and rate 10% survived reopening.
+- TKU creation was exercised through Profil Saya. Desktop export menu, name
+  filtering, and mobile table scrolling were checked; “Semua masa” remained
+  a single line and document scroll width equalled client width.
 
-Migration `0039_bp_parity.sql` is required. Verification and migrations were local;
-no production database write, deployment, official issuance or push was performed.
+Migrations `0039_bp_parity.sql` and `0040_drop_bp_local_registry.sql` are required.
+Registry-removal verification and migration application were local only; no
+production database write, deployment, official issuance or push was performed
+in this follow-up.
 Not a claim of exhaustive parity across every Coretax object/facility/validation
 combination; authoritative registry access, official signing and issuance remain
 outside this educational simulator.

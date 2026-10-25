@@ -281,6 +281,13 @@
       "when": 1792898218611,
       "tag": "0039_bp_parity",
       "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "6",
+      "when": 1792902386683,
+      "tag": "0040_drop_bp_local_registry",
+      "breakpoints": true
     }
   ]
 }

@@ -96,7 +96,7 @@
 
 	const ebupotMenu: NavDropdownSection[] = [
 		{
-			heading: "Dokumen Saya",
+			heading: "e-Bupot",
 			items: [
 				{
 					label: "Bukti Potong Saya",
@@ -105,11 +105,6 @@
 				},
 				{ label: "BPPU", description: "Bukti potong unifikasi", href: "/ebupot/bpu" },
 				{ label: "BP21", description: "Pemotongan PPh Pasal 21", href: "/ebupot/bp21" },
-			],
-		},
-		{
-			heading: "Dokumen Lainnya",
-			items: [
 				{ label: "BP26", description: "Pemotongan PPh Pasal 26", href: "/ebupot/bp26" },
 				{ label: "BPA1", description: "Bukti potong formulir A1", href: "/ebupot/bpa1" },
 				{ label: "BPA2", description: "Bukti potong formulir A2", href: "/ebupot/bpa2" },

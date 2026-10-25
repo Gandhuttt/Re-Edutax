@@ -18,7 +18,6 @@ const MIN_YEAR = 2025;
 const JAKARTA_OFFSET_MS = 7 * 60 * 60 * 1000;
 const ISO_DATE = /^(\d{4})-(\d{2})-(\d{2})$/;
 const PERIOD_MIN_YEARS_BACK = 5;
-const GOVERNMENT_FUTURE_MONTHS = 3;
 
 const monthNames = [
 	'Januari',
@@ -89,33 +88,22 @@ export const isDateInPeriod = (date: string, tahun: number, masaPajak: number): 
 };
 
 // Allowed range: >= Jan 2025 and >= (current month - 5 years), through the
-// current month. Government withholders (local simulation) may also use up to
-// 3 months after the current month, rolling over the year as needed.
-const allowedRange = (government: boolean, now: Date) => {
+// current month.
+const allowedRange = (now: Date) => {
 	const current = currentMonthIndex(now);
-	const min = Math.max(MIN_YEAR * 12, current - PERIOD_MIN_YEARS_BACK * 12);
-	const max = current + (government ? GOVERNMENT_FUTURE_MONTHS : 0);
-	return { min, max };
+	return { min: Math.max(MIN_YEAR * 12, current - PERIOD_MIN_YEARS_BACK * 12), max: current };
 };
 
-export const isAllowedPeriod = (
-	tahun: number,
-	masaPajak: number,
-	government = false,
-	now: Date = new Date()
-): boolean => {
+export const isAllowedPeriod = (tahun: number, masaPajak: number, now: Date = new Date()): boolean => {
 	if (!isValidMonth(tahun, masaPajak)) return false;
 	const index = tahun * 12 + masaPajak - 1;
-	const { min, max } = allowedRange(government, now);
+	const { min, max } = allowedRange(now);
 	return index >= min && index <= max;
 };
 
 // Newest first.
-export const periodOptions = (
-	government = false,
-	now: Date = new Date()
-): { tahun: number; masaPajak: number; label: string }[] => {
-	const { min, max } = allowedRange(government, now);
+export const periodOptions = (now: Date = new Date()): { tahun: number; masaPajak: number; label: string }[] => {
+	const { min, max } = allowedRange(now);
 	const options: { tahun: number; masaPajak: number; label: string }[] = [];
 	for (let index = max; index >= min; index--) {
 		const tahun = Math.floor(index / 12);

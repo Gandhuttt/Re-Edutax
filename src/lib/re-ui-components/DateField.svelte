@@ -229,7 +229,7 @@
 	<button
 		bind:this={trigger}
 		class="date-trigger"
-		class:placeholder={!resolvedValue}
+		class:is-placeholder={!resolvedValue}
 		type="button"
 		aria-labelledby="{id}-label {id}-value"
 		aria-haspopup="dialog"
@@ -389,7 +389,7 @@
 		outline: 3px solid var(--ui-yellow-soft);
 		border-color: var(--ui-navy);
 	}
-	.date-trigger.placeholder {
+	.date-trigger.is-placeholder {
 		color: var(--ui-muted);
 	}
 	.date-trigger:disabled {

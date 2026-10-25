@@ -46,6 +46,8 @@
 	import { formatMonth } from "$lib/helpers/date";
 	import Breadcrumbs from "./Breadcrumbs.svelte";
 	import ActionButton from "./ActionButton.svelte";
+	import CheckboxField from "./CheckboxField.svelte";
+	import ActionMenu, { type ActionMenuItem } from "./ActionMenu.svelte";
 	import DataTableBody from "./DataTableBody.svelte";
 	import DataTableViewport from "./DataTableViewport.svelte";
 	import DataWorkspace from "./DataWorkspace.svelte";
@@ -57,6 +59,7 @@
 	import ServiceWorkspace from "./ServiceWorkspace.svelte";
 	import Stack from "./Stack.svelte";
 	import StatusBadge from "./StatusBadge.svelte";
+	import TableFilterField from "./TableFilterField.svelte";
 	import TableActions, { type TableAction } from "./TableActions.svelte";
 	import TabbedSection from "./TabbedSection.svelte";
 
@@ -92,8 +95,11 @@
 	let sidebarOpen = $state(false);
 	let currentPage = $state(1);
 	let pageSize = $state(10);
-	let filterTahun = $state("");
-	let filterMasa = $state("");
+	let filterPeriode = $state("");
+	let filterTin = $state("");
+	let filterNama = $state("");
+	let filterObjek = $state("");
+	let filterNomor = $state("");
 	let filterStatus = $state("");
 	const selected = new SvelteSet<string>();
 	let confirmOpen = $state(false);
@@ -102,15 +108,11 @@
 	let errorMessage = $state("");
 
 	const tabRows = $derived(rows.filter((row) => inTab(row, activeTab)));
-	const tahunOptions = $derived([
-		{ value: "", label: "Semua tahun" },
-		...[...new Set(tabRows.map((row) => row.tahun))]
-			.sort((a, b) => b - a)
-			.map((tahun) => ({ value: String(tahun), label: String(tahun) }))
-	]);
-	const masaOptions = $derived([
+	const periodeOptions = $derived([
 		{ value: "", label: "Semua masa" },
-		...Array.from({ length: 12 }, (_, i) => ({ value: String(i + 1), label: formatMonth(i + 1) }))
+		...[...new Set(tabRows.map((row) => row.tahun * 100 + row.masaPajak))]
+			.sort((a, b) => b - a)
+			.map((key) => ({ value: String(key), label: `${formatMonth(key % 100)} ${Math.floor(key / 100)}` }))
 	]);
 	const statusOptions = $derived([
 		{ value: "", label: "Semua status" },
@@ -119,11 +121,16 @@
 			label: statusLabel[status]
 		}))
 	]);
+	const contains = (value: string | null | undefined, needle: string) =>
+		!needle.trim() || (value ?? "").toLocaleLowerCase("id-ID").includes(needle.trim().toLocaleLowerCase("id-ID"));
 	const filteredRows = $derived(
 		tabRows.filter(
 			(row) =>
-				(!filterTahun || String(row.tahun) === filterTahun) &&
-				(!filterMasa || String(row.masaPajak) === filterMasa) &&
+				(!filterPeriode || String(row.tahun * 100 + row.masaPajak) === filterPeriode) &&
+				contains(row.nomorIdentitasWp, filterTin) &&
+				contains(row.nama, filterNama) &&
+				contains(row.namaObjekPajak, filterObjek) &&
+				contains(row.nomorPemotongan, filterNomor) &&
 				(!filterStatus || row.status === filterStatus)
 		)
 	);
@@ -139,8 +146,11 @@
 	$effect(() => {
 		activeTab;
 		currentPage = 1;
-		filterTahun = "";
-		filterMasa = "";
+		filterPeriode = "";
+		filterTin = "";
+		filterNama = "";
+		filterObjek = "";
+		filterNomor = "";
 		filterStatus = "";
 		errorMessage = "";
 	});
@@ -161,7 +171,7 @@
 		amend: canIssued
 	};
 	const actionText: Record<BpListAction, { button: string; verb: string; danger: boolean }> = {
-		issue: { button: "Terbitkan", verb: "menerbitkan (simulasi)", danger: false },
+		issue: { button: "Terbitkan", verb: "menerbitkan", danger: false },
 		delete: { button: "Hapus", verb: "menghapus", danger: true },
 		cancel: { button: "Batalkan", verb: "membatalkan", danger: true },
 		amend: { button: "Buat Pembetulan", verb: "membuat pembetulan dari", danger: false }
@@ -227,7 +237,7 @@
 		if (row.status === "CANCELLED" || row.status === "DELETED" || row.status === "SAVEDINVALID")
 			return { label: statusLabel[row.status], tone: "error" };
 		if (row.status === "AMENDED") return { label: statusLabel.AMENDED, tone: "neutral" };
-		if (row.diterbitkan) return { label: "Telah Terbit (Simulasi)", tone: "success" };
+		if (row.diterbitkan) return { label: "Telah Terbit", tone: "success" };
 		return { label: statusLabel[row.status], tone: row.status === "SUBMITTED" ? "neutral" : "attention" };
 	}
 
@@ -240,7 +250,20 @@
 				? `Maksimal ${MAX_BULK} baris per ekspor.`
 				: ""
 	);
+	const exportUrl = (format: "csv" | "xlsx" | "print") => `${exportBase}&format=${format}&ids=${selectedIdsParam}`;
+	const exportItems: ActionMenuItem[] = [
+		{ label: "CSV", description: "Unduh berkas .csv", onclick: () => { window.location.href = exportUrl("csv"); } },
+		{ label: "Excel", description: "Unduh berkas .xlsx", onclick: () => { window.location.href = exportUrl("xlsx"); } },
+		{ label: "Cetak / Simpan PDF", description: "Buka tampilan cetak di tab baru", onclick: () => { window.open(exportUrl("print"), "_blank", "noopener"); } }
+	];
 </script>
+
+{#snippet headerActions()}
+	<div class="header-actions">
+		<ActionButton type="button" tone="quiet" onclick={() => goto(`/ebupot/impor?jenis=${kind}`)}>Impor XML</ActionButton>
+		{@render createAction()}
+	</div>
+{/snippet}
 
 <PageLayout contentWidth="1540px">
 	<Stack gap="16px">
@@ -261,35 +284,19 @@
 						{ label: "BP26", href: "/ebupot/bp26", active: kind === "bp26" },
 						{ label: "BPA1", href: "/ebupot/bpa1" },
 						{ label: "BPA2", href: "/ebupot/bpa2" },
-						{ label: "Bukti Pemotongan Bulanan Pegawai Tetap", href: "/ebupot/mp" },
-						{ label: "Referensi Lokal (Simulasi)", href: "/ebupot/referensi-lokal" }
+						{ label: "Bukti Pemotongan Bulanan Pegawai Tetap", href: "/ebupot/mp" }
 					]
 				}
 			]}
 		>
-			<DataWorkspace title={`${label} ${activeTab}`} primaryActions={activeTab === "Belum Terbit" ? createAction : undefined}>
-				<Stack gap="12px">
-					<InlineAlert
-						tone="info"
-						compact
-						title="Simulasi Pendidikan"
-						message={`Penerbitan, nomor pemotongan, pembetulan dan pembatalan ${label} di sini adalah simulasi lokal (nomor SIM-${label}-…), bukan penerbitan atau verifikasi DJP/Coretax.`}
-					/>
-					{#if errorMessage}
+			<DataWorkspace title={`${label} ${activeTab}`} primaryActions={activeTab === "Belum Terbit" ? headerActions : undefined}>
+				{#if errorMessage}
+					<div class="bp-error">
 						<InlineAlert tone="error" title="Aksi tidak dijalankan" message={errorMessage} dismissible ondismiss={() => (errorMessage = "")} />
-					{/if}
-					<nav class="bp-links" aria-label={`Tautan ${label}`}>
-						<a href="/ebupot/referensi-lokal">Referensi Lokal</a>
-						<a href={`/ebupot/impor?jenis=${kind}`}>Impor XML</a>
-					</nav>
-				</Stack>
+					</div>
+				{/if}
 				<TabbedSection {tabs} active={activeTab} onchange={(value) => (activeTab = value as Tab)} ariaLabel={`Status ${label}`} panelLabel={`Daftar ${label}`}>
 					{#snippet children()}
-						<div class="bp-filters">
-							<SelectField label="Tahun" bind:value={filterTahun} options={tahunOptions} />
-							<SelectField label="Masa Pajak" bind:value={filterMasa} options={masaOptions} />
-							<SelectField label="Status" bind:value={filterStatus} options={statusOptions} />
-						</div>
 						<div class="bp-bulk" aria-live="polite">
 							<span>
 								{selectedRows.length} dari {filteredRows.length} baris terpilih
@@ -308,50 +315,57 @@
 								<ActionButton type="button" tone="quiet" onclick={() => selected.clear()}>Kosongkan Pilihan</ActionButton>
 							{/if}
 							<span class="bp-export">
-								Ekspor terpilih:
-								{#if exportBlocker}
-									<span title={exportBlocker}>CSV · Excel · Cetak / Simpan PDF ({exportBlocker})</span>
-								{:else}
-									<a href={`${exportBase}&format=csv&ids=${selectedIdsParam}`}>CSV</a>
-									<a href={`${exportBase}&format=xlsx&ids=${selectedIdsParam}`}>Excel</a>
-									<a href={`${exportBase}&format=print&ids=${selectedIdsParam}`} target="_blank" rel="noopener">Cetak / Simpan PDF</a>
-								{/if}
+								<ActionMenu label={selectedRows.length > 0 ? `Ekspor (${selectedRows.length})` : "Ekspor"} tone="quiet" align="end" disabled={exportBlocker !== ""} items={exportItems} />
 							</span>
 						</div>
-						<DataTableViewport label={`Daftar ${label} ${activeTab}`} minWidth="1250px" framed={false} headerTone="yellow" density="compact" stickyFirstColumn>
+						<DataTableViewport class="bp-table" label={`Daftar ${label} ${activeTab}`} minWidth="1520px" framed={false} headerTone="yellow" density="compact" stickyFirstColumn>
 							<table>
 								<thead>
 									<tr>
 										<th style="width: 40px">
-											<input
-												type="checkbox"
-												aria-label={`Pilih semua ${filteredRows.length} baris hasil filter`}
+											<CheckboxField
+												label={`Pilih semua ${filteredRows.length} baris hasil filter`}
+												labelHidden
+												compact
 												title="Pilih semua baris hasil filter (semua halaman)"
 												checked={allFilteredSelected}
 												disabled={filteredRows.length === 0}
-												onchange={(event) => toggleAll(event.currentTarget.checked)}
+												onchange={(event) => toggleAll((event.currentTarget as HTMLInputElement).checked)}
 											/>
 										</th>
 										<th style="width: 190px">Aksi</th>
-										<th>Masa Pajak</th>
-										<th>Nomor Identitas WP</th>
-										<th>Nama</th>
-										<th>Objek Pajak</th>
-										<th class="right">Pajak Penghasilan (Rp)</th>
-										<th>Nomor Pemotongan</th>
-										<th>Status</th>
-										{#if activeTab === "Histori" || activeTab === "Telah Terbit"}<th>Pembetulan</th>{/if}
+										<th style="width: 170px">Masa Pajak</th>
+										<th style="width: 190px">Nomor Identitas WP</th>
+										<th style="width: 200px">Nama</th>
+										<th style="width: 260px">Objek Pajak</th>
+										<th class="right" style="width: 170px">Pajak Penghasilan (Rp)</th>
+										<th style="width: 220px">Nomor Pemotongan</th>
+										<th style="width: 180px">Status</th>
+										{#if activeTab === "Histori" || activeTab === "Telah Terbit"}<th style="width: 160px">Pembetulan</th>{/if}
+									</tr>
+									<tr>
+										<th><span class="visually-hidden">Filter tabel</span></th>
+										<th></th>
+										<th><SelectField label="Filter masa pajak" labelHidden bind:value={filterPeriode} options={periodeOptions} /></th>
+										<th><TableFilterField label="Filter nomor identitas WP" placeholder="Cari NPWP/NIK" bind:value={filterTin} /></th>
+										<th><TableFilterField label="Filter nama" placeholder="Cari nama" bind:value={filterNama} /></th>
+										<th><TableFilterField label="Filter objek pajak" placeholder="Cari objek" bind:value={filterObjek} /></th>
+										<th></th>
+										<th><TableFilterField label="Filter nomor pemotongan" placeholder="Cari nomor" bind:value={filterNomor} /></th>
+										<th><SelectField label="Filter status" labelHidden bind:value={filterStatus} options={statusOptions} /></th>
+										{#if activeTab === "Histori" || activeTab === "Telah Terbit"}<th></th>{/if}
 									</tr>
 								</thead>
 								<DataTableBody items={pagedRows} getKey={(row) => row.id} emptyColspan={10} emptyText="Tidak ada data yang ditemukan.">
 									{#snippet row(row)}
 										{@const status = badge(row)}
 										<td>
-											<input
-												type="checkbox"
-												aria-label={`Pilih ${row.nama || row.nomorIdentitasWp || "baris"}`}
+											<CheckboxField
+												label={`Pilih ${row.nama || row.nomorIdentitasWp || "baris"}`}
+												labelHidden
+												compact
 												checked={selected.has(row.id)}
-												onchange={(event) => (event.currentTarget.checked ? selected.add(row.id) : selected.delete(row.id))}
+												onchange={(event) => ((event.currentTarget as HTMLInputElement).checked ? selected.add(row.id) : selected.delete(row.id))}
 											/>
 										</td>
 										<td class="action-cell"><TableActions visibleCount={3} actions={rowActions(row)} /></td>
@@ -415,11 +429,15 @@
 </InstitutionalModal>
 
 <style>
-	.bp-filters {
-		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(180px, 220px));
-		gap: 12px;
-		margin-bottom: 12px;
+	:global(.bp-table) {
+		position: relative;
+	}
+	table td {
+		white-space: nowrap;
+	}
+	table :global(.select-value) {
+		white-space: nowrap;
+		overflow-wrap: normal;
 	}
 	.bp-bulk {
 		display: flex;
@@ -429,13 +447,14 @@
 		margin-bottom: 12px;
 	}
 	.bp-export {
-		display: inline-flex;
-		flex-wrap: wrap;
-		gap: 8px;
 		margin-left: auto;
 	}
-	.bp-links {
+	.bp-error {
+		padding: 12px 18px 0;
+	}
+	.header-actions {
 		display: flex;
-		gap: 16px;
+		flex-wrap: wrap;
+		gap: 8px;
 	}
 </style>

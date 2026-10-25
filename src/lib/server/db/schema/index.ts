@@ -34,7 +34,6 @@ export * from './transactional/ebupot/bukti_potong_bp26';
 export * from './transactional/ebupot/bukti_potong_bpa1';
 export * from './transactional/ebupot/bukti_potong_bpa2';
 export * from './transactional/ebupot/bukti_potong_mp';
-export * from './transactional/ebupot/referensi_lokal';
 export * from './references/spt_pph_badan/sektor_usaha';
 export * from './references/spt_pph_badan/opini_auditor';
 export * from './references/spt_pph_badan/negara';

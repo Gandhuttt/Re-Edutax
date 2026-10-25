@@ -268,7 +268,7 @@
 		{disabled}
 		onclick={show}
 		onkeydown={handleKeydown}
-		><span id="{id}-value" class="select-value" class:placeholder={!selected}
+		><span id="{id}-value" class="select-value" class:is-placeholder={!selected}
 			>{selected?.label ?? placeholder}</span
 		><span
 			class="chevron"
@@ -421,7 +421,7 @@
 		white-space: normal;
 		overflow-wrap: anywhere;
 	}
-	.select-value.placeholder {
+	.select-value.is-placeholder {
 		color: var(--ui-muted);
 	}
 	.chevron {

@@ -10,13 +10,7 @@ import {
 	kode_objek_pajak_pph,
 	negara_spt_pph_badan
 } from '$lib/server/db/schema';
-import {
-	findLocalBpInvoice,
-	findLocalBpReceipt,
-	getLocalBpContext,
-	hasLocalBpCertificate,
-	isOwnedBranch
-} from '$lib/server/ebupot/localRegistry';
+import { findBpInvoice, isOwnedBranch } from '$lib/server/ebupot/bpLookup';
 import { error, invalid, redirect } from '@sveltejs/kit';
 import { and, eq, inArray } from 'drizzle-orm';
 import * as v from 'valibot';
@@ -125,7 +119,7 @@ export const updateBp26 = form(UpdateBp26Schema, async (input, issue) => {
 	const bad = (field: FormField, message: string) => issues.push(issue[field](message));
 	const today = todayIso();
 
-	// --- Facility / receipt (receipt may rewrite the recipient identity) ---
+	// --- Facility / receipt ---
 	let fasilitas: typeof fasilitas_pajak_ebupot.$inferSelect | undefined;
 	if (input.fasilitasPajakId) {
 		[fasilitas] = await db
@@ -144,48 +138,17 @@ export const updateBp26 = form(UpdateBp26Schema, async (input, issue) => {
 		bad('fasilitasPajakId', 'Nama Fasilitas harus dipilih');
 	}
 
-	let nomorIdentitasWp = input.nomorIdentitasWp;
-	let nama = input.nama;
-	let alamat = input.alamat;
-	let negaraAsalId = input.negaraAsalId;
+	const { nomorIdentitasWp, nama, alamat, negaraAsalId } = input;
 	let receiptNumber: string | null = null;
 
 	const periodValid = Number.isInteger(input.tahun) && Number.isInteger(input.masaPajak);
 
 	if (fasilitas?.kode === '7') {
-		const receipt = input.receiptNumber
-			? await findLocalBpReceipt(activeNpwp, input.receiptNumber, input.tahun, input.masaPajak)
-			: null;
-		if (receipt) {
-			receiptNumber = receipt.nomorReceipt;
-			if (submit) {
-				if (input.nomorIdentitasWp.trim() !== receipt.nomorIdentitasWp) {
-					bad('nomorIdentitasWp', 'Nomor Identitas WP tidak sesuai dengan Receipt Number');
-				}
-				if (input.nama.trim() !== receipt.nama) {
-					bad('nama', 'Nama tidak sesuai dengan Receipt Number');
-				}
-				if (input.alamat.trim() !== receipt.alamat) {
-					bad('alamat', 'Alamat tidak sesuai dengan Receipt Number');
-				}
-				if (input.negaraAsalId !== receipt.negaraAsalId) {
-					bad('negaraAsalId', 'Negara Asal tidak sesuai dengan Receipt Number');
-				}
-			}
-			nomorIdentitasWp = receipt.nomorIdentitasWp;
-			nama = receipt.nama;
-			alamat = receipt.alamat;
-			negaraAsalId = receipt.negaraAsalId;
-		} else {
-			receiptNumber = input.receiptNumber || null;
-			if (submit) {
-				bad(
-					'receiptNumber',
-					input.receiptNumber
-						? 'Receipt Number tidak valid, tidak aktif, atau di luar masa berlaku pada masa pajak ini'
-						: 'Receipt Number harus diisi untuk fasilitas Surat Keterangan Domisili'
-				);
-			}
+		receiptNumber = input.receiptNumber.toUpperCase() || null;
+		if (receiptNumber && !/^[A-Z0-9][A-Z0-9./-]*$/.test(receiptNumber)) {
+			bad('receiptNumber', 'Receipt Number hanya boleh berisi huruf, angka, titik, garis miring, dan tanda hubung');
+		} else if (submit && !receiptNumber) {
+			bad('receiptNumber', 'Receipt Number harus diisi untuk fasilitas Surat Keterangan Domisili');
 		}
 	}
 
@@ -193,20 +156,8 @@ export const updateBp26 = form(UpdateBp26Schema, async (input, issue) => {
 		bad('nomorIdentitasWp', 'Nomor Identitas WP penerima tidak boleh sama dengan NPWP pemotong');
 	}
 
-	// --- Local registry context (government setting, recipient profile) ---
-	const context = await getLocalBpContext(
-		activeNpwp,
-		nomorIdentitasWp,
-		periodValid ? input.tahun : undefined,
-		periodValid ? input.masaPajak : undefined
-	);
-
-	if (!isAllowedPeriod(input.tahun, input.masaPajak, context.government)) {
+	if (!isAllowedPeriod(input.tahun, input.masaPajak)) {
 		bad('masaPajak', 'Masa Pajak berada di luar rentang yang diperbolehkan');
-	}
-
-	if (submit && context.recipientProfile?.jenisWp === 'badan') {
-		bad('nomorIdentitasWp', 'Hanya NPWP Orang Pribadi yang diperbolehkan untuk jenis Bukti Potong ini');
 	}
 
 	// --- Foreign identity ---
@@ -276,25 +227,6 @@ export const updateBp26 = form(UpdateBp26Schema, async (input, issue) => {
 		bad('kodeObjekPajakId', 'Nama Objek Pajak harus dipilih');
 	}
 
-	// --- Certificate required by the facility (SKD 7 is covered by the receipt) ---
-	if (
-		submit &&
-		fasilitas &&
-		fasilitas.kode !== '7' &&
-		!(await hasLocalBpCertificate(
-			activeNpwp,
-			nomorIdentitasWp,
-			fasilitas.kode,
-			input.tahun,
-			input.masaPajak
-		))
-	) {
-		bad(
-			'fasilitasPajakId',
-			'Sertifikat/keterangan fasilitas ini belum terdaftar atau tidak berlaku pada masa pajak untuk penerima ini (lihat Referensi Lokal)'
-		);
-	}
-
 	// --- Reference document ---
 	let jenisDokumen: { id: string; kode: string } | undefined;
 	if (input.jenisDokumenId) {
@@ -311,7 +243,7 @@ export const updateBp26 = form(UpdateBp26Schema, async (input, issue) => {
 
 	let tanggalDokumen = input.tanggalDokumen;
 	if (jenisDokumen?.kode === 'TAXINVOICE' && input.nomorDokumen) {
-		const invoice = await findLocalBpInvoice(activeNpwp, nomorIdentitasWp, input.nomorDokumen);
+		const invoice = await findBpInvoice(activeNpwp, nomorIdentitasWp, input.nomorDokumen);
 		if (invoice) {
 			tanggalDokumen = invoice.tanggalFaktur;
 		} else if (submit) {

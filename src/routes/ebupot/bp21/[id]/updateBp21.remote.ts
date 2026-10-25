@@ -15,13 +15,7 @@ import {
 	jenis_dokumen_ebupot,
 	kode_objek_pajak_pph
 } from '$lib/server/db/schema';
-import {
-	findLocalBpInvoice,
-	getLocalBpContext,
-	hasLocalBpCertificate,
-	isGovernmentWithholder,
-	isOwnedBranch
-} from '$lib/server/ebupot/localRegistry';
+import { findBpInvoice, getBpContext, isOwnedBranch } from '$lib/server/ebupot/bpLookup';
 import { error, invalid, redirect } from '@sveltejs/kit';
 import { and, eq, inArray } from 'drizzle-orm';
 import * as v from 'valibot';
@@ -109,9 +103,8 @@ export const updateBp21 = form(UpdateBp21Schema, async (input, issue) => {
 	if (masaPajak < 1 || masaPajak > 12) {
 		invalid(issue.periode('Masa pajak tidak valid'));
 	}
-	const government = await isGovernmentWithholder(owner);
 	const periodChanged = tahun !== existing.tahun || masaPajak !== existing.masaPajak;
-	if ((isSubmit || periodChanged) && !isAllowedPeriod(tahun, masaPajak, government)) {
+	if ((isSubmit || periodChanged) && !isAllowedPeriod(tahun, masaPajak)) {
 		errs.push(issue.periode('Masa pajak di luar rentang yang diizinkan, pilih masa pajak yang tersedia'));
 	}
 
@@ -131,19 +124,11 @@ export const updateBp21 = form(UpdateBp21Schema, async (input, issue) => {
 	if (!nama) errs.push(issue.namaPenerima('Nama penerima harus diisi'));
 	else if (nama.length > 100) errs.push(issue.namaPenerima('Nama penerima maksimal 100 karakter'));
 
-	const ctx = await getLocalBpContext(owner, tin, tahun, masaPajak);
-	const profile = ctx.recipientProfile;
-	if (tin && profile && profile.jenisWp !== 'orang_pribadi') {
+	const ctx = await getBpContext(owner, tin);
+	if (isSubmit && tin && !ctx.knownTaxpayer && tin !== GENERIC_TIN) {
 		errs.push(
 			issue.nomorIdentitasWp(
-				`Penerima terdaftar sebagai ${profile.jenisWp === 'badan' ? 'Badan' : 'Luar Negeri'} pada Referensi Lokal, tidak dapat dibuatkan BP21`
-			)
-		);
-	}
-	if (isSubmit && tin && !profile && !ctx.knownTaxpayer && tin !== GENERIC_TIN) {
-		errs.push(
-			issue.nomorIdentitasWp(
-				'TIN belum dikenal. Gunakan tombol Cari dan konfirmasi penggunaan TIN generik, atau daftarkan profil penerima di Referensi Lokal'
+				'TIN belum terdaftar. Gunakan tombol Cari NPWP dan konfirmasi penggunaan TIN generik'
 			)
 		);
 	}
@@ -152,8 +137,6 @@ export const updateBp21 = form(UpdateBp21Schema, async (input, issue) => {
 	if (input.statusPtkp) {
 		if (!ptkpEbupotValues.includes(input.statusPtkp as (typeof ptkpEbupotValues)[number])) {
 			errs.push(issue.statusPtkp('Status PTKP tidak valid'));
-		} else if (isSubmit && profile?.statusPtkp && profile.statusPtkp !== input.statusPtkp) {
-			errs.push(issue.statusPtkp(`Status PTKP harus sama dengan profil lokal penerima (${profile.statusPtkp})`));
 		}
 	} else if (isSubmit) {
 		errs.push(issue.statusPtkp('Status PTKP harus dipilih'));
@@ -208,17 +191,6 @@ export const updateBp21 = form(UpdateBp21Schema, async (input, issue) => {
 		);
 	}
 
-	if (isSubmit && fasilitas && fasilitas.kode !== '9' && tin) {
-		const certified = await hasLocalBpCertificate(owner, tin, fasilitas.kode, tahun, masaPajak);
-		if (!certified) {
-			errs.push(
-				issue.fasilitasPajakId(
-					'Tidak ada sertifikat lokal aktif milik Anda untuk penerima ini pada masa pajak tersebut (kelola di Referensi Lokal)'
-				)
-			);
-		}
-	}
-
 	// --- NITKU ---
 	const nitkuPemotong = input.nitkuPemotong.trim();
 	const nitkuPenerima = input.nitkuPenerima.trim();
@@ -234,7 +206,7 @@ export const updateBp21 = form(UpdateBp21Schema, async (input, issue) => {
 			errs.push(issue.nitkuPenerima('NITKU penerima tidak terdaftar untuk penerima ini'));
 		}
 	} else if (isSubmit) {
-		errs.push(issue.nitkuPenerima('NITKU penerima harus dipilih; penerima perlu memiliki cabang di referensi lokal akunnya'));
+		errs.push(issue.nitkuPenerima('NITKU penerima harus dipilih; penerima perlu mendaftarkan Tempat Kegiatan Usaha di Profil Saya'));
 	}
 
 	// --- Dokumen referensi ---
@@ -256,7 +228,7 @@ export const updateBp21 = form(UpdateBp21Schema, async (input, issue) => {
 
 	let tanggalDokumen = input.tanggalDokumen.trim();
 	if (jenisDokumen?.kode === 'TAXINVOICE' && nomorDokumen && tin) {
-		const invoice = await findLocalBpInvoice(owner, tin, nomorDokumen);
+		const invoice = await findBpInvoice(owner, tin, nomorDokumen);
 		if (invoice) tanggalDokumen = invoice.tanggalFaktur;
 		else if (isSubmit) {
 			errs.push(

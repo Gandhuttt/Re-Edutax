@@ -13,7 +13,7 @@
 		FormIssueSummary,
 		FormSection,
 		InlineAlert,
-		LookupField,
+		DateField,
 		PageLayout,
 		RupiahField,
 		SelectField,
@@ -25,7 +25,7 @@
 	import { getJenisDokumenEbupot } from '../../jenisDokumen.remote';
 	import { getNegara } from '../../negara.remote';
 	import { getObjekPajakBp26 } from '../../objekPajakBp26.remote';
-	import { getBpLocalContext, lookupBpInvoice, lookupBpReceipt } from '../../referensiLokal.remote';
+	import { getBpLookupContext, lookupBpInvoice } from '../../bpLookup.remote';
 	import { terbitkanBp26 } from '../terbitkanBp26.remote';
 	import { getBp26 } from './getBp26.remote';
 	import { updateBp26 } from './updateBp26.remote';
@@ -59,7 +59,7 @@
 		getFasilitasPajakBp26(),
 		getJenisDokumenEbupot(),
 		getNegara(),
-		getBpLocalContext({ tin: bp26.nomorIdentitasWp, tahun: bp26.tahun, masaPajak: bp26.masaPajak })
+		getBpLookupContext({ tin: bp26.nomorIdentitasWp })
 	]);
 
 	const today = todayIso();
@@ -99,10 +99,9 @@
 	const selectedJenisDokumen = $derived(jenisDokumenOptions.find((j) => j.id === jenisDokumenIdState));
 	const isTaxInvoice = $derived(selectedJenisDokumen?.kode === 'TAXINVOICE');
 	const isSkd = $derived(selectedFasilitas?.kode === '7');
-	const receiptLocked = $derived(isSkd && receiptNumberState !== '');
 
 	const periodChoices = $derived.by(() => {
-		const list = periodOptions(context.government).map((o) => ({ value: `${o.tahun}-${o.masaPajak}`, label: o.label }));
+		const list = periodOptions().map((o) => ({ value: `${o.tahun}-${o.masaPajak}`, label: o.label }));
 		const persisted = `${bp26.tahun}-${bp26.masaPajak}`;
 		if (!list.some((o) => o.value === persisted)) list.push({ value: persisted, label: `${formatMonth(bp26.masaPajak)} ${bp26.tahun}` });
 		return list;
@@ -152,45 +151,22 @@
 	const detailErrors = $derived(
 		(['alamat', 'negaraAsalId', 'tanggalLahir', 'tempatLahir', 'nomorPaspor', 'nomorKitasKitap'] as const).some((name) => err(name) !== '')
 	);
-	const detailsOpen = $derived(showDetails || detailErrors || receiptLocked);
-	const badanWarning = $derived(context.recipientProfile?.jenisWp === 'badan');
+	const detailsOpen = $derived(showDetails || detailErrors);
 
 	async function refreshContext() {
 		try {
-			context = await getBpLocalContext({ tin: nomorIdentitasWpState.trim(), tahun, masaPajak });
+			context = await getBpLookupContext({ tin: nomorIdentitasWpState.trim() });
 			return true;
 		} catch (cause) {
-			lookupNotice = { tone: 'error', title: 'Referensi lokal gagal dimuat', message: remoteFailureFrom(cause).message };
+			lookupNotice = { tone: 'error', title: 'Data penerima gagal dimuat', message: remoteFailureFrom(cause).message };
 			return false;
 		}
 	}
 	async function lookupIdentity() {
-		if (receiptLocked || ro || !(await refreshContext())) return;
-		const known = context.recipientProfile?.nama ?? context.knownTaxpayer?.nama;
+		if (ro || !(await refreshContext())) return;
+		const known = context.knownTaxpayer?.nama;
 		if (known && !namaState.trim()) namaState = known;
 		if (isTaxInvoice) await lookupInvoice();
-	}
-	async function lookupReceipt() {
-		if (ro || !isSkd) return;
-		const typed = receiptNumberState.trim();
-		if (!typed) return;
-		try {
-			const receipt = await lookupBpReceipt({ receiptNumber: typed, tahun, masaPajak });
-			if (receipt) {
-				receiptNumberState = receipt.nomorReceipt;
-				nomorIdentitasWpState = receipt.nomorIdentitasWp;
-				namaState = receipt.nama;
-				alamatState = receipt.alamat;
-				negaraAsalIdState = receipt.negaraAsalId;
-				lookupNotice = { tone: 'success', title: 'Receipt Number valid (SIMULASI)', message: `${receipt.labelSimulasi}. Identitas penerima diisi dari receipt lokal milik akun ini.` };
-				await refreshContext();
-			} else {
-				receiptNumberState = '';
-				lookupNotice = { tone: 'error', title: 'Receipt Number invalid', message: 'Receipt Number tidak ditemukan, tidak aktif, atau di luar masa berlaku untuk masa pajak ini pada referensi lokal akun Anda (SIMULASI, bukan verifikasi DJP).' };
-			}
-		} catch (cause) {
-			lookupNotice = { tone: 'error', title: 'Receipt Number gagal dicek', message: remoteFailureFrom(cause).message };
-		}
 	}
 	async function lookupInvoice() {
 		if (ro || !isTaxInvoice) return;
@@ -213,7 +189,6 @@
 
 	function onPeriodChange() {
 		clearObjectAndDerived();
-		if (isSkd) void lookupReceipt();
 	}
 	function onFasilitasChange(value: string | number) {
 		fasilitasPajakIdState = String(value);
@@ -241,31 +216,29 @@
 {#snippet formContent()}
 	<FormIssueSummary source={updateBp26.fields} />
 	{#if submitFailure}<InlineAlert tone="error" title="Penyimpanan gagal" message={submitFailure} />{/if}
-	{#if ro}<InlineAlert tone="info" title={bp26.diterbitkan ? 'BP26 sudah diterbitkan (simulasi)' : 'BP26 final'} message={`Status ${bp26.status}. Dokumen ini hanya dapat dilihat.`} />{/if}
+	{#if ro}<InlineAlert tone="info" title={bp26.diterbitkan ? 'BP26 sudah diterbitkan' : 'BP26 final'} message={`Status ${bp26.status}. Dokumen ini hanya dapat dilihat.`} />{/if}
 	{#if bp26.sumberPembetulan}<InlineAlert tone="info" title="Pembetulan">Pembetulan ke-{bp26.pembetulanKe} dari <a href={`/ebupot/bp26/${bp26.sumberPembetulan.id}`}>{bp26.sumberPembetulan.nomorPemotongan ?? bp26.sumberPembetulan.id}</a> (status {bp26.sumberPembetulan.status}).</InlineAlert>{/if}
 	<FormSection number="01" title="Informasi Umum"><FieldGrid>
 		<input type="hidden" name="masaPajak" value={masaPajak} />
 		<input type="hidden" name="tahun" value={tahun} />
 		<SelectField label="Masa Pajak" bind:value={period} disabled={ro} options={periodChoices} error={err('masaPajak')} onchange={onPeriodChange} />
 		<FormField label="Status" value={bp26.status} disabled />
-		<FormField label="Tanggal Pemotongan" name="tanggalPemotongan" type="date" max={today} bind:value={tanggalPemotonganState} disabled={ro} error={err('tanggalPemotongan')} />
-		<SelectField label="NITKU/Nomor Identitas Sub Unit Organisasi" name="nitkuPemotong" bind:value={nitkuPemotongState} disabled={ro} options={branchChoices} placeholder="Pilih NITKU cabang" error={err('nitkuPemotong')} hint="Cabang milik akun ini. Kelola di Referensi Lokal." />
+		<DateField label="Tanggal Pemotongan" name="tanggalPemotongan" max={today} bind:value={tanggalPemotonganState} disabled={ro} error={err('tanggalPemotongan')} />
+		<SelectField label="NITKU/Nomor Identitas Sub Unit Organisasi" name="nitkuPemotong" bind:value={nitkuPemotongState} disabled={ro} options={branchChoices} placeholder="Pilih NITKU cabang" error={err('nitkuPemotong')} hint={context.ownBranches.length === 0 ? 'Belum ada NITKU. Tambahkan di Profil Saya › Tempat Kegiatan Usaha.' : ''} />
 	</FieldGrid></FormSection>
 	<FormSection number="02" title="Pajak Penghasilan">
 	<FieldGrid>
 		<SelectField label="Nama Fasilitas" name="fasilitasPajakId" value={fasilitasPajakIdState} disabled={ro} options={select(fasilitasOptions)} placeholder="Pilih fasilitas" error={err('fasilitasPajakId')} onchange={(value) => onFasilitasChange(value)} />
-		{#if isSkd}<LookupField label="Receipt Number (SIMULASI SKD-)" name="receiptNumber" bind:value={receiptNumberState} disabled={ro} buttonLabel="Cek Receipt" onlookup={lookupReceipt} onblur={lookupReceipt} error={err('receiptNumber')} hint="Receipt lokal akun Anda, bukan verifikasi DJP." />{/if}
-		<FormField label="Nomor Identitas WP" name="nomorIdentitasWp" bind:value={nomorIdentitasWpState} disabled={ro} readonly={receiptLocked} error={err('nomorIdentitasWp')} onblur={lookupIdentity} />
-		<FormField label="Nama" name="nama" bind:value={namaState} disabled={ro} readonly={receiptLocked} error={err('nama')} />
+		{#if isSkd}<FormField label="Receipt Number" name="receiptNumber" bind:value={receiptNumberState} disabled={ro} maxlength={80} error={err('receiptNumber')} />{/if}
+		<FormField label="Nomor Identitas WP" name="nomorIdentitasWp" bind:value={nomorIdentitasWpState} disabled={ro} error={err('nomorIdentitasWp')} onblur={lookupIdentity} />
+		<FormField label="Nama" name="nama" bind:value={namaState} disabled={ro} error={err('nama')} />
 	</FieldGrid>
-	{#if isSkd}<InlineAlert tone="info" title="Simulasi Pendidikan"><a href="/ebupot/referensi-lokal">Kelola Receipt SKD lokal</a> — receipt ini simulasi dan bukan verifikasi DJP.</InlineAlert>{/if}
-	{#if badanWarning}<InlineAlert tone="warning" title="Jenis penerima" message="Hanya NPWP Orang Pribadi yang diperbolehkan untuk jenis Bukti Potong ini (profil lokal: badan)." />{/if}
 	{#if lookupNotice}<InlineAlert tone={lookupNotice.tone} title={lookupNotice.title} message={lookupNotice.message} />{/if}
 	{#if !ro}<ActionButton type="button" tone="quiet" aria-expanded={detailsOpen} onclick={() => (showDetails = !detailsOpen)}>{detailsOpen ? 'Sembunyikan Detail Identitas' : 'Tampilkan Detail Identitas'}</ActionButton>{/if}
 	<div hidden={!detailsOpen && !ro}><FieldGrid>
-		<FormField label="Alamat" name="alamat" bind:value={alamatState} disabled={ro} readonly={receiptLocked} error={err('alamat')} />
-		<SelectField label="Negara Asal" name="negaraAsalId" bind:value={negaraAsalIdState} disabled={ro || receiptLocked} options={select(negaraOptions)} placeholder="Pilih negara" error={err('negaraAsalId')} />
-		<FormField label="Tanggal Lahir" name="tanggalLahir" type="date" min="1900-01-01" max={today} bind:value={tanggalLahirState} disabled={ro} error={err('tanggalLahir')} />
+		<FormField label="Alamat" name="alamat" bind:value={alamatState} disabled={ro} error={err('alamat')} />
+		<SelectField label="Negara Asal" name="negaraAsalId" bind:value={negaraAsalIdState} disabled={ro} options={select(negaraOptions)} placeholder="Pilih negara" error={err('negaraAsalId')} />
+		<DateField label="Tanggal Lahir" name="tanggalLahir" min="1900-01-01" max={today} bind:value={tanggalLahirState} disabled={ro} error={err('tanggalLahir')} />
 		<FormField label="Tempat Lahir" name="tempatLahir" bind:value={tempatLahirState} disabled={ro} error={err('tempatLahir')} />
 		<FormField label="Nomor Paspor" name="nomorPaspor" bind:value={nomorPasporState} disabled={ro} error={err('nomorPaspor')} />
 		<FormField label="Nomor KITAS/KITAP" name="nomorKitasKitap" bind:value={nomorKitasKitapState} disabled={ro} error={err('nomorKitasKitap')} />
@@ -289,7 +262,7 @@
 	<FormSection number="03" title="Dokumen Referensi"><FieldGrid>
 		<SelectField label="Jenis Dokumen" name="jenisDokumenId" bind:value={jenisDokumenIdState} disabled={ro} options={select(jenisDokumenOptions)} placeholder="Pilih jenis dokumen" error={err('jenisDokumenId')} onchange={() => { if (!ro) queueMicrotask(lookupInvoice); }} />
 		<FormField label="Nomor Dokumen" name="nomorDokumen" bind:value={nomorDokumenState} disabled={ro} error={err('nomorDokumen')} onblur={lookupInvoice} />
-		<FormField label="Tanggal Dokumen" name="tanggalDokumen" type="date" max={today} bind:value={tanggalDokumenState} disabled={ro} readonly={isTaxInvoice} error={err('tanggalDokumen')} hint={isTaxInvoice ? 'Tanggal diambil dari faktur pajak lokal.' : ''} />
+		<DateField label="Tanggal Dokumen" name="tanggalDokumen" max={today} bind:value={tanggalDokumenState} disabled={ro || isTaxInvoice} error={err('tanggalDokumen')} hint={isTaxInvoice ? 'Tanggal diisi otomatis dari faktur pajak.' : ''} />
 	</FieldGrid></FormSection>
 	{#if !ro}
 		<FormActions>
@@ -303,7 +276,7 @@
 {/snippet}
 <PageLayout contentWidth="1540px"><Stack gap="16px"><Breadcrumbs separator="›" items={[{ label: 'Beranda', href: '/dashboard' }, { label: 'e-Bupot' }, { label: 'BP26', href: '/ebupot/bp26' }, { label: bp26.nama || 'Detail' }]} />
 <ServiceWorkspace bind:sidebarOpen identity={{ eyebrow: 'Wajib Pajak', name: accountName, identifier: accountNpwp, mark: 'EB' }} groups={[{ label: 'e-Bupot', links: [
-	{ label: 'Bukti Potong Saya', href: '/ebupot/bukti-potong-saya' }, { label: 'BPPU', href: '/ebupot/bpu' }, { label: 'BP21', href: '/ebupot/bp21' }, { label: 'BP26', href: '/ebupot/bp26', active: true }, { label: 'BPA1', href: '/ebupot/bpa1' }, { label: 'BPA2', href: '/ebupot/bpa2' }, { label: 'Bukti Pemotongan Bulanan Pegawai Tetap', href: '/ebupot/mp' }, { label: 'Referensi Lokal', href: '/ebupot/referensi-lokal' }
+	{ label: 'Bukti Potong Saya', href: '/ebupot/bukti-potong-saya' }, { label: 'BPPU', href: '/ebupot/bpu' }, { label: 'BP21', href: '/ebupot/bp21' }, { label: 'BP26', href: '/ebupot/bp26', active: true }, { label: 'BPA1', href: '/ebupot/bpa1' }, { label: 'BPA2', href: '/ebupot/bpa2' }, { label: 'Bukti Pemotongan Bulanan Pegawai Tetap', href: '/ebupot/mp' }
 ] }]}>
 <DocumentWorkspace>
 {#if bp26.canEdit}
@@ -318,5 +291,5 @@
 		})}
 	>{@render formContent()}</form>
 {:else}{@render formContent()}{/if}
-{#if bp26.canEdit && bp26.status === 'SUBMITTED'}<FormActions><form {...terbitkanBp26.for(bp26.id)}><input type="hidden" name="id" value={bp26.id} /><ActionButton type="submit">Terbitkan (Simulasi)</ActionButton></form></FormActions>{:else if bp26.nomorPemotongan}<p>Nomor Pemotongan (simulasi): <strong>{bp26.nomorPemotongan}</strong></p>{/if}
+{#if bp26.canEdit && bp26.status === 'SUBMITTED'}<FormActions><form {...terbitkanBp26.for(bp26.id)}><input type="hidden" name="id" value={bp26.id} /><ActionButton type="submit">Terbitkan</ActionButton></form></FormActions>{:else if bp26.nomorPemotongan}<p>Nomor Pemotongan: <strong>{bp26.nomorPemotongan}</strong></p>{/if}
 </DocumentWorkspace></ServiceWorkspace></Stack></PageLayout>
