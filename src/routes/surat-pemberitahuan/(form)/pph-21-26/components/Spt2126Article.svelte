@@ -32,7 +32,7 @@
 </script>
 
 <Stack gap="14px">
-	<FormSection title={`I. PAJAK PENGHASILAN PASAL ${pasal} YANG DIPOTONG`} padded={false} bordered>
+	<FormSection title={`I. PAJAK PENGHASILAN PASAL ${pasal} YANG DIPOTONG`} bordered>
 		<DataTableViewport label={`Pajak Penghasilan Pasal ${pasal} yang dipotong`} minWidth="860px" headerTone="navy" density="compact">
 			<table>
 				<thead><tr><th>No.</th><th>Uraian</th><th>KAP-KJS</th><th class="number">Jumlah (Rp)</th></tr></thead>
@@ -72,7 +72,7 @@
 			</table>
 		</DataTableViewport>
 	</FormSection>
-	<FormSection title={`II. PAJAK PENGHASILAN PASAL ${pasal} YANG DITANGGUNG OLEH PEMERINTAH`} padded={false} bordered>
+	<FormSection title={`II. PAJAK PENGHASILAN PASAL ${pasal} YANG DITANGGUNG OLEH PEMERINTAH`} bordered>
 		<DataTableViewport label={`Pajak Penghasilan Pasal ${pasal} ditanggung pemerintah`} minWidth="860px" headerTone="navy" density="compact">
 			<table>
 				<thead><tr><th>No.</th><th>Uraian</th><th>KAP-KJS</th><th class="number">Jumlah (Rp)</th></tr></thead>

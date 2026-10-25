@@ -119,7 +119,7 @@
 	{@const cfg = layout[table.kind]}
 	{@const total = totals(table)}
 	{@const count = filtered(table).length}
-	<FormSection title={table.title} padded={false}>
+	<FormSection title={table.title}>
 
 		<DataTableViewport label={`${active.list} ${table.title}`} minWidth={table.kind === 'iii' ? '1700px' : '1560px'} framed={false} headerTone="navy" density="compact">
 			<table>

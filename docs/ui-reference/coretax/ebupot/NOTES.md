@@ -1151,6 +1151,8 @@ and totals. No summary cards, scenario selector, technical panels, or extra
 SP2D description field are displayed. Existing saved taxpayer classification
 controls SP2D availability; it is not inferred from the taxpayer's name.
 The route and its tax/annex components have no local stylesheets or inline styles.
+Tax and annex tables use the shared FormSection's default 20px content padding,
+verified on desktop and 390px mobile without document overflow.
 
 New source previews/postings capture reference-backed presentation metadata.
 Missing source facts are displayed as unavailable, not fabricated; old snapshots
