@@ -3,15 +3,15 @@ import {
 	buildPrintHtml,
 	buildXlsx,
 	ExportError,
-	loadExportRows,
+	loadExportTable,
 	newNonce,
-	parseExportIds,
-	type BpExportFormat,
-	type BpExportKind
+	parseExportIds
 } from '$lib/server/ebupot/export';
+import type { BpExportFormat } from '$lib/server/ebupot/export';
+import type { BpLifecycleKind } from '$lib/helpers/bp-parity';
 import type { RequestHandler } from './$types';
 
-const KINDS: Record<string, BpExportKind> = { bp21: 'bp21', bp26: 'bp26' };
+const KINDS: Record<string, BpLifecycleKind> = { bp21: 'bp21', bp26: 'bp26', bpa1: 'bpa1', bpa2: 'bpa2' };
 const FORMATS: Record<string, BpExportFormat> = { csv: 'csv', xlsx: 'xlsx', print: 'print' };
 
 const text = (status: number, message: string) =>
@@ -34,12 +34,12 @@ export const GET: RequestHandler = async ({ locals, url }) => {
 	const format = Object.hasOwn(FORMATS, url.searchParams.get('format') ?? '')
 		? FORMATS[url.searchParams.get('format')!]
 		: undefined;
-	if (!jenis) return text(400, 'Parameter jenis harus bp21 atau bp26');
+	if (!jenis) return text(400, 'Parameter jenis harus bp21, bp26, bpa1, atau bpa2');
 	if (!format) return text(400, 'Parameter format harus csv, xlsx, atau print');
 
 	try {
 		const ids = parseExportIds(url.searchParams.get('ids'));
-		const rows = await loadExportRows(owner, jenis, ids);
+		const rows = await loadExportTable(owner, jenis, ids);
 		const stamp = new Date().toISOString().slice(0, 10).replaceAll('-', '');
 		const base = `${jenis}-simulasi-${stamp}`;
 		const common = {
@@ -48,7 +48,7 @@ export const GET: RequestHandler = async ({ locals, url }) => {
 		};
 
 		if (format === 'csv') {
-			return new Response(buildCsv(rows, jenis), {
+			return new Response(buildCsv(rows), {
 				headers: {
 					...common,
 					'Content-Type': 'text/csv; charset=utf-8',

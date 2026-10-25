@@ -1220,3 +1220,51 @@ No DJP signing, billing, NTPN or official filing is produced. Testing creation
 and filing of a new amendment and final backend validation on real Coretax
 remains intentionally on hold; these local results do not establish full parity.
 
+## BPA1/BPA2 list, lifecycle and file parity (2026-10-25)
+
+BPA1/BPA2 now use the same `BpListWorkspace` as BP21/BP26: per-row and
+select-all checkboxes, owner-scoped bulk actions, column filters, horizontal
+table scrolling with nonwrapping cells, and Belum Terbit/Telah Terbit/Tidak
+Valid/Histori tabs. Their period column shows the full start–end range.
+Detail actions share one FormActions group (Kembali, Simpan Konsep, Submit);
+the group wraps on narrow screens. Submit saves and validates the current
+form, rather than submitting an older saved copy.
+
+The shared lifecycle issues only SUBMITTED drafts with SIM-BPA1/SIM-BPA2
+numbers. Cancellation and deletion preserve history. Pembetulan copies an
+issued active original into an unissued draft; issuing the replacement marks
+the original AMENDED. List queries explicitly refresh after successful
+commands, so transitions appear without a manual reload.
+
+CSV, Excel and print/PDF export support both BPA kinds, selected IDs and
+owner isolation. Exports show period range, amendment links, recipient,
+object, gross/net/deductions and PPh totals. Spreadsheet formula protection
+and the educational-simulation label also apply to BPA exports.
+
+XML import accepts official `A1Bulk/ListOfA1/A1` and `A2Bulk/ListOfA2/A2`
+templates from pajak.go.id's `bpa1.zip`/`bpa2.zip`. TIN must match the active
+account; recipient names and withholding NITKU must resolve in local data.
+All rows are validated and recalculated before one atomic D1 batch creates
+SAVEDINVALID drafts. Gross-up, explicit annualized months and prior monthly
+withholding use the same calculator as detail save. Article21IncomeTax is not
+trusted as a computed total. PrevWhTaxSlip must resolve an active issued local
+slip for this owner/recipient/kind in an earlier period of the same year;
+unavailable references reject the file rather than inventing prior values.
+This is local simulator import, not an upload to DJP.
+
+Apply `0044_bpa_lifecycle.sql` and `0045_bpa_xml_import.sql` before use.
+The latter preserves imported withholding date/NITKU and BPA1 passport data.
+
+Local verification: check reported 0 errors/0 warnings; build completed.
+Browser smoke exercised BPA1 save → Submit → bulk issue → amendment →
+replacement issue → cancellation, and BPA2 XML import → Submit → issue →
+cancellation plus draft deletion. History refreshed without reloading.
+Official-template-derived XML imported two BPA1 and two BPA2 drafts. An invalid
+second BPA2 row (annualized NumberOfMonths=12) displayed its validation error
+and left the prior count unchanged. CSV/XLSX/print returned 200 for both kinds;
+Excel retained numeric tax amounts (BPA1 Rp14,475,000; BPA2 Rp8,100,000).
+The print surface displayed the simulation label. Desktop and actual Chromium
+390px surfaces were inspected; narrow tables scroll within the workspace.
+All six smoke-created BPA records were removed by UUID; follow-up SELECTs
+returned zero. Migrations and writes were local only.
+

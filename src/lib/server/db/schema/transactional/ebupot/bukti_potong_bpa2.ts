@@ -1,17 +1,19 @@
-import { integer, real, sqliteTable, text } from 'drizzle-orm/sqlite-core';
+import { index, integer, real, sqliteTable, text, type AnySQLiteColumn } from 'drizzle-orm/sqlite-core';
 import { kode_objek_pajak_pph } from '../../references/ebupot/kode_objek_pajak_pph';
 import { wajib_pajak } from '../wajib_pajak/wajib_pajak';
-import { buktiPotongBpuStatusValues } from './bukti_potong_bpu';
+import { bpStatusValues } from '../../../../../helpers/bp-parity';
 import { bpa1PtkpValues } from '../../../../../helpers/ptkp-bpa1';
 
 // eBupot BPA2 ("Bukti Pemotongan A2 Masa Pajak") -- BPA1's counterpart for
 // PNS/TNI/Polri/pejabat negara. Shares BPA1's period-range/PTKP/progressive-
-// bracket mechanics exactly (see resolveBpa2.ts), but live-verified with a
+// bracket mechanics exactly (see $lib/helpers/bpa-calc.ts), but live-verified with a
 // structurally simpler form: no Pegawai Asing, no Fasilitas Pajak/DTP
 // mechanism, a PNS-specific Penghasilan Bruto breakdown, and no Dokumen
 // Referensi section at all. See docs/ui-reference/coretax/ebupot/NOTES.md
 // "BPA2" for the full live-verified field list.
-export const bukti_potong_bpa2 = sqliteTable('bukti_potong_bpa2', {
+export const bukti_potong_bpa2 = sqliteTable(
+	'bukti_potong_bpa2',
+	{
 	id: text('id')
 		.primaryKey()
 		.$defaultFn(() => crypto.randomUUID()),
@@ -32,7 +34,7 @@ export const bukti_potong_bpa2 = sqliteTable('bukti_potong_bpa2', {
 	tahunAkhir: integer('tahun_akhir')
 		.notNull()
 		.$defaultFn(() => new Date().getFullYear()),
-	status: text('status', { enum: buktiPotongBpuStatusValues }).notNull().default('NORMAL'),
+	status: text('status', { enum: bpStatusValues }).notNull().default('NORMAL'),
 
 	bekerjaDiLebihDariSatuPemberiKerja: integer('bekerja_di_lebih_dari_satu_pemberi_kerja', {
 		mode: 'boolean'
@@ -94,5 +96,14 @@ export const bukti_potong_bpa2 = sqliteTable('bukti_potong_bpa2', {
 	pphKurangLebihDipotongDesember: real('pph_kurang_lebih_dipotong_desember').notNull().default(0),
 
 	nomorPemotongan: text('nomor_pemotongan'),
-	diterbitkan: integer('diterbitkan', { mode: 'boolean' }).notNull().default(false)
-});
+	diterbitkan: integer('diterbitkan', { mode: 'boolean' }).notNull().default(false),
+	nitkuPemotong: text('nitku_pemotong'),
+	tanggalPemotongan: text('tanggal_pemotongan'),
+	// Amendment origin, same lifecycle as BP21/BP26 (see lifecycle.ts).
+	pembetulanDariId: text('pembetulan_dari_id').references((): AnySQLiteColumn => bukti_potong_bpa2.id, {
+		onDelete: 'set null'
+	}),
+	pembetulanKe: integer('pembetulan_ke').notNull().default(0)
+	},
+	(t) => [index('bukti_potong_bpa2_pembetulan_dari_idx').on(t.pembetulanDariId)]
+);

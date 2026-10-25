@@ -1,10 +1,10 @@
 import { db, type Statement } from '$lib/server/db';
-import { bukti_potong_bp21, bukti_potong_bp26, fasilitas_pajak_ebupot } from '$lib/server/db/schema';
-import type { BpKind, BpStatus } from '$lib/helpers/bp-parity';
+import { bukti_potong_bp21, bukti_potong_bp26, bukti_potong_bpa1, bukti_potong_bpa2, fasilitas_pajak_ebupot } from '$lib/server/db/schema';
+import type { BpKind, BpLifecycleKind, BpStatus } from '$lib/helpers/bp-parity';
 import { error } from '@sveltejs/kit';
 import { and, eq, inArray, sql, type SQL } from 'drizzle-orm';
 
-// Shared owner-scoped lifecycle for BP21/BP26 (local simulation only -- no DJP
+// Shared owner-scoped lifecycle for BP21/BP26/BPA1/BPA2 (local simulation only -- no DJP
 // issuance, no e-sign, numbers are clearly prefixed SIM-).
 //
 // Atomicity: D1 runs db.batch() as ONE implicit transaction, so any statement that
@@ -36,18 +36,22 @@ const ISSUED_ACTIVE: readonly BpStatus[] = ['NORMAL', 'SUBMITTED', 'AMENDMENT'];
 
 const tables = {
 	bp21: { table: bukti_potong_bp21, name: 'bukti_potong_bp21', label: 'BP21', prefix: 'SIM-BP21' },
-	bp26: { table: bukti_potong_bp26, name: 'bukti_potong_bp26', label: 'BP26', prefix: 'SIM-BP26' }
+	bp26: { table: bukti_potong_bp26, name: 'bukti_potong_bp26', label: 'BP26', prefix: 'SIM-BP26' },
+	bpa1: { table: bukti_potong_bpa1, name: 'bukti_potong_bpa1', label: 'BPA1', prefix: 'SIM-BPA1' },
+	bpa2: { table: bukti_potong_bpa2, name: 'bukti_potong_bpa2', label: 'BPA2', prefix: 'SIM-BPA2' }
 } as const;
 
-// The two tables share every column this service touches; bp26 is structurally
-// compatible with bp21 for these operations, so one typed handle is used.
-const tableOf = (kind: BpKind) => tables[kind].table as unknown as typeof bukti_potong_bp21;
+// All four tables share every column this service touches (id, npwp_pemotong, status,
+// diterbitkan, nomor_pemotongan, pembetulan_*), so one typed handle is used.
+const tableOf = (kind: BpLifecycleKind) => tables[kind].table as unknown as typeof bukti_potong_bp21;
 
 type LifecycleRow = {
 	id: string;
 	npwpPemotong: string;
 	masaPajak: number;
 	tahun: number;
+	tahunAkhir?: number;
+	masaPajakAkhir?: number;
 	status: BpStatus;
 	diterbitkan: boolean;
 	pembetulanDariId: string | null;
@@ -87,7 +91,7 @@ const normalizeIds = (ids: string[]) => {
 	return unique;
 };
 
-const loadRows = async (kind: BpKind, owner: string, ids: string[]) => {
+const loadRows = async (kind: BpLifecycleKind, owner: string, ids: string[]) => {
 	const t = tableOf(kind);
 	const rows = (await db
 		.select()
@@ -99,8 +103,9 @@ const loadRows = async (kind: BpKind, owner: string, ids: string[]) => {
 	return rows;
 };
 
-const generateNumber = (kind: BpKind, row: LifecycleRow) =>
-	`${tables[kind].prefix}-${row.tahun}${String(row.masaPajak).padStart(2, '0')}-${crypto
+// BPA1/BPA2 span Masa Pajak Awal..Akhir; their number is keyed by the period end.
+const generateNumber = (kind: BpLifecycleKind, row: LifecycleRow) =>
+	`${tables[kind].prefix}-${row.tahunAkhir ?? row.tahun}${String(row.masaPajakAkhir ?? row.masaPajak).padStart(2, '0')}-${crypto
 		.randomUUID()
 		.replaceAll('-', '')
 		.slice(0, 10)
@@ -126,7 +131,7 @@ export async function createBpDraft(owner: string, kind: BpKind): Promise<string
 	return id;
 }
 
-const stateError = (kind: BpKind, message: string) =>
+const stateError = (kind: BpLifecycleKind, message: string) =>
 	new BpLifecycleError(`${tables[kind].label}: ${message}`, 409);
 
 /**
@@ -135,7 +140,7 @@ const stateError = (kind: BpKind, message: string) =>
  */
 export async function mutateBp(
 	owner: string,
-	kind: BpKind,
+	kind: BpLifecycleKind,
 	action: BpAction,
 	ids: string[]
 ): Promise<BpMutationResult> {
@@ -337,7 +342,7 @@ export async function mutateBp(
 /** mutateBp for remote functions: expected lifecycle failures become HTTP errors with their message. */
 export async function mutateBpOrHttpError(
 	owner: string | null | undefined,
-	kind: BpKind,
+	kind: BpLifecycleKind,
 	action: BpAction,
 	ids: string[]
 ): Promise<BpMutationResult> {

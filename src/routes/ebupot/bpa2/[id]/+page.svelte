@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page as appPage } from '$app/state';
-	import { ActionButton, Breadcrumbs, DocumentWorkspace, FieldGrid, FormActions, FormField, FormSection, LookupField, PageLayout, RupiahField, SelectField, ServiceWorkspace, Stack } from '$lib/re-ui-components';
+	import { ActionButton, Breadcrumbs, DocumentWorkspace, FieldGrid, FormActions, FormField, FormSection, InlineAlert, LookupField, PageLayout, RupiahField, SelectField, ServiceWorkspace, Stack, StatusBadge } from '$lib/re-ui-components';
 	import { formatMonth } from '$lib/helpers/date';
 	import { BPA_MAX_ANNUALIZED_MONTHS, calculateBpa } from '$lib/helpers/bpa-calc';
 	import { bpa1PtkpOptions, type Bpa1Ptkp } from '$lib/helpers/ptkp-bpa1';
@@ -8,10 +8,9 @@
 	import { getPriorMonthlyWithheld } from '../../priorMonthlyWithheld.remote';
 	import { getWajibPajak } from '../../../getWajibPajak.remote';
 	import { getBpa2 } from './getBpa2.remote';
-	import { submitBpa2 } from './submitBpa2.remote';
-	import { terbitkanBpa2 } from '../terbitkanBpa2.remote';
 	import { updateBpa2 } from './updateBpa2.remote';
 
+	const statusLabel: Record<string, string> = { NORMAL: 'Normal', SAVEDINVALID: 'Disimpan Tidak Valid', SUBMITTED: 'Disimpan (Submit)', AMENDMENT: 'Pembetulan', AMENDED: 'Telah Dibetulkan', CANCELLED: 'Dibatalkan', DELETED: 'Dihapus' };
 	const bpa2 = await getBpa2();
 	const objekPajakOptions = await getObjekPajakBpa2();
 
@@ -128,6 +127,12 @@
 </script>
 {#snippet content()}
 	<Stack gap="18px">
+		{#if !bpa2.canEdit}
+			<InlineAlert tone="warning" title={bpa2.diterbitkan ? 'Telah diterbitkan' : `Status ${statusLabel[bpa2.status] ?? bpa2.status}`}>Bukti potong ini tidak dapat diubah.</InlineAlert>
+		{/if}
+		{#if bpa2.pembetulanKe > 0 || bpa2.pembetulanDariId}
+			<InlineAlert tone="info" title={`Pembetulan ke-${bpa2.pembetulanKe}`}>{#if bpa2.pembetulanDari}Pembetulan dari <a href={`/ebupot/bpa2/${bpa2.pembetulanDari.id}`}>{bpa2.pembetulanDari.nomorPemotongan ?? 'bukti potong asal'}</a>.{:else}Bukti potong asal tidak dapat ditampilkan.{/if}</InlineAlert>
+		{/if}
 		<FormSection number="01" title="Informasi Umum" bordered>
 			<FieldGrid>
 				<SelectField label="Bekerja di Lebih dari Satu Pemberi Kerja" name="bekerjaDiLebihDariSatuPemberiKerja" bind:value={bekerjaLebihState} disabled={!bpa2.canEdit} options={[{ value: 'false', label: 'Tidak' }, { value: 'true', label: 'Ya' }]} />
@@ -135,7 +140,7 @@
 				<FormField label="Tahun Awal" name="tahunAwal" type="number" bind:value={() => String(tahunAwalState), (v) => (tahunAwalState = Number(v))} disabled={!bpa2.canEdit} />
 				<SelectField label="Masa Pajak Akhir" name="masaPajakAkhir" bind:value={masaPajakAkhirState} disabled={!bpa2.canEdit} options={months.map((m) => ({ value: m, label: formatMonth(m) }))} />
 				<FormField label="Tahun Akhir" name="tahunAkhir" type="number" bind:value={() => String(tahunAkhirState), (v) => (tahunAkhirState = Number(v))} disabled={!bpa2.canEdit} />
-				<FormField label="Status" value={bpa2.status} disabled />
+				<FormField label="Status" value={statusLabel[bpa2.status] ?? bpa2.status} disabled />
 				<LookupField label="Nomor Identitas WP" name="nomorIdentitasWp" bind:value={nomorIdentitasWpState} buttonLabel="Cari NPWP" buttonVisible={bpa2.canEdit} disabled={!bpa2.canEdit} inputmode="numeric" maxlength={16} onlookup={cariNpwpPenerima} />
 				<FormField label="Nama" name="nama" bind:value={namaState} disabled={!bpa2.canEdit} />
 				<FormField label="NIP/NRP" name="nip" bind:value={nipState} disabled={!bpa2.canEdit} />
@@ -190,16 +195,22 @@
 			</FieldGrid>
 			<p>“PPh Pasal 21 yang Telah Dipotong” diambil dari Bukti Pemotongan Bulanan Pegawai Tetap yang telah terbit untuk penerima dan objek pajak yang sama sebelum masa pajak terakhir.</p>
 		</FormSection>
-		<FormActions>
-			<ActionButton tone="quiet" type="button" onclick={() => (window.location.href = '/ebupot/bpa2')}>Kembali</ActionButton>
-			{#if bpa2.canEdit}<ActionButton type="submit">Simpan Konsep</ActionButton>{/if}
-		</FormActions>
+		{#if bpa2.canEdit}
+			<FormActions>
+				<ActionButton type="button" tone="quiet" onclick={() => (window.location.href = '/ebupot/bpa2')}>Kembali</ActionButton>
+				<ActionButton type="submit" name="intent" value="draft" tone="secondary" pending={updateBpa2.pending > 0}>Simpan Konsep</ActionButton>
+				<ActionButton type="submit" name="intent" value="submit" tone="danger" pending={updateBpa2.pending > 0}>Submit</ActionButton>
+			</FormActions>
+		{:else}
+			<FormActions><ActionButton type="button" tone="quiet" onclick={() => (window.location.href = '/ebupot/bpa2')}>Kembali</ActionButton></FormActions>
+		{/if}
 	</Stack>
 {/snippet}
 
+<svelte:head><title>e-Bupot BPA2</title></svelte:head>
 <PageLayout contentWidth="1540px">
 	<Stack gap="16px">
-		<Breadcrumbs separator="›" items={[{ label: 'Beranda', href: '/dashboard' }, { label: 'e-Bupot' }, { label: 'BPA2' }]} />
+		<Breadcrumbs separator="›" items={[{ label: 'Beranda', href: '/dashboard' }, { label: 'e-Bupot', href: '/ebupot/bpa2' }, { label: 'BPA2' }]} />
 		<ServiceWorkspace
 			identity={{ eyebrow: 'Wajib Pajak', name: String(appPage.data.user?.name ?? 'Wajib Pajak'), identifier: String(appPage.data.user?.username ?? ''), mark: 'EB' }}
 			groups={[{ label: 'e-Bupot', links: [
@@ -213,13 +224,8 @@
 			]}]}
 		>
 			<DocumentWorkspace>
+				{#if bpa2.nomorPemotongan}<p>Nomor Pemotongan: <code>{bpa2.nomorPemotongan}</code> <StatusBadge label="Telah Terbit" tone="success" /></p>{/if}
 				{#if bpa2.canEdit}<form {...updateBpa2}>{@render content()}</form>{:else}{@render content()}{/if}
-				{#if bpa2.canEdit}
-					<FormActions>
-						{#if bpa2.status !== 'SUBMITTED'}<form {...submitBpa2}><ActionButton type="submit" tone="danger">Submit</ActionButton></form>
-						{:else}<form {...terbitkanBpa2.for(bpa2.id)}><ActionButton type="submit">Terbitkan</ActionButton></form>{/if}
-					</FormActions>
-				{/if}
 			</DocumentWorkspace>
 		</ServiceWorkspace>
 	</Stack>

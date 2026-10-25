@@ -1,7 +1,7 @@
 <script module lang="ts">
 	import type { Snippet } from "svelte";
 
-	export type BpListKind = "bp21" | "bp26";
+	export type BpListKind = "bp21" | "bp26" | "bpa1" | "bpa2";
 	export type BpListAction = "delete" | "issue" | "cancel" | "amend";
 	export type BpListStatus =
 		| "NORMAL"
@@ -14,8 +14,12 @@
 
 	export type BpListRow = {
 		id: string;
+		/** Masa Pajak (period end for BPA1/BPA2, which span Awal..Akhir). */
 		masaPajak: number;
 		tahun: number;
+		/** Period start; only BPA1/BPA2 rows carry it. */
+		masaPajakAwal?: number;
+		tahunAwal?: number;
 		status: BpListStatus;
 		nomorIdentitasWp: string;
 		nama: string;
@@ -75,7 +79,12 @@
 
 	// Mirrors MAX_BP_BULK in $lib/server/ebupot/lifecycle (D1 bound-parameter limit).
 	const MAX_BULK = 50;
-	const label = $derived(kind === "bp21" ? "BP21" : "BP26");
+	const label = $derived(kind.toUpperCase());
+	const isBpa = $derived(kind === "bpa1" || kind === "bpa2");
+	const periodeText = (row: BpListRow) =>
+		row.masaPajakAwal !== undefined && row.tahunAwal !== undefined
+			? `${formatMonth(row.masaPajakAwal)} ${row.tahunAwal} - ${formatMonth(row.masaPajak)} ${row.tahun}`
+			: `${formatMonth(row.masaPajak)} ${row.tahun}`;
 	const tabs = ["Belum Terbit", "Telah Terbit", "Tidak Valid", "Histori"] as const;
 	type Tab = (typeof tabs)[number];
 
@@ -303,8 +312,8 @@
 						{ label: "BPPU", href: "/ebupot/bpu" },
 						{ label: "BP21", href: "/ebupot/bp21", active: kind === "bp21" },
 						{ label: "BP26", href: "/ebupot/bp26", active: kind === "bp26" },
-						{ label: "BPA1", href: "/ebupot/bpa1" },
-						{ label: "BPA2", href: "/ebupot/bpa2" },
+						{ label: "BPA1", href: "/ebupot/bpa1", active: kind === "bpa1" },
+						{ label: "BPA2", href: "/ebupot/bpa2", active: kind === "bpa2" },
 						{ label: "Bukti Pemotongan Bulanan Pegawai Tetap", href: "/ebupot/mp" }
 					]
 				}
@@ -361,11 +370,11 @@
 											/>
 										</th>
 										<th style="width: 190px">Aksi</th>
-										<th style="width: 170px">Masa Pajak</th>
+										<th style={`width: ${isBpa ? 260 : 170}px`}>{isBpa ? "Masa Pajak Awal - Akhir" : "Masa Pajak"}</th>
 										<th style="width: 190px">Nomor Identitas WP</th>
 										<th style="width: 200px">Nama</th>
 										<th style="width: 260px">Objek Pajak</th>
-										<th class="right" style="width: 170px">Pajak Penghasilan (Rp)</th>
+										<th class="right" style="width: 190px">{isBpa ? "PPh Pasal 21 Terutang (Rp)" : "Pajak Penghasilan (Rp)"}</th>
 										<th style="width: 220px">Nomor Pemotongan</th>
 										<th style="width: 180px">Status</th>
 										{#if activeTab === "Histori" || activeTab === "Telah Terbit"}<th style="width: 160px">Pembetulan</th>{/if}
@@ -396,7 +405,7 @@
 											/>
 										</td>
 										<td class="action-cell"><TableActions visibleCount={3} actions={rowActions(row)} /></td>
-										<td>{formatMonth(row.masaPajak)} {row.tahun}</td>
+										<td>{periodeText(row)}</td>
 										<td>{row.nomorIdentitasWp || "—"}</td>
 										<td><strong>{row.nama || "—"}</strong></td>
 										<td>{row.namaObjekPajak ?? "—"}</td>

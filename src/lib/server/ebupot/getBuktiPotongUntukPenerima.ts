@@ -135,7 +135,11 @@ export async function getBuktiPotongUntukPenerima(nomorIdentitasWp: string) {
 		.from(bukti_potong_bpa1)
 		.innerJoin(wajib_pajak, eq(bukti_potong_bpa1.npwpPemotong, wajib_pajak.npwp))
 		.leftJoin(kode_objek_pajak_pph, eq(bukti_potong_bpa1.kodeObjekPajakId, kode_objek_pajak_pph.id))
-		.where(and(eq(bukti_potong_bpa1.nomorIdentitasWp, nomorIdentitasWp), eq(bukti_potong_bpa1.diterbitkan, true)));
+		.where(and(
+			eq(bukti_potong_bpa1.nomorIdentitasWp, nomorIdentitasWp),
+			eq(bukti_potong_bpa1.diterbitkan, true),
+			eq(bukti_potong_bpa1.status, 'SUBMITTED')
+		));
 
 	const bpa2Rows = await db
 		.select({
@@ -157,7 +161,11 @@ export async function getBuktiPotongUntukPenerima(nomorIdentitasWp: string) {
 		.from(bukti_potong_bpa2)
 		.innerJoin(wajib_pajak, eq(bukti_potong_bpa2.npwpPemotong, wajib_pajak.npwp))
 		.leftJoin(kode_objek_pajak_pph, eq(bukti_potong_bpa2.kodeObjekPajakId, kode_objek_pajak_pph.id))
-		.where(and(eq(bukti_potong_bpa2.nomorIdentitasWp, nomorIdentitasWp), eq(bukti_potong_bpa2.diterbitkan, true)));
+		.where(and(
+			eq(bukti_potong_bpa2.nomorIdentitasWp, nomorIdentitasWp),
+			eq(bukti_potong_bpa2.diterbitkan, true),
+			eq(bukti_potong_bpa2.status, 'SUBMITTED')
+		));
 
 	const mpRows = await db
 		.select({

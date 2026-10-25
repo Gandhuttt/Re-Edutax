@@ -6,7 +6,7 @@ import { db } from '$lib/server/db';
 import { bukti_potong_bpa2, kode_objek_pajak_pph } from '$lib/server/db/schema';
 import { priorMonthlyPph21Withheld } from '$lib/server/ebupot/priorMonthlyWithheld';
 import { error, redirect } from '@sveltejs/kit';
-import { and, eq } from 'drizzle-orm';
+import { and, eq, inArray } from 'drizzle-orm';
 import * as v from 'valibot';
 
 const jenisPemotonganValues = ['KURANG_SETAHUN', 'KURANG_SETAHUN_DISETAHUNKAN', 'SETAHUN_PENUH'] as const;
@@ -20,6 +20,7 @@ const optionalRupiah = (field: string) =>
 	v.optional(v.union([rupiahString(field), v.pipe(v.literal(''), v.transform(() => '0'))]), '0');
 
 const UpdateBpa2Schema = v.object({
+	intent: v.optional(v.picklist(['draft', 'submit']), 'draft'),
 	masaPajakAwal: v.pipe(v.string(), v.transform(Number), v.integer(), v.minValue(1), v.maxValue(12)),
 	tahunAwal: v.pipe(v.string(), v.transform(Number), v.integer(), v.minValue(2000)),
 	masaPajakAkhir: v.pipe(v.string(), v.transform(Number), v.integer(), v.minValue(1), v.maxValue(12)),
@@ -80,7 +81,8 @@ export const updateBpa2 = form(UpdateBpa2Schema, async (input) => {
 			and(
 				eq(bukti_potong_bpa2.id, id),
 				eq(bukti_potong_bpa2.npwpPemotong, activeNpwp),
-				eq(bukti_potong_bpa2.diterbitkan, false)
+				eq(bukti_potong_bpa2.diterbitkan, false),
+				inArray(bukti_potong_bpa2.status, ['NORMAL', 'SAVEDINVALID', 'SUBMITTED', 'AMENDMENT'])
 			)
 		)
 		.limit(1);
@@ -184,6 +186,11 @@ export const updateBpa2 = form(UpdateBpa2Schema, async (input) => {
 		error(400, err instanceof Error ? err.message : 'Tarif tidak dapat dihitung');
 	}
 
+	const isSubmit = input.intent === 'submit';
+	if (isSubmit && calc.penghasilanBruto <= 0) {
+		error(400, 'Penghasilan Bruto harus lebih dari 0 untuk Submit');
+	}
+
 	await db
 		.update(bukti_potong_bpa2)
 		.set({
@@ -227,9 +234,9 @@ export const updateBpa2 = form(UpdateBpa2Schema, async (input) => {
 			pphPasal21TerutangPadaIni: calc.pphPasal21TerutangPadaIni,
 			pphPasal21YangTelahDipotong: calc.pphDipotongAtauDitanggung,
 			pphKurangLebihDipotongDesember: calc.pphKurangLebihDipotongDesember,
-			// Matches Coretax: every Simpan Konsep save resets the draft to
-			// "Disimpan Tidak Valid" -- same rule as BPU/BP21/BP26/BPA1.
-			status: 'SAVEDINVALID'
+			// Matches Coretax: Simpan Konsep resets the draft to "Disimpan Tidak Valid";
+			// only Submit (same validated save) marks it ready to issue.
+			status: isSubmit ? 'SUBMITTED' : 'SAVEDINVALID'
 		})
 		.where(eq(bukti_potong_bpa2.id, id));
 

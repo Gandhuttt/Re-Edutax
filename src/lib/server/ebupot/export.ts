@@ -2,13 +2,17 @@ import { db } from '$lib/server/db';
 import {
 	bukti_potong_bp21,
 	bukti_potong_bp26,
+	bukti_potong_bpa1,
+	bukti_potong_bpa2,
 	fasilitas_pajak_ebupot,
 	jenis_dokumen_ebupot,
 	kode_objek_pajak_pph,
 	negara_spt_pph_badan
 } from '$lib/server/db/schema';
+import type { BpaKind, BpLifecycleKind } from '$lib/helpers/bp-parity';
 import { and, desc, eq, inArray, ne } from 'drizzle-orm';
 import { alias } from 'drizzle-orm/sqlite-core';
+import * as XLSX from 'xlsx';
 
 export type BpExportKind = 'bp21' | 'bp26';
 export type BpExportFormat = 'csv' | 'xlsx' | 'print';
@@ -105,7 +109,7 @@ const checkComplete = (rows: { id: string }[], ids: string[] | null) => {
 };
 
 // Read-only: owner-scoped, excludes DELETED, explicit ids must ALL match.
-export const loadExportRows = async (
+const loadExportRows = async (
 	owner: string,
 	jenis: BpExportKind,
 	ids: string[] | null
@@ -234,10 +238,135 @@ export const loadExportRows = async (
 	}));
 };
 
-type Cell = string | number | null;
-type Column = { header: string; get: (r: ExportRow) => Cell; kinds?: BpExportKind[] };
+// BPA1/BPA2 rows: the full Penghasilan Bruto -> PPh Pasal 21 build-up of the form.
+type BpaExportRow = {
+	id: string;
+	status: string;
+	diterbitkan: boolean;
+	nomorPemotongan: string | null;
+	masaPajakAwal: number;
+	tahunAwal: number;
+	masaPajakAkhir: number;
+	tahunAkhir: number;
+	pembetulanKe: number;
+	pembetulanDariId: string | null;
+	pembetulanDariNomor: string | null;
+	npwpPemotong: string;
+	nomorIdentitasWp: string;
+	nama: string;
+	statusPtkp: string | null;
+	jenisPemotongan: string | null;
+	jumlahBulan: number | null;
+	kodeObjek: string | null;
+	namaObjek: string | null;
+	penghasilanBruto: number;
+	biayaJabatan: number;
+	iuranPensiun: number;
+	zakat: number;
+	penghasilanNeto: number;
+	penghasilanNetoSebelumnya: number;
+	penghasilanTidakKenaPajak: number;
+	penghasilanKenaPajak: number;
+	pphPasal21Terutang: number;
+	pphPasal21DipotongSebelumnya: number;
+	pphPasal21TerutangPadaIni: number;
+	/** BPA1: Dipotong/Ditanggung Pemerintah; BPA2: yang Telah Dipotong. */
+	pphPasal21Dipotong: number;
+	pphKurangLebih: number;
+};
 
-const asal = (r: ExportRow) => (r.pembetulanKe > 0 || r.pembetulanDariId ? 'Pembetulan' : 'Normal');
+const loadBpaExportRows = async (owner: string, jenis: BpaKind, ids: string[] | null): Promise<BpaExportRow[]> => {
+	const t = jenis === 'bpa1' ? bukti_potong_bpa1 : bukti_potong_bpa2;
+	const sumber = alias(t, 'sumber');
+	const rows = await db
+		.select({
+			id: t.id,
+			status: t.status,
+			diterbitkan: t.diterbitkan,
+			nomorPemotongan: t.nomorPemotongan,
+			masaPajakAwal: t.masaPajakAwal,
+			tahunAwal: t.tahunAwal,
+			masaPajakAkhir: t.masaPajakAkhir,
+			tahunAkhir: t.tahunAkhir,
+			pembetulanKe: t.pembetulanKe,
+			pembetulanDariId: t.pembetulanDariId,
+			pembetulanDariNomor: sumber.nomorPemotongan,
+			npwpPemotong: t.npwpPemotong,
+			nomorIdentitasWp: t.nomorIdentitasWp,
+			nama: t.nama,
+			statusPtkp: t.statusPtkp,
+			jenisPemotongan: t.jenisPemotongan,
+			jumlahBulan: t.jumlahBulan,
+			kodeObjek: kode_objek_pajak_pph.kode,
+			namaObjek: kode_objek_pajak_pph.nama,
+			penghasilanBruto: t.penghasilanBruto,
+			biayaJabatan: t.biayaJabatan,
+			iuranPensiun: t.iuranPensiun,
+			zakat: t.zakat,
+			penghasilanNeto: t.penghasilanNeto,
+			penghasilanNetoSebelumnya: t.penghasilanNetoSebelumnya,
+			penghasilanTidakKenaPajak: t.penghasilanTidakKenaPajak,
+			penghasilanKenaPajak: t.penghasilanKenaPajak,
+			pphPasal21Terutang: t.pphPasal21Terutang,
+			pphPasal21DipotongSebelumnya: t.pphPasal21DipotongSebelumnya,
+			pphPasal21TerutangPadaIni: t.pphPasal21TerutangPadaIni,
+			pphPasal21Dipotong: jenis === 'bpa1' ? bukti_potong_bpa1.pphDipotongDitanggungPemerintah : bukti_potong_bpa2.pphPasal21YangTelahDipotong,
+			pphKurangLebih: t.pphKurangLebihDipotongDesember
+		})
+		.from(t)
+		.leftJoin(sumber, eq(t.pembetulanDariId, sumber.id))
+		.leftJoin(kode_objek_pajak_pph, eq(t.kodeObjekPajakId, kode_objek_pajak_pph.id))
+		.where(and(eq(t.npwpPemotong, owner), ne(t.status, 'DELETED'), ids ? inArray(t.id, ids) : undefined))
+		.orderBy(desc(t.tahunAkhir), desc(t.masaPajakAkhir), t.nama, t.id)
+		.limit(MAX_EXPORT_ROWS + 1);
+	checkComplete(rows, ids);
+	return rows;
+};
+
+type Cell = string | number | null;
+type Column<R = ExportRow> = { header: string; get: (r: R) => Cell; kinds?: BpLifecycleKind[] };
+
+const asal = (r: { pembetulanKe: number; pembetulanDariId: string | null }) =>
+	r.pembetulanKe > 0 || r.pembetulanDariId ? 'Pembetulan' : 'Normal';
+
+const jenisPemotonganLabel: Record<string, string> = {
+	KURANG_SETAHUN: 'Kurang dari Setahun',
+	KURANG_SETAHUN_DISETAHUNKAN: 'Kurang dari setahun yang penghasilannya disetahunkan',
+	SETAHUN_PENUH: 'Setahun Penuh'
+};
+
+const BPA_COLUMNS: Column<BpaExportRow>[] = [
+	{ header: 'Status', get: (r) => r.status },
+	{ header: 'Diterbitkan (Simulasi)', get: (r) => (r.diterbitkan ? 'Ya' : 'Belum') },
+	{ header: 'Nomor Bukti Potong (Simulasi)', get: (r) => r.nomorPemotongan },
+	{ header: 'Masa Pajak Awal', get: (r) => `${String(r.masaPajakAwal).padStart(2, '0')}-${r.tahunAwal}` },
+	{ header: 'Masa Pajak Akhir', get: (r) => `${String(r.masaPajakAkhir).padStart(2, '0')}-${r.tahunAkhir}` },
+	{ header: 'Asal', get: asal },
+	{ header: 'Pembetulan Ke', get: (r) => r.pembetulanKe },
+	{ header: 'Pembetulan Dari Nomor', get: (r) => r.pembetulanDariNomor },
+	{ header: 'NPWP Pemotong', get: (r) => r.npwpPemotong },
+	{ header: 'Nomor Identitas Penerima', get: (r) => r.nomorIdentitasWp },
+	{ header: 'Nama Penerima', get: (r) => r.nama },
+	{ header: 'Status PTKP', get: (r) => (r.statusPtkp ? `${r.statusPtkp.slice(0, -1)}/${r.statusPtkp.slice(-1)}` : null) },
+	{ header: 'Jenis Pemotongan', get: (r) => (r.jenisPemotongan ? jenisPemotonganLabel[r.jenisPemotongan] : null) },
+	{ header: 'Number Of Months', get: (r) => r.jumlahBulan },
+	{ header: 'Kode Objek Pajak', get: (r) => r.kodeObjek },
+	{ header: 'Nama Objek Pajak', get: (r) => r.namaObjek },
+	{ header: 'Penghasilan Bruto', get: (r) => r.penghasilanBruto },
+	{ header: 'Biaya Jabatan / Biaya Pensiun', get: (r) => r.biayaJabatan },
+	{ header: 'Iuran Pensiun', get: (r) => r.iuranPensiun },
+	{ header: 'Zakat', get: (r) => r.zakat },
+	{ header: 'Penghasilan Neto', get: (r) => r.penghasilanNeto },
+	{ header: 'Penghasilan Neto Sebelumnya', get: (r) => r.penghasilanNetoSebelumnya },
+	{ header: 'Penghasilan Tidak Kena Pajak', get: (r) => r.penghasilanTidakKenaPajak },
+	{ header: 'Penghasilan Kena Pajak', get: (r) => r.penghasilanKenaPajak },
+	{ header: 'PPh Pasal 21 Terutang', get: (r) => r.pphPasal21Terutang },
+	{ header: 'PPh Pasal 21 Dipotong Sebelumnya', get: (r) => r.pphPasal21DipotongSebelumnya },
+	{ header: 'PPh Pasal 21 Terutang pada Bukti Ini', get: (r) => r.pphPasal21TerutangPadaIni },
+	{ header: 'PPh Pasal 21 Dipotong/Ditanggung Pemerintah', get: (r) => r.pphPasal21Dipotong },
+	{ header: 'PPh Pasal 21 Kurang (Lebih) Dipotong', get: (r) => r.pphKurangLebih },
+	{ header: 'Keterangan', get: () => SIM_LABEL }
+];
 
 const COLUMNS: Column[] = [
 	{ header: 'Jenis', get: (r) => r.jenis.toUpperCase() },
@@ -285,6 +414,23 @@ const COLUMNS: Column[] = [
 const columnsFor = (jenis: BpExportKind) =>
 	COLUMNS.filter((c) => !c.kinds || c.kinds.includes(jenis));
 
+export type ExportTable = { columns: string[]; rows: Cell[][] };
+
+const tabulate = <R>(rows: R[], cols: Column<R>[]): ExportTable => ({
+	columns: cols.map((c) => c.header),
+	rows: rows.map((r) => cols.map((c) => c.get(r)))
+});
+
+/** Owner-scoped export table for any list kind (BP21/BP26 slips or BPA1/BPA2 recaps). */
+export const loadExportTable = async (
+	owner: string,
+	jenis: BpLifecycleKind,
+	ids: string[] | null
+): Promise<ExportTable> =>
+	jenis === 'bp21' || jenis === 'bp26'
+		? tabulate(await loadExportRows(owner, jenis, ids), columnsFor(jenis))
+		: tabulate(await loadBpaExportRows(owner, jenis, ids), BPA_COLUMNS);
+
 // Neutralises spreadsheet formula injection: if the first character that is not
 // whitespace/control/invisible is = + - @, prefix an apostrophe.
 // eslint-disable-next-line no-control-regex
@@ -300,31 +446,23 @@ const csvCell = (c: Cell): string => {
 	return `"${safeText(c).replace(/"/g, '""')}"`;
 };
 
-export const buildCsv = (rows: ExportRow[], jenis: BpExportKind): string => {
-	const cols = columnsFor(jenis);
-	const lines = [cols.map((c) => csvCell(c.header)).join(',')];
-	for (const r of rows) lines.push(cols.map((c) => csvCell(c.get(r))).join(','));
+export const buildCsv = (table: ExportTable): string => {
+	const lines = [table.columns.map(csvCell).join(',')];
+	for (const row of table.rows) lines.push(row.map(csvCell).join(','));
 	return '\uFEFF' + lines.join('\r\n') + '\r\n';
 };
 
-export const buildXlsx = async (rows: ExportRow[], jenis: BpExportKind): Promise<Uint8Array<ArrayBuffer>> => {
-	// Dynamic on purpose: keeps the large xlsx bundle out of CSV/print requests (server-only module).
-	const XLSX = await import('xlsx');
-	const cols = columnsFor(jenis);
+export const buildXlsx = async (table: ExportTable, jenis: BpLifecycleKind): Promise<Uint8Array<ArrayBuffer>> => {
+	// Workbook generation stays server-side.
 	const title = `${jenis.toUpperCase()} SIMULASI`;
 	const aoa: (string | number | null)[][] = [
 		[SIM_LABEL],
 		[],
-		cols.map((c) => c.header),
-		...rows.map((r) =>
-			cols.map((c) => {
-				const v = c.get(r);
-				return typeof v === 'string' ? safeText(v) : v;
-			})
-		)
+		table.columns,
+		...table.rows.map((row) => row.map((v) => (typeof v === 'string' ? safeText(v) : v)))
 	];
 	const ws = XLSX.utils.aoa_to_sheet(aoa);
-	ws['!cols'] = cols.map((c) => ({ wch: Math.max(12, Math.min(40, c.header.length + 2)) }));
+	ws['!cols'] = table.columns.map((header) => ({ wch: Math.max(12, Math.min(40, header.length + 2)) }));
 	const wb = XLSX.utils.book_new();
 	wb.Props = { Title: `${title} - bukan dokumen resmi DJP` };
 	XLSX.utils.book_append_sheet(wb, ws, title);
@@ -349,15 +487,16 @@ const displayCell = (header: string, v: Cell): string => {
 	return v;
 };
 
-export const buildPrintHtml = (rows: ExportRow[], jenis: BpExportKind, nonce: string): string => {
-	const cols = columnsFor(jenis).filter((c) => c.header !== 'Keterangan');
+export const buildPrintHtml = (table: ExportTable, jenis: BpLifecycleKind, nonce: string): string => {
+	const keep = table.columns.map((header, index) => ({ header, index })).filter((c) => c.header !== 'Keterangan');
 	const title = `Cetak ${jenis.toUpperCase()} (Simulasi)`;
+	const rows = table.rows;
 	const slips = rows
 		.map((r) => {
-			const body = cols
+			const body = keep
 				.map(
 					(c) =>
-						`<tr><th>${escapeHtml(c.header)}</th><td>${escapeHtml(displayCell(c.header, c.get(r)))}</td></tr>`
+						`<tr><th>${escapeHtml(c.header)}</th><td>${escapeHtml(displayCell(c.header, r[c.index]))}</td></tr>`
 				)
 				.join('');
 			return `<section class="slip"><div class="sim">${escapeHtml(SIM_LABEL)}</div><h1>Bukti Pemotongan ${escapeHtml(jenis.toUpperCase())}</h1><table>${body}</table><div class="sim">${escapeHtml(SIM_LABEL)}</div></section>`;
