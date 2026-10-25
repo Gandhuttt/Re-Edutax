@@ -956,8 +956,13 @@ production when removed).
 Verified public sources:
 [BP21 ZIP](https://pajak.go.id/sites/default/files/2024-12/bp21.zip) and
 [BP26 ZIP](https://pajak.go.id/sites/default/files/2024-12/bp26.zip).
-`/ebupot/impor?jenis=bp21|bp26` reads their `Bp21Bulk`/`BP26Bulk` structures into
-new local `SAVEDINVALID` drafts, never uploads to DJP or updates issued records.
+BP21/BP26 lists use the same **Impor Data** dropdown pattern as Faktur:
+**Pilih File** opens the file picker and imports immediately; **Unduh Format XML**
+downloads the corresponding official ZIP template. There is no separate import
+page or Excel import option. Success/errors appear in the list, and successful
+imports refresh its data without navigation.
+The importer reads `Bp21Bulk`/`BP26Bulk` structures into new local `SAVEDINVALID`
+drafts, never uploads to DJP or updates issued records.
 It preserves `WithholdingDate` separately from document date and handles the
 official country codes, PTKP codes and nil fields. Limit: 100 rows and 1 MiB.
 Unknown fields, DTD/entities, owner-TIN mismatches and invalid rows reject the
@@ -992,6 +997,10 @@ bruto is absent from the template and must be completed before Submit where need
 - TKU creation was exercised through Profil Saya. Desktop export menu, name
   filtering, and mobile table scrolling were checked; “Semua masa” remained
   a single line and document scroll width equalled client width.
+- Dropdown import was exercised through the browser file picker: a BP21 XML
+  created a draft visible in Tidak Valid without reloading. Selecting that XML
+  on BP26 displayed the wrong-root validation error. The dropdown was visually
+  checked at 1365px and 390px.
 
 Migrations `0039_bp_parity.sql` and `0040_drop_bp_local_registry.sql` are required.
 Registry-removal verification and migration application were local only; no

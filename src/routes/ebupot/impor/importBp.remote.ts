@@ -10,6 +10,8 @@ import { resolveBp21, computeBp21Amounts, type Bp21Amounts } from '$lib/helpers/
 import { resolveBp26, computeBp26Amounts, type Bp26Amounts } from '$lib/helpers/resolveBp26';
 import { getBpContext, isRecipientBranch, type BpContext } from '$lib/server/ebupot/bpLookup';
 import { parseBpXml, type BpXmlRow } from '$lib/server/ebupot/parseBpXml';
+import { listBp21 } from '../bp21/listBp21.remote';
+import { listBp26 } from '../bp26/listBp26.remote';
 
 const certificateCodes: Record<string, string> = { 'N/A': '9', DTP: '4', TaxExAr21: '10', ETC: '8', COD: '7' };
 
@@ -76,5 +78,6 @@ export const importBp = form('unchecked', async (input) => {
 	}
 	// Build every statement only after validation. D1 batch rolls back the whole file on failure.
 	await db.batch(statements as [Statement, ...Statement[]]);
+	await (kind === 'bp21' ? listBp21() : listBp26()).refresh();
 	return { imported: rows.length, message: `${rows.length} konsep ${kind.toUpperCase()} berhasil dibuat. Periksa lalu Submit dari daftar ${kind.toUpperCase()}.` };
 });

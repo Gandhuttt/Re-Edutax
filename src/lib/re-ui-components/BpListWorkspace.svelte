@@ -44,6 +44,7 @@
 	import { goto } from "$app/navigation";
 	import { SvelteSet } from "svelte/reactivity";
 	import { formatMonth } from "$lib/helpers/date";
+	import { importBp } from "../../routes/ebupot/impor/importBp.remote";
 	import Breadcrumbs from "./Breadcrumbs.svelte";
 	import ActionButton from "./ActionButton.svelte";
 	import CheckboxField from "./CheckboxField.svelte";
@@ -64,6 +65,13 @@
 	import TabbedSection from "./TabbedSection.svelte";
 
 	let { kind, rows, accountName, accountNpwp, onmutate, createAction }: BpListWorkspaceProps = $props();
+	let importFileInput = $state<HTMLInputElement>();
+	const importFormId = $props.id();
+	const importIssues = $derived(importBp.fields.allIssues() ?? []);
+
+	function submitImport(event: Event) {
+		(event.currentTarget as HTMLInputElement).form?.requestSubmit();
+	}
 
 	// Mirrors MAX_BP_BULK in $lib/server/ebupot/lifecycle (D1 bound-parameter limit).
 	const MAX_BULK = 50;
@@ -258,9 +266,22 @@
 	];
 </script>
 
+<form {...importBp} id={importFormId} enctype="multipart/form-data" hidden>
+	<input type="hidden" name="jenis" value={kind} />
+	<input type="file" name="file" accept=".xml" bind:this={importFileInput} onchange={submitImport} />
+</form>
+
 {#snippet headerActions()}
 	<div class="header-actions">
-		<ActionButton type="button" tone="quiet" onclick={() => goto(`/ebupot/impor?jenis=${kind}`)}>Impor XML</ActionButton>
+		<ActionMenu
+			label={importBp.pending > 0 ? "Mengimpor..." : "Impor Data"}
+			tone="quiet"
+			disabled={importBp.pending > 0}
+			items={[
+				{ label: "Pilih File", onclick: () => { if (importFileInput) { importFileInput.value = ""; importFileInput.click(); } } },
+				{ label: "Unduh Format XML", onclick: () => { window.location.href = `https://pajak.go.id/sites/default/files/2024-12/${kind}.zip`; } }
+			]}
+		/>
 		{@render createAction()}
 	</div>
 {/snippet}
@@ -290,6 +311,12 @@
 			]}
 		>
 			<DataWorkspace title={`${label} ${activeTab}`} primaryActions={activeTab === "Belum Terbit" ? headerActions : undefined}>
+				{#if importIssues.length > 0}
+					<div class="bp-error"><InlineAlert tone="error" title="Impor dibatalkan" message={importIssues.map((issue) => issue.message).join(" ")} /></div>
+				{/if}
+				{#if importBp.result}
+					<div class="bp-error"><InlineAlert tone="success" title="Impor berhasil" message={importBp.result.message} /></div>
+				{/if}
 				{#if errorMessage}
 					<div class="bp-error">
 						<InlineAlert tone="error" title="Aksi tidak dijalankan" message={errorMessage} dismissible ondismiss={() => (errorMessage = "")} />
