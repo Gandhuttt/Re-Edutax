@@ -1,9 +1,9 @@
-import { integer, real, sqliteTable, text } from 'drizzle-orm/sqlite-core';
+import { index, integer, real, sqliteTable, text, type AnySQLiteColumn } from 'drizzle-orm/sqlite-core';
 import { fasilitas_pajak_ebupot } from '../../references/ebupot/fasilitas_pajak_ebupot';
 import { jenis_dokumen_ebupot } from '../../references/ebupot/jenis_dokumen_ebupot';
 import { kode_objek_pajak_pph } from '../../references/ebupot/kode_objek_pajak_pph';
 import { wajib_pajak } from '../wajib_pajak/wajib_pajak';
-import { buktiPotongBpuStatusValues } from './bukti_potong_bpu';
+import { bpStatusValues } from '../../../../../helpers/bp-parity';
 import { ptkpEbupotValues } from '../../../../../helpers/ptkp-ebupot';
 
 // eBupot BP21 ("Bukti Pemotongan Selain Pegawai Tetap") -- PPh Pasal 21
@@ -19,7 +19,9 @@ import { ptkpEbupotValues } from '../../../../../helpers/ptkp-ebupot';
 // derived (TER bracket keyed by Status PTKP + bruto, or a flat rate) via
 // resolveBp21.ts -- both `dpp` and `tarif` are stored as the *resolved*
 // values at save time, same treatment BPU already gives `tarif`.
-export const bukti_potong_bp21 = sqliteTable('bukti_potong_bp21', {
+export const bukti_potong_bp21 = sqliteTable(
+'bukti_potong_bp21',
+{
 	id: text('id')
 		.primaryKey()
 		.$defaultFn(() => crypto.randomUUID()),
@@ -34,7 +36,7 @@ export const bukti_potong_bp21 = sqliteTable('bukti_potong_bp21', {
 	tahun: integer('tahun')
 		.notNull()
 		.$defaultFn(() => new Date().getFullYear()),
-	status: text('status', { enum: buktiPotongBpuStatusValues }).notNull().default('NORMAL'),
+	status: text('status', { enum: bpStatusValues }).notNull().default('NORMAL'),
 
 	nomorIdentitasWp: text('nomor_identitas_wp').notNull().default(''),
 	namaPenerima: text('nama_penerima').notNull().default(''),
@@ -60,5 +62,21 @@ export const bukti_potong_bp21 = sqliteTable('bukti_potong_bp21', {
 	// Assigned on Terbitkan -- simulated locally, same as BPU's
 	// nomorPemotongan/diterbitkan (see terbitkanBpu.remote.ts).
 	nomorPemotongan: text('nomor_pemotongan'),
-	diterbitkan: integer('diterbitkan', { mode: 'boolean' }).notNull().default(false)
-});
+	// WithholdingDate (Tanggal Pemotongan), ISO date; distinct from the document date.
+	tanggalPemotongan: text('tanggal_pemotongan'),
+	diterbitkan: integer('diterbitkan', { mode: 'boolean' }).notNull().default(false),
+
+	// Persisted NITKU (tempat_kegiatan_usaha.nitku) captured at save time.
+	nitkuPemotong: text('nitku_pemotong'),
+	nitkuPenerima: text('nitku_penerima'),
+	// Amendment origin: the BP21 this row replaces (stays valid until this row is issued).
+	pembetulanDariId: text('pembetulan_dari_id').references((): AnySQLiteColumn => bukti_potong_bp21.id, {
+		onDelete: 'set null'
+	}),
+	pembetulanKe: integer('pembetulan_ke').notNull().default(0),
+},
+(t) => [
+	index('bukti_potong_bp21_pembetulan_dari_idx').on(t.pembetulanDariId),
+	index('bukti_potong_bp21_owner_idx').on(t.npwpPemotong, t.tahun, t.masaPajak)
+]
+);

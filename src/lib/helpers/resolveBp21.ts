@@ -27,6 +27,14 @@ export type ResolvedBp21 = {
 	maxBruto?: number;
 };
 
+export type Bp21ManualInput = {
+	dppManual?: string | number | null;
+	tarifManual?: string | number | null;
+	pajakPenghasilanManual?: string | number | null;
+};
+
+export type Bp21Amounts = { dpp: number; tarif: number; pajakPenghasilan: number };
+
 const bandContains = (band: KodeObjekPajakTarifBand, amount: number) =>
 	amount >= band.Min && amount <= band.Max;
 
@@ -140,4 +148,20 @@ export const resolveBp21 = (
 	}
 
 	return { dppPercent, tarif: 0, manualDpp, manualTarif, manualIncomeTax };
+};
+
+// Final DPP%/Tarif%/PPh from a resolved result plus the user's manual inputs --
+// the exact derivation the save path uses. Callers validate required manual
+// values (resolved.manual*) before calling.
+export const computeBp21Amounts = (
+	resolved: ResolvedBp21,
+	bruto: number,
+	manual: Bp21ManualInput = {}
+): Bp21Amounts => {
+	const dpp = resolved.manualDpp ? Number(manual.dppManual) : resolved.dppPercent;
+	const tarif = resolved.manualTarif ? Number(manual.tarifManual) : resolved.tarif;
+	const pajakPenghasilan = resolved.manualIncomeTax
+		? Number(manual.pajakPenghasilanManual)
+		: (resolved.pajakPenghasilanOverride ?? Math.round((bruto * dpp * tarif) / 10000));
+	return { dpp, tarif, pajakPenghasilan };
 };

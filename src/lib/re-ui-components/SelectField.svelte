@@ -83,9 +83,12 @@
 		field ? remoteFieldName(field, "hidden", resolvedValue) : name,
 	);
 	const messageId = $derived(`${id}-message`);
-	const selected = $derived(
-		options.find((option) => option.value === resolvedValue) ?? options[0],
-	);
+	// Match the actual submitted value, including an explicit empty "Semua" option.
+	// Unmatched values show the placeholder; never fabricate the first selection.
+	function isSelectedValue(optionValue: SelectFieldValue) {
+		return optionValue === resolvedValue || String(optionValue) === String(resolvedValue);
+	}
+	const selected = $derived(options.find((option) => isSelectedValue(option.value)));
 	const filteredOptions = $derived.by(() => {
 		const needle = query.trim().toLocaleLowerCase(locale);
 		if (!searchable || !needle) return options;
@@ -134,7 +137,7 @@
 		query = "";
 		activeIndex = Math.max(
 			0,
-			options.findIndex((option) => option.value === resolvedValue),
+			options.findIndex((option) => isSelectedValue(option.value)),
 		);
 		closing = false;
 		// Width first, so the height measured below is not of a zero-width panel.
@@ -265,7 +268,9 @@
 		{disabled}
 		onclick={show}
 		onkeydown={handleKeydown}
-		><span id="{id}-value">{selected?.label ?? placeholder}</span><span
+		><span id="{id}-value" class="select-value" class:placeholder={!selected}
+			>{selected?.label ?? placeholder}</span
+		><span
 			class="chevron"
 			class:open={expanded}>⌄</span
 		></button
@@ -299,14 +304,14 @@
 				{#each filteredOptions as option, index (option.value)}<button
 						type="button"
 						role="option"
-						aria-selected={option.value === resolvedValue}
-						class:selected={option.value === resolvedValue}
+						aria-selected={isSelectedValue(option.value)}
+						class:selected={isSelectedValue(option.value)}
 						class:active={index === activeIndex}
 						style:--index={index}
 						onmouseenter={() => (activeIndex = index)}
 						onclick={() => choose(option)}
 						><span>{option.label}</span
-						>{#if option.value === resolvedValue}<span class="check">✓</span
+						>{#if isSelectedValue(option.value)}<span class="check">✓</span
 							>{/if}</button
 					>{:else}<div class="empty-option">
 						<strong>{emptyTitle}</strong><span
@@ -347,8 +352,8 @@
 		border: 0;
 	}
 	.label-hidden .select-trigger {
-		height: 30px;
-		padding: 0 8px;
+		min-height: 30px;
+		padding: 3px 8px;
 		font-size: 10px;
 	}
 	.field-label em {
@@ -367,8 +372,8 @@
 		white-space: nowrap;
 	}
 	.inline .select-trigger {
-		height: 34px;
-		padding: 0 9px;
+		min-height: 34px;
+		padding: 4px 9px;
 		font-size: 14px;
 	}
 	.inline .message,
@@ -377,8 +382,8 @@
 	}
 	.select-trigger {
 		width: 100%;
-		height: 40px;
-		padding: 0 11px;
+		min-height: 40px;
+		padding: 7px 11px;
 		display: flex;
 		align-items: center;
 		justify-content: space-between;
@@ -409,7 +414,18 @@
 		color: #666b70;
 		cursor: not-allowed;
 	}
+	.select-value {
+		min-width: 0;
+		flex: 1 1 auto;
+		line-height: 1.35;
+		white-space: normal;
+		overflow-wrap: anywhere;
+	}
+	.select-value.placeholder {
+		color: var(--ui-muted);
+	}
 	.chevron {
+		flex: 0 0 auto;
 		color: var(--ui-navy);
 		font-size: 15px;
 		font-weight: 900;
@@ -484,6 +500,11 @@
 		padding: 5px;
 		overflow: auto;
 	}
+	.option-list > button > span:first-child {
+		min-width: 0;
+		line-height: 1.35;
+		overflow-wrap: anywhere;
+	}
 	.option-list > button {
 		width: 100%;
 		min-height: 36px;
@@ -530,6 +551,7 @@
 		font-size: 12px;
 	}
 	.check {
+		flex: 0 0 auto;
 		color: var(--ui-yellow-deep);
 		font-size: 14px;
 		font-weight: 900;

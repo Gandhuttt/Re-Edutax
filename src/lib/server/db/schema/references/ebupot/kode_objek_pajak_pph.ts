@@ -81,7 +81,11 @@ export const kode_objek_pajak_pph = sqliteTable(
 		parameterData: text('parameter_data', { mode: 'json' })
 			.$type<KodeObjekPajakParameterData>()
 			.notNull(),
-		aktif: integer('aktif', { mode: 'boolean' }).notNull().default(true)
+		aktif: integer('aktif', { mode: 'boolean' }).notNull().default(true),
+		// Optional ISO-date (YYYY-MM-DD, inclusive) validity window. NULL = unavailable/unbounded;
+		// only filled from exact captured reference metadata, never invented.
+		validFrom: text('valid_from'),
+		validTo: text('valid_to')
 	},
 	(t) => [
 		uniqueIndex('kode_objek_pajak_pph_jenis_kode_unique').on(t.jenisBuktiPotong, t.kode)

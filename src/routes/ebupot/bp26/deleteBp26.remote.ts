@@ -1,29 +1,10 @@
 import { form, getRequestEvent } from '$app/server';
-import { db } from '$lib/server/db';
-import { bukti_potong_bp26 } from '$lib/server/db/schema';
-import { error, redirect } from '@sveltejs/kit';
-import { and, eq } from 'drizzle-orm';
+import { mutateBpOrHttpError } from '$lib/server/ebupot/lifecycle';
+import { redirect } from '@sveltejs/kit';
 import * as v from 'valibot';
 
-const DeleteBp26Schema = v.object({ id: v.string() });
-
-export const deleteBp26 = form(DeleteBp26Schema, async ({ id }) => {
-	const event = getRequestEvent();
-	const activeNpwp = event.locals.user?.username;
-
-	if (!activeNpwp) {
-		error(401, 'Belum login');
-	}
-
-	await db
-		.delete(bukti_potong_bp26)
-		.where(
-			and(
-				eq(bukti_potong_bp26.id, id),
-				eq(bukti_potong_bp26.npwpPemotong, activeNpwp),
-				eq(bukti_potong_bp26.diterbitkan, false)
-			)
-		);
-
+// Soft delete: unissued -> DELETED (never a hard delete), all guards in the shared service.
+export const deleteBp26 = form(v.object({ id: v.string() }), async ({ id }) => {
+	await mutateBpOrHttpError(getRequestEvent().locals.user?.username, 'bp26', 'delete', [id]);
 	redirect(303, '/ebupot/bp26');
 });

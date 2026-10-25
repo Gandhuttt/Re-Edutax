@@ -16,6 +16,12 @@ const kodeObjekPajakId = (jenisBuktiPotong: string, kode: string) =>
 const jenisDokumenId = (kode: string) => `jenis-dokumen-ebupot-${kode}`;
 const fasilitasPajakId = (kode: string) => `fasilitas-pajak-ebupot-${kode}`;
 
+// Preserve source validity (ISO date) only when the captured data supplies it; otherwise NULL.
+const validity = (row: object) => {
+	const v = row as { validFrom?: string | null; validTo?: string | null };
+	return { validFrom: v.validFrom ?? null, validTo: v.validTo ?? null };
+};
+
 export const run = async ({ db }: SeedContext) => {
 	await batchInsert(
 		db,
@@ -31,7 +37,9 @@ export const run = async ({ db }: SeedContext) => {
 					pasal: row.pasal,
 					sifat: row.sifat,
 					kap: row.kap,
-					parameterData: row.parameterData
+					parameterData: row.parameterData,
+					validFrom: validity(row).validFrom,
+					validTo: validity(row).validTo
 				})
 				.onConflictDoUpdate({
 					target: [kode_objek_pajak_pph.jenisBuktiPotong, kode_objek_pajak_pph.kode],
@@ -42,7 +50,9 @@ export const run = async ({ db }: SeedContext) => {
 						sifat: row.sifat,
 						kap: row.kap,
 						parameterData: row.parameterData,
-						aktif: true
+						aktif: true,
+						validFrom: validity(row).validFrom,
+						validTo: validity(row).validTo
 					}
 				})
 		)

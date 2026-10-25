@@ -884,3 +884,105 @@ Nama Objek Pajak catalog beyond what's already been pulled for BPU/BP21/
 BP26/BPA1/BPA2's own object codes (only those specific codes were
 fetched per-type via `fetch-reference-data.mjs`, not the entire shared
 catalog in one pull).
+
+## BP21/BP26 — local parity implementation (2026-10-25)
+
+This section supersedes older descriptions of **local BP21/BP26** limitations above.
+It does not change the audit observations or the behavior of BPU/MP/BPA1/BPA2.
+Reference: authenticated Coretax UI/network audit and the captured
+`main.7ec255bc8bb87f8c.js` bundle. Coretax was exercised only through draft
+creation/reopening during the audit; the two audit drafts were subsequently
+cancelled/deleted and verified as `DELETED`. Official issuance/upload was not tested.
+
+### Forms and calculations
+
+- Both forms use Informasi Umum → Pajak Penghasilan → Dokumen Referensi.
+  Long object labels wrap; lists scroll horizontally inside their own table.
+- Tanpa Fasilitas (code 9) is the default. Facility/period changes clear the old
+  object selection. Available objects are filtered by facility and known validity
+  metadata; missing validity dates remain unknown/unbounded, not invented.
+- Browser and server share the BP21/BP26 calculation helpers. Reopening BP26
+  preserves saved manual DPP/tariff; changing bruto resets manual overrides.
+  Server-side Submit recalculates tax from the **current submitted form**, not a
+  previously saved record.
+- Simpan Konsep requires period, recipient identity and name, but permits incomplete
+  supporting fields and bruto above an object's ceiling. It saves `SAVEDINVALID`.
+  Submit requires complete valid data and enforces the ceiling. Issued, cancelled,
+  deleted and superseded records cannot be edited.
+- Sender NITKU comes from the account's actual `tempat_kegiatan_usaha` records.
+  BP21 recipient NITKU must belong to the recipient WP and is required for Submit.
+  If missing, the recipient must configure a branch in their own account; a draft
+  may still be saved. No synthetic `NPWP + 000000` fallback is used.
+- Local recipient profiles explicitly distinguish individuals, entities and foreign
+  recipients, with PTKP for individuals. Government status controls the simulated
+  future-period allowance. Periods begin January 2025; real calendar dates and
+  identity/name/rate/date bounds are checked server-side.
+- Reference invoices must be issued local invoices from the income recipient
+  (seller) to the withholder (buyer). Their dates are derived and locked; unrelated
+  invoices are not disclosed by lookup.
+
+### Local registries are not DJP verification
+
+`/ebupot/referensi-lokal` manages account-owned branches, recipient profiles/PTKP,
+facility certificates and SKD receipts. Certificate/receipt checks require an active
+entry valid at the selected period end. Receipt numbers use the mandatory
+`SIM-SKD-` prefix. BP26 SKD lookup fills identity/address/country from that account's
+receipt and is rechecked on Submit. Another account cannot read or reuse the
+private receipt. No DJP session token or registry API is used.
+
+### Lists, lifecycle and exports
+
+- Lists have Belum Terbit, Telah Terbit, Tidak Valid and Histori tabs, period/status
+  filters, selection across filtered pages, and owner-scoped bulk operations.
+  Mutations accept at most 50 IDs and reject the whole operation for an unowned,
+  missing, stale or ineligible row. D1 batches also guard state transitions.
+- Delete is soft (`DELETED`). Amendment creates a linked draft; the source remains
+  active until the replacement is issued atomically, then becomes `AMENDED`.
+  Cancellation sets `CANCELLED`. Recipient lists/recaps include only issued
+  current versions, not superseded/cancelled/deleted records.
+- Issuance is explicitly an educational simulation. Numbers start with `SIM-BP21-`
+  or `SIM-BP26-`; they are not official DJP numbers or electronic signatures.
+- Selected records can be exported as CSV, a real XLSX workbook, or printable HTML
+  labelled `SIMULASI PENDIDIKAN—BUKAN DOKUMEN RESMI DJP`. The print action is
+  **Cetak / Simpan PDF**, not a pretend PDF download. Export is owner-scoped and
+  rejects mixed-owner ID sets rather than silently omitting records.
+
+### Official-template XML import, local destination only
+
+Verified public sources:
+[BP21 ZIP](https://pajak.go.id/sites/default/files/2024-12/bp21.zip) and
+[BP26 ZIP](https://pajak.go.id/sites/default/files/2024-12/bp26.zip).
+`/ebupot/impor?jenis=bp21|bp26` reads their `Bp21Bulk`/`BP26Bulk` structures into
+new local `SAVEDINVALID` drafts, never uploads to DJP or updates issued records.
+It preserves `WithholdingDate` separately from document date and handles the
+official country codes, PTKP codes and nil fields. Limit: 100 rows and 1 MiB.
+Unknown fields, DTD/entities, owner-TIN mismatches and invalid rows reject the
+whole file before persistence. Automatic Deemed/Rate must match local reference
+calculations; sample numbers in a template are not assumed valid tax examples.
+BP21 names come from local recipient profiles/registered WPs. Prior cumulative
+bruto is absent from the template and must be completed before Submit where needed.
+
+### Exercised verification
+
+- `npm run check`: 0 errors, 0 warnings; production build completed.
+- Browser interaction at desktop 1365px and mobile 390px: both forms, wrapping
+  object labels, persistence, lookup and Submit; no document-level horizontal overflow.
+- BP21 current-form bruto Rp12,000,000 → DPP 50%, tariff 5%, PPh Rp300,000.
+  Bruto Rp2,500,001 on daily object `21-100-24` saved as a draft but failed Submit.
+- BP26 manual DPP 50%/tariff 10% survived reopening; a bruto edit reset them to
+  100%/0%. Current-form Submit at Rp100,000,000 persisted PPh Rp5,000,000.
+- Amendment/issuance/cancellation and soft deletion exercised on local fixtures.
+  The recipient saw only the BP21 replacement (Rp600,000), then no version after
+  cancellation. Mixed-owner bulk/exports/detail access and mixed-state issuance
+  were rejected. Receipt ownership/expiry and unrelated-invoice lookup returned null.
+- Official-shaped BP21 XML imported successfully through the UI; inconsistent
+  automatic rates were rejected. Parser smoke covered both official templates,
+  nil passport fields, decimal rates, owner mismatch and entity rejection.
+- CSV and parsed XLSX exports exercised on both Vite and the built Cloudflare
+  Worker running locally with D1; printable output was checked for simulation labels.
+
+Migration `0039_bp_parity.sql` is required. Verification and migrations were local;
+no production database write, deployment, official issuance or push was performed.
+Not a claim of exhaustive parity across every Coretax object/facility/validation
+combination; authoritative registry access, official signing and issuance remain
+outside this educational simulator.

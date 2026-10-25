@@ -4,7 +4,7 @@ import { ptkpEbupotValues } from '$lib/helpers/ptkp-ebupot';
 import { formatRupiah } from '$lib/helpers/rupiahInput';
 import { db } from '$lib/server/db';
 import { bukti_potong_mp, fasilitas_pajak_ebupot, kode_objek_pajak_pph } from '$lib/server/db/schema';
-import { resolveBp21 } from '$lib/server/ebupot/resolveBp21';
+import { resolveBp21 } from '$lib/helpers/resolveBp21';
 import { error, redirect } from '@sveltejs/kit';
 import { and, eq } from 'drizzle-orm';
 import * as v from 'valibot';
