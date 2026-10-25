@@ -12,7 +12,7 @@ export type BpBranch = { nitku: string; nama: string };
 export type BpContext = {
 	ownBranches: BpBranch[];
 	recipientBranches: BpBranch[];
-	// Registered taxpayer matching the TIN; only used to prefill the name.
+	// Registered name used by the form lookup and canonicalized again on save.
 	knownTaxpayer: { npwp: string; nama: string } | null;
 };
 

@@ -898,6 +898,29 @@ cancelled/deleted and verified as `DELETED`. Official issuance/upload was not te
 
 - Both forms use Informasi Umum → Pajak Penghasilan → Dokumen Referensi.
   Long object labels wrap; lists scroll horizontally inside their own table.
+- Input correction (2026-10-25): the prior audit was partial, not proof of full
+  form parity. The active Coretax main bundle hash was rechecked and matched
+  `main.7ec255bc8bb87f8c.js`; initial forms and BP26 unknown-TIN/object transitions
+  were exercised live without saving, submitting, issuing or uploading.
+- Neither interactive form has Tanggal Pemotongan or an editable issuer NPWP.
+  WithholdingDate remains an XML-import/export field; interactive saves leave
+  any existing imported date untouched, and do not invent a replacement date.
+  NITKU pemotong is under Dokumen Referensi after Tanggal Dokumen.
+- BP21 Nama is readonly and populated on recipient lookup; registered names are
+  canonicalized again server-side. Generic names retain the confirmed original
+  numeric identity in `PENERIMA PENGHASILAN#...`, not freely entered text.
+  KAP-KJS is derived from the selected object. Previous gross appears as an
+  editable Jumlah only for cumulative objects `21-401-01`/`21-401-02`; the initial
+  untouched form shows the disabled amount as Coretax does.
+- BP26 has no manual reveal-details button. Unknown-recipient lookup reveals
+  address, country, birth date/place, passport and KITAS/KITAP automatically;
+  registered recipients use a readonly canonical name and hide those fields.
+  Address/country are required only for full Submit of an unknown recipient.
+  Changing identity clears stale details; reopening an unknown draft restores them.
+- DPP is editable before object selection; selected-object manual flags determine
+  DPP, tariff and final-tax editing. Manual final-tax zero is valid when enabled;
+  automatic combinations ignore forged overrides. Required markers do not block
+  minimal drafts: the draft action bypasses native full-form validation.
 - Tanpa Fasilitas (code 9) is the default. Facility/period changes clear the old
   object selection. Available objects are filtered by facility and known validity
   metadata; missing validity dates remain unknown/unbounded, not invented.
@@ -920,16 +943,20 @@ cancelled/deleted and verified as `DELETED`. Official issuance/upload was not te
   to this registered pusat; BP21 recipient lookup defaults to the recipient's
   registered pusat. Saved branch selections are preserved. No synthetic fallback
   substitutes for a missing database record; drafts may still omit NITKU.
-- Cari NPWP fills the recipient name from registered taxpayers; Status PTKP is chosen
-  in the form. Periods begin January 2025 and end at the current month; real calendar
-  dates and identity/name/rate/date bounds are checked server-side.
+- Lookup fills registered recipient names; Status PTKP is chosen locally because
+  the local WP table does not supply DJP taxpayer type/marital/dependent data.
+  Periods begin January 2025 and end at the current month; real calendar dates
+  and identity/name/rate bounds are checked server-side.
 - Facility certificates (SKB/DTP/Fasilitas Lainnya) and BP26 SKD receipts are issued by
   DJP in Coretax and looked up there. This app has no such registry, so the facility is
-  selected directly and the SKD Receipt Number is entered on the form with a format
-  check only; it is not matched against any list.
+  selected directly and the SKD Receipt Number is entered as text, required for
+  SKD Submit only. No invented receipt pattern or DJP validation is applied.
+  An inline hint explains that receipt lookup/autofill is unavailable locally.
 - Reference invoices must be issued local invoices from the income recipient
-  (seller) to the withholder (buyer). Their dates are derived and locked; unrelated
-  invoices are not disclosed by lookup.
+  (seller) to the withholder (buyer). Selecting Faktur Pajak initially locks its
+  date; document-number lookup populates it when found and unlocks date editing,
+  matching the captured client event. Unrelated invoices are not disclosed,
+  and Submit still requires a matching issued local invoice.
 
 The earlier `/ebupot/referensi-lokal` page (local branches, recipient profiles,
 certificates, SKD receipts, government flag) was removed because Coretax has no such
@@ -990,8 +1017,8 @@ bruto is absent from the template and must be completed before Submit where need
   The recipient saw only the BP21 replacement (Rp600,000), then no version after
   cancellation. Mixed-owner bulk/exports/detail access and mixed-state issuance
   were rejected. Unrelated-invoice lookup returned null. Receipt ownership/expiry
-  checks belonged to the removed registry and no longer apply: SKD receipt input
-  is format-checked only, not verified against DJP.
+  checks belonged to the removed registry and no longer apply. Receipt input was
+  formerly format-checked; the input correction removed that invented pattern.
 - Official-shaped BP21 XML imported successfully through the UI; inconsistent
   automatic rates were rejected. Parser smoke covered both official templates,
   nil passport fields, decimal rates, owner mismatch and entity rejection.
@@ -1014,6 +1041,24 @@ bruto is absent from the template and must be completed before Submit where need
 - BP21 Submit without manually adding TKU persisted `SUBMITTED`, sender/recipient
   pusat NITKU, and PPh Rp300,000. BP26 sender pusat was selected automatically
   on a new draft and visually checked at 390px.
+- Input-correction browser smoke at 1365px/390px: BP21 minimal draft preserved
+  DPP150.1234567, and a forged name was replaced by the registered name. Full
+  Submit without a withholding-date input produced PPh Rp300,000. Cumulative
+  object selection exposed editable Jumlah; all forms stayed within viewport.
+- BP26 unknown-recipient minimal draft reopened with automatic identity details.
+  Full Submit rejected missing address/country, then succeeded after completion.
+  Switching to a registered recipient hid foreign fields and full Submit
+  succeeded without them; a forged name was canonicalized. Mobile draft save
+  worked. SKD receipt `skd/UI2026.123`, DPP50 and tariff10 survived reopening;
+  leaving SKD cleared receipt and stale identity.
+- Fixture dates `2026-09-17` (BP21) and `2026-09-18` (BP26) survived interactive
+  saves unchanged. BP26 Faktur Pajak locked then unlocked date on number lookup.
+  Actual-helper smoke verified ignored automatic overrides, manual DPP150,
+  manual final-tax0, and calculated tax when no manual final-tax is supplied.
+- This is input-level verification, not official-backend acceptance parity.
+  Full Submit still requires positive bruto locally; official acceptance of
+  zero was not tested. DJP receipt/certificate checks, taxpayer type/PTKP lookup
+  and automatic official SKD identity population remain outside the simulator.
 
 Migrations `0039_bp_parity.sql`, `0040_drop_bp_local_registry.sql`, and
 `0041_default_tku_pusat.sql` are required.

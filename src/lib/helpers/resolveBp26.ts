@@ -16,6 +16,7 @@ export type ResolvedBp26 = {
 export type Bp26ManualInput = {
 	dppManual?: string | number | null;
 	tarifManual?: string | number | null;
+	pajakPenghasilanManual?: string | number | null;
 };
 
 export type Bp26Amounts = { dpp: number; tarif: number; pajakPenghasilan: number };
@@ -87,5 +88,12 @@ export const computeBp26Amounts = (
 ): Bp26Amounts => {
 	const dpp = resolved.manualDpp ? Number(manual.dppManual) : resolved.dppPercent;
 	const tarif = resolved.manualTarif ? Number(manual.tarifManual) : resolved.tarif;
-	return { dpp, tarif, pajakPenghasilan: Math.round((bruto * dpp * tarif) / 10000) };
+	const calculatedTax = Math.round((bruto * dpp * tarif) / 10000);
+	const pajakPenghasilan =
+		resolved.manualIncomeTax &&
+		manual.pajakPenghasilanManual != null &&
+		manual.pajakPenghasilanManual !== ''
+			? Number(manual.pajakPenghasilanManual)
+			: calculatedTax;
+	return { dpp, tarif, pajakPenghasilan };
 };

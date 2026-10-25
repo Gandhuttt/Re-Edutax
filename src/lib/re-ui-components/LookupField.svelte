@@ -58,7 +58,7 @@
 </script>
 
 <label class="lookup-field {className ?? ""}" class:without-button={!buttonVisible} for={id}>
-	<span>{label}</span>
+	<span>{label}{#if inputProps.required}<em aria-hidden="true">*</em>{/if}</span>
 	<div>
 		<input
 			{...inputProps}
@@ -87,6 +87,12 @@
 	.lookup-field > span {
 		font-size: 14px;
 		font-weight: 700;
+	}
+
+	.lookup-field > span em {
+		margin-left: 3px;
+		color: var(--ui-danger);
+		font-style: normal;
 	}
 
 	.lookup-field > div {

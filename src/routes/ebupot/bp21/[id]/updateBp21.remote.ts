@@ -43,7 +43,10 @@ const optionalDecimal = v.optional(
 	v.pipe(
 		v.string(),
 		v.trim(),
-		v.regex(/^(?:\d{1,6}(?:\.\d{1,6})?)?$/, 'Nilai harus berupa angka nonnegatif')
+		v.check(
+			(value) => value === '' || (/^\d+(?:\.\d+)?(?:e[+-]?\d+)?$/i.test(value) && Number.isFinite(Number(value)) && Number(value) >= 0),
+			'Nilai harus berupa angka nonnegatif yang terhingga'
+		)
 	),
 	''
 );
@@ -55,7 +58,6 @@ const UpdateBp21Schema = v.object({
 	namaPenerima: optionalText,
 	nitkuPemotong: optionalText,
 	nitkuPenerima: optionalText,
-	tanggalPemotongan: optionalText,
 	statusPtkp: optionalText,
 	fasilitasPajakId: optionalText,
 	kodeObjekPajakId: optionalText,
@@ -110,22 +112,27 @@ export const updateBp21 = form(UpdateBp21Schema, async (input, issue) => {
 
 	// --- Penerima ---
 	const tin = input.nomorIdentitasWp.trim();
-	const nama = input.namaPenerima.trim();
+	const ctx = await getBpContext(owner, tin);
+	// A locked browser field is not a trust boundary. Only the confirmed generic
+	// naming convention may carry an original (unregistered) identity from the UI.
+	const genericName = /^PENERIMA PENGHASILAN#(\d{3,16})$/.exec(input.namaPenerima.trim());
+	const nama = tin === GENERIC_TIN && genericName
+		? `PENERIMA PENGHASILAN#${genericName[1]}`
+		: ctx.knownTaxpayer?.nama.trim() ?? '';
 	if (!tin) errs.push(issue.nomorIdentitasWp('Nomor Identitas WP harus diisi'));
 	else if (tin === owner) {
 		errs.push(issue.nomorIdentitasWp('Nomor Identitas WP penerima tidak boleh sama dengan NPWP pemotong'));
-	} else if (isSubmit ? !/^\d{16}$/.test(tin) : !/^\d{1,16}$/.test(tin)) {
+	} else if (!/^\d{3,16}$/.test(tin)) {
 		errs.push(
 			issue.nomorIdentitasWp(
-				isSubmit ? 'Nomor Identitas WP harus 16 digit angka' : 'Nomor Identitas WP harus berupa angka (maks 16 digit)'
+				'Nomor Identitas WP harus berupa 3 sampai 16 digit angka'
 			)
 		);
 	}
-	if (!nama) errs.push(issue.namaPenerima('Nama penerima harus diisi'));
-	else if (nama.length > 100) errs.push(issue.namaPenerima('Nama penerima maksimal 100 karakter'));
+	if (!nama) errs.push(issue.namaPenerima('Nama harus terisi melalui pencarian Nomor Identitas WP'));
+	else if (nama.length < 3 || nama.length > 150) errs.push(issue.namaPenerima('Nama harus 3 sampai 150 karakter'));
 
-	const ctx = await getBpContext(owner, tin);
-	if (isSubmit && tin && !ctx.knownTaxpayer && tin !== GENERIC_TIN) {
+	if (tin && !ctx.knownTaxpayer && tin !== GENERIC_TIN) {
 		errs.push(
 			issue.nomorIdentitasWp(
 				'TIN belum terdaftar. Gunakan tombol Cari NPWP dan konfirmasi penggunaan TIN generik'
@@ -247,15 +254,6 @@ export const updateBp21 = form(UpdateBp21Schema, async (input, issue) => {
 		errs.push(issue.tanggalDokumen('Tanggal dokumen harus diisi'));
 	}
 
-	const tanggalPemotongan = input.tanggalPemotongan.trim();
-	if (tanggalPemotongan) {
-		if (!isValidIsoDate(tanggalPemotongan)) {
-			errs.push(issue.tanggalPemotongan('Tanggal pemotongan tidak valid'));
-		} else if (tanggalPemotongan > today) {
-			errs.push(issue.tanggalPemotongan('Tanggal pemotongan tidak boleh melebihi hari ini'));
-		}
-	}
-
 	// --- Penghasilan & derived amounts (always recomputed server-side) ---
 	const penghasilanBruto = Number(input.penghasilanBruto || '0');
 	const isCumulativeObject = objekPajak ? cumulativeObjectCodes.includes(objekPajak.kode) : false;
@@ -290,6 +288,9 @@ export const updateBp21 = form(UpdateBp21Schema, async (input, issue) => {
 			if (resolved.manualTarif && !input.tarifManual) {
 				errs.push(issue.tarifManual('Tarif harus diisi untuk kombinasi ini'));
 			}
+			if (resolved.manualTarif && Number(input.tarifManual) >= 1000) {
+				errs.push(issue.tarifManual('Tarif harus kurang dari 1000'));
+			}
 			if (resolved.manualIncomeTax && !input.pajakPenghasilanManual) {
 				errs.push(issue.pajakPenghasilanManual('Pajak Penghasilan harus diisi untuk kombinasi ini'));
 			}
@@ -304,7 +305,7 @@ export const updateBp21 = form(UpdateBp21Schema, async (input, issue) => {
 				tarifManual: input.tarifManual || '0',
 				pajakPenghasilanManual: input.pajakPenghasilanManual || '0'
 			})
-		: { dpp: 0, tarif: 0, pajakPenghasilan: 0 };
+		: { dpp: Number(input.dppManual || '0'), tarif: 0, pajakPenghasilan: 0 };
 
 	// Guarded update: the row must still be this owner's, unissued and in the status we
 	// validated against, so a stale save cannot clobber a concurrent transition.
@@ -326,7 +327,6 @@ export const updateBp21 = form(UpdateBp21Schema, async (input, issue) => {
 			jenisDokumenId: jenisDokumen?.id ?? null,
 			nomorDokumen,
 			tanggalDokumen: tanggalDokumen || null,
-			tanggalPemotongan: tanggalPemotongan || null,
 			nitkuPemotong: nitkuPemotong || null,
 			nitkuPenerima: nitkuPenerima || null,
 			// Draft always resets to "Disimpan Tidak Valid"; only a complete Submit validates.

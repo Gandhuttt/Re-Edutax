@@ -62,7 +62,7 @@ export const bukti_potong_bp21 = sqliteTable(
 	// Assigned on Terbitkan -- simulated locally, same as BPU's
 	// nomorPemotongan/diterbitkan (see terbitkanBpu.remote.ts).
 	nomorPemotongan: text('nomor_pemotongan'),
-	// WithholdingDate (Tanggal Pemotongan), ISO date; distinct from the document date.
+	// XML WithholdingDate, ISO date; preserved, not edited by the interactive form.
 	tanggalPemotongan: text('tanggal_pemotongan'),
 	diterbitkan: integer('diterbitkan', { mode: 'boolean' }).notNull().default(false),
 

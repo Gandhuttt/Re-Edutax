@@ -10,7 +10,7 @@ import {
 	kode_objek_pajak_pph,
 	negara_spt_pph_badan
 } from '$lib/server/db/schema';
-import { findBpInvoice, isOwnedBranch } from '$lib/server/ebupot/bpLookup';
+import { findBpInvoice, getBpContext, isOwnedBranch } from '$lib/server/ebupot/bpLookup';
 import { error, invalid, redirect } from '@sveltejs/kit';
 import { and, eq, inArray } from 'drizzle-orm';
 import * as v from 'valibot';
@@ -47,12 +47,7 @@ const UpdateBp26Schema = v.object({
 		v.nonEmpty('Nomor Identitas WP harus diisi'),
 		v.maxLength(50, 'Nomor Identitas WP maksimal 50 karakter')
 	),
-	nama: v.pipe(
-		v.string(),
-		v.trim(),
-		v.nonEmpty('Nama harus diisi'),
-		v.maxLength(100, 'Nama maksimal 100 karakter')
-	),
+	nama: optionalText('Nama', 100),
 	alamat: optionalText('Alamat', 500),
 	negaraAsalId: optionalText('Negara Asal', 100),
 	tanggalLahir: optionalText('Tanggal Lahir', 10),
@@ -74,10 +69,17 @@ const UpdateBp26Schema = v.object({
 	// Only used when the resolver says the object+facility combination is manual.
 	dppManual: optionalText('DPP', 20),
 	tarifManual: optionalText('Tarif', 20),
+	pajakPenghasilanManual: v.optional(
+		v.pipe(
+			v.string(),
+			v.transform((value) => value.replaceAll('.', '').trim()),
+			v.check((value) => value === '' || /^\d+$/.test(value), 'Pajak Penghasilan harus berupa angka')
+		),
+		''
+	),
 	jenisDokumenId: optionalText('Jenis Dokumen', 100),
 	nomorDokumen: optionalText('Nomor Dokumen', 100),
 	tanggalDokumen: optionalText('Tanggal Dokumen', 10),
-	tanggalPemotongan: optionalText('Tanggal Pemotongan', 10),
 	nitkuPemotong: optionalText('NITKU Pemotong', 30)
 });
 
@@ -138,16 +140,20 @@ export const updateBp26 = form(UpdateBp26Schema, async (input, issue) => {
 		bad('fasilitasPajakId', 'Nama Fasilitas harus dipilih');
 	}
 
-	const { nomorIdentitasWp, nama, alamat, negaraAsalId } = input;
+	const { nomorIdentitasWp } = input;
+	const identity = await getBpContext(activeNpwp, nomorIdentitasWp);
+	const knownName = identity.knownTaxpayer?.nama;
+	const nama = knownName || input.nama;
+	const alamat = knownName ? '' : input.alamat;
+	const negaraAsalId = knownName ? '' : input.negaraAsalId;
+	if (!nama) bad('nama', 'Nama harus diisi');
 	let receiptNumber: string | null = null;
 
 	const periodValid = Number.isInteger(input.tahun) && Number.isInteger(input.masaPajak);
 
 	if (fasilitas?.kode === '7') {
-		receiptNumber = input.receiptNumber.toUpperCase() || null;
-		if (receiptNumber && !/^[A-Z0-9][A-Z0-9./-]*$/.test(receiptNumber)) {
-			bad('receiptNumber', 'Receipt Number hanya boleh berisi huruf, angka, titik, garis miring, dan tanda hubung');
-		} else if (submit && !receiptNumber) {
+		receiptNumber = input.receiptNumber || null;
+		if (submit && !receiptNumber) {
 			bad('receiptNumber', 'Receipt Number harus diisi untuk fasilitas Surat Keterangan Domisili');
 		}
 	}
@@ -168,13 +174,13 @@ export const updateBp26 = form(UpdateBp26Schema, async (input, issue) => {
 			.where(and(eq(negara_spt_pph_badan.id, negaraAsalId), eq(negara_spt_pph_badan.aktif, true)))
 			.limit(1);
 		if (!negara) bad('negaraAsalId', 'Negara Asal tidak valid');
-	} else if (submit) {
+	} else if (submit && !knownName) {
 		bad('negaraAsalId', 'Negara Asal harus dipilih');
 	}
 
-	if (submit && !alamat) bad('alamat', 'Alamat harus diisi');
+	if (submit && !knownName && !alamat) bad('alamat', 'Alamat harus diisi');
 
-	if (input.tanggalLahir) {
+	if (!knownName && input.tanggalLahir) {
 		if (!isValidIsoDate(input.tanggalLahir)) {
 			bad('tanggalLahir', 'Tanggal Lahir tidak valid');
 		} else if (submit && (input.tanggalLahir < MIN_BIRTH_DATE || input.tanggalLahir > today)) {
@@ -182,13 +188,6 @@ export const updateBp26 = form(UpdateBp26Schema, async (input, issue) => {
 		}
 	}
 
-	if (input.tanggalPemotongan) {
-		if (!isValidIsoDate(input.tanggalPemotongan)) {
-			bad('tanggalPemotongan', 'Tanggal Pemotongan tidak valid');
-		} else if (input.tanggalPemotongan > today) {
-			bad('tanggalPemotongan', 'Tanggal Pemotongan tidak boleh setelah hari ini');
-		}
-	}
 
 	// --- Branch (issuer's own NITKU) ---
 	if (input.nitkuPemotong) {
@@ -265,22 +264,25 @@ export const updateBp26 = form(UpdateBp26Schema, async (input, issue) => {
 
 	// --- Amounts (shared resolver; recomputed server-side) ---
 	const penghasilanBruto = Number(input.penghasilanBruto);
-	const dppInvalid = input.dppManual !== '' && !(decimalRegex.test(input.dppManual) && Number(input.dppManual) <= 100);
+	const dppInvalid = input.dppManual !== '' && !(decimalRegex.test(input.dppManual) && Number.isFinite(Number(input.dppManual)));
 	const tarifInvalid =
 		input.tarifManual !== '' && !(decimalRegex.test(input.tarifManual) && Number(input.tarifManual) < 1000);
+	const manualIncomeTax = input.pajakPenghasilanManual === '' ? undefined : Number(input.pajakPenghasilanManual);
+	const incomeTaxInvalid = manualIncomeTax !== undefined && (!Number.isSafeInteger(manualIncomeTax) || manualIncomeTax < 0);
+	if (incomeTaxInvalid) bad('pajakPenghasilanManual', 'Pajak Penghasilan tidak valid');
 	const brutoInvalid = !Number.isSafeInteger(penghasilanBruto) || penghasilanBruto < 0;
 	if (brutoInvalid) {
 		bad('penghasilanBruto', 'Penghasilan Bruto tidak valid');
 	} else if (submit && penghasilanBruto <= 0) {
 		bad('penghasilanBruto', 'Penghasilan Bruto harus lebih dari 0');
 	}
-	if (dppInvalid) bad('dppManual', 'DPP harus berupa angka 0 sampai 100');
+	if (dppInvalid) bad('dppManual', 'DPP harus berupa angka minimal 0');
 	if (tarifInvalid) bad('tarifManual', 'Tarif harus berupa angka minimal 0 dan kurang dari 1000');
 
 	let dpp = 0;
 	let tarif = 0;
 	let pajakPenghasilan = 0;
-	if (objekPajak && fasilitas && !brutoInvalid && !dppInvalid && !tarifInvalid) {
+	if (objekPajak && fasilitas && !brutoInvalid && !dppInvalid && !tarifInvalid && !incomeTaxInvalid) {
 		try {
 			const resolved = resolveBp26(objekPajak.parameterData, fasilitas.kode, penghasilanBruto);
 			if (submit && resolved.maxBruto !== undefined && penghasilanBruto > resolved.maxBruto) {
@@ -291,10 +293,12 @@ export const updateBp26 = form(UpdateBp26Schema, async (input, issue) => {
 			}
 			if (submit && resolved.manualDpp && !input.dppManual) bad('dppManual', 'DPP harus diisi');
 			if (submit && resolved.manualTarif && !input.tarifManual) bad('tarifManual', 'Tarif harus diisi');
+			if (submit && resolved.manualIncomeTax && manualIncomeTax === undefined) bad('pajakPenghasilanManual', 'Pajak Penghasilan harus diisi');
 			// A draft without a manual value falls back to the resolved default.
 			({ dpp, tarif, pajakPenghasilan } = computeBp26Amounts(resolved, penghasilanBruto, {
 				dppManual: input.dppManual || resolved.dppPercent,
-				tarifManual: input.tarifManual || resolved.tarif
+				tarifManual: input.tarifManual || resolved.tarif,
+				pajakPenghasilanManual: manualIncomeTax
 			}));
 			if (!Number.isFinite(pajakPenghasilan) || pajakPenghasilan < 0) {
 				bad('penghasilanBruto', 'Pajak Penghasilan tidak valid');
@@ -315,10 +319,10 @@ export const updateBp26 = form(UpdateBp26Schema, async (input, issue) => {
 			nama,
 			alamat,
 			negaraAsalId: negaraAsalId || null,
-			tanggalLahir: input.tanggalLahir || null,
-			tempatLahir: input.tempatLahir,
-			nomorPaspor: input.nomorPaspor,
-			nomorKitasKitap: input.nomorKitasKitap,
+			tanggalLahir: knownName ? null : input.tanggalLahir || null,
+			tempatLahir: knownName ? '' : input.tempatLahir,
+			nomorPaspor: knownName ? '' : input.nomorPaspor,
+			nomorKitasKitap: knownName ? '' : input.nomorKitasKitap,
 			kodeObjekPajakId: objekPajak?.id ?? null,
 			fasilitasPajakId: fasilitas?.id ?? null,
 			receiptNumber,
@@ -329,7 +333,6 @@ export const updateBp26 = form(UpdateBp26Schema, async (input, issue) => {
 			jenisDokumenId: jenisDokumen?.id ?? null,
 			nomorDokumen: input.nomorDokumen,
 			tanggalDokumen: tanggalDokumen || null,
-			tanggalPemotongan: input.tanggalPemotongan || null,
 			nitkuPemotong: input.nitkuPemotong || null,
 			// Draft always resets to "Disimpan Tidak Valid"; Submit marks SUBMITTED.
 			status: submit ? 'SUBMITTED' : 'SAVEDINVALID'

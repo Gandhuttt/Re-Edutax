@@ -27,10 +27,9 @@
 	// Preserve saved NITKU; editable drafts without one default to their registered pusat.
 	let periodeState = $state(`${bp21.tahun}-${pad(bp21.masaPajak)}`);
 	let nomorIdentitasWpState = $state(bp21.nomorIdentitasWp);
-	let namaPenerimaState = $state(bp21.namaPenerima);
+	let namaPenerimaState = $state(!editable || (bp21.nomorIdentitasWp === GENERIC_TIN && /^PENERIMA PENGHASILAN#\d{3,16}$/.test(bp21.namaPenerima)) ? bp21.namaPenerima : initialContext.knownTaxpayer?.nama ?? '');
 	let nitkuPemotongState = $state(bp21.nitkuPemotong ?? (editable ? initialContext.ownBranches.find((b) => b.nitku.endsWith('000000'))?.nitku ?? '' : ''));
 	let nitkuPenerimaState = $state(bp21.nitkuPenerima ?? (editable ? initialContext.recipientBranches.find((b) => b.nitku === `${bp21.nomorIdentitasWp}000000`)?.nitku ?? '' : ''));
-	let tanggalPemotonganState = $state(bp21.tanggalPemotongan ?? '');
 	let statusPtkpState = $state(bp21.statusPtkp ?? '');
 	let fasilitasPajakIdState = $state(bp21.fasilitasPajakId ?? '');
 	let kodeObjekPajakIdState = $state(bp21.kodeObjekPajakId ?? '');
@@ -48,6 +47,7 @@
 	let dirty = $state(false);
 	let lookupMessage = $state('');
 	let invoiceMessage = $state('');
+	let taxInvoiceDateUnlocked = $state(false);
 	let brutoAtFocus = 0;
 	let sidebarOpen = $state(false);
 
@@ -65,7 +65,7 @@
 	const selectedFasilitas = $derived(fasilitasOptions.find((f) => f.id === fasilitasPajakIdState));
 	const selectedObjekPajak = $derived(objekPajakOptions.find((o) => o.id === kodeObjekPajakIdState));
 	const fasilitasSelectOptions = fasilitasOptions.map((f) => ({ value: f.id, label: f.nama }));
-	const objekAvailableIds = $derived(new Set(selectedFasilitas ? objekPajakOptions.filter((o) => isObjectAvailable(o, selectedFasilitas.kode, tahunState, masaPajakState)).map((o) => o.id) : []));
+	const objekAvailableIds = $derived(new Set(selectedFasilitas && !periodOutOfRange ? objekPajakOptions.filter((o) => isObjectAvailable(o, selectedFasilitas.kode, tahunState, masaPajakState)).map((o) => o.id) : []));
 	const objekSelectOptions = $derived(objekPajakOptions.filter((o) => objekAvailableIds.has(o.id) || o.id === kodeObjekPajakIdState).map((o) => ({ value: o.id, label: `${o.kode} — ${o.nama}` })));
 	const objekMismatch = $derived(Boolean(selectedObjekPajak) && !objekAvailableIds.has(selectedObjekPajak!.id));
 	const isCumulativeObject = $derived(selectedObjekPajak ? cumulativeObjectCodes.includes(selectedObjekPajak.kode) : false);
@@ -102,11 +102,14 @@
 	}
 
 	async function refreshContext(tin: string) {
+		const nextContext = await getBpLookupContext({ tin });
+		if (nomorIdentitasWpState.trim() !== tin) return false;
 		committedTin = tin;
-		ctx = await getBpLookupContext({ tin });
+		ctx = nextContext;
 		if (!nitkuPenerimaState || !ctx.recipientBranches.some((b) => b.nitku === nitkuPenerimaState)) {
 			nitkuPenerimaState = ctx.recipientBranches.find((b) => b.nitku === `${tin}000000`)?.nitku ?? '';
 		}
+		return true;
 	}
 	function changePeriode(value: string) {
 		touch();
@@ -131,6 +134,7 @@
 	function changeJenisDokumen(value: string) {
 		touch();
 		jenisDokumenIdState = value;
+		taxInvoiceDateUnlocked = false;
 		invoiceMessage = '';
 		if (jenisDokumenOptions.find((d) => d.id === value)?.kode === 'TAXINVOICE') tanggalDokumenState = '';
 	}
@@ -139,14 +143,23 @@
 		touch();
 		lookupMessage = '';
 		const tin = nomorIdentitasWpState.trim();
-		await refreshContext(tin);
-		if (ctx.knownTaxpayer) {
-			namaPenerimaState = ctx.knownTaxpayer.nama;
-		} else if (tin && tin !== GENERIC_TIN && confirm(`TIN ${tin} saat ini belum terdaftar dalam sistem. Sistem akan otomatis menggunakan TIN ${GENERIC_TIN} sebagai TIN penerima penghasilan.`)) {
+		if (!/^\d{3,16}$/.test(tin)) {
+			namaPenerimaState = '';
+			lookupMessage = 'Nomor Identitas WP harus berupa 3 sampai 16 digit angka.';
+			return;
+		}
+		if (!(await refreshContext(tin))) return;
+		if (tin === accountNpwp) {
+			namaPenerimaState = '';
+			lookupMessage = 'Nomor Identitas WP penerima tidak boleh sama dengan NPWP pemotong.';
+		} else if (ctx.knownTaxpayer) {
+			if (tin !== GENERIC_TIN || !/^PENERIMA PENGHASILAN#\d{3,16}$/.test(namaPenerimaState)) namaPenerimaState = ctx.knownTaxpayer.nama;
+		} else if (tin !== GENERIC_TIN && confirm(`TIN ${tin} saat ini belum terdaftar dalam sistem. Sistem akan otomatis menggunakan TIN ${GENERIC_TIN} sebagai TIN penerima penghasilan.`)) {
 			namaPenerimaState = `PENERIMA PENGHASILAN#${tin}`;
 			nomorIdentitasWpState = GENERIC_TIN;
 			await refreshContext(GENERIC_TIN);
 		} else if (tin !== GENERIC_TIN) {
+			namaPenerimaState = '';
 			lookupMessage = 'TIN tidak ditemukan dan penggunaan TIN generik tidak dikonfirmasi.';
 		}
 	}
@@ -154,6 +167,7 @@
 	async function cariFaktur() {
 		touch();
 		invoiceMessage = '';
+		taxInvoiceDateUnlocked = true;
 		const invoice = await lookupBpInvoice({ tin: nomorIdentitasWpState.trim(), nomorDokumen: nomorDokumenState.trim() });
 		if (invoice) {
 			tanggalDokumenState = invoice.tanggalFaktur;
@@ -180,54 +194,56 @@
 
 		<FormSection number="01" title="Informasi Umum" bordered>
 			<FieldGrid>
-				<SelectField label="Masa Pajak" name="periode" value={periodeState} disabled={!editable} options={periodSelectOptions} error={issue('periode')} onchange={(v) => changePeriode(String(v))} />
-				<FormField label="Status" value={statusLabel[bp21.status] ?? bp21.status} disabled />
+				<SelectField label="Masa Pajak" required name="periode" value={periodeState} disabled={!editable} options={periodSelectOptions} error={issue('periode')} onchange={(v) => changePeriode(String(v))} />
+				<FormField label="Status" required value={statusLabel[bp21.status] ?? bp21.status} disabled />
 				{#if periodOutOfRange}<div class="wide"><InlineAlert tone="error" title="Masa pajak tidak sesuai">Masa pajak tersimpan berada di luar rentang yang diizinkan. Pilih masa pajak yang valid sebelum Submit.</InlineAlert></div>{/if}
 				{#if bp21.pembetulanKe > 0 || bp21.pembetulanDariId}
 					<div class="wide"><InlineAlert tone="info" title={`Pembetulan ke-${bp21.pembetulanKe}`}>{#if bp21.pembetulanDari}Pembetulan dari <a href={`/ebupot/bp21/${bp21.pembetulanDari.id}`}>{bp21.pembetulanDari.nomorPemotongan ?? 'bukti potong asal'}</a>.{:else}Bukti potong asal tidak dapat ditampilkan.{/if}</InlineAlert></div>
 				{/if}
-				<FormField label="NPWP/NIK Pemotong" value={accountNpwp} disabled />
-				<SelectField label="NITKU Pemotong" name="nitkuPemotong" value={nitkuPemotongState} disabled={!editable} options={ownBranchOptions} placeholder="Pilih NITKU pemotong" error={issue('nitkuPemotong')} hint={ctx.ownBranches.length === 0 ? 'Belum ada NITKU. Tambahkan di Profil Saya › Tempat Kegiatan Usaha.' : ''} onchange={(v) => { touch(); nitkuPemotongState = String(v); }} />
-				<LookupField label="Nomor Identitas WP (Penerima)" name="nomorIdentitasWp" bind:value={nomorIdentitasWpState} buttonLabel="Cari NPWP" buttonVisible={editable} disabled={!editable} inputmode="numeric" maxlength={16} error={issue('nomorIdentitasWp')} hint={lookupMessage} onlookup={cariNpwpPenerima} onvaluechange={touch} onblur={() => { if (editable && nomorIdentitasWpState.trim() !== committedTin) refreshContext(nomorIdentitasWpState.trim()); }} />
-				<FormField label="Nama Penerima" name="namaPenerima" maxlength={100} bind:value={namaPenerimaState} disabled={!editable} error={issue('namaPenerima')} oninput={touch} />
-				<SelectField label="NITKU Penerima Penghasilan" name="nitkuPenerima" value={nitkuPenerimaState} disabled={!editable} options={recipientBranchOptions} placeholder="Pilih NITKU penerima" error={issue('nitkuPenerima')} onchange={(v) => { touch(); nitkuPenerimaState = String(v); }} />
-				<DateField label="Tanggal Pemotongan" name="tanggalPemotongan" bind:value={tanggalPemotonganState} max={today} disabled={!editable} error={issue('tanggalPemotongan')} onchange={touch} />
+				<LookupField label="Nomor Identitas WP" required name="nomorIdentitasWp" bind:value={nomorIdentitasWpState} buttonLabel="Cari NPWP" buttonVisible={editable} disabled={!editable} inputmode="numeric" minlength={3} maxlength={16} error={issue('nomorIdentitasWp')} hint={lookupMessage} onlookup={cariNpwpPenerima} onvaluechange={() => { touch(); namaPenerimaState = ''; nitkuPenerimaState = ''; }} onblur={() => { if (editable && nomorIdentitasWpState.trim() !== committedTin) cariNpwpPenerima(); }} />
+				<FormField label="Nama" required name="namaPenerima" minlength={3} maxlength={150} bind:value={namaPenerimaState} readonly error={issue('namaPenerima')} />
+				<SelectField label="NITKU /Nomor Identitas Subunit Organisasi Penerima Penghasilan" required name="nitkuPenerima" value={nitkuPenerimaState} disabled={!editable} options={recipientBranchOptions} placeholder="Pilih NITKU penerima" error={issue('nitkuPenerima')} onchange={(v) => { touch(); nitkuPenerimaState = String(v); }} />
 			</FieldGrid>
 		</FormSection>
 
 		<FormSection number="02" title="Pajak Penghasilan (Rp)" bordered>
 			<FieldGrid>
-				<SelectField label="Status PTKP" name="statusPtkp" value={statusPtkpState} disabled={!editable} placeholder="Pilih Status PTKP" options={ptkpEbupotOptions.map((p) => ({ value: p.value, label: p.label }))} error={issue('statusPtkp')} onchange={(v) => changePtkp(String(v))} />
-				<SelectField label="Fasilitas Pajak yang Dimiliki oleh Penerima Penghasilan" name="fasilitasPajakId" value={fasilitasPajakIdState} disabled={!editable} placeholder="Pilih fasilitas pajak" options={fasilitasSelectOptions} error={issue('fasilitasPajakId')} onchange={(v) => changeFasilitas(String(v))} />
-				<SelectField label="Nama Objek Pajak" name="kodeObjekPajakId" value={kodeObjekPajakIdState} disabled={!editable} searchable placeholder={selectedFasilitas ? 'Pilih objek pajak' : 'Pilih fasilitas pajak terlebih dahulu'} options={objekSelectOptions} error={issue('kodeObjekPajakId') || (objekMismatch ? 'Objek pajak tersimpan tidak berlaku untuk fasilitas/masa pajak ini, pilih ulang.' : '')} onchange={(v) => changeObjek(String(v))} />
-				<FormField label="Jenis Pajak" value={selectedObjekPajak?.pasal ?? ''} disabled />
-				<FormField label="Kode Objek Pajak" value={selectedObjekPajak?.kode ?? ''} disabled />
-				<FormField label="Sifat Pajak Penghasilan" value={selectedObjekPajak?.sifat ?? ''} disabled />
-				{#if isCumulativeObject}<RupiahField label="Pendapatan Bruto yang Telah Dibayar Sebelumnya (Khusus 21-401-01 dan 21-401-02)" name="pendapatanBrutoSebelumnya" bind:value={pendapatanBrutoSebelumnyaState} disabled={!editable} error={issue('pendapatanBrutoSebelumnya')} oninput={touch} />{/if}
-				<RupiahField label="Penghasilan Bruto (Rp)" name="penghasilanBruto" bind:value={penghasilanBrutoState} disabled={!editable} error={issue('penghasilanBruto')} oninput={touch} onfocus={() => (brutoAtFocus = penghasilanBrutoState)} onblur={() => { if (penghasilanBrutoState !== brutoAtFocus) resetManualToResolved(); }} />
+				<SelectField label="Status PTKP" required name="statusPtkp" value={statusPtkpState} disabled={!editable} placeholder="Pilih Status PTKP" options={ptkpEbupotOptions.map((p) => ({ value: p.value, label: p.label }))} error={issue('statusPtkp')} onchange={(v) => changePtkp(String(v))} />
+				<SelectField label="Fasilitas Pajak yang Dimiliki oleh Penerima Penghasilan" required name="fasilitasPajakId" value={fasilitasPajakIdState} disabled={!editable || periodOutOfRange} placeholder="Pilih fasilitas pajak" options={fasilitasSelectOptions} error={issue('fasilitasPajakId')} onchange={(v) => changeFasilitas(String(v))} />
+				<SelectField label="Nama Objek Pajak" required name="kodeObjekPajakId" value={kodeObjekPajakIdState} disabled={!editable || periodOutOfRange || !selectedFasilitas} searchable placeholder={selectedFasilitas ? 'Pilih objek pajak' : 'Pilih fasilitas pajak terlebih dahulu'} options={objekSelectOptions} error={issue('kodeObjekPajakId') || (objekMismatch ? 'Objek pajak tersimpan tidak berlaku untuk fasilitas/masa pajak ini, pilih ulang.' : '')} onchange={(v) => changeObjek(String(v))} />
+				<FormField label="Jenis Pajak" required value={selectedObjekPajak?.pasal ?? ''} readonly />
+				<FormField label="Kode Objek Pajak" required value={selectedObjekPajak?.kode ?? ''} readonly />
+				<FormField label="Sifat Pajak Penghasilan" required value={selectedObjekPajak?.sifat ?? ''} readonly />
+				{#if isCumulativeObject || (!selectedObjekPajak && !dirty)}
+					<p class="wide">Pendapatan Bruto yang Telah Dibayar Sebelumnya (Khusus untuk Kode Objek Pajak 21-401-01 dan 21-401-02) jika terdapat pembayaran lebih dari sekali dalam periode 2 tahun</p>
+					<RupiahField label="Jumlah" name="pendapatanBrutoSebelumnya" bind:value={pendapatanBrutoSebelumnyaState} disabled={!editable || !isCumulativeObject} error={issue('pendapatanBrutoSebelumnya')} oninput={touch} />
+				{/if}
+				<RupiahField label="Penghasilan Bruto (Rp)" required name="penghasilanBruto" bind:value={penghasilanBrutoState} disabled={!editable} error={issue('penghasilanBruto')} oninput={touch} onfocus={() => (brutoAtFocus = penghasilanBrutoState)} onblur={() => { if (penghasilanBrutoState !== brutoAtFocus) resetManualToResolved(); }} />
 				{#if overCeiling && resolved?.maxBruto !== undefined}<div class="wide"><InlineAlert tone="error" title="Peringatan">Penghasilan Bruto melebihi nilai maksimum untuk objek pajak ini (Rp{formatRupiah(resolved.maxBruto)}). Konsep masih dapat disimpan, tetapi tidak dapat di-Submit.</InlineAlert></div>{/if}
-				{#if resolved?.manualDpp}<FormField label="DPP (%)" name="dppManual" type="number" step="any" min="0" bind:value={() => String(dppManualState), (v) => { touch(); dppManualState = Number(v); }} disabled={!editable} error={issue('dppManual')} />{:else}<FormField label="DPP (%)" value={String(amounts?.dpp ?? 0)} disabled />{/if}
-				{#if resolved?.manualTarif}<FormField label="Tarif (%)" name="tarifManual" type="number" step="any" min="0" bind:value={() => String(tarifManualState), (v) => { touch(); tarifManualState = Number(v); }} disabled={!editable} error={issue('tarifManual')} />{:else}<FormField label="Tarif (%)" value={String(amounts?.tarif ?? 0)} disabled />{/if}
-				{#if resolved?.manualIncomeTax}<RupiahField label="Pajak Penghasilan (Rp)" name="pajakPenghasilanManual" bind:value={pajakPenghasilanManualState} disabled={!editable} error={issue('pajakPenghasilanManual')} oninput={touch} />{:else}<RupiahField label="Pajak Penghasilan (Rp)" value={amounts?.pajakPenghasilan ?? 0} disabled />{/if}
+				{#if !selectedObjekPajak || resolved?.manualDpp}<FormField label="DPP (%)" required name="dppManual" type="number" step="any" min="0" bind:value={() => String(dppManualState), (v) => { touch(); dppManualState = Number(v); }} disabled={!editable} error={issue('dppManual')} />{:else}<FormField label="DPP (%)" required value={String(amounts?.dpp ?? 0)} readonly />{/if}
+				{#if resolved?.manualTarif}<FormField label="Tarif (%)" required name="tarifManual" type="number" step="any" min="0" bind:value={() => String(tarifManualState), (v) => { touch(); tarifManualState = Number(v); }} disabled={!editable} error={issue('tarifManual')} />{:else}<FormField label="Tarif (%)" required value={String(amounts?.tarif ?? 0)} readonly />{/if}
+				{#if resolved?.manualIncomeTax}<RupiahField label="Pajak Penghasilan (Rp)" required name="pajakPenghasilanManual" bind:value={pajakPenghasilanManualState} disabled={!editable} error={issue('pajakPenghasilanManual')} oninput={touch} />{:else}<RupiahField label="Pajak Penghasilan (Rp)" required value={amounts?.pajakPenghasilan ?? 0} disabled />{/if}
+				<FormField label="KAP-KJS" required value={selectedObjekPajak?.kap ?? ''} readonly />
 			</FieldGrid>
 		</FormSection>
 
 		<FormSection number="03" title="Dokumen Referensi" bordered>
 			<FieldGrid>
-				<SelectField label="Jenis Dokumen" name="jenisDokumenId" value={jenisDokumenIdState} disabled={!editable} placeholder="Pilih jenis dokumen" options={jenisDokumenOptions.map((d) => ({ value: d.id, label: d.nama }))} error={issue('jenisDokumenId')} onchange={(v) => changeJenisDokumen(String(v))} />
+				<SelectField label="Jenis Dokumen" required name="jenisDokumenId" value={jenisDokumenIdState} disabled={!editable} placeholder="Pilih jenis dokumen" options={jenisDokumenOptions.map((d) => ({ value: d.id, label: d.nama }))} error={issue('jenisDokumenId')} onchange={(v) => changeJenisDokumen(String(v))} />
 				{#if isTaxInvoice}
-					<LookupField label="Nomor Dokumen (Faktur Pajak)" name="nomorDokumen" bind:value={nomorDokumenState} buttonLabel="Cari Faktur" buttonVisible={editable} disabled={!editable} error={issue('nomorDokumen')} hint={invoiceMessage} onlookup={cariFaktur} onvaluechange={touch} />
+					<LookupField label="Nomor Dokumen" required name="nomorDokumen" bind:value={nomorDokumenState} buttonLabel="Cari Faktur" buttonVisible={editable} disabled={!editable} error={issue('nomorDokumen')} hint={invoiceMessage} onlookup={cariFaktur} onvaluechange={touch} onblur={() => { if (editable && nomorDokumenState.trim()) cariFaktur(); }} />
 				{:else}
-					<FormField label="Nomor Dokumen" name="nomorDokumen" bind:value={nomorDokumenState} disabled={!editable} error={issue('nomorDokumen')} oninput={touch} />
+					<FormField label="Nomor Dokumen" required name="nomorDokumen" bind:value={nomorDokumenState} disabled={!editable} error={issue('nomorDokumen')} oninput={touch} />
 				{/if}
-				<DateField label="Tanggal Dokumen" name="tanggalDokumen" bind:value={tanggalDokumenState} max={today} disabled={!editable || isTaxInvoice} error={issue('tanggalDokumen')} hint={isTaxInvoice ? 'Tanggal diisi otomatis dari faktur pajak (Cari Faktur).' : ''} onchange={touch} />
+				<DateField label="Tanggal Dokumen" required name="tanggalDokumen" bind:value={tanggalDokumenState} max={today} disabled={!editable || (isTaxInvoice && !taxInvoiceDateUnlocked)} error={issue('tanggalDokumen')} hint={isTaxInvoice && !taxInvoiceDateUnlocked ? 'Tanggal diisi dari pencarian faktur pajak; pencarian juga membuka isian tanggal.' : ''} onchange={touch} />
+				<SelectField label="NITKU Pemotong" required name="nitkuPemotong" value={nitkuPemotongState} disabled={!editable} options={ownBranchOptions} placeholder="Pilih NITKU pemotong" error={issue('nitkuPemotong')} hint={ctx.ownBranches.length === 0 ? 'Belum ada NITKU. Tambahkan di Profil Saya › Tempat Kegiatan Usaha.' : ''} onchange={(v) => { touch(); nitkuPemotongState = String(v); }} />
 			</FieldGrid>
 		</FormSection>
 
 		{#if editable}
 			<FormActions>
 				<ActionButton type="button" tone="quiet" onclick={() => (window.location.href = '/ebupot/bp21')}>Kembali</ActionButton>
-				<ActionButton type="submit" name="intent" value="draft" tone="secondary" pending={updateBp21.pending > 0}>Simpan Konsep</ActionButton>
+				<ActionButton type="submit" name="intent" value="draft" formnovalidate tone="secondary" pending={updateBp21.pending > 0}>Simpan Konsep</ActionButton>
 				<ActionButton type="submit" name="intent" value="submit" tone="danger" pending={updateBp21.pending > 0}>Submit</ActionButton>
 			</FormActions>
 		{:else}

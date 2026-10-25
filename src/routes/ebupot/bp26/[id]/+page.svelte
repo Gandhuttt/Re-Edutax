@@ -46,10 +46,10 @@
 		| 'penghasilanBruto'
 		| 'dppManual'
 		| 'tarifManual'
+		| 'pajakPenghasilanManual'
 		| 'jenisDokumenId'
 		| 'nomorDokumen'
 		| 'tanggalDokumen'
-		| 'tanggalPemotongan'
 		| 'nitkuPemotong';
 
 	const bp26 = await getBp26();
@@ -69,7 +69,7 @@
 	let context = $state(initialContext);
 	let period = $state(`${bp26.tahun}-${bp26.masaPajak}`);
 	let nomorIdentitasWpState = $state(bp26.nomorIdentitasWp);
-	let namaState = $state(bp26.nama);
+	let namaState = $state(ro ? bp26.nama : initialContext.knownTaxpayer?.nama || bp26.nama);
 	let alamatState = $state(bp26.alamat);
 	let negaraAsalIdState = $state(bp26.negaraAsalId ?? '');
 	let tanggalLahirState = $state(bp26.tanggalLahir ?? '');
@@ -82,12 +82,15 @@
 	let penghasilanBrutoState = $state(bp26.penghasilanBruto);
 	let dppState = $state(String(bp26.dpp));
 	let tarifState = $state(String(bp26.tarif));
+	let pajakPenghasilanState = $state(bp26.pajakPenghasilan);
 	let jenisDokumenIdState = $state(bp26.jenisDokumenId ?? '');
 	let nomorDokumenState = $state(bp26.nomorDokumen);
 	let tanggalDokumenState = $state(bp26.tanggalDokumen ?? '');
-	let tanggalPemotonganState = $state(bp26.tanggalPemotongan ?? '');
+	let taxInvoiceDateUnlocked = $state(Boolean(bp26.tanggalDokumen));
 	let nitkuPemotongState = $state(bp26.nitkuPemotong ?? (!ro ? initialContext.ownBranches.find((b) => b.nitku.endsWith('000000'))?.nitku ?? '' : ''));
-	let showDetails = $state(false);
+	let identityCheckedTin = $state<string | null>(bp26.nomorIdentitasWp.trim() || null);
+	const knownName = $derived(identityCheckedTin === nomorIdentitasWpState.trim() ? context.knownTaxpayer?.nama ?? '' : '');
+	const detailsOpen = $derived(Boolean(nomorIdentitasWpState.trim()) && identityCheckedTin === nomorIdentitasWpState.trim() && !knownName);
 	let brutoAtFocus = bp26.penghasilanBruto;
 	let lookupNotice = $state<{ tone: 'info' | 'warning' | 'error' | 'success'; title: string; message: string } | null>(null);
 	let submitFailure = $state('');
@@ -132,7 +135,7 @@
 		ro
 			? { dpp: bp26.dpp, tarif: bp26.tarif, pajakPenghasilan: bp26.pajakPenghasilan }
 			: resolved
-				? computeBp26Amounts(resolved, penghasilanBrutoState, { dppManual: dppState, tarifManual: tarifState })
+				? computeBp26Amounts(resolved, penghasilanBrutoState, { dppManual: dppState, tarifManual: tarifState, pajakPenghasilanManual: pajakPenghasilanState })
 				: { dpp: 0, tarif: 0, pajakPenghasilan: 0 }
 	);
 
@@ -140,39 +143,52 @@
 		const defaults = resolveFor(objekId, fasilitasId, bruto);
 		dppState = String(defaults?.dppPercent ?? 0);
 		tarifState = String(defaults?.tarif ?? 0);
+		pajakPenghasilanState = defaults ? computeBp26Amounts(defaults, bruto, { dppManual: dppState, tarifManual: tarifState }).pajakPenghasilan : 0;
 	}
 	function clearObjectAndDerived() {
 		kodeObjekPajakIdState = '';
 		dppState = '0';
 		tarifState = '0';
+		pajakPenghasilanState = 0;
+	}
+	function recalculateIncomeTax() {
+		pajakPenghasilanState = resolved ? computeBp26Amounts(resolved, penghasilanBrutoState, { dppManual: dppState, tarifManual: tarifState }).pajakPenghasilan : 0;
 	}
 
 	const err = (name: FieldName) => updateBp26.fields[name].issues()?.[0]?.message ?? '';
-	const detailErrors = $derived(
-		(['alamat', 'negaraAsalId', 'tanggalLahir', 'tempatLahir', 'nomorPaspor', 'nomorKitasKitap'] as const).some((name) => err(name) !== '')
-	);
-	const detailsOpen = $derived(showDetails || detailErrors);
-
-	async function refreshContext() {
-		try {
-			context = await getBpLookupContext({ tin: nomorIdentitasWpState.trim() });
-			return true;
-		} catch (cause) {
-			lookupNotice = { tone: 'error', title: 'Data penerima gagal dimuat', message: remoteFailureFrom(cause).message };
-			return false;
-		}
+	function clearIdentity() {
+		identityCheckedTin = null;
+		namaState = '';
+		alamatState = '';
+		negaraAsalIdState = '';
+		tanggalLahirState = '';
+		tempatLahirState = '';
+		nomorPasporState = '';
+		nomorKitasKitapState = '';
+		lookupNotice = null;
 	}
 	async function lookupIdentity() {
-		if (ro || !(await refreshContext())) return;
-		const known = context.knownTaxpayer?.nama;
-		if (known && !namaState.trim()) namaState = known;
-		if (isTaxInvoice) await lookupInvoice();
+		if (ro) return;
+		const tin = nomorIdentitasWpState.trim();
+		if (!tin) return;
+		try {
+			const result = await getBpLookupContext({ tin });
+			if (tin !== nomorIdentitasWpState.trim()) return;
+			context = result;
+			identityCheckedTin = tin;
+			if (result.knownTaxpayer?.nama) namaState = result.knownTaxpayer.nama;
+			if (isTaxInvoice) await lookupInvoice();
+		} catch (cause) {
+			if (tin === nomorIdentitasWpState.trim()) lookupNotice = { tone: 'error', title: 'Data penerima gagal dimuat', message: remoteFailureFrom(cause).message };
+		}
 	}
 	async function lookupInvoice() {
 		if (ro || !isTaxInvoice) return;
 		const tin = nomorIdentitasWpState.trim();
 		const nomor = nomorDokumenState.trim();
-		if (!tin || !nomor) return;
+		if (!nomor) return;
+		taxInvoiceDateUnlocked = true;
+		if (!tin) return;
 		try {
 			const invoice = await lookupBpInvoice({ tin, nomorDokumen: nomor });
 			if (invoice) {
@@ -189,11 +205,18 @@
 
 	function onPeriodChange() {
 		clearObjectAndDerived();
+		receiptNumberState = '';
+		nomorIdentitasWpState = '';
+		clearIdentity();
 	}
 	function onFasilitasChange(value: string | number) {
 		fasilitasPajakIdState = String(value);
 		clearObjectAndDerived();
 		receiptNumberState = '';
+		if (fasilitasOptions.find((f) => f.id === String(value))?.kode !== '7') {
+			nomorIdentitasWpState = '';
+			clearIdentity();
+		}
 		lookupNotice = null;
 	}
 	function onObjekChange(value: string | number) {
@@ -221,53 +244,51 @@
 	<FormSection number="01" title="Informasi Umum"><FieldGrid>
 		<input type="hidden" name="masaPajak" value={masaPajak} />
 		<input type="hidden" name="tahun" value={tahun} />
-		<SelectField label="Masa Pajak" bind:value={period} disabled={ro} options={periodChoices} error={err('masaPajak')} onchange={onPeriodChange} />
-		<FormField label="Status" value={bp26.status} disabled />
-		<DateField label="Tanggal Pemotongan" name="tanggalPemotongan" max={today} bind:value={tanggalPemotonganState} disabled={ro} error={err('tanggalPemotongan')} />
-		<SelectField label="NITKU/Nomor Identitas Sub Unit Organisasi" name="nitkuPemotong" bind:value={nitkuPemotongState} disabled={ro} options={branchChoices} placeholder="Pilih NITKU cabang" error={err('nitkuPemotong')} hint={context.ownBranches.length === 0 ? 'Belum ada NITKU. Tambahkan di Profil Saya › Tempat Kegiatan Usaha.' : ''} />
+		<SelectField label="Masa Pajak" bind:value={period} disabled={ro} required options={periodChoices} error={err('masaPajak')} onchange={onPeriodChange} />
+		<FormField label="Status" value={bp26.status} disabled required />
 	</FieldGrid></FormSection>
 	<FormSection number="02" title="Pajak Penghasilan">
 	<FieldGrid>
-		<SelectField label="Nama Fasilitas" name="fasilitasPajakId" value={fasilitasPajakIdState} disabled={ro} options={select(fasilitasOptions)} placeholder="Pilih fasilitas" error={err('fasilitasPajakId')} onchange={(value) => onFasilitasChange(value)} />
-		{#if isSkd}<FormField label="Receipt Number" name="receiptNumber" bind:value={receiptNumberState} disabled={ro} maxlength={80} error={err('receiptNumber')} />{/if}
-		<FormField label="Nomor Identitas WP" name="nomorIdentitasWp" bind:value={nomorIdentitasWpState} disabled={ro} error={err('nomorIdentitasWp')} onblur={lookupIdentity} />
-		<FormField label="Nama" name="nama" bind:value={namaState} disabled={ro} error={err('nama')} />
+		<SelectField label="Nama Fasilitas" name="fasilitasPajakId" value={fasilitasPajakIdState} disabled={ro || !period} required options={select(fasilitasOptions)} placeholder="Pilih fasilitas" error={err('fasilitasPajakId')} onchange={(value) => onFasilitasChange(value)} />
+		{#if isSkd}<FormField label="Receipt Number" name="receiptNumber" bind:value={receiptNumberState} disabled={ro} required maxlength={80} error={err('receiptNumber')} hint="Simulasi: Receipt Number tidak diverifikasi ke DJP dan tidak mengisi identitas secara otomatis." />{/if}
+		<FormField label="Nomor Identitas WP" name="nomorIdentitasWp" bind:value={nomorIdentitasWpState} disabled={ro} required error={err('nomorIdentitasWp')} oninput={clearIdentity} onblur={lookupIdentity} />
+		<FormField label="Nama" name="nama" bind:value={namaState} readonly={Boolean(knownName)} disabled={ro} required error={err('nama')} />
 	</FieldGrid>
 	{#if lookupNotice}<InlineAlert tone={lookupNotice.tone} title={lookupNotice.title} message={lookupNotice.message} />{/if}
-	{#if !ro}<ActionButton type="button" tone="quiet" aria-expanded={detailsOpen} onclick={() => (showDetails = !detailsOpen)}>{detailsOpen ? 'Sembunyikan Detail Identitas' : 'Tampilkan Detail Identitas'}</ActionButton>{/if}
-	<div hidden={!detailsOpen && !ro}><FieldGrid>
-		<FormField label="Alamat" name="alamat" bind:value={alamatState} disabled={ro} error={err('alamat')} />
-		<SelectField label="Negara Asal" name="negaraAsalId" bind:value={negaraAsalIdState} disabled={ro} options={select(negaraOptions)} placeholder="Pilih negara" error={err('negaraAsalId')} />
+	{#if detailsOpen}<FieldGrid>
+		<FormField label="Alamat" name="alamat" bind:value={alamatState} disabled={ro} required error={err('alamat')} />
+		<SelectField label="Negara Asal" name="negaraAsalId" bind:value={negaraAsalIdState} disabled={ro} required options={select(negaraOptions)} placeholder="Pilih negara" error={err('negaraAsalId')} />
 		<DateField label="Tanggal Lahir" name="tanggalLahir" min="1900-01-01" max={today} bind:value={tanggalLahirState} disabled={ro} error={err('tanggalLahir')} />
 		<FormField label="Tempat Lahir" name="tempatLahir" bind:value={tempatLahirState} disabled={ro} error={err('tempatLahir')} />
 		<FormField label="Nomor Paspor" name="nomorPaspor" bind:value={nomorPasporState} disabled={ro} error={err('nomorPaspor')} />
 		<FormField label="Nomor KITAS/KITAP" name="nomorKitasKitap" bind:value={nomorKitasKitapState} disabled={ro} error={err('nomorKitasKitap')} />
-	</FieldGrid></div>
+	</FieldGrid>{/if}
 	<FieldGrid>
-		<SelectField label="Nama Objek Pajak" name="kodeObjekPajakId" bind:value={kodeObjekPajakIdState} disabled={ro} options={select(objekChoices)} placeholder="Pilih objek pajak" error={err('kodeObjekPajakId')} onchange={(value) => onObjekChange(value)} />
-		<FormField label="Jenis Pajak" value={selectedObjekPajak?.pasal ?? ''} disabled />
-		<FormField label="Kode Objek Pajak" value={selectedObjekPajak?.kode ?? ''} disabled />
-		<FormField label="Sifat Pajak Penghasilan" value={selectedObjekPajak?.sifat ?? ''} disabled />
-		<RupiahField label="Penghasilan Bruto (Rp)" name="penghasilanBruto" bind:value={penghasilanBrutoState} disabled={ro} error={err('penghasilanBruto')} onfocus={onBrutoFocus} onblur={onBrutoBlur} />
+		<SelectField label="Nama Objek Pajak" name="kodeObjekPajakId" bind:value={kodeObjekPajakIdState} disabled={ro || !period || !selectedFasilitas} required options={select(objekChoices)} placeholder="Pilih objek pajak" error={err('kodeObjekPajakId')} onchange={(value) => onObjekChange(value)} />
+		<FormField label="Jenis Pajak" value={selectedObjekPajak?.pasal ?? ''} disabled required />
+		<FormField label="Kode Objek Pajak" value={selectedObjekPajak?.kode ?? ''} disabled required />
+		<FormField label="Sifat Pajak Penghasilan" value={selectedObjekPajak?.sifat ?? ''} disabled required />
+		<RupiahField label="Penghasilan Bruto (Rp)" name="penghasilanBruto" bind:value={penghasilanBrutoState} disabled={ro} required error={err('penghasilanBruto')} onfocus={onBrutoFocus} onblur={onBrutoBlur} />
 	</FieldGrid>
 	{#if resolved?.maxBruto !== undefined && penghasilanBrutoState > resolved.maxBruto}<InlineAlert tone="warning" title="Batas Penghasilan Bruto" message="Penghasilan Bruto melebihi nilai maksimum untuk objek pajak ini. Konsep dapat disimpan, Submit akan ditolak." />{/if}
 	<FieldGrid>
-		{#if !ro && resolved?.manualDpp}<FormField label="DPP (%)" name="dppManual" inputmode="decimal" bind:value={dppState} error={err('dppManual')} />{:else}<FormField label="DPP (%)" value={String(amounts.dpp)} disabled />{/if}
-		{#if !ro && resolved?.manualTarif}<FormField label="Tarif (%)" name="tarifManual" inputmode="decimal" bind:value={tarifState} error={err('tarifManual')} />{:else}<FormField label="Tarif (%)" value={String(amounts.tarif)} disabled />{/if}
-		<RupiahField label="Pajak Penghasilan (Rp)" value={amounts.pajakPenghasilan} disabled />
-		<FormField label="KAP" value={selectedObjekPajak?.kap ?? ''} disabled />
+		{#if !ro && (!selectedObjekPajak || resolved?.manualDpp)}<FormField label="DPP (%)" name="dppManual" inputmode="decimal" bind:value={dppState} required error={err('dppManual')} onblur={recalculateIncomeTax} />{:else}<FormField label="DPP (%)" value={String(amounts.dpp)} disabled required />{/if}
+		{#if !ro && resolved?.manualTarif}<FormField label="Tarif (%)" name="tarifManual" inputmode="decimal" bind:value={tarifState} required error={err('tarifManual')} onblur={recalculateIncomeTax} />{:else}<FormField label="Tarif (%)" value={String(amounts.tarif)} disabled required />{/if}
+		{#if !ro && resolved?.manualIncomeTax}<RupiahField label="Pajak Penghasilan (Rp)" name="pajakPenghasilanManual" bind:value={pajakPenghasilanState} required error={err('pajakPenghasilanManual')} />{:else}<RupiahField label="Pajak Penghasilan (Rp)" value={amounts.pajakPenghasilan} disabled required />{/if}
+		<FormField label="KAP" value={selectedObjekPajak?.kap ?? ''} disabled required />
 	</FieldGrid>
 	<p>{#if resolved?.manualDpp || resolved?.manualTarif}DPP dan/atau Tarif untuk kombinasi ini dapat diisi manual (mis. Surat Keterangan Domisili/tarif tax treaty). Mengubah Penghasilan Bruto mengembalikan nilai ke default.{:else}DPP dan Tarif dihitung otomatis dari kombinasi Nama Objek Pajak dan Fasilitas Pajak, dan dihitung ulang server saat disimpan.{/if}</p>
 	</FormSection>
 	<FormSection number="03" title="Dokumen Referensi"><FieldGrid>
-		<SelectField label="Jenis Dokumen" name="jenisDokumenId" bind:value={jenisDokumenIdState} disabled={ro} options={select(jenisDokumenOptions)} placeholder="Pilih jenis dokumen" error={err('jenisDokumenId')} onchange={() => { if (!ro) queueMicrotask(lookupInvoice); }} />
-		<FormField label="Nomor Dokumen" name="nomorDokumen" bind:value={nomorDokumenState} disabled={ro} error={err('nomorDokumen')} onblur={lookupInvoice} />
-		<DateField label="Tanggal Dokumen" name="tanggalDokumen" max={today} bind:value={tanggalDokumenState} disabled={ro || isTaxInvoice} error={err('tanggalDokumen')} hint={isTaxInvoice ? 'Tanggal diisi otomatis dari faktur pajak.' : ''} />
+		<SelectField label="Jenis Dokumen" name="jenisDokumenId" bind:value={jenisDokumenIdState} disabled={ro} required options={select(jenisDokumenOptions)} placeholder="Pilih jenis dokumen" error={err('jenisDokumenId')} onchange={() => { taxInvoiceDateUnlocked = false; }} />
+		<FormField label="Nomor Dokumen" name="nomorDokumen" bind:value={nomorDokumenState} disabled={ro} required error={err('nomorDokumen')} onblur={lookupInvoice} />
+		<DateField label="Tanggal Dokumen" name="tanggalDokumen" max={today} bind:value={tanggalDokumenState} disabled={ro || (isTaxInvoice && !taxInvoiceDateUnlocked)} required error={err('tanggalDokumen')} hint={isTaxInvoice && !taxInvoiceDateUnlocked ? 'Tanggal diisi dari pencarian faktur pajak; pencarian juga membuka isian tanggal.' : ''} />
+		<SelectField label="NITKU/Nomor Identitas Sub Unit Organisasi" name="nitkuPemotong" bind:value={nitkuPemotongState} disabled={ro} required options={branchChoices} placeholder="Pilih NITKU cabang" error={err('nitkuPemotong')} hint={context.ownBranches.length === 0 ? 'Belum ada NITKU. Tambahkan di Profil Saya › Tempat Kegiatan Usaha.' : ''} />
 	</FieldGrid></FormSection>
 	{#if !ro}
 		<FormActions>
 			<ActionButton type="button" tone="quiet" onclick={() => history.back()}>Kembali</ActionButton>
-			<ActionButton type="submit" name="intent" value="draft" tone="secondary" pending={updateBp26.pending > 0}>Simpan Konsep</ActionButton>
+			<ActionButton type="submit" name="intent" value="draft" formnovalidate tone="secondary" pending={updateBp26.pending > 0}>Simpan Konsep</ActionButton>
 			<ActionButton type="submit" name="intent" value="submit" tone="primary" pending={updateBp26.pending > 0}>Submit</ActionButton>
 		</FormActions>
 	{:else}
@@ -281,6 +302,7 @@
 <DocumentWorkspace>
 {#if bp26.canEdit}
 	<form
+		novalidate
 		{...updateBp26.enhance(async (form) => {
 			submitFailure = '';
 			try {

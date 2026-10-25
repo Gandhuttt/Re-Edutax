@@ -12,12 +12,10 @@ import { bpStatusValues } from '../../../../../helpers/bp-parity';
 // form this mirrors, and bukti_potong_bpu.ts for the shared status-
 // lifecycle / Terbitkan-simulation conventions this table reuses as-is.
 //
-// Unlike BPU/BP21, the recipient here is a non-resident: no NIK/NPWP, no
-// DJP taxpayer-master lookup, no NITKU -- Nama is a plain typed field
-// (confirmed live), and identity is instead captured via Alamat, Negara
-// Asal (reusing the country reference already seeded for SPT PPh Badan --
-// see negara.remote.ts), and optional Tanggal/Tempat Lahir, Nomor Paspor,
-// Nomor KITAS/KITAP.
+// Recipient lookup uses the submitted TIN. Registered recipients have a
+// canonical readonly name; unknown recipients expose name, address, country
+// and optional birth/passport/KITAS details. No recipient NITKU is required.
+// Country references reuse the generic list seeded for SPT PPh Badan.
 export const bukti_potong_bp26 = sqliteTable(
 'bukti_potong_bp26',
 {
@@ -59,7 +57,7 @@ export const bukti_potong_bp26 = sqliteTable(
 	tanggalDokumen: text('tanggal_dokumen'),
 
 	nomorPemotongan: text('nomor_pemotongan'),
-	// WithholdingDate (Tanggal Pemotongan), ISO date; distinct from the document date.
+	// XML WithholdingDate, ISO date; preserved, not edited by the interactive form.
 	tanggalPemotongan: text('tanggal_pemotongan'),
 	diterbitkan: integer('diterbitkan', { mode: 'boolean' }).notNull().default(false),
 
