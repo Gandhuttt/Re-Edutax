@@ -21,7 +21,6 @@
 		Stack
 	} from '$lib/re-ui-components';
 	import { getFasilitasPajakBpa1 } from '../../fasilitasPajak.remote';
-	import { getJenisDokumenEbupot } from '../../jenisDokumen.remote';
 	import { getPriorMonthlyWithheld } from '../../priorMonthlyWithheld.remote';
 	import { getObjekPajakBpa1 } from '../../objekPajakBpa1.remote';
 	import { getWajibPajak } from '../../../getWajibPajak.remote';
@@ -31,10 +30,9 @@
 	import { updateBpa1 } from './updateBpa1.remote';
 
 	const bpa1 = await getBpa1();
-	const [objekPajakOptions, fasilitasOptions, jenisDokumenOptions] = await Promise.all([
+	const [objekPajakOptions, fasilitasOptions] = await Promise.all([
 		getObjekPajakBpa1(),
-		getFasilitasPajakBpa1(),
-		getJenisDokumenEbupot()
+		getFasilitasPajakBpa1()
 	]);
 
 	let masaPajakAwalState = $state(bpa1.masaPajakAwal);
@@ -66,10 +64,6 @@
 	let jumlahBulanState = $state<number | undefined>(bpa1.jumlahBulan ?? undefined);
 	let iuranPensiunState = $state(bpa1.iuranPensiun);
 	let zakatState = $state(bpa1.zakat);
-
-	let jenisDokumenIdState = $state(bpa1.jenisDokumenId ?? '');
-	let nomorDokumenState = $state(bpa1.nomorDokumen);
-	let tanggalDokumenState = $state(bpa1.tanggalDokumen ?? '');
 
 	let nomorBuktiSebelumnyaState = $state(bpa1.nomorBuktiSebelumnya);
 	let penghasilanNetoSebelumnyaState = $state(bpa1.penghasilanNetoSebelumnya);
@@ -181,7 +175,6 @@
 		<FormSection number="04" title="Penghitungan PPh Pasal 21" bordered><FieldGrid columns={2}>
 			<FormField label="Nomor Bukti Pemotongan BPA1 dari Pemberi Kerja Sebelumnya (Apabila ada)" name="nomorBuktiSebelumnya" bind:value={nomorBuktiSebelumnyaState} disabled={!bpa1.canEdit} /><RupiahField label="Penghasilan Neto dari Pemotongan Sebelumnya (Rp)" name="penghasilanNetoSebelumnya" bind:value={penghasilanNetoSebelumnyaState} disabled={!bpa1.canEdit} /><RupiahField label="Jumlah Penghasilan Neto untuk Perhitungan PPh Pasal 21 (Setahun/Disetahunkan) (Rp)" value={calc?.penghasilanNetoSetahunDisetahunkan ?? 0} disabled /><RupiahField label="Penghasilan Tidak Kena Pajak (Rp)" value={calc?.penghasilanTidakKenaPajak ?? 0} disabled /><RupiahField label="Penghasilan Kena Pajak Setahun / Disetahunkan (Rp)" value={calc?.penghasilanKenaPajak ?? 0} disabled /><FormField label="Tarif (%)" value={String(calc?.tarif ?? 0)} disabled /><RupiahField label="PPh Pasal 21 atas Penghasilan Kena Pajak Setahun/Disetahunkan (Rp)" value={calc?.pphPasal21AtasPkp ?? 0} disabled /><RupiahField label="PPh Pasal 21 Terutang (Rp)" value={calc?.pphPasal21Terutang ?? 0} disabled /><RupiahField label="PPh Pasal 21 Dipotong dari Bukti Pemotongan Sebelumnya (Rp)" name="pphPasal21DipotongSebelumnya" bind:value={pphDipotongSebelumnyaState} disabled={!bpa1.canEdit} /><RupiahField label="PPh Pasal 21 Terutang pada Bukti Pemotongan Ini (Dapat Dikreditkan Pada SPT Tahunan) (Rp)" value={calc?.pphPasal21TerutangPadaIni ?? 0} disabled /><RupiahField label="PPh Pasal 21 yang Dipotong/Ditanggung Pemerintah (Rp)" value={calc?.pphDipotongAtauDitanggung ?? 0} disabled /><RupiahField label="PPh Pasal 21 Kurang (Lebih) Dipotong pada Masa Pajak Desember / Masa Pajak Terakhir (Rp)" value={calc?.pphKurangLebihDipotongDesember ?? 0} disabled /><SelectField label="Jenis Fasilitas pada Masa Pajak Desember/Masa Pajak Terakhir" name="fasilitasPajakId" bind:value={fasilitasPajakIdState} disabled={!bpa1.canEdit} options={fasilitasOptions.map((f) => ({value:f.id,label:f.nama}))} /><FormField label="KAP-KJS" value={selectedObjekPajak?.kap ?? ''} disabled /><FormField label="NITKU/Nomor Identitas Sub Unit Organisasi" value={nitkuPemotong} disabled />
 		</FieldGrid><InlineAlert title="Informasi perhitungan" message="PPh Pasal 21 yang Dipotong diambil dari Bukti Pemotongan Bulanan Pegawai Tetap yang telah terbit untuk penerima dan objek pajak yang sama sebelum masa pajak terakhir. Fasilitas PPh Pasal 21 Ditanggung Pemerintah memindahkan seluruh PPh Terutang ke kolom tersebut." tone="info" /></FormSection>
-		<FormSection number="05" title="Dokumen Referensi" bordered><FieldGrid columns={2}><SelectField label="Jenis Dokumen" name="jenisDokumenId" bind:value={jenisDokumenIdState} disabled={!bpa1.canEdit} options={jenisDokumenOptions.map((d) => ({value:d.id,label:d.nama}))} /><FormField label="Nomor Dokumen" name="nomorDokumen" bind:value={nomorDokumenState} disabled={!bpa1.canEdit} /><FormField label="Tanggal Dokumen" name="tanggalDokumen" type="date" bind:value={tanggalDokumenState} disabled={!bpa1.canEdit} /></FieldGrid></FormSection>
 	</Stack>
 {/snippet}
 

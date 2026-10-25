@@ -853,9 +853,9 @@ verification, to compare mechanics directly.
   implement the same way BPA1 does (derived plain value, no real FK
   reference table needed for this app's single-NITKU-per-account scope).
 - **No "Dokumen Referensi" section at all** — confirmed by the full field
-  list ending at NITKU, directly followed by Submit/Simpan Konsep. Unlike
-  every other bukti type built so far (BPU/BP21/BP26/BPA1 all require
-  Jenis Dokumen/Nomor Dokumen/Tanggal Dokumen), BPA2 needs none of it.
+  list ending at NITKU, directly followed by Submit/Simpan Konsep. BPA1 is
+  the same (rechecked live 2026-10-25); BPU/BP21/BP26 do require Jenis
+  Dokumen/Nomor Dokumen/Tanggal Dokumen.
 
 **Build status**: BPA2 shipped locally this session (schema, `resolveBpa2Tax`
 reusing BPA1's PTKP/Biaya-Jabatan helpers, full CRUD, detail form, nav link,
@@ -913,6 +913,10 @@ Mechanics, from the bundle and confirmed by the live form:
 - The shared calculation lives in `src/lib/helpers/bpa-calc.ts`; server
   update remotes and both detail pages use it, so the preview and the
   saved figures cannot drift.
+- **No Dokumen Referensi on BPA1**: the live form ends at NITKU, then
+  Submit/Simpan Konsep (same as BPA2). The local BPA1 form, update schema
+  and Submit check no longer ask for Jenis/Nomor/Tanggal Dokumen; the
+  columns remain in `bukti_potong_bpa1` for old rows.
 
 Also fixed: MP saved PPh 0 since `2bcbf4d` because `resolveBp21` treats a
 missing `DeemedRate` as 0 and MP items carry none; `updateMp.remote.ts`

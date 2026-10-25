@@ -1,9 +1,9 @@
 import { form, getRequestEvent } from '$app/server';
 import { BPA_MAX_ANNUALIZED_MONTHS, calculateBpa } from '$lib/helpers/bpa-calc';
-import { isRealIsoDate, requiredString, rupiahString } from '$lib/helpers/valibot-schema';
+import { requiredString, rupiahString } from '$lib/helpers/valibot-schema';
 import { bpa1PtkpValues } from '$lib/helpers/ptkp-bpa1';
 import { db } from '$lib/server/db';
-import { bukti_potong_bpa1, fasilitas_pajak_ebupot, jenis_dokumen_ebupot, kode_objek_pajak_pph } from '$lib/server/db/schema';
+import { bukti_potong_bpa1, fasilitas_pajak_ebupot, kode_objek_pajak_pph } from '$lib/server/db/schema';
 import { priorMonthlyPph21Withheld } from '$lib/server/ebupot/priorMonthlyWithheld';
 import { error, redirect } from '@sveltejs/kit';
 import { and, eq } from 'drizzle-orm';
@@ -56,13 +56,6 @@ const UpdateBpa1Schema = v.object({
 	nomorBuktiSebelumnya: v.optional(v.string(), ''),
 	penghasilanNetoSebelumnya: optionalRupiah('Penghasilan Neto dari Pemotongan Sebelumnya'),
 	pphPasal21DipotongSebelumnya: optionalRupiah('PPh Pasal 21 Dipotong dari Bukti Pemotongan Sebelumnya'),
-	jenisDokumenId: requiredString('Jenis Dokumen harus dipilih'),
-	nomorDokumen: requiredString('Nomor Dokumen harus diisi'),
-	tanggalDokumen: v.pipe(
-		v.string(),
-		v.isoDate('Tanggal dokumen tidak valid'),
-		v.check(isRealIsoDate, 'Tanggal dokumen tidak valid')
-	)
 });
 
 export const updateBpa1 = form(UpdateBpa1Schema, async (input) => {
@@ -134,16 +127,6 @@ export const updateBpa1 = form(UpdateBpa1Schema, async (input) => {
 
 	if (!fasilitas) {
 		error(400, 'Fasilitas Pajak tidak valid');
-	}
-
-	const [jenisDokumen] = await db
-		.select({ id: jenis_dokumen_ebupot.id })
-		.from(jenis_dokumen_ebupot)
-		.where(and(eq(jenis_dokumen_ebupot.id, input.jenisDokumenId), eq(jenis_dokumen_ebupot.aktif, true)))
-		.limit(1);
-
-	if (!jenisDokumen) {
-		error(400, 'Jenis Dokumen tidak valid');
 	}
 
 	// Penghasilan Bruto -- a single lump figure for the whole Masa Pajak
@@ -248,9 +231,6 @@ export const updateBpa1 = form(UpdateBpa1Schema, async (input) => {
 			pphPasal21TerutangPadaIni: calc.pphPasal21TerutangPadaIni,
 			pphDipotongDitanggungPemerintah: calc.pphDipotongAtauDitanggung,
 			pphKurangLebihDipotongDesember: calc.pphKurangLebihDipotongDesember,
-			jenisDokumenId: jenisDokumen.id,
-			nomorDokumen: input.nomorDokumen.trim(),
-			tanggalDokumen: input.tanggalDokumen,
 			// Matches Coretax: every Simpan Konsep save resets the draft to
 			// "Disimpan Tidak Valid" -- same rule as BPU/BP21/BP26.
 			status: 'SAVEDINVALID'
