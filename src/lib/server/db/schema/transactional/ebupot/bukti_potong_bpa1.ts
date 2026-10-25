@@ -57,6 +57,9 @@ export const bukti_potong_bpa1 = sqliteTable('bukti_potong_bpa1', {
 		enum: ['KURANG_SETAHUN', 'KURANG_SETAHUN_DISETAHUNKAN', 'SETAHUN_PENUH']
 	}),
 	jumlahBulan: integer('jumlah_bulan'),
+	// Coretax's "Penghitungan Gross Up" checkbox: Tunjangan PPh is then the
+	// fixed point of the PPh Pasal 21 terutang pada bukti ini.
+	isGrossUp: integer('is_gross_up', { mode: 'boolean' }).notNull().default(false),
 
 	// Penghasilan Bruto components -- each a manual input, summed into
 	// penghasilanBruto at save time (see updateBpa1.remote.ts).

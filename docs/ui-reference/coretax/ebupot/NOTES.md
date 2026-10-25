@@ -323,21 +323,12 @@ Much larger form than the others — this is the annual 1721-A1-equivalent.
   (`nomorBuktiSebelumnya`, `penghasilanNetoSebelumnya`,
   `pphPasal21DipotongSebelumnya`) instead, consistent with the established
   "not doable" precedent from BPU/BP21.
-- Gross Up checkbox exists on the live form but was deliberately scoped
-  out of this build (deferred, not implemented).
+- Gross Up: implemented 2026-10-25, see "BPA1/BPA2 parity (2026-10-25)".
 - **"PPh Pasal 21 Kurang (Lebih) Dipotong pada Masa Pajak Desember" is
-  NOT always 0** — corrected after live testing. Live Coretax: with no
-  prior monthly Bukti Pemotongan Bulanan Pegawai Tetap recorded, this
-  field equals `PPh Terutang pada Bukti Ini − PPh Ditanggung Pemerintah`
-  (live-verified exact: 14,625,000 − 0 = 14,625,000, not 0 as this app
-  originally computed). This app still has no monthly-withholding-history
-  feature to subtract a "sudah dipotong bulanan" term, so it always
-  mirrors the zero-prior-withholding case — a taxpayer with real monthly
-  BP Bulanan filings would see a smaller (or "lebih"/negative) figure on
-  real Coretax that this app cannot reproduce. Fixed in
-  `updateBpa1.remote.ts`; both this field and "PPh Pasal 21 yang
-  Dipotong/Ditanggung Pemerintah" were also missing entirely from the
-  detail page's display and have been added.
+  NOT always 0** — it equals `PPh Terutang pada Bukti Ini − PPh yang
+  Dipotong/Ditanggung Pemerintah`. Since 2026-10-25 the subtracted term
+  includes prior monthly MP withholding, see "BPA1/BPA2 parity
+  (2026-10-25)".
 - **BPA1's `Nama Objek Pajak` dropdown legacy entries are period-gated**:
   live Coretax for a 2026 filing showed only 3 objects (`21-100-01`,
   `21-100-02`, `21-100-32`) — the `9999`/`9998` legacy pre-2022-bracket
@@ -849,15 +840,12 @@ verification, to compare mechanics directly.
   Dipotong dari Bukti Sebelumnya*, PPh Pasal 21 Terutang pada Bukti Ini*.
   **No "Jenis Fasilitas pada Masa Pajak Desember" dropdown at all** —
   BPA1's facility/DTP mechanism doesn't exist for BPA2. Instead there's
-  **"PPh Pasal 21 yang Telah Dipotong*"**, confirmed live to be a
-  disabled/system-computed field (not manually enterable) — defaults to
-  0 with no monthly withholding history behind it, presumably auto-pulled
-  from Bukti Pemotongan Bulanan Pegawai Tetap records when they exist
-  (same monthly-history feature this app lacks for BPA1 too). "PPh Pasal
-  21 Kurang (Lebih) Dipotong pada Masa Pajak Desember / Masa Pajak
-  Terakhir*" = `PPh Terutang pada Ini − PPh yang Telah Dipotong`,
-  live-verified exact (14,625,000 − 0 = 14,625,000) — same structural
-  formula as BPA1's fixed version, just without the DTP-facility branch.
+  **"PPh Pasal 21 yang Telah Dipotong*"**, a disabled/system-computed
+  field filled from the monthly MP slips (see "BPA1/BPA2 parity
+  (2026-10-25)"). "PPh Pasal 21 Kurang (Lebih) Dipotong pada Masa Pajak
+  Desember / Masa Pajak Terakhir*" = `PPh Terutang pada Ini − PPh yang
+  Telah Dipotong`, live-verified exact (14,625,000 − 0 = 14,625,000) —
+  same structural formula as BPA1, without the DTP-facility branch.
   KAP-KJS* (derived, `411121-100`, same). **NITKU/Nomor Identitas Sub
   Unit Organisasi\* is an actual `<select>` here** (not a readonly derived
   field like BPA1) — but live-verified to offer exactly one option (the
@@ -884,6 +872,64 @@ Nama Objek Pajak catalog beyond what's already been pulled for BPU/BP21/
 BP26/BPA1/BPA2's own object codes (only those specific codes were
 fetched per-type via `fetch-reference-data.mjs`, not the entire shared
 catalog in one pull).
+
+## BPA1/BPA2 parity (2026-10-25)
+
+Live Coretax (`main.7ec255bc8bb87f8c.js`, BPA1 class `ml`, BPA2 class `Qs`,
+both inside the main bundle) was exercised on `ebupotbpa1/create` and
+`ebupotbpa2/create`. Simpan Konsep was attempted; both
+`createebupotbpa1`/`createebupotbpa2` returned 400 "Gender tidak boleh
+null" for the generic TIN, so no Coretax draft was created. Nothing was
+submitted or issued.
+
+Live reference case (Jan–Okt 2026, K/0, Gaji 200,000,000, 21-100-01):
+
+| Case | Coretax | Local |
+|---|---|---|
+| Kurang dari Setahun | Biaya Jabatan 5,000,000; PKP 136,500,000; PPh 14,475,000 | same |
+| Disetahunkan, Number Of Months 8 | Neto setahun 292,500,000; PKP 234,000,000; PPh atas PKP 29,100,000; terutang 19,400,000 | same (BPA1 and BPA2) |
+| BPA1 Gross Up | Tunjangan PPh 17,029,350; Bruto 217,029,350 | same |
+| BPA2 Pensiunan (21-100-02) | Biaya Pensiun 2,000,000 | same |
+
+Mechanics, from the bundle and confirmed by the live form:
+- **Number Of Months** is an explicit input for the annualized variant,
+  independent of the Masa Pajak range: `12 / NumberOfMonths × (neto +
+  neto sebelumnya)`, tax de-annualized by `× NumberOfMonths / 12`.
+  Submit rejects 0 and 12 ("between 1 to 11"). BPA2 now stores it too
+  (`bukti_potong_bpa2.jumlah_bulan`); it previously used the period length.
+- **Biaya Jabatan cap** uses the period length; 500,000/month for
+  21-100-01/21-100-32, **200,000/month for 21-100-02** (pensiun).
+- **Gross Up** (BPA1 only): `calculation()` sets Tunjangan PPh := PPh
+  terutang pada bukti ini and repeats until stable. Stored as
+  `bukti_potong_bpa1.is_gross_up`; Tunjangan PPh becomes read-only.
+- **Monthly history**: every identity/period change POSTs
+  `getebupotmpincometaxwithheld` (`{TaxIdentificationNumber,
+  IncomePeriodStart, IncomePeriodEnd}` → `{Article21TaxWithheld}`) and
+  fills "PPh Pasal 21 yang Dipotong" (BPA1) / "yang Telah Dipotong"
+  (BPA2). Locally `priorMonthlyPph21Withheld` sums issued active MP slips
+  of the same withholder, recipient (generic TIN also by name) and object
+  code from Masa Pajak Awal up to, not including, Masa Pajak Akhir. BPA1
+  DTP (facility 11) keeps moving the whole terutang into that field.
+- The shared calculation lives in `src/lib/helpers/bpa-calc.ts`; server
+  update remotes and both detail pages use it, so the preview and the
+  saved figures cannot drift.
+
+Also fixed: MP saved PPh 0 since `2bcbf4d` because `resolveBp21` treats a
+missing `DeemedRate` as 0 and MP items carry none; `updateMp.remote.ts`
+now supplies 100%, matching the MP page preview (20,000,000 K/0 → TER 9%,
+PPh 1,800,000).
+
+Local UI chain verified (Simpan Konsep → Submit → Terbitkan → Posting SPT
+Oktober 2026): MP September 1,800,000 → BPA1 Gross Up shows Dipotong
+1,800,000 and Kurang (Lebih) 15,229,350; L-IB lists it with bruto
+197,029,350 (217,029,350 − MP 20,000,000). BPA2 annualized 8 months
+appears in L-IB with 19,400,000. Induk PPh 21 equals the L-IB totals.
+All fixtures were deleted afterwards and the SPT was re-posted (0
+sources, as before).
+
+Not reproduced: prior-employer "Get data" (Coretax endpoint needs DJP
+registry data; fields stay manual), `BranchId` NITKU selection (local
+uses the pusat NITKU), Coretax's backend Gender requirement.
 
 ## BP21/BP26 — local parity implementation (2026-10-25)
 

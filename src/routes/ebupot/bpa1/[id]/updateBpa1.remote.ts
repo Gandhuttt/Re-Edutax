@@ -1,14 +1,10 @@
 import { form, getRequestEvent } from '$app/server';
-import { decimalString, isRealIsoDate, requiredString, rupiahString } from '$lib/helpers/valibot-schema';
+import { BPA_MAX_ANNUALIZED_MONTHS, calculateBpa } from '$lib/helpers/bpa-calc';
+import { isRealIsoDate, requiredString, rupiahString } from '$lib/helpers/valibot-schema';
 import { bpa1PtkpValues } from '$lib/helpers/ptkp-bpa1';
 import { db } from '$lib/server/db';
 import { bukti_potong_bpa1, fasilitas_pajak_ebupot, jenis_dokumen_ebupot, kode_objek_pajak_pph } from '$lib/server/db/schema';
-import {
-	calculateBiayaJabatan,
-	monthCountInclusive,
-	resolveBpa1Tax,
-	resolvePtkpAmount
-} from '$lib/server/ebupot/resolveBpa1';
+import { priorMonthlyPph21Withheld } from '$lib/server/ebupot/priorMonthlyWithheld';
 import { error, redirect } from '@sveltejs/kit';
 import { and, eq } from 'drizzle-orm';
 import * as v from 'valibot';
@@ -43,10 +39,11 @@ const UpdateBpa1Schema = v.object({
 			v.nonEmpty('Number Of Months harus diisi'),
 			v.transform(Number),
 			v.integer('Number Of Months harus berupa bilangan bulat'),
-			v.minValue(1, 'Number Of Months minimal 1'),
-			v.maxValue(12, 'Number Of Months maksimal 12')
+			v.minValue(1, 'Number Of Months harus antara 1 sampai 11'),
+			v.maxValue(BPA_MAX_ANNUALIZED_MONTHS, 'Number Of Months harus antara 1 sampai 11')
 		)
 	),
+	isGrossUp: v.optional(v.picklist(['true', 'false']), 'false'),
 	gajiPensiunThtJht: rupiahString('Gaji/Pensiun atau THT/JHT'),
 	tunjanganPph: optionalRupiah('Tunjangan PPh'),
 	tunjanganLainnya: optionalRupiah('Tunjangan Lainnya'),
@@ -149,84 +146,64 @@ export const updateBpa1 = form(UpdateBpa1Schema, async (input) => {
 		error(400, 'Jenis Dokumen tidak valid');
 	}
 
-	// Penghasilan Bruto build-up -- live-verified: a single lump figure for
-	// the whole Masa Pajak Awal..Akhir period, not a monthly-recurring
-	// amount Coretax multiplies (see docs/ui-reference/coretax/ebupot/
-	// NOTES.md "BPA1").
+	// Penghasilan Bruto -- a single lump figure for the whole Masa Pajak
+	// Awal..Akhir period, not a monthly-recurring amount.
 	const gajiPensiunThtJht = Number(input.gajiPensiunThtJht);
-	const tunjanganPph = Number(input.tunjanganPph);
 	const tunjanganLainnya = Number(input.tunjanganLainnya);
 	const honorarium = Number(input.honorarium);
 	const premiAsuransi = Number(input.premiAsuransi);
 	const natura = Number(input.natura);
 	const tantiemBonus = Number(input.tantiemBonus);
-	const penghasilanBruto =
-		gajiPensiunThtJht +
-		tunjanganPph +
-		tunjanganLainnya +
-		honorarium +
-		premiAsuransi +
-		natura +
-		tantiemBonus;
-
-	const monthCount = monthCountInclusive(
-		input.masaPajakAwal,
-		input.tahunAwal,
-		input.masaPajakAkhir,
-		input.tahunAkhir
-	);
-	const annualizationMonthCount = jumlahBulan ?? monthCount;
-	const biayaJabatan = calculateBiayaJabatan(penghasilanBruto, monthCount);
 	const iuranPensiun = Number(input.iuranPensiun);
 	const zakat = Number(input.zakat);
-	const jumlahPengurangan = biayaJabatan + iuranPensiun + zakat;
-	const penghasilanNeto = penghasilanBruto - jumlahPengurangan;
-
 	const penghasilanNetoSebelumnya = Number(input.penghasilanNetoSebelumnya);
-	const netoGabungan = penghasilanNeto + penghasilanNetoSebelumnya;
+	const pphPasal21DipotongSebelumnya = Number(input.pphPasal21DipotongSebelumnya);
+	const isGrossUp = input.isGrossUp === 'true';
+	const isDtp = fasilitas.kode === '11';
 
-	// "Kurang dari setahun yang disetahunkan": annualize the combined Neto
-	// for bracket lookup using Coretax's explicit Number Of Months value,
-	// then de-annualize the resulting tax back to that period.
-	const penghasilanNetoSetahunDisetahunkan = isDisetahunkan
-		? Math.round((netoGabungan * 12) / annualizationMonthCount)
-		: netoGabungan;
+	// DTP moves the whole terutang to "Ditanggung Pemerintah"; otherwise the
+	// field holds PPh 21 already withheld through the monthly MP slips, as
+	// Coretax's getebupotmpincometaxwithheld lookup fills it.
+	const pphDipotongBulanan = isDtp
+		? 0
+		: await priorMonthlyPph21Withheld({
+				npwpPemotong: activeNpwp,
+				nomorIdentitasWp: input.nomorIdentitasWp,
+				nama: input.nama,
+				kodeObjekPajakId: objekPajak.id,
+				masaPajakAwal: input.masaPajakAwal,
+				tahunAwal: input.tahunAwal,
+				masaPajakAkhir: input.masaPajakAkhir,
+				tahunAkhir: input.tahunAkhir
+			});
 
-	const penghasilanTidakKenaPajak = resolvePtkpAmount(input.statusPtkp);
-	const penghasilanKenaPajak = Math.max(
-		0,
-		Math.floor((penghasilanNetoSetahunDisetahunkan - penghasilanTidakKenaPajak) / 1000) * 1000
-	);
-
-	let resolved: ReturnType<typeof resolveBpa1Tax>;
+	let calc: ReturnType<typeof calculateBpa>;
 	try {
-		resolved = resolveBpa1Tax(objekPajak.parameterData, fasilitas.kode, penghasilanKenaPajak);
+		calc = calculateBpa({
+			brutoTanpaTunjanganPph:
+				gajiPensiunThtJht + tunjanganLainnya + honorarium + premiAsuransi + natura + tantiemBonus,
+			tunjanganPph: Number(input.tunjanganPph),
+			grossUp: isGrossUp,
+			masaPajakAwal: input.masaPajakAwal,
+			tahunAwal: input.tahunAwal,
+			masaPajakAkhir: input.masaPajakAkhir,
+			tahunAkhir: input.tahunAkhir,
+			kodeObjek: objekPajak.kode,
+			disetahunkan: isDisetahunkan,
+			jumlahBulan: jumlahBulan ?? null,
+			iuranPensiun,
+			zakat,
+			penghasilanNetoSebelumnya,
+			statusPtkp: input.statusPtkp,
+			pphDipotongSebelumnya: pphPasal21DipotongSebelumnya,
+			parameterData: objekPajak.parameterData,
+			facilityKode: fasilitas.kode,
+			dtp: isDtp,
+			pphDipotongBulanan
+		});
 	} catch (err) {
 		error(400, err instanceof Error ? err.message : 'Tarif tidak dapat dihitung');
 	}
-
-	const pphPasal21AtasPkp = resolved.pajakPenghasilan;
-	const pphPasal21Terutang = isDisetahunkan
-		? Math.round((pphPasal21AtasPkp * annualizationMonthCount) / 12)
-		: pphPasal21AtasPkp;
-	const pphPasal21DipotongSebelumnya = Number(input.pphPasal21DipotongSebelumnya);
-	const pphPasal21TerutangPadaIni = pphPasal21Terutang - pphPasal21DipotongSebelumnya;
-
-	// Fasilitas code 11 = PPh Pasal 21 Ditanggung Pemerintah (DTP) -- the
-	// government bears this bukti's tax instead of the employee.
-	const pphDipotongDitanggungPemerintah = fasilitas.kode === '11' ? pphPasal21TerutangPadaIni : 0;
-
-	// Live-verified on Coretax: with no prior monthly Bukti Pemotongan
-	// Bulanan Pegawai Tetap recorded, "Kurang (Lebih) Dipotong pada Masa
-	// Pajak Desember" equals PPh Terutang pada Bukti Ini minus PPh
-	// Ditanggung Pemerintah -- it is NOT always 0 (PKP 137,500,000 case:
-	// PPh Terutang pada Ini 14,625,000, DTP 0 -> Kurang/Lebih 14,625,000,
-	// confirmed exact live). This app has no monthly-withholding-history
-	// feature to subtract a "sudah dipotong bulanan" term, so this mirrors
-	// the zero-prior-withholding case exactly; a taxpayer with real monthly
-	// BP Bulanan history would see a smaller (or negative/"lebih") value on
-	// real Coretax that this app cannot compute.
-	const pphKurangLebihDipotongDesember = pphPasal21TerutangPadaIni - pphDipotongDitanggungPemerintah;
 
 	await db
 		.update(bukti_potong_bpa1)
@@ -245,31 +222,32 @@ export const updateBpa1 = form(UpdateBpa1Schema, async (input) => {
 			fasilitasPajakId: fasilitas.id,
 			jenisPemotongan: input.jenisPemotongan,
 			jumlahBulan,
+			isGrossUp,
 			gajiPensiunThtJht,
-			tunjanganPph,
+			tunjanganPph: calc.tunjanganPph,
 			tunjanganLainnya,
 			honorarium,
 			premiAsuransi,
 			natura,
 			tantiemBonus,
-			penghasilanBruto,
-			biayaJabatan,
+			penghasilanBruto: calc.penghasilanBruto,
+			biayaJabatan: calc.biayaJabatan,
 			iuranPensiun,
 			zakat,
-			jumlahPengurangan,
-			penghasilanNeto,
+			jumlahPengurangan: calc.jumlahPengurangan,
+			penghasilanNeto: calc.penghasilanNeto,
 			nomorBuktiSebelumnya: input.nomorBuktiSebelumnya.trim(),
 			penghasilanNetoSebelumnya,
-			penghasilanNetoSetahunDisetahunkan,
-			penghasilanTidakKenaPajak,
-			penghasilanKenaPajak,
-			tarif: resolved.tarif,
-			pphPasal21AtasPkp,
-			pphPasal21Terutang,
+			penghasilanNetoSetahunDisetahunkan: calc.penghasilanNetoSetahunDisetahunkan,
+			penghasilanTidakKenaPajak: calc.penghasilanTidakKenaPajak,
+			penghasilanKenaPajak: calc.penghasilanKenaPajak,
+			tarif: calc.tarif,
+			pphPasal21AtasPkp: calc.pphPasal21AtasPkp,
+			pphPasal21Terutang: calc.pphPasal21Terutang,
 			pphPasal21DipotongSebelumnya,
-			pphPasal21TerutangPadaIni,
-			pphDipotongDitanggungPemerintah,
-			pphKurangLebihDipotongDesember,
+			pphPasal21TerutangPadaIni: calc.pphPasal21TerutangPadaIni,
+			pphDipotongDitanggungPemerintah: calc.pphDipotongAtauDitanggung,
+			pphKurangLebihDipotongDesember: calc.pphKurangLebihDipotongDesember,
 			jenisDokumenId: jenisDokumen.id,
 			nomorDokumen: input.nomorDokumen.trim(),
 			tanggalDokumen: input.tanggalDokumen,

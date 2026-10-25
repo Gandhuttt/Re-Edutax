@@ -100,10 +100,18 @@ export const updateMp = form(UpdateMpSchema, async (input) => {
 	}
 
 	const penghasilanBruto = Number(input.penghasilanBruto);
+	// MP reference items carry no DeemedRate: TER applies to the whole bruto
+	// (the live form has no DPP field). resolveBp21 treats a missing DeemedRate
+	// as 0 for BP21's exempt entries, so MP supplies the 100% explicitly --
+	// the same default the MP page preview uses.
+	const parameterData = {
+		...objekPajak.parameterData,
+		ItemList: objekPajak.parameterData.ItemList.map((item) => ({ DeemedRate: 100, ...item }))
+	};
 
 	let resolved: ReturnType<typeof resolveBp21>;
 	try {
-		resolved = resolveBp21(objekPajak.parameterData, fasilitas.kode, input.statusPtkp, penghasilanBruto, 0);
+		resolved = resolveBp21(parameterData, fasilitas.kode, input.statusPtkp, penghasilanBruto, 0);
 	} catch (err) {
 		error(400, err instanceof Error ? err.message : 'Tarif tidak dapat dihitung');
 	}

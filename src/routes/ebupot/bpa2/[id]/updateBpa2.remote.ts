@@ -1,14 +1,10 @@
 import { form, getRequestEvent } from '$app/server';
+import { BPA_MAX_ANNUALIZED_MONTHS, calculateBpa } from '$lib/helpers/bpa-calc';
 import { requiredString, rupiahString } from '$lib/helpers/valibot-schema';
 import { bpa1PtkpValues } from '$lib/helpers/ptkp-bpa1';
 import { db } from '$lib/server/db';
 import { bukti_potong_bpa2, kode_objek_pajak_pph } from '$lib/server/db/schema';
-import {
-	calculateBiayaJabatan,
-	monthCountInclusive,
-	resolveBpa2Tax,
-	resolvePtkpAmount
-} from '$lib/server/ebupot/resolveBpa2';
+import { priorMonthlyPph21Withheld } from '$lib/server/ebupot/priorMonthlyWithheld';
 import { error, redirect } from '@sveltejs/kit';
 import { and, eq } from 'drizzle-orm';
 import * as v from 'valibot';
@@ -37,6 +33,16 @@ const UpdateBpa2Schema = v.object({
 	posisi: requiredString('Posisi harus diisi'),
 	kodeObjekPajakId: requiredString('Nama Objek Pajak harus dipilih'),
 	jenisPemotongan: v.picklist(jenisPemotonganValues, 'Jenis Pemotongan harus dipilih'),
+	jumlahBulan: v.optional(
+		v.pipe(
+			v.string(),
+			v.nonEmpty('Number Of Months harus diisi'),
+			v.transform(Number),
+			v.integer('Number Of Months harus berupa bilangan bulat'),
+			v.minValue(1, 'Number Of Months harus antara 1 sampai 11'),
+			v.maxValue(BPA_MAX_ANNUALIZED_MONTHS, 'Number Of Months harus antara 1 sampai 11')
+		)
+	),
 	gajiPokokPensiun: rupiahString('Gaji Pokok/Pensiun'),
 	tunjanganIstri: optionalRupiah('Tunjangan Istri'),
 	tunjanganAnak: optionalRupiah('Tunjangan Anak'),
@@ -93,6 +99,11 @@ export const updateBpa2 = form(UpdateBpa2Schema, async (input) => {
 	) {
 		error(400, 'Masa Pajak Akhir tidak boleh sebelum Masa Pajak Awal');
 	}
+	const isDisetahunkan = input.jenisPemotongan === 'KURANG_SETAHUN_DISETAHUNKAN';
+	const jumlahBulan = isDisetahunkan ? input.jumlahBulan : null;
+	if (isDisetahunkan && jumlahBulan === undefined) {
+		error(400, 'Number Of Months harus diisi');
+	}
 
 	const [objekPajak] = await db
 		.select()
@@ -120,65 +131,58 @@ export const updateBpa2 = form(UpdateBpa2Schema, async (input) => {
 	const tunjanganBeras = Number(input.tunjanganBeras);
 	const tunjanganLainLain = Number(input.tunjanganLainLain);
 	const penghasilanTetapTeraturLainnya = Number(input.penghasilanTetapTeraturLainnya);
-	const penghasilanBruto =
-		gajiPokokPensiun +
-		tunjanganIstri +
-		tunjanganAnak +
-		tunjanganPerbaikanPenghasilan +
-		tunjanganStrukturalFungsional +
-		tunjanganBeras +
-		tunjanganLainLain +
-		penghasilanTetapTeraturLainnya;
-
-	const monthCount = monthCountInclusive(
-		input.masaPajakAwal,
-		input.tahunAwal,
-		input.masaPajakAkhir,
-		input.tahunAkhir
-	);
-	const biayaJabatan = calculateBiayaJabatan(penghasilanBruto, monthCount);
 	const iuranPensiun = Number(input.iuranPensiun);
 	const zakat = Number(input.zakat);
-	const jumlahPengurangan = biayaJabatan + iuranPensiun + zakat;
-	const penghasilanNeto = penghasilanBruto - jumlahPengurangan;
-
 	const penghasilanNetoSebelumnya = Number(input.penghasilanNetoSebelumnya);
-	const netoGabungan = penghasilanNeto + penghasilanNetoSebelumnya;
+	const pphPasal21DipotongSebelumnya = Number(input.pphPasal21DipotongSebelumnya);
 
-	const isDisetahunkan = input.jenisPemotongan === 'KURANG_SETAHUN_DISETAHUNKAN';
-	const penghasilanNetoSetahunDisetahunkan = isDisetahunkan
-		? Math.round((netoGabungan * 12) / monthCount)
-		: netoGabungan;
+	// "PPh Pasal 21 yang Telah Dipotong": filled from the monthly MP slips, as
+	// Coretax's getebupotmpincometaxwithheld lookup does. BPA2 has no facility.
+	const pphDipotongBulanan = await priorMonthlyPph21Withheld({
+		npwpPemotong: activeNpwp,
+		nomorIdentitasWp: input.nomorIdentitasWp,
+		nama: input.nama,
+		kodeObjekPajakId: objekPajak.id,
+		masaPajakAwal: input.masaPajakAwal,
+		tahunAwal: input.tahunAwal,
+		masaPajakAkhir: input.masaPajakAkhir,
+		tahunAkhir: input.tahunAkhir
+	});
 
-	const penghasilanTidakKenaPajak = resolvePtkpAmount(input.statusPtkp);
-	const penghasilanKenaPajak = Math.max(
-		0,
-		Math.floor((penghasilanNetoSetahunDisetahunkan - penghasilanTidakKenaPajak) / 1000) * 1000
-	);
-
-	let resolved: ReturnType<typeof resolveBpa2Tax>;
+	let calc: ReturnType<typeof calculateBpa>;
 	try {
-		resolved = resolveBpa2Tax(objekPajak.parameterData, penghasilanKenaPajak);
+		calc = calculateBpa({
+			brutoTanpaTunjanganPph:
+				gajiPokokPensiun +
+				tunjanganIstri +
+				tunjanganAnak +
+				tunjanganPerbaikanPenghasilan +
+				tunjanganStrukturalFungsional +
+				tunjanganBeras +
+				tunjanganLainLain +
+				penghasilanTetapTeraturLainnya,
+			tunjanganPph: 0,
+			grossUp: false,
+			masaPajakAwal: input.masaPajakAwal,
+			tahunAwal: input.tahunAwal,
+			masaPajakAkhir: input.masaPajakAkhir,
+			tahunAkhir: input.tahunAkhir,
+			kodeObjek: objekPajak.kode,
+			disetahunkan: isDisetahunkan,
+			jumlahBulan: jumlahBulan ?? null,
+			iuranPensiun,
+			zakat,
+			penghasilanNetoSebelumnya,
+			statusPtkp: input.statusPtkp,
+			pphDipotongSebelumnya: pphPasal21DipotongSebelumnya,
+			parameterData: objekPajak.parameterData,
+			facilityKode: null,
+			dtp: false,
+			pphDipotongBulanan
+		});
 	} catch (err) {
 		error(400, err instanceof Error ? err.message : 'Tarif tidak dapat dihitung');
 	}
-
-	const pphPasal21AtasPkp = resolved.pajakPenghasilan;
-	const pphPasal21Terutang = isDisetahunkan
-		? Math.round((pphPasal21AtasPkp * monthCount) / 12)
-		: pphPasal21AtasPkp;
-	const pphPasal21DipotongSebelumnya = Number(input.pphPasal21DipotongSebelumnya);
-	const pphPasal21TerutangPadaIni = pphPasal21Terutang - pphPasal21DipotongSebelumnya;
-
-	// No Fasilitas Pajak/DTP mechanism for BPA2 (live-verified: no such
-	// selector exists) -- "PPh Pasal 21 yang Telah Dipotong" is itself a
-	// disabled/system-computed field on real Coretax, pulled from monthly
-	// Bukti Pemotongan Bulanan Pegawai Tetap history this app doesn't have,
-	// so it stays 0 here (same zero-prior-withholding case BPA1's DTP=0
-	// default mirrors -- see docs/ui-reference/coretax/ebupot/NOTES.md
-	// "BPA2").
-	const pphPasal21YangTelahDipotong = 0;
-	const pphKurangLebihDipotongDesember = pphPasal21TerutangPadaIni - pphPasal21YangTelahDipotong;
 
 	await db
 		.update(bukti_potong_bpa2)
@@ -196,6 +200,7 @@ export const updateBpa2 = form(UpdateBpa2Schema, async (input) => {
 			posisi: input.posisi.trim(),
 			kodeObjekPajakId: objekPajak.id,
 			jenisPemotongan: input.jenisPemotongan,
+			jumlahBulan,
 			gajiPokokPensiun,
 			tunjanganIstri,
 			tunjanganAnak,
@@ -204,24 +209,24 @@ export const updateBpa2 = form(UpdateBpa2Schema, async (input) => {
 			tunjanganBeras,
 			tunjanganLainLain,
 			penghasilanTetapTeraturLainnya,
-			penghasilanBruto,
-			biayaJabatan,
+			penghasilanBruto: calc.penghasilanBruto,
+			biayaJabatan: calc.biayaJabatan,
 			iuranPensiun,
 			zakat,
-			jumlahPengurangan,
-			penghasilanNeto,
+			jumlahPengurangan: calc.jumlahPengurangan,
+			penghasilanNeto: calc.penghasilanNeto,
 			nomorBuktiSebelumnya: input.nomorBuktiSebelumnya.trim(),
 			penghasilanNetoSebelumnya,
-			penghasilanNetoSetahunDisetahunkan,
-			penghasilanTidakKenaPajak,
-			penghasilanKenaPajak,
-			tarif: resolved.tarif,
-			pphPasal21AtasPkp,
-			pphPasal21Terutang,
+			penghasilanNetoSetahunDisetahunkan: calc.penghasilanNetoSetahunDisetahunkan,
+			penghasilanTidakKenaPajak: calc.penghasilanTidakKenaPajak,
+			penghasilanKenaPajak: calc.penghasilanKenaPajak,
+			tarif: calc.tarif,
+			pphPasal21AtasPkp: calc.pphPasal21AtasPkp,
+			pphPasal21Terutang: calc.pphPasal21Terutang,
 			pphPasal21DipotongSebelumnya,
-			pphPasal21TerutangPadaIni,
-			pphPasal21YangTelahDipotong,
-			pphKurangLebihDipotongDesember,
+			pphPasal21TerutangPadaIni: calc.pphPasal21TerutangPadaIni,
+			pphPasal21YangTelahDipotong: calc.pphDipotongAtauDitanggung,
+			pphKurangLebihDipotongDesember: calc.pphKurangLebihDipotongDesember,
 			// Matches Coretax: every Simpan Konsep save resets the draft to
 			// "Disimpan Tidak Valid" -- same rule as BPU/BP21/BP26/BPA1.
 			status: 'SAVEDINVALID'

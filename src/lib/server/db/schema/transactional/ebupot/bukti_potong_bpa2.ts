@@ -50,6 +50,9 @@ export const bukti_potong_bpa2 = sqliteTable('bukti_potong_bpa2', {
 	jenisPemotongan: text('jenis_pemotongan', {
 		enum: ['KURANG_SETAHUN', 'KURANG_SETAHUN_DISETAHUNKAN', 'SETAHUN_PENUH']
 	}),
+	// Explicit "Number Of Months" (1-11), required only for the annualized
+	// variant; independent of the Masa Pajak Awal..Akhir range.
+	jumlahBulan: integer('jumlah_bulan'),
 
 	// Penghasilan Bruto -- PNS-specific allowance breakdown, live-verified
 	// distinct from BPA1's (no Honorarium/Premi Asuransi/Natura/Tantiem

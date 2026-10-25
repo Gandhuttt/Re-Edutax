@@ -12,8 +12,8 @@ import { ptkpEbupotValues } from '../../../../../helpers/ptkp-ebupot';
 // field list this mirrors.
 //
 // A single Masa Pajak like BP21/BPU (not a period range like BPA1/BPA2 --
-// MP is the per-month slip those annual recaps would cross-reference
-// against, if this app had that history feature). Reuses BP21's 12-value
+// MP is the per-month slip those annual recaps subtract as "PPh Pasal 21
+// yang Dipotong", see priorMonthlyWithheld.ts). Reuses BP21's 12-value
 // PTKP enum (K/TK/HB 0-3) since MP's own object codes carry TaxExemptionStatus
 // bands keyed to the exact same codes, and reuses resolveBp21's TER branch
 // directly (see updateMp.remote.ts) rather than a separate resolver --

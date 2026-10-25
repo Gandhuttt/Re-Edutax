@@ -43,6 +43,7 @@ export const submitBpa2 = form(async () => {
 		!existing.posisi ||
 		!existing.kodeObjekPajakId ||
 		!existing.jenisPemotongan ||
+		(existing.jenisPemotongan === 'KURANG_SETAHUN_DISETAHUNKAN' && !existing.jumlahBulan) ||
 		existing.penghasilanBruto <= 0;
 
 	if (missing) {

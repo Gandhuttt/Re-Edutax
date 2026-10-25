@@ -2,8 +2,10 @@
 	import { page as appPage } from '$app/state';
 	import { ActionButton, Breadcrumbs, DocumentWorkspace, FieldGrid, FormActions, FormField, FormSection, LookupField, PageLayout, RupiahField, SelectField, ServiceWorkspace, Stack } from '$lib/re-ui-components';
 	import { formatMonth } from '$lib/helpers/date';
-	import { bpa1PtkpOptions } from '$lib/helpers/ptkp-bpa1';
+	import { BPA_MAX_ANNUALIZED_MONTHS, calculateBpa } from '$lib/helpers/bpa-calc';
+	import { bpa1PtkpOptions, type Bpa1Ptkp } from '$lib/helpers/ptkp-bpa1';
 	import { getObjekPajakBpa2 } from '../../objekPajakBpa2.remote';
+	import { getPriorMonthlyWithheld } from '../../priorMonthlyWithheld.remote';
 	import { getWajibPajak } from '../../../getWajibPajak.remote';
 	import { getBpa2 } from './getBpa2.remote';
 	import { submitBpa2 } from './submitBpa2.remote';
@@ -37,83 +39,67 @@
 	let tunjanganBerasState = $state(bpa2.tunjanganBeras);
 	let tunjanganLainLainState = $state(bpa2.tunjanganLainLain);
 	let penghasilanTetapLainnyaState = $state(bpa2.penghasilanTetapTeraturLainnya);
-	const jumlahPenghasilanBruto = $derived(
-		gajiPokokState +
-			tunjanganIstriState +
-			tunjanganAnakState +
-			tunjanganPerbaikanState +
-			tunjanganStrukturalState +
-			tunjanganBerasState +
-			tunjanganLainLainState +
-			penghasilanTetapLainnyaState
-	);
-
-	const monthCount = $derived(
-		(tahunAkhirState - tahunAwalState) * 12 + (masaPajakAkhirState - masaPajakAwalState) + 1
-	);
-	const biayaJabatan = $derived(
-		Math.min(Math.round(jumlahPenghasilanBruto * 0.05), 500_000 * Math.max(monthCount, 0))
-	);
+	let jumlahBulanState = $state<number | undefined>(bpa2.jumlahBulan ?? undefined);
 	let iuranPensiunState = $state(bpa2.iuranPensiun);
 	let zakatState = $state(bpa2.zakat);
-	const jumlahPengurangan = $derived(biayaJabatan + iuranPensiunState + zakatState);
-	const penghasilanNeto = $derived(jumlahPenghasilanBruto - jumlahPengurangan);
-
 	let nomorBuktiSebelumnyaState = $state(bpa2.nomorBuktiSebelumnya);
 	let penghasilanNetoSebelumnyaState = $state(bpa2.penghasilanNetoSebelumnya);
-	const netoGabungan = $derived(penghasilanNeto + penghasilanNetoSebelumnyaState);
-	const isDisetahunkan = $derived(jenisPemotonganState === 'KURANG_SETAHUN_DISETAHUNKAN');
-	const penghasilanNetoSetahunDisetahunkan = $derived(
-		isDisetahunkan && monthCount > 0 ? Math.round((netoGabungan * 12) / monthCount) : netoGabungan
-	);
-
-	const ptkpAmounts: Record<string, number> = {
-		TK0: 54_000_000,
-		TK1: 58_500_000,
-		TK2: 63_000_000,
-		TK3: 67_500_000,
-		K0: 58_500_000,
-		K1: 63_000_000,
-		K2: 67_500_000,
-		K3: 72_000_000
-	};
-	const penghasilanTidakKenaPajak = $derived(ptkpAmounts[statusPtkpState] ?? 0);
-	const penghasilanKenaPajak = $derived(
-		Math.max(
-			0,
-			Math.floor((penghasilanNetoSetahunDisetahunkan - penghasilanTidakKenaPajak) / 1000) * 1000
-		)
-	);
-
-	// Client-side mirror of resolveBpa2Tax, for display only -- the server
-	// is the source of truth at save time. No facility selector for BPA2, so
-	// this just picks the ItemList entry that carries real bracket data.
-	const resolvedTax = $derived.by(() => {
-		if (!selectedObjekPajak) return { tarif: 0, pajakPenghasilan: 0 };
-		const item = selectedObjekPajak.parameterData.ItemList.find(
-			(entry) => entry.Rates && entry.Rates.length > 0
-		);
-		if (!item || penghasilanKenaPajak <= 0) return { tarif: 0, pajakPenghasilan: 0 };
-		const band = item.Rates?.find(
-			(b) => penghasilanKenaPajak >= b.Min && penghasilanKenaPajak <= b.Max
-		);
-		if (!band) return { tarif: 0, pajakPenghasilan: 0 };
-		return {
-			tarif: band.Rate,
-			pajakPenghasilan: Math.round(penghasilanKenaPajak * (band.Rate / 100) - (band.Minus ?? 0))
-		};
-	});
-	const pphPasal21Terutang = $derived(
-		isDisetahunkan && monthCount > 0
-			? Math.round((resolvedTax.pajakPenghasilan * monthCount) / 12)
-			: resolvedTax.pajakPenghasilan
-	);
 	let pphDipotongSebelumnyaState = $state(bpa2.pphPasal21DipotongSebelumnya);
-	const pphTerutangPadaIni = $derived(pphPasal21Terutang - pphDipotongSebelumnyaState);
-	// System-computed on real Coretax (pulled from monthly withholding
-	// history this app doesn't have) -- always 0 here, same as the server.
-	const pphYangTelahDipotong = 0;
-	const pphKurangLebihDesember = $derived(pphTerutangPadaIni - pphYangTelahDipotong);
+	const isDisetahunkan = $derived(jenisPemotonganState === 'KURANG_SETAHUN_DISETAHUNKAN');
+
+	// Coretax refreshes "PPh Pasal 21 yang Telah Dipotong" from the monthly MP
+	// slips whenever identity, object or period changes; the server recomputes on save.
+	const pphDipotongBulanan = $derived(
+		selectedObjekPajak && nomorIdentitasWpState
+			? await getPriorMonthlyWithheld({
+					nomorIdentitasWp: nomorIdentitasWpState,
+					nama: namaState,
+					kodeObjekPajakId: selectedObjekPajak.id,
+					masaPajakAwal: masaPajakAwalState,
+					tahunAwal: tahunAwalState,
+					masaPajakAkhir: masaPajakAkhirState,
+					tahunAkhir: tahunAkhirState
+				})
+			: 0
+	);
+
+	// Same calculation the server runs at Simpan Konsep (bpa-calc.ts), for display.
+	const calc = $derived.by(() => {
+		if (!selectedObjekPajak || !statusPtkpState) return null;
+		try {
+			return calculateBpa({
+				brutoTanpaTunjanganPph:
+					gajiPokokState +
+					tunjanganIstriState +
+					tunjanganAnakState +
+					tunjanganPerbaikanState +
+					tunjanganStrukturalState +
+					tunjanganBerasState +
+					tunjanganLainLainState +
+					penghasilanTetapLainnyaState,
+				tunjanganPph: 0,
+				grossUp: false,
+				masaPajakAwal: masaPajakAwalState,
+				tahunAwal: tahunAwalState,
+				masaPajakAkhir: masaPajakAkhirState,
+				tahunAkhir: tahunAkhirState,
+				kodeObjek: selectedObjekPajak.kode,
+				disetahunkan: isDisetahunkan,
+				jumlahBulan: jumlahBulanState ?? null,
+				iuranPensiun: iuranPensiunState,
+				zakat: zakatState,
+				penghasilanNetoSebelumnya: penghasilanNetoSebelumnyaState,
+				statusPtkp: statusPtkpState as Bpa1Ptkp,
+				pphDipotongSebelumnya: pphDipotongSebelumnyaState,
+				parameterData: selectedObjekPajak.parameterData,
+				facilityKode: null,
+				dtp: false,
+				pphDipotongBulanan
+			});
+		} catch {
+			return null;
+		}
+	});
 
 	async function cariNpwpPenerima() {
 		const wp = await getWajibPajak({ npwp: nomorIdentitasWpState });
@@ -160,6 +146,7 @@
 				<FormField label="Jenis Pajak" value={selectedObjekPajak?.pasal ?? ''} disabled />
 				<FormField label="Kode Objek Pajak" value={selectedObjekPajak?.kode ?? ''} disabled />
 				<SelectField label="Jenis Pemotongan" name="jenisPemotongan" bind:value={jenisPemotonganState} disabled={!bpa2.canEdit} options={jenisPemotonganOptions} />
+				{#if isDisetahunkan}<FormField label="Number Of Months" name="jumlahBulan" type="number" min="1" max={String(BPA_MAX_ANNUALIZED_MONTHS)} step="1" bind:value={() => jumlahBulanState === undefined ? '' : String(jumlahBulanState), (v) => (jumlahBulanState = v === '' ? undefined : Number(v))} required disabled={!bpa2.canEdit} />{/if}
 			</FieldGrid>
 		</FormSection>
 		<FormSection number="02" title="Penghasilan Bruto" bordered>
@@ -172,36 +159,36 @@
 				<RupiahField label="Tunjangan Beras" name="tunjanganBeras" bind:value={tunjanganBerasState} disabled={!bpa2.canEdit} />
 				<RupiahField label="Tunjangan Lain-lain" name="tunjanganLainLain" bind:value={tunjanganLainLainState} disabled={!bpa2.canEdit} />
 				<RupiahField label="Penghasilan Tetap dan Teratur Lainnya yang Pembayarannya Terpisah dari Pembayaran Gaji" name="penghasilanTetapTeraturLainnya" bind:value={penghasilanTetapLainnyaState} disabled={!bpa2.canEdit} />
-				<RupiahField label="Jumlah Penghasilan Bruto" value={jumlahPenghasilanBruto} disabled />
+				<RupiahField label="Jumlah Penghasilan Bruto" value={calc?.penghasilanBruto ?? 0} disabled />
 			</FieldGrid>
 		</FormSection>
 		<FormSection number="03" title="Pengurang" bordered>
 			<FieldGrid>
-				<RupiahField label="Biaya Jabatan / Biaya Pensiun" value={biayaJabatan} disabled />
+				<RupiahField label="Biaya Jabatan / Biaya Pensiun" value={calc?.biayaJabatan ?? 0} disabled />
 				<RupiahField label="Iuran terkait Pensiun atau Hari Tua" name="iuranPensiun" bind:value={iuranPensiunState} disabled={!bpa2.canEdit} />
 				<RupiahField label="Zakat atau Sumbangan Keagamaan yang Bersifat Wajib" name="zakat" bind:value={zakatState} disabled={!bpa2.canEdit} />
-				<RupiahField label="Jumlah Pengurangan" value={jumlahPengurangan} disabled />
-				<RupiahField label="Jumlah Penghasilan Neto" value={penghasilanNeto} disabled />
+				<RupiahField label="Jumlah Pengurangan" value={calc?.jumlahPengurangan ?? 0} disabled />
+				<RupiahField label="Jumlah Penghasilan Neto" value={calc?.penghasilanNeto ?? 0} disabled />
 			</FieldGrid>
 		</FormSection>
 		<FormSection number="04" title="Penghitungan PPh Pasal 21" bordered>
 			<FieldGrid>
 				<FormField label="Nomor Bukti Pemotongan BPA2 dari Pemberi Kerja Sebelumnya (Apabila ada)" name="nomorBuktiSebelumnya" bind:value={nomorBuktiSebelumnyaState} disabled={!bpa2.canEdit} />
 				<RupiahField label="Penghasilan Neto dari Pemotongan Sebelumnya" name="penghasilanNetoSebelumnya" bind:value={penghasilanNetoSebelumnyaState} disabled={!bpa2.canEdit} />
-				<RupiahField label="Jumlah Penghasilan Neto untuk Perhitungan PPh Pasal 21 (Setahun/Disetahunkan)" value={penghasilanNetoSetahunDisetahunkan} disabled />
-				<RupiahField label="Penghasilan Tidak Kena Pajak" value={penghasilanTidakKenaPajak} disabled />
-				<RupiahField label="Penghasilan Kena Pajak Setahun / Disetahunkan" value={penghasilanKenaPajak} disabled />
-				<FormField label="Tarif (%)" value={String(resolvedTax.tarif)} disabled />
-				<RupiahField label="PPh Pasal 21 atas Penghasilan Kena Pajak Setahun/Disetahunkan" value={resolvedTax.pajakPenghasilan} disabled />
-				<RupiahField label="PPh Pasal 21 Terutang" value={pphPasal21Terutang} disabled />
+				<RupiahField label="Jumlah Penghasilan Neto untuk Perhitungan PPh Pasal 21 (Setahun/Disetahunkan)" value={calc?.penghasilanNetoSetahunDisetahunkan ?? 0} disabled />
+				<RupiahField label="Penghasilan Tidak Kena Pajak" value={calc?.penghasilanTidakKenaPajak ?? 0} disabled />
+				<RupiahField label="Penghasilan Kena Pajak Setahun / Disetahunkan" value={calc?.penghasilanKenaPajak ?? 0} disabled />
+				<FormField label="Tarif (%)" value={String(calc?.tarif ?? 0)} disabled />
+				<RupiahField label="PPh Pasal 21 atas Penghasilan Kena Pajak Setahun/Disetahunkan" value={calc?.pphPasal21AtasPkp ?? 0} disabled />
+				<RupiahField label="PPh Pasal 21 Terutang" value={calc?.pphPasal21Terutang ?? 0} disabled />
 				<RupiahField label="PPh Pasal 21 Dipotong dari Bukti Pemotongan Sebelumnya" name="pphPasal21DipotongSebelumnya" bind:value={pphDipotongSebelumnyaState} disabled={!bpa2.canEdit} />
-				<RupiahField label="PPh Pasal 21 Terutang pada Bukti Pemotongan Ini (Dapat Dikreditkan Pada SPT Tahunan)" value={pphTerutangPadaIni} disabled />
-				<RupiahField label="PPh Pasal 21 yang Telah Dipotong" value={pphYangTelahDipotong} disabled />
-				<RupiahField label="PPh Pasal 21 Kurang (Lebih) Dipotong pada Masa Pajak Desember / Masa Pajak Terakhir" value={pphKurangLebihDesember} disabled />
+				<RupiahField label="PPh Pasal 21 Terutang pada Bukti Pemotongan Ini (Dapat Dikreditkan Pada SPT Tahunan)" value={calc?.pphPasal21TerutangPadaIni ?? 0} disabled />
+				<RupiahField label="PPh Pasal 21 yang Telah Dipotong" value={calc?.pphDipotongAtauDitanggung ?? 0} disabled />
+				<RupiahField label="PPh Pasal 21 Kurang (Lebih) Dipotong pada Masa Pajak Desember / Masa Pajak Terakhir" value={calc?.pphKurangLebihDipotongDesember ?? 0} disabled />
 				<FormField label="KAP-KJS" value={selectedObjekPajak?.kap ?? ''} disabled />
 				<FormField label="NITKU/Nomor Identitas Sub Unit Organisasi" value={nitkuPemotong} disabled />
 			</FieldGrid>
-			<p>BPA2 tidak memiliki mekanisme Fasilitas Pajak/DTP seperti BPA1. “PPh Pasal 21 yang Telah Dipotong” dihitung dari riwayat pemotongan bulanan yang belum tersedia di aplikasi ini.</p>
+			<p>“PPh Pasal 21 yang Telah Dipotong” diambil dari Bukti Pemotongan Bulanan Pegawai Tetap yang telah terbit untuk penerima dan objek pajak yang sama sebelum masa pajak terakhir.</p>
 		</FormSection>
 		<FormActions>
 			<ActionButton tone="quiet" type="button" onclick={() => (window.location.href = '/ebupot/bpa2')}>Kembali</ActionButton>
