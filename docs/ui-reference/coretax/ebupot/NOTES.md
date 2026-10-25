@@ -1141,6 +1141,16 @@ SPT. The wizard blocked a second Normal return for an existing period.
 All 17 source fixtures and four SPT fixtures were removed afterward, with
 zero remaining fixture records. Migration application was local only.
 
+UI refinement: the PPh 21/26 page contains no local stylesheet or inline styles.
+Identity/status use KeyValueGrid, details use DisclosureItem, and monetary
+summaries use the reusable AmountSummary inside ResponsiveGrid. Shared form
+fields and FormActions replace route-specific controls and CSS.
+Browser smoke at 1440px and 390px checked nonempty and empty source panels,
+horizontal table scrolling without document overflow, changed-select dirty
+blocking, and persisted scenario/SP2D/declaration values. A Rp500,000 source
+less Rp123,456 SP2D posted Rp376,544 due and enabled simulated reporting.
+The UI-smoke SPT and its single source fixture were removed afterward.
+
 
 No DJP signing, billing, NTPN or official filing is produced. Testing creation
 and filing of a new amendment and final backend validation on real Coretax

@@ -56,6 +56,12 @@ and `ConditionalField` components rather than Faktur-only CSS. Lower-level
 layouts such as `ContentSection`, `FieldGrid`, `ResponsiveGrid`, `KeyValueGrid`,
 `LabeledGroup`, and `Stack` can be combined for other workflows.
 
+`AmountSummary` displays a formatted amount with a label, optional description,
+and optional `status` snippet. Pair it with `ResponsiveGrid` for side-by-side
+financial summaries that stack on narrow containers. Keep formatting and amount
+semantics in the caller; the component does not calculate or alter values.
+The PPh 21/26 route composes shared components without page CSS or inline styles.
+
 ## Public site pages
 
 Marketing pages (the landing page at `/`) use the same tokens with larger
