@@ -47,7 +47,7 @@
 	<PageHeading
 		eyebrow="Profil Saya"
 		title="Tempat Kegiatan Usaha"
-		description="Kelola tempat kegiatan usaha beserta NITKU yang tercatat pada akun wajib pajak."
+		description="Setiap NPWP memiliki TKU pusat bawaan dengan akhiran 000000. Kelola detail pusat dan tambahkan cabang di sini."
 	/>
 
 	<Stack gap="18px">
@@ -77,10 +77,12 @@
 							<td>{row.nomorTelepon ?? '—'}</td>
 							<td>
 								<ActionButton tone="secondary" onclick={() => ubah(row)} aria-label={`Ubah TKU ${row.nitku}`}>Ubah</ActionButton>
-								<form {...hapus} style="display:inline">
-									<input {...hapus.fields.id.as('hidden', row.id)} />
-									<ActionButton type="submit" tone="danger" aria-label={`Hapus TKU ${row.nitku}`} pending={hapus.pending > 0}>Hapus</ActionButton>
-								</form>
+								{#if row.nitku !== `${data.owner}000000`}
+									<form {...hapus} style="display:inline">
+										<input {...hapus.fields.id.as('hidden', row.id)} />
+										<ActionButton type="submit" tone="danger" aria-label={`Hapus TKU ${row.nitku}`} pending={hapus.pending > 0}>Hapus</ActionButton>
+									</form>
+								{/if}
 								{#each hapus.fields.allIssues() ?? [] as issue (issue.message)}<p role="alert">{issue.message}</p>{/each}
 								{#if hapus.result?.message}<p role="status">{hapus.result.message}</p>{/if}
 							</td>

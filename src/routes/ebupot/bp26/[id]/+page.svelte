@@ -65,7 +65,7 @@
 	const today = todayIso();
 	const tanpaFasilitasId = fasilitasOptions.find((f) => f.kode === '9')?.id ?? '';
 
-	// All state starts from the persisted row; nothing below overwrites it on mount.
+	// Preserve saved NITKU; editable drafts without one default to their registered pusat.
 	let context = $state(initialContext);
 	let period = $state(`${bp26.tahun}-${bp26.masaPajak}`);
 	let nomorIdentitasWpState = $state(bp26.nomorIdentitasWp);
@@ -86,7 +86,7 @@
 	let nomorDokumenState = $state(bp26.nomorDokumen);
 	let tanggalDokumenState = $state(bp26.tanggalDokumen ?? '');
 	let tanggalPemotonganState = $state(bp26.tanggalPemotongan ?? '');
-	let nitkuPemotongState = $state(bp26.nitkuPemotong ?? '');
+	let nitkuPemotongState = $state(bp26.nitkuPemotong ?? (!ro ? initialContext.ownBranches.find((b) => b.nitku.endsWith('000000'))?.nitku ?? '' : ''));
 	let showDetails = $state(false);
 	let brutoAtFocus = bp26.penghasilanBruto;
 	let lookupNotice = $state<{ tone: 'info' | 'warning' | 'error' | 'success'; title: string; message: string } | null>(null);

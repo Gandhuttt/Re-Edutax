@@ -288,6 +288,13 @@
       "when": 1792902386683,
       "tag": "0040_drop_bp_local_registry",
       "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "6",
+      "when": 1792903761367,
+      "tag": "0041_default_tku_pusat",
+      "breakpoints": true
     }
   ]
 }

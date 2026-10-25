@@ -24,12 +24,12 @@
 	const editable = bp21.canEdit;
 	const today = todayIso();
 
-	// Form state: all initialised from the persisted row, only changed by real user actions (never by mount effects).
+	// Preserve saved NITKU; editable drafts without one default to their registered pusat.
 	let periodeState = $state(`${bp21.tahun}-${pad(bp21.masaPajak)}`);
 	let nomorIdentitasWpState = $state(bp21.nomorIdentitasWp);
 	let namaPenerimaState = $state(bp21.namaPenerima);
-	let nitkuPemotongState = $state(bp21.nitkuPemotong ?? '');
-	let nitkuPenerimaState = $state(bp21.nitkuPenerima ?? '');
+	let nitkuPemotongState = $state(bp21.nitkuPemotong ?? (editable ? initialContext.ownBranches.find((b) => b.nitku.endsWith('000000'))?.nitku ?? '' : ''));
+	let nitkuPenerimaState = $state(bp21.nitkuPenerima ?? (editable ? initialContext.recipientBranches.find((b) => b.nitku === `${bp21.nomorIdentitasWp}000000`)?.nitku ?? '' : ''));
 	let tanggalPemotonganState = $state(bp21.tanggalPemotongan ?? '');
 	let statusPtkpState = $state(bp21.statusPtkp ?? '');
 	let fasilitasPajakIdState = $state(bp21.fasilitasPajakId ?? '');
@@ -104,7 +104,9 @@
 	async function refreshContext(tin: string) {
 		committedTin = tin;
 		ctx = await getBpLookupContext({ tin });
-		if (nitkuPenerimaState && !ctx.recipientBranches.some((b) => b.nitku === nitkuPenerimaState)) nitkuPenerimaState = '';
+		if (!nitkuPenerimaState || !ctx.recipientBranches.some((b) => b.nitku === nitkuPenerimaState)) {
+			nitkuPenerimaState = ctx.recipientBranches.find((b) => b.nitku === `${tin}000000`)?.nitku ?? '';
+		}
 	}
 	function changePeriode(value: string) {
 		touch();

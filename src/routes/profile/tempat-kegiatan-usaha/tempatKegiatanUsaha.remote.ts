@@ -145,6 +145,7 @@ export const hapusTempatKegiatanUsaha = form(
 			.where(and(eq(tempat_kegiatan_usaha.id, id), eq(wajib_pajak.npwp, owner)))
 			.limit(1);
 		if (!tku) invalid('Tempat kegiatan usaha tidak ditemukan pada akun Anda.');
+		if (tku.nitku === `${owner}000000`) invalid('TKU pusat bawaan tidak dapat dihapus.');
 
 		const [used21] = await db
 			.select({ id: bukti_potong_bp21.id })

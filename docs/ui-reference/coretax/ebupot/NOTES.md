@@ -912,8 +912,14 @@ cancelled/deleted and verified as `DELETED`. Official issuance/upload was not te
 - NITKU comes from Profil Saya › Tempat Kegiatan Usaha (`/profile/tempat-kegiatan-usaha`,
   table `tempat_kegiatan_usaha`), the same place Coretax keeps TKU. Sender NITKU must
   be one of the account's own TKU; BP21 recipient NITKU must belong to the recipient
-  WP and is required for Submit (the recipient adds it in their own profile). A draft
-  may still be saved without it. No synthetic `NPWP + 000000` fallback is used.
+  WP and is required for Submit. Migration `0041_default_tku_pusat.sql` backfills
+  the actual `NPWP + 000000` pusat record for existing valid 16-digit NPWP and
+  creates it automatically for newly inserted taxpayers. Existing pusat data and
+  branches are preserved. Pusat can be edited but not deleted through the profile,
+  including direct remote-form calls. Editable BP21/BP26 drafts default the sender
+  to this registered pusat; BP21 recipient lookup defaults to the recipient's
+  registered pusat. Saved branch selections are preserved. No synthetic fallback
+  substitutes for a missing database record; drafts may still omit NITKU.
 - Cari NPWP fills the recipient name from registered taxpayers; Status PTKP is chosen
   in the form. Periods begin January 2025 and end at the current month; real calendar
   dates and identity/name/rate/date bounds are checked server-side.
@@ -1001,8 +1007,16 @@ bruto is absent from the template and must be completed before Submit where need
   created a draft visible in Tidak Valid without reloading. Selecting that XML
   on BP26 displayed the wrong-root validation error. The dropdown was visually
   checked at 1365px and 390px.
+- Default-pusat migration left no local WP without pusat; existing custom pusat
+  and branch data remained unchanged. Inserting a new WP, then upserting it,
+  produced exactly one pusat with its email/phone. The profile hid pusat deletion
+  and a direct remote-form request returned the server-side rejection.
+- BP21 Submit without manually adding TKU persisted `SUBMITTED`, sender/recipient
+  pusat NITKU, and PPh Rp300,000. BP26 sender pusat was selected automatically
+  on a new draft and visually checked at 390px.
 
-Migrations `0039_bp_parity.sql` and `0040_drop_bp_local_registry.sql` are required.
+Migrations `0039_bp_parity.sql`, `0040_drop_bp_local_registry.sql`, and
+`0041_default_tku_pusat.sql` are required.
 Registry-removal verification and migration application were local only; no
 production database write, deployment, official issuance or push was performed
 in this follow-up.
