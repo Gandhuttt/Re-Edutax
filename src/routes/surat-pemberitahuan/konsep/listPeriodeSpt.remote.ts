@@ -1,6 +1,6 @@
 import { getRequestEvent, query } from '$app/server';
 import { db } from '$lib/server/db';
-import { spt_pph_badan, spt_pph_orang_pribadi, spt_ppn } from '$lib/server/db/schema';
+import { spt_pph_badan, spt_pph_orang_pribadi, spt_ppn, spt_pph_2126 } from '$lib/server/db/schema';
 import { error } from '@sveltejs/kit';
 import { and, eq } from 'drizzle-orm';
 
@@ -15,7 +15,11 @@ export const listPeriodeSpt = query(async () => {
 		error(401, 'Belum login');
 	}
 
-	const [ppn, badan, orangPribadi] = await Promise.all([
+	const [pph2126, ppn, badan, orangPribadi] = await Promise.all([
+		db
+			.select({ masaPajak: spt_pph_2126.masaPajak, tahun: spt_pph_2126.tahun })
+			.from(spt_pph_2126)
+			.where(and(eq(spt_pph_2126.npwpPemotong, activeNpwp), eq(spt_pph_2126.pembetulanKe, 0))),
 		db
 			.select({ masaPajak: spt_ppn.masaPajak, tahun: spt_ppn.tahun })
 			.from(spt_ppn)
@@ -32,5 +36,5 @@ export const listPeriodeSpt = query(async () => {
 			)
 	]);
 
-	return { ppn, badan, orangPribadi };
+	return { pph2126, ppn, badan, orangPribadi };
 });

@@ -29,8 +29,10 @@
 	import { newSptPphOrangPribadi } from './newSptPphOrangPribadi.remote';
 	import { newSptPpn } from './newSptPpn.remote';
 	import { TAHUN_SPT, TAHUN_SPT_DEFAULT } from './tahunSpt';
+	import { listSptPph2126, newSptPph2126, deleteSptPph2126 } from '../spt2126.remote';
+	import { SPT2126_YEARS } from '$lib/helpers/spt-pph-2126';
 
-	type JenisSpt = 'ppn' | 'pph-badan' | 'pph-orang-pribadi';
+	type JenisSpt = 'ppn' | 'pph-badan' | 'pph-orang-pribadi' | 'pph-21-26';
 	type ConceptRow = {
 		id: string;
 		kind: JenisSpt;
@@ -43,6 +45,8 @@
 		ppnKeluaran: number | null;
 		ppnMasukan: number | null;
 		kurangLebihBayar: number;
+		pasal21?: number;
+		pasal26?: number;
 	};
 
 	const rupiah = new Intl.NumberFormat('id-ID');
@@ -54,6 +58,7 @@
 	}));
 	const jenisSptOptions: { value: JenisSpt; label: string }[] = [
 		{ value: 'ppn', label: 'SPT Masa PPN' },
+		{ value: 'pph-21-26', label: 'SPT Masa PPh Pasal 21/26' },
 		{ value: 'pph-badan', label: 'SPT Tahunan PPh Badan' },
 		{ value: 'pph-orang-pribadi', label: 'SPT Tahunan PPh Orang Pribadi' }
 	];
@@ -64,8 +69,24 @@
 	const sptPpn = $derived(await listSptPpn({ status: 'konsep' }));
 	const sptPphBadan = $derived(await listSptPphBadan({ status: 'konsep' }));
 	const sptPphOrangPribadi = $derived(await listSptPphOrangPribadi({ status: 'konsep' }));
+	const sptPph2126 = $derived(await listSptPph2126({ status: 'konsep' }));
 	const periodeSpt = $derived(await listPeriodeSpt());
 	const rows = $derived.by((): ConceptRow[] => [
+		...sptPph2126.map((row) => ({
+			id: row.id,
+			kind: 'pph-21-26' as const,
+			jenis: 'SPT Masa PPh Pasal 21/26',
+			masaPajak: formatMonth(row.masaPajak),
+			tahun: row.tahun,
+			pembetulanKe: row.pembetulanKe,
+			dibuat: row.createdAt,
+			urutan: '',
+			ppnKeluaran: null,
+			ppnMasukan: null,
+			kurangLebihBayar: row.kurangLebihBayar,
+			pasal21: row.kurangLebihBayar21,
+			pasal26: row.kurangLebihBayar26
+		})),
 		...sptPpn.map((row) => ({
 			id: row.id,
 			kind: 'ppn' as const,
@@ -124,7 +145,7 @@
 	// How many normal SPT the taxpayer already holds for the period picked in the dialog, so
 	// that opening another one is a deliberate choice rather than a surprise.
 	const periodeDipilih = $derived(
-		jenisSpt === 'ppn'
+		jenisSpt === 'ppn' || jenisSpt === 'pph-21-26'
 			? { tahun: Number(tahun), masaPajak: Number(masaPajak) }
 			: {
 					tahun: Number(jenisSpt === 'pph-badan' ? tahunPajakBadan : tahunPajakOrangPribadi),
@@ -132,8 +153,8 @@
 				}
 	);
 	const jumlahSudahAda = $derived(
-		(jenisSpt === 'ppn'
-			? periodeSpt.ppn.filter(
+		(jenisSpt === 'ppn' || jenisSpt === 'pph-21-26'
+			? (jenisSpt === 'pph-21-26' ? periodeSpt.pph2126 : periodeSpt.ppn).filter(
 					(row) => row.tahun === periodeDipilih.tahun && row.masaPajak === periodeDipilih.masaPajak
 				)
 			: (jenisSpt === 'pph-badan' ? periodeSpt.badan : periodeSpt.orangPribadi).filter(
@@ -142,7 +163,9 @@
 		).length
 	);
 	const catatanSudahAda = $derived(
-		`Anda sudah memiliki ${jumlahSudahAda} ${jenisSptOptions.find((option) => option.value === jenisSpt)?.label} untuk ${
+		jenisSpt === 'pph-21-26'
+			? 'SPT Normal untuk masa ini sudah ada. Buka SPT yang tersedia; jika sudah dilaporkan, gunakan Buat Pembetulan pada daftar SPT Dilaporkan.'
+			: `Anda sudah memiliki ${jumlahSudahAda} ${jenisSptOptions.find((option) => option.value === jenisSpt)?.label} untuk ${
 			periodeDipilih.masaPajak === null
 				? `tahun pajak ${periodeDipilih.tahun}`
 				: `${formatMonth(periodeDipilih.masaPajak)} ${periodeDipilih.tahun}`
@@ -153,7 +176,7 @@
 	const accountNpwp = $derived(String(appPage.data.user?.username ?? ''));
 	const pagedRows = $derived(rows.slice((currentPage - 1) * pageSize, currentPage * pageSize));
 	const creationPending = $derived(
-		jenisSpt === 'ppn'
+		jenisSpt === 'pph-21-26' ? newSptPph2126.pending > 0 : jenisSpt === 'ppn'
 			? newSptPpn.pending > 0
 			: jenisSpt === 'pph-badan'
 				? newSptPphBadan.pending > 0
@@ -161,6 +184,7 @@
 	);
 
 	function detailHref(row: ConceptRow) {
+		if (row.kind === 'pph-21-26') return `/surat-pemberitahuan/pph-21-26?id=${row.id}`;
 		if (row.kind === 'ppn') return `/surat-pemberitahuan/ppn?id=${row.id}`;
 		if (row.kind === 'pph-badan') return `/surat-pemberitahuan/pph-badan?id=${row.id}`;
 		return `/surat-pemberitahuan/pph-orang-pribadi?id=${row.id}`;
@@ -241,7 +265,14 @@
 						>
 							{#snippet row(row)}
 								<td class="action-cell">
-									{#if row.kind === 'ppn'}
+									{#if row.kind === 'pph-21-26'}
+										<form {...deleteSptPph2126.for(row.id)} id={`delete-spt-2126-${row.id}`} hidden>
+											<input type="hidden" name="id" value={row.id} />
+										</form>
+										{#each deleteSptPph2126.for(row.id).fields.allIssues() ?? [] as issue}
+											<p role="alert">{issue.message}</p>
+										{/each}
+									{:else if row.kind === 'ppn'}
 										<form {...deleteSptPpn.for(row.id)} id={`delete-spt-ppn-${row.id}`} hidden>
 											<input type="hidden" name="id" value={row.id} />
 										</form>
@@ -258,7 +289,13 @@
 										visibleCount={2}
 										actions={[
 											{ label: 'Buka', href: detailHref(row) },
-											...(row.kind === 'ppn'
+											...(row.kind === 'pph-21-26'
+												? [{
+														label: 'Hapus',
+														danger: true,
+														onclick: () => submitForm(`delete-spt-2126-${row.id}`, 'Hapus konsep SPT Masa PPh 21/26 ini?')
+													}]
+												: row.kind === 'ppn'
 												? [
 														{
 															label: 'Hapus',
@@ -304,7 +341,12 @@
 								<td class="number">{formatTanggalWaktu(row.dibuat)}</td>
 								<td class="right amount">{row.ppnKeluaran === null ? '—' : rupiah.format(row.ppnKeluaran)}</td>
 								<td class="right amount">{row.ppnMasukan === null ? '—' : rupiah.format(row.ppnMasukan)}</td>
-								<td class="right amount">{rupiah.format(row.kurangLebihBayar)}</td>
+								<td class="right amount">
+									{#if row.kind === 'pph-21-26'}
+										PPh 21: {rupiah.format(row.pasal21 ?? 0)}<br />
+										PPh 26: {rupiah.format(row.pasal26 ?? 0)}
+									{:else}{rupiah.format(row.kurangLebihBayar)}{/if}
+								</td>
 							{/snippet}
 						</DataTableBody>
 					</table>
@@ -336,7 +378,16 @@
 			required
 		/>
 
-		{#if jenisSpt === 'ppn'}
+		{#if jenisSpt === 'pph-21-26'}
+			<form {...newSptPph2126} id="form-buat-spt">
+				<Stack gap="17px">
+					<SelectField label="Masa Pajak" name="masaPajak" bind:value={masaPajak}
+						options={months.map((month) => ({ value: month, label: formatMonth(month) }))} required />
+					<SelectField label="Tahun" name="tahun" bind:value={tahun}
+						options={SPT2126_YEARS.map((year) => ({ value: year, label: String(year) }))} required />
+				</Stack>
+			</form>
+		{:else if jenisSpt === 'ppn'}
 			<form {...newSptPpn} id="form-buat-spt">
 				<Stack gap="17px">
 					<SelectField
@@ -376,6 +427,11 @@
 				/>
 			</form>
 		{/if}
+		{#if jenisSpt === 'pph-21-26'}
+			{#each newSptPph2126.fields.allIssues() ?? [] as issue}
+				<InlineAlert tone="error" compact message={issue.message} />
+			{/each}
+		{/if}
 
 		{#if jumlahSudahAda > 0}
 			<InlineAlert tone="info" compact message={catatanSudahAda} />
@@ -388,6 +444,7 @@
 			type="submit"
 			form="form-buat-spt"
 			pending={creationPending}
+			disabled={jenisSpt === 'pph-21-26' && jumlahSudahAda > 0}
 			pendingLabel="Membuka..."
 		>
 			Buat

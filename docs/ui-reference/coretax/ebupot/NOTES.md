@@ -1080,3 +1080,69 @@ in this follow-up.
 Not a claim of exhaustive parity across every Coretax object/facility/validation
 combination; authoritative registry access, official signing and issuance remain
 outside this educational simulator.
+
+## SPT Masa PPh 21/26 — nonmigrasi simulator (2026-10-25)
+
+Entry: Surat Pemberitahuan → Konsep SPT → Buat SPT → SPT Masa PPh Pasal
+21/26. The form is `/surat-pemberitahuan/pph-21-26?id=…`; supported years
+are 2025–2026. Apply `0042_spt_pph_2126.sql` before using the feature.
+Historical/imported SPT migration and SPT Unifikasi are not part of this module.
+
+### Posting and calculation contract
+
+- L-IA: issued active MP in the selected tax period; withholding date does not
+  determine membership. L-III: issued active BP21/BP26, separated by article.
+  Issued `AMENDMENT` is effective; `AMENDED`, cancelled, deleted and unissued
+  drafts are excluded. A replacement contributes its full value, not its delta.
+- L-IB and L-II use the same BPA1/BPA2. L-IB uses last-period tax and last-period
+  gross; L-II uses annual/part-year gross and tax. L-II is informational and is
+  never added again to Induk.
+- Explicit simulator rule: last-period gross equals BPA annual gross less
+  effective prior MP gross matching employer, recipient, object code and BPA
+  period. Generic identities also require matching names. Cross-year BPA and
+  ambiguous multiple annual slips are rejected rather than guessed. This rule
+  reconciles the observed Rp54m annual − Rp45m prior MP = Rp9m last-period sample,
+  but is not a claim that every official backend filter has been verified.
+- Summary `pajak` includes DTP; `dtp` is its separate subset (facility 4 or 11).
+  Annual DTP is stored separately even when last-period DTP is zero.
+  Amount due = PPh including DTP − DTP − compensation − SP2D. Amendment dues
+  additionally subtract all previous simulated payments in the same chain,
+  separately for PPh 21 and 26. One article's surplus never offsets the other.
+- Compensation records its source chain, article, period and remaining credit.
+  D1 batch guards prevent double consumption. Source-credit reductions cannot
+  invalidate compensation already consumed by another return.
+- SP2D is a documented manual training input, available only in the explicitly
+  selected government simulator scenario, not a DJP taxpayer-classification or
+  treasury verification.
+
+### Lifecycle and verification
+
+Save concept → post → report simulation. Saving does not require declaration;
+reporting requires saved declaration and a current source snapshot. Changed
+sources require reposting. Positive dues enter Menunggu Pembayaran; simulated
+payment completes reporting. Nil/negative dues can be reported without payment.
+Reported snapshots remain immutable; Pembetulan creates a new linked concept.
+Waiting returns can explicitly return to concept, clearing declaration/posting
+and releasing only the new compensation reservation, not historical consumption.
+
+Local verification: `npm run check` (0 errors/0 warnings), `npm run build`, and
+`npx --no-install tsx --test src/lib/helpers/spt-pph-2126.test.ts` (5 behavioral
+regressions). Browser smoke exercised nonzero source snapshots, excluded old
+versions/drafts, annual versus last-period gross, DTP separation, save without
+declaration, changed-source reposting, waiting recovery, payment and amendment.
+An amendment with PPh 21 −Rp500,000 and PPh 26 +Rp500,000 still required payment
+of PPh 26; the original reported snapshot stayed unchanged. The form and source
+tables were visually checked at desktop and 390px, without document overflow.
+Browser checks also consumed Rp500,000 from a recorded prior-period credit;
+the next period no longer offered that exhausted source. A forged reuse was
+rejected at submission without increasing its ledger consumption. A second
+local account received 404 for both read and mutation of the first account's
+SPT. The wizard blocked a second Normal return for an existing period.
+All 17 source fixtures and four SPT fixtures were removed afterward, with
+zero remaining fixture records. Migration application was local only.
+
+
+No DJP signing, billing, NTPN or official filing is produced. Testing creation
+and filing of a new amendment and final backend validation on real Coretax
+remains intentionally on hold; these local results do not establish full parity.
+

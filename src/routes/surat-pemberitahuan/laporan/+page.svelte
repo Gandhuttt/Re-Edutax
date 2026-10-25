@@ -19,8 +19,9 @@
 	import { listSptPphBadan } from '../listSptPphBadan.remote';
 	import { listSptPphOrangPribadi } from '../listSptPphOrangPribadi.remote';
 	import { listSptPpn } from '../listSptPpn.remote';
+	import { listSptPph2126, newPembetulanSptPph2126 } from '../spt2126.remote';
 
-	type JenisSpt = 'ppn' | 'pph-badan' | 'pph-orang-pribadi';
+	type JenisSpt = 'ppn' | 'pph-badan' | 'pph-orang-pribadi' | 'pph-21-26';
 	type ReportedRow = {
 		id: string;
 		kind: JenisSpt;
@@ -31,16 +32,33 @@
 		dibuat: Date;
 		urutan: string;
 		kurangLebihBayar: number;
+		pasal21?: number;
+		pasal26?: number;
 		tanggalDilaporkan: Date | null;
 	};
 
 	const rupiah = new Intl.NumberFormat('id-ID');
+	const sptPph2126 = await listSptPph2126({ status: 'dilaporkan' });
 	const [sptPpn, sptPphBadan, sptPphOrangPribadi] = await Promise.all([
 		listSptPpn({ status: 'dilaporkan' }),
 		listSptPphBadan({ status: 'dilaporkan' }),
 		listSptPphOrangPribadi({ status: 'dilaporkan' })
 	]);
 	const rows = $derived.by((): ReportedRow[] => [
+		...sptPph2126.map((row) => ({
+			id: row.id,
+			kind: 'pph-21-26' as const,
+			jenis: 'SPT Masa PPh Pasal 21/26',
+			masaPajak: formatMonth(row.masaPajak),
+			tahun: row.tahun,
+			pembetulanKe: row.pembetulanKe,
+			dibuat: row.createdAt,
+			urutan: '',
+			kurangLebihBayar: row.kurangLebihBayar,
+			pasal21: row.kurangLebihBayar21,
+			pasal26: row.kurangLebihBayar26,
+			tanggalDilaporkan: row.tanggalDilaporkan
+		})),
 		...sptPpn.map((row) => ({
 			id: row.id,
 			kind: 'ppn' as const,
@@ -88,6 +106,7 @@
 	const pagedRows = $derived(rows.slice((currentPage - 1) * pageSize, currentPage * pageSize));
 
 	function detailHref(row: ReportedRow) {
+		if (row.kind === 'pph-21-26') return `/surat-pemberitahuan/pph-21-26?id=${row.id}`;
 		if (row.kind === 'ppn') return `/surat-pemberitahuan/ppn?id=${row.id}`;
 		if (row.kind === 'pph-badan') return `/surat-pemberitahuan/pph-badan?id=${row.id}`;
 		return `/surat-pemberitahuan/pph-orang-pribadi?id=${row.id}`;
@@ -166,7 +185,14 @@
 						>
 							{#snippet row(row)}
 								<td class="action-cell">
-									{#if row.kind === 'pph-badan'}
+									{#if row.kind === 'pph-21-26'}
+										<form {...newPembetulanSptPph2126.for(row.id)} id={`correct-spt-2126-${row.id}`} hidden>
+											<input type="hidden" name="id" value={row.id} />
+										</form>
+										{#each newPembetulanSptPph2126.for(row.id).fields.allIssues() ?? [] as issue}
+											<p role="alert">{issue.message}</p>
+										{/each}
+									{:else if row.kind === 'pph-badan'}
 										<form {...newPembetulanSptPphBadan.for(row.id)} id={`correct-spt-pph-badan-${row.id}`} hidden>
 											<input type="hidden" name="id" value={row.id} />
 										</form>
@@ -183,7 +209,12 @@
 										visibleCount={2}
 										actions={[
 											{ label: 'Lihat', href: detailHref(row) },
-											...(row.kind === 'pph-badan'
+											...(row.kind === 'pph-21-26'
+												? [{
+														label: 'Buat Pembetulan',
+														onclick: () => submitForm(`correct-spt-2126-${row.id}`)
+													}]
+												: row.kind === 'pph-badan'
 												? [
 														{
 															label: 'Buat Pembetulan',
@@ -207,7 +238,12 @@
 								<td class="number">{row.tahun}</td>
 								<td class="number">{row.pembetulanKe}</td>
 								<td class="number">{formatTanggalWaktu(row.dibuat)}</td>
-								<td class="right amount">{rupiah.format(row.kurangLebihBayar)}</td>
+								<td class="right amount">
+									{#if row.kind === 'pph-21-26'}
+										PPh 21: {rupiah.format(row.pasal21 ?? 0)}<br />
+										PPh 26: {rupiah.format(row.pasal26 ?? 0)}
+									{:else}{rupiah.format(row.kurangLebihBayar)}{/if}
+								</td>
 								<td class="number">{row.tanggalDilaporkan?.toLocaleDateString('id-ID') ?? '—'}</td>
 							{/snippet}
 						</DataTableBody>
