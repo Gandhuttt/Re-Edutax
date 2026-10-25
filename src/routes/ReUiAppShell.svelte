@@ -275,7 +275,7 @@
 				<NavLink href="/dashboard">Beranda</NavLink>
 				<NavDropdown label="Faktur" sections={fakturMenu} columns={1} />
 				<NavDropdown label="SPT" sections={sptMenu} columns={1} />
-				<NavDropdown label="eBupot" sections={ebupotMenu} />
+				<NavDropdown label="eBupot" sections={ebupotMenu} columns={1} />
 			{/if}
 		{/snippet}
 		{#snippet account()}

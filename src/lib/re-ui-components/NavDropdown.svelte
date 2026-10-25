@@ -97,6 +97,7 @@
 		<div
 			class="menu"
 			class:closing
+			style:--menu-width="{columns * 340}px"
 			id="{id}-menu"
 			role="menu"
 			aria-label={label}
@@ -183,7 +184,7 @@
 		z-index: 80;
 		top: calc(100% + 4px);
 		left: 0;
-		width: min(680px, calc(100vw - 32px));
+		width: min(var(--menu-width), calc(100vw - 32px));
 		border: 1px solid var(--ui-line-strong);
 		border-top: 4px solid var(--ui-yellow);
 		background: var(--ui-paper);

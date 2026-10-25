@@ -197,6 +197,10 @@ snippet receives the current pending state.
 Pass menu data directly to `NavDropdown` and `ProfileMenu`. Their item
 callbacks can be used for client-side navigation or analytics.
 
+Set `columns={1}` for a single-column service menu. Desktop panels use 340px
+per column (680px for the default two columns), capped to the viewport width.
+Mobile panels retain their viewport inset and single-column layout.
+
 ```svelte
 <script lang="ts">
 	import {
