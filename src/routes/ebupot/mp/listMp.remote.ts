@@ -5,12 +5,8 @@ import { error } from '@sveltejs/kit';
 import { desc, eq } from 'drizzle-orm';
 
 export const listMp = query(async () => {
-	const event = getRequestEvent();
-	const activeNpwp = event.locals.user?.username;
-
-	if (!activeNpwp) {
-		error(401, 'Belum login');
-	}
+	const activeNpwp = getRequestEvent().locals.user?.username;
+	if (!activeNpwp) error(401, 'Belum login');
 
 	const rows = await db
 		.select({
@@ -21,13 +17,24 @@ export const listMp = query(async () => {
 			nomorIdentitasWp: bukti_potong_mp.nomorIdentitasWp,
 			nama: bukti_potong_mp.nama,
 			namaObjekPajak: kode_objek_pajak_pph.nama,
-			pajakPenghasilanDipotong: bukti_potong_mp.pajakPenghasilanDipotong,
-			diterbitkan: bukti_potong_mp.diterbitkan
+			pajakPenghasilan: bukti_potong_mp.pajakPenghasilanDipotong,
+			diterbitkan: bukti_potong_mp.diterbitkan,
+			nomorPemotongan: bukti_potong_mp.nomorPemotongan,
+			pembetulanDariId: bukti_potong_mp.pembetulanDariId,
+			pembetulanKe: bukti_potong_mp.pembetulanKe
 		})
 		.from(bukti_potong_mp)
 		.leftJoin(kode_objek_pajak_pph, eq(bukti_potong_mp.kodeObjekPajakId, kode_objek_pajak_pph.id))
 		.where(eq(bukti_potong_mp.npwpPemotong, activeNpwp))
-		.orderBy(desc(bukti_potong_mp.tahun), desc(bukti_potong_mp.masaPajak));
+		.orderBy(desc(bukti_potong_mp.tahun), desc(bukti_potong_mp.masaPajak), desc(bukti_potong_mp.pembetulanKe));
 
-	return rows;
+	const replacement: Record<string, { id: string; issued: boolean }> = {};
+	for (const row of rows) {
+		if (!row.pembetulanDariId || row.status === 'DELETED' || row.status === 'CANCELLED') continue;
+		const current = replacement[row.pembetulanDariId];
+		if (!current || (row.diterbitkan && !current.issued)) {
+			replacement[row.pembetulanDariId] = { id: row.id, issued: row.diterbitkan };
+		}
+	}
+	return rows.map((row) => ({ ...row, replacedById: replacement[row.id]?.id ?? null }));
 });

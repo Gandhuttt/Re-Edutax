@@ -15,7 +15,8 @@ export type BpStatus = (typeof bpStatusValues)[number];
 export type BpKind = 'bp21' | 'bp26';
 /** Annual recaps sharing the BP21/BP26 list lifecycle, keyed by their period end. */
 export type BpaKind = 'bpa1' | 'bpa2';
-export type BpLifecycleKind = BpKind | BpaKind;
+export type MpKind = 'mp';
+export type BpLifecycleKind = BpKind | BpaKind | MpKind;
 
 const MIN_YEAR = 2025;
 const JAKARTA_OFFSET_MS = 7 * 60 * 60 * 1000;

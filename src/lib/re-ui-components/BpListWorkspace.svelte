@@ -1,7 +1,7 @@
 <script module lang="ts">
 	import type { Snippet } from "svelte";
 
-	export type BpListKind = "bp21" | "bp26" | "bpa1" | "bpa2";
+	export type BpListKind = "bp21" | "bp26" | "bpa1" | "bpa2" | "mp";
 	export type BpListAction = "delete" | "issue" | "cancel" | "amend";
 	export type BpListStatus =
 		| "NORMAL"
@@ -288,7 +288,7 @@
 			disabled={importBp.pending > 0}
 			items={[
 				{ label: "Pilih File", onclick: () => { if (importFileInput) { importFileInput.value = ""; importFileInput.click(); } } },
-				{ label: "Unduh Format XML", onclick: () => { window.location.href = `https://pajak.go.id/sites/default/files/2024-12/${kind}.zip`; } }
+				{ label: "Unduh Format XML", onclick: () => { window.location.href = kind === "mp" ? "/ebupot/impor/template/mp" : `https://pajak.go.id/sites/default/files/2024-12/${kind}.zip`; } }
 			]}
 		/>
 		{@render createAction()}
@@ -314,7 +314,7 @@
 						{ label: "BP26", href: "/ebupot/bp26", active: kind === "bp26" },
 						{ label: "BPA1", href: "/ebupot/bpa1", active: kind === "bpa1" },
 						{ label: "BPA2", href: "/ebupot/bpa2", active: kind === "bpa2" },
-						{ label: "Bukti Pemotongan Bulanan Pegawai Tetap", href: "/ebupot/mp" }
+						{ label: "Bukti Pemotongan Bulanan Pegawai Tetap", href: "/ebupot/mp", active: kind === "mp" }
 					]
 				}
 			]}

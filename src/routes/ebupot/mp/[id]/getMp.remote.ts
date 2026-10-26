@@ -1,4 +1,5 @@
 import { getRequestEvent, query } from '$app/server';
+import { MP_EDITABLE_STATUSES } from '$lib/helpers/mp-parity';
 import { db } from '$lib/server/db';
 import { bukti_potong_mp } from '$lib/server/db/schema';
 import { error } from '@sveltejs/kit';
@@ -27,5 +28,20 @@ export const getMp = query(async () => {
 		error(404, 'MP tidak ditemukan');
 	}
 
-	return { ...row, canEdit: !row.diterbitkan };
+	// Origin of a correction (pembetulan): only link to a row the same owner can open.
+	let pembetulanDari: { id: string; nomorPemotongan: string | null } | null = null;
+	if (row.pembetulanDariId) {
+		const [origin] = await db
+			.select({ id: bukti_potong_mp.id, nomorPemotongan: bukti_potong_mp.nomorPemotongan })
+			.from(bukti_potong_mp)
+			.where(and(eq(bukti_potong_mp.id, row.pembetulanDariId), eq(bukti_potong_mp.npwpPemotong, activeNpwp)))
+			.limit(1);
+		pembetulanDari = origin ?? null;
+	}
+
+	return {
+		...row,
+		canEdit: !row.diterbitkan && MP_EDITABLE_STATUSES.includes(row.status),
+		pembetulanDari
+	};
 });

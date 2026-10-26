@@ -1,10 +1,10 @@
 import { db, type Statement } from '$lib/server/db';
-import { bukti_potong_bp21, bukti_potong_bp26, bukti_potong_bpa1, bukti_potong_bpa2, fasilitas_pajak_ebupot } from '$lib/server/db/schema';
-import type { BpKind, BpLifecycleKind, BpStatus } from '$lib/helpers/bp-parity';
+import { bukti_potong_bp21, bukti_potong_bp26, bukti_potong_bpa1, bukti_potong_bpa2, bukti_potong_mp, fasilitas_pajak_ebupot } from '$lib/server/db/schema';
+import type { BpKind, BpLifecycleKind, BpStatus, MpKind } from '$lib/helpers/bp-parity';
 import { error } from '@sveltejs/kit';
 import { and, eq, inArray, sql, type SQL } from 'drizzle-orm';
 
-// Shared owner-scoped lifecycle for BP21/BP26/BPA1/BPA2 (local simulation only -- no DJP
+// Shared owner-scoped lifecycle for BP21/BP26/BPA1/BPA2/MP (local simulation only -- no DJP
 // issuance, no e-sign, numbers are clearly prefixed SIM-).
 //
 // Atomicity: D1 runs db.batch() as ONE implicit transaction, so any statement that
@@ -38,10 +38,11 @@ const tables = {
 	bp21: { table: bukti_potong_bp21, name: 'bukti_potong_bp21', label: 'BP21', prefix: 'SIM-BP21' },
 	bp26: { table: bukti_potong_bp26, name: 'bukti_potong_bp26', label: 'BP26', prefix: 'SIM-BP26' },
 	bpa1: { table: bukti_potong_bpa1, name: 'bukti_potong_bpa1', label: 'BPA1', prefix: 'SIM-BPA1' },
-	bpa2: { table: bukti_potong_bpa2, name: 'bukti_potong_bpa2', label: 'BPA2', prefix: 'SIM-BPA2' }
+	bpa2: { table: bukti_potong_bpa2, name: 'bukti_potong_bpa2', label: 'BPA2', prefix: 'SIM-BPA2' },
+	mp: { table: bukti_potong_mp, name: 'bukti_potong_mp', label: 'MP', prefix: 'SIM-MP' }
 } as const;
 
-// All four tables share every column this service touches (id, npwp_pemotong, status,
+// All tables share every column this service touches (id, npwp_pemotong, status,
 // diterbitkan, nomor_pemotongan, pembetulan_*), so one typed handle is used.
 const tableOf = (kind: BpLifecycleKind) => tables[kind].table as unknown as typeof bukti_potong_bp21;
 
@@ -112,7 +113,7 @@ const generateNumber = (kind: BpLifecycleKind, row: LifecycleRow) =>
 		.toUpperCase()}`;
 
 /** Create an empty unissued draft with default Tanpa Fasilitas (kode 9, looked up). */
-export async function createBpDraft(owner: string, kind: BpKind): Promise<string> {
+export async function createBpDraft(owner: string, kind: BpKind | MpKind): Promise<string> {
 	const [facility] = await db
 		.select({ id: fasilitas_pajak_ebupot.id })
 		.from(fasilitas_pajak_ebupot)
@@ -120,6 +121,7 @@ export async function createBpDraft(owner: string, kind: BpKind): Promise<string
 		.limit(1);
 	// Asia/Jakarta current period, independent of server timezone.
 	const jakarta = new Date(Date.now() + 7 * 60 * 60 * 1000);
+	if (kind === 'mp' && jakarta.getUTCMonth() === 11) jakarta.setUTCMonth(10);
 	const id = crypto.randomUUID();
 	await db.insert(tableOf(kind)).values({
 		id,

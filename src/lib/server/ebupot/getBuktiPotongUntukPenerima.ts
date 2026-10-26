@@ -187,7 +187,11 @@ export async function getBuktiPotongUntukPenerima(nomorIdentitasWp: string) {
 		.from(bukti_potong_mp)
 		.innerJoin(wajib_pajak, eq(bukti_potong_mp.npwpPemotong, wajib_pajak.npwp))
 		.leftJoin(kode_objek_pajak_pph, eq(bukti_potong_mp.kodeObjekPajakId, kode_objek_pajak_pph.id))
-		.where(and(eq(bukti_potong_mp.nomorIdentitasWp, nomorIdentitasWp), eq(bukti_potong_mp.diterbitkan, true)));
+		.where(and(
+			eq(bukti_potong_mp.nomorIdentitasWp, nomorIdentitasWp),
+			eq(bukti_potong_mp.diterbitkan, true),
+			eq(bukti_potong_mp.status, 'SUBMITTED')
+		));
 
 	const rows = [...bpuRows, ...bp21Rows, ...bp26Rows, ...bpa1Rows, ...bpa2Rows, ...mpRows];
 

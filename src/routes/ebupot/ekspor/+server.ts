@@ -11,7 +11,7 @@ import type { BpExportFormat } from '$lib/server/ebupot/export';
 import type { BpLifecycleKind } from '$lib/helpers/bp-parity';
 import type { RequestHandler } from './$types';
 
-const KINDS: Record<string, BpLifecycleKind> = { bp21: 'bp21', bp26: 'bp26', bpa1: 'bpa1', bpa2: 'bpa2' };
+const KINDS: Record<string, BpLifecycleKind> = { bp21: 'bp21', bp26: 'bp26', bpa1: 'bpa1', bpa2: 'bpa2', mp: 'mp' };
 const FORMATS: Record<string, BpExportFormat> = { csv: 'csv', xlsx: 'xlsx', print: 'print' };
 
 const text = (status: number, message: string) =>
@@ -34,7 +34,7 @@ export const GET: RequestHandler = async ({ locals, url }) => {
 	const format = Object.hasOwn(FORMATS, url.searchParams.get('format') ?? '')
 		? FORMATS[url.searchParams.get('format')!]
 		: undefined;
-	if (!jenis) return text(400, 'Parameter jenis harus bp21, bp26, bpa1, atau bpa2');
+	if (!jenis) return text(400, 'Parameter jenis harus bp21, bp26, bpa1, bpa2, atau mp');
 	if (!format) return text(400, 'Parameter format harus csv, xlsx, atau print');
 
 	try {

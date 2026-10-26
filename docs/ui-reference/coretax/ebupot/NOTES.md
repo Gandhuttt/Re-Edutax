@@ -185,10 +185,10 @@ verified field list — no fresh Coretax login needed this pass, since
 `EBUPOTMP_TAX_OBJECT`'s `ParameterData` confirmed MP's tax mechanism is TER
 (Tarif Efektif Rata-rata, PMK 168/2023): the exact same band shape
 (`TaxExemptionStatus`-keyed `Rates`) BP21 already resolves for its own
-permanent-employee-monthly-wage objects. `resolveBp21()` is reused directly
-as MP's resolver (no separate `resolveMp.ts`) — MP's `ItemList` shape (TER
-bands + one manual-facility entry, no cumulative bracket) is a strict subset
-of what it already handles; `brutoSebelumnya` is always passed as `0`.
+permanent-employee-monthly-wage objects. The current `helpers/mp-parity.ts`
+wrapper reuses `resolveBp21()` with `brutoSebelumnya = 0` and supplies the
+implicit 100% DPP. Form, server and XML import share this calculation; MP's
+ItemList has TER bands and one manual-facility entry, no cumulative bracket.
 Reuses BP21's 12-value PTKP enum (`ptkp-ebupot.ts`) since the TER bands are
 keyed to the identical K/TK/HB codes.
 
@@ -207,10 +207,8 @@ Two things needed fixing in the reference data before it was usable:
    pre-TER" is semantically incoherent anyway since TER didn't exist before
    PMK 168/2023.
 
-Fasilitas Pajak scope (`4`/`8`/`9`) is derived from the `ItemList`'s
-`TaxCertificateCodes`, not live-UI-confirmed this pass — flagged in
-`fasilitasPajak.remote.ts`'s comment in case a future session finds a 4th
-option live.
+Fasilitas Pajak scope (`4`/`8`/`9`) was initially derived from the `ItemList`'s
+`TaxCertificateCodes`; the later live MP audit confirmed these three options.
 
 Smoke-tested end-to-end (Bruto 10,000,000, PTKP K/0, object `21-100-01`,
 Tanpa Fasilitas) through Simpan Konsep → Submit → Terbitkan: Tarif 2%,
@@ -919,9 +917,9 @@ Mechanics, from the bundle and confirmed by the live form:
   columns remain in `bukti_potong_bpa1` for old rows.
 
 Also fixed: MP saved PPh 0 since `2bcbf4d` because `resolveBp21` treats a
-missing `DeemedRate` as 0 and MP items carry none; `updateMp.remote.ts`
-now supplies 100%, matching the MP page preview (20,000,000 K/0 → TER 9%,
-PPh 1,800,000).
+missing `DeemedRate` as 0 and MP items carry none. The current `resolveMp`
+wrapper in `helpers/mp-parity.ts`, called by `mpService.prepareMp`, supplies
+100%: 20,000,000 K/0 → TER 9%, PPh 1,800,000.
 
 Local UI chain verified (Simpan Konsep → Submit → Terbitkan → Posting SPT
 Oktober 2026): MP September 1,800,000 → BPA1 Gross Up shows Dipotong
@@ -1267,4 +1265,84 @@ The print surface displayed the simulation label. Desktop and actual Chromium
 390px surfaces were inspected; narrow tables scroll within the workspace.
 All six smoke-created BPA records were removed by UUID; follow-up SELECTs
 returned zero. Migrations and writes were local only.
+
+
+## MP form, lifecycle and file parity (2026-10-26)
+
+This section supersedes the older local MP build-status descriptions. The
+reference was the live Coretax MP UI, its create/update/view traffic and
+`main.7ec255bc8bb87f8c.js` (MP class `fl`). Only draft actions were exercised
+in Coretax during the audit; no upload, Submit, issuance or signature.
+
+- The form uses master-data recipient lookup and a read-only name; the
+  existing confirmed generic-TIN convention requires explicit confirmation.
+  Own TIN, unknown unconfirmed identities and another owner's NITKU are
+  rejected. The chosen withholding NITKU is stored, not synthesized for display.
+- Period options exclude December and future periods, beginning January 2025
+  within the shared rolling-year window. A saved valid period is locked in
+  both UI and server; legacy invalid periods remain correctable.
+- `mp-parity.ts` and `mpService.ts` share TER, full-bruto DPP, manual tarif/PPh,
+  object/facility validity and amount checks between form save and XML import.
+  Saved manual values initialize from the record and survive reopening.
+- `BpListWorkspace` provides filters, selection, bulk actions and history.
+  `lifecycle.ts` now includes MP: local SIM-MP numbering, amendment drafts,
+  original supersession when a replacement is issued, cancellation and deletion.
+  The old separate Submit/issuance form remotes have been removed.
+
+### XML and local exports
+
+The live **Unduh Format Data** action POSTs to
+`/withholdingslipsportal/api/DownloadWithholdingSlips/download-template`.
+Its XML body is served byte-for-byte by authenticated
+`GET /ebupot/impor/template/mp`; placeholders and the original 2024 example
+remain unchanged. Replace them with valid account/recipient/period data before
+importing. The public reference is also available in
+[bpmp.zip](https://pajak.go.id/sites/default/files/2024-12/bpmp.zip).
+
+Root: `MmPayrollBulk/TIN + ListOfMmPayroll/MmPayroll*`. Fields:
+`TaxPeriodMonth`, `TaxPeriodYear`, `CounterpartOpt`, `CounterpartPassport`,
+`CounterpartTin`, `StatusTaxExemption`, `Position`, `TaxCertificate`,
+`TaxObjectCode`, `Gross`, `Rate`, `IDPlaceOfBusinessActivity`, `WithholdingDate`.
+The official template uses a six-digit branch suffix; import accepts that
+(normalized with the owner's TIN) or full 22-digit NITKU, then checks ownership.
+`N/A`, `DTP`, `ETC` map to facilities 9, 4, 8; the converter XSD's `ECT` spelling
+is also accepted. The XML has no PPh amount: automatic TER must match Rate;
+facility 8 uses Rate and derives PPh from gross. Independent manual PPh amounts
+can be entered in the form, not carried by this XML contract.
+
+All rows resolve recipient master data, objects, facilities and branches before
+one atomic D1 batch creates SAVEDINVALID drafts. Unsupported fields, DTD/entities,
+invalid numbers/dates and wrong-owner TIN reject the file. Local limits: 1 MiB,
+1–100 slips, 16-digit TIN, periods from 2025; generic recipients without a
+resolvable name cannot be imported because the template has no name field.
+
+CSV, XLSX and print/PDF use the existing owner-scoped export service, including
+stored NITKU, passport/date, taxable amounts, amendment links and SIMULASI labels.
+These are simulator exports, not a claim of byte/column identity with Coretax's
+asynchronous **Download CSV by Period** job. Its period/year dialog and bundle
+handler were inspected; that Coretax job was not executed.
+
+### Migration and exercised verification
+
+Apply `0046_mp_parity.sql`: passport, withholding date/NITKU, amendment origin
+and version, plus owner/amendment indexes. Applied locally only.
+
+- `npm run check`: 0 errors, 0 warnings; `npm run build`: completed.
+- Actual local desktop and 390px form surfaces inspected. Rp20,000,000 K/0
+  produced 9% / Rp1,800,000. Manual 7% / Rp123,456 survived save and reopening;
+  tampering with a saved period was rejected by the server.
+- UI flow: draft → Submit → bulk issue → amendment → replacement issue →
+  cancellation. Four imported drafts were bulk-deleted; resulting statuses
+  were AMENDED (1), CANCELLED (1), DELETED (4), without manual list reloads.
+- A two-row official-structure XML with an invalid second-row NITKU left zero
+  imported rows. Valid data imported as SAVEDINVALID: automatic Rp1,800,000 and
+  manual-rate-derived Rp1,400,000, retaining passport/date and normalized NITKU.
+- CSV/XLSX/print/template endpoints returned 200. Workbook amounts were numeric
+  and matched those values; print visibly showed the educational-simulation
+  label. The served template was compared with the captured Coretax body.
+- Real local SQLite with production BPA/SPT service code: MP prior withholding
+  and SPT preview used Rp123,456 and stored NITKU. Replacement did not double
+  the BPA total; cancellation removed it. No SPT save/post was performed.
+- All six smoke records were physically removed by exact UUID afterward;
+  follow-up SELECT returned zero. No production database writes or deployment.
 

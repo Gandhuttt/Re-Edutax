@@ -4,6 +4,7 @@ import {
 	bukti_potong_bp26,
 	bukti_potong_bpa1,
 	bukti_potong_bpa2,
+	bukti_potong_mp,
 	fasilitas_pajak_ebupot,
 	jenis_dokumen_ebupot,
 	kode_objek_pajak_pph,
@@ -323,6 +324,77 @@ const loadBpaExportRows = async (owner: string, jenis: BpaKind, ids: string[] | 
 	return rows;
 };
 
+// MP rows: monthly TER slip (single masa pajak).
+type MpExportRow = {
+	id: string;
+	status: string;
+	diterbitkan: boolean;
+	nomorPemotongan: string | null;
+	masaPajak: number;
+	tahun: number;
+	pembetulanKe: number;
+	pembetulanDariId: string | null;
+	pembetulanDariNomor: string | null;
+	npwpPemotong: string;
+	nitkuPemotong: string | null;
+	nomorIdentitasWp: string;
+	nama: string;
+	pegawaiAsing: boolean;
+	nomorPaspor: string;
+	statusPtkp: string | null;
+	jabatan: string;
+	kodeObjek: string | null;
+	namaObjek: string | null;
+	fasilitasKode: string | null;
+	fasilitasNama: string | null;
+	penghasilanBruto: number;
+	tarif: number;
+	pajak: number;
+	tanggalPemotongan: string | null;
+};
+
+const loadMpExportRows = async (owner: string, ids: string[] | null): Promise<MpExportRow[]> => {
+	const t = bukti_potong_mp;
+	const sumber = alias(t, 'sumber');
+	const rows = await db
+		.select({
+			id: t.id,
+			status: t.status,
+			diterbitkan: t.diterbitkan,
+			nomorPemotongan: t.nomorPemotongan,
+			masaPajak: t.masaPajak,
+			tahun: t.tahun,
+			pembetulanKe: t.pembetulanKe,
+			pembetulanDariId: t.pembetulanDariId,
+			pembetulanDariNomor: sumber.nomorPemotongan,
+			npwpPemotong: t.npwpPemotong,
+			nitkuPemotong: t.nitkuPemotong,
+			nomorIdentitasWp: t.nomorIdentitasWp,
+			nama: t.nama,
+			pegawaiAsing: t.pegawaiAsing,
+			nomorPaspor: t.nomorPaspor,
+			statusPtkp: t.statusPtkp,
+			jabatan: t.jabatan,
+			kodeObjek: kode_objek_pajak_pph.kode,
+			namaObjek: kode_objek_pajak_pph.nama,
+			fasilitasKode: fasilitas_pajak_ebupot.kode,
+			fasilitasNama: fasilitas_pajak_ebupot.nama,
+			penghasilanBruto: t.penghasilanBruto,
+			tarif: t.tarif,
+			pajak: t.pajakPenghasilanDipotong,
+			tanggalPemotongan: t.tanggalPemotongan
+		})
+		.from(t)
+		.leftJoin(sumber, eq(t.pembetulanDariId, sumber.id))
+		.leftJoin(kode_objek_pajak_pph, eq(t.kodeObjekPajakId, kode_objek_pajak_pph.id))
+		.leftJoin(fasilitas_pajak_ebupot, eq(t.fasilitasPajakId, fasilitas_pajak_ebupot.id))
+		.where(and(eq(t.npwpPemotong, owner), ne(t.status, 'DELETED'), ids ? inArray(t.id, ids) : undefined))
+		.orderBy(desc(t.tahun), desc(t.masaPajak), t.nama, t.id)
+		.limit(MAX_EXPORT_ROWS + 1);
+	checkComplete(rows, ids);
+	return rows;
+};
+
 type Cell = string | number | null;
 type Column<R = ExportRow> = { header: string; get: (r: R) => Cell; kinds?: BpLifecycleKind[] };
 
@@ -334,6 +406,36 @@ const jenisPemotonganLabel: Record<string, string> = {
 	KURANG_SETAHUN_DISETAHUNKAN: 'Kurang dari setahun yang penghasilannya disetahunkan',
 	SETAHUN_PENUH: 'Setahun Penuh'
 };
+
+
+const MP_COLUMNS: Column<MpExportRow>[] = [
+	{ header: 'Jenis', get: () => 'MP' },
+	{ header: 'Status', get: (r) => r.status },
+	{ header: 'Diterbitkan (Simulasi)', get: (r) => (r.diterbitkan ? 'Ya' : 'Belum') },
+	{ header: 'Nomor Bukti Potong (Simulasi)', get: (r) => r.nomorPemotongan },
+	{ header: 'Tahun', get: (r) => r.tahun },
+	{ header: 'Masa Pajak', get: (r) => r.masaPajak },
+	{ header: 'Asal', get: asal },
+	{ header: 'Pembetulan Ke', get: (r) => r.pembetulanKe },
+	{ header: 'Pembetulan Dari Nomor', get: (r) => r.pembetulanDariNomor },
+	{ header: 'NPWP Pemotong', get: (r) => r.npwpPemotong },
+	{ header: 'NITKU Pemotong', get: (r) => r.nitkuPemotong },
+	{ header: 'Nomor Identitas Penerima', get: (r) => r.nomorIdentitasWp },
+	{ header: 'Nama Penerima', get: (r) => r.nama },
+	{ header: 'Pegawai Asing', get: (r) => (r.pegawaiAsing ? 'Ya' : 'Tidak') },
+	{ header: 'Nomor Paspor', get: (r) => r.nomorPaspor || null },
+	{ header: 'Status PTKP', get: (r) => (r.statusPtkp ? `${r.statusPtkp.slice(0, -1)}/${r.statusPtkp.slice(-1)}` : null) },
+	{ header: 'Jabatan', get: (r) => r.jabatan },
+	{ header: 'Kode Objek Pajak', get: (r) => r.kodeObjek },
+	{ header: 'Nama Objek Pajak', get: (r) => r.namaObjek },
+	{ header: 'Kode Fasilitas', get: (r) => r.fasilitasKode },
+	{ header: 'Fasilitas Pajak', get: (r) => r.fasilitasNama },
+	{ header: 'Penghasilan Bruto', get: (r) => r.penghasilanBruto },
+	{ header: 'Tarif (%)', get: (r) => r.tarif },
+	{ header: 'PPh Dipotong', get: (r) => r.pajak },
+	{ header: 'Tanggal Pemotongan', get: (r) => r.tanggalPemotongan },
+	{ header: 'Keterangan', get: () => SIM_LABEL }
+];
 
 const BPA_COLUMNS: Column<BpaExportRow>[] = [
 	{ header: 'Status', get: (r) => r.status },
@@ -429,7 +531,9 @@ export const loadExportTable = async (
 ): Promise<ExportTable> =>
 	jenis === 'bp21' || jenis === 'bp26'
 		? tabulate(await loadExportRows(owner, jenis, ids), columnsFor(jenis))
-		: tabulate(await loadBpaExportRows(owner, jenis, ids), BPA_COLUMNS);
+		: jenis === 'mp'
+			? tabulate(await loadMpExportRows(owner, ids), MP_COLUMNS)
+			: tabulate(await loadBpaExportRows(owner, jenis, ids), BPA_COLUMNS);
 
 // Neutralises spreadsheet formula injection: if the first character that is not
 // whitespace/control/invisible is = + - @, prefix an apostrophe.

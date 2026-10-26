@@ -13,8 +13,10 @@ import { parseBpXml, type BpXmlRow } from '$lib/server/ebupot/parseBpXml';
 import { listBp21 } from '../bp21/listBp21.remote';
 import { listBp26 } from '../bp26/listBp26.remote';
 import { importBpaXml } from '$lib/server/ebupot/importBpaXml';
+import { importMpXml } from '$lib/server/ebupot/importMpXml';
 import { listBpa1 } from '../bpa1/listBpa1.remote';
 import { listBpa2 } from '../bpa2/listBpa2.remote';
+import { listMp } from '../mp/listMp.remote';
 
 const certificateCodes: Record<string, string> = { 'N/A': '9', DTP: '4', TaxExAr21: '10', ETC: '8', COD: '7' };
 
@@ -22,10 +24,17 @@ export const importBp = form('unchecked', async (input) => {
 	const owner = getRequestEvent().locals.user?.username;
 	if (!owner) error(401, 'Belum login');
 	const kind = input.jenis;
-	if (kind !== 'bp21' && kind !== 'bp26' && kind !== 'bpa1' && kind !== 'bpa2') invalid('Pilih jenis BP21, BP26, BPA1, atau BPA2.');
+	if (kind !== 'bp21' && kind !== 'bp26' && kind !== 'bpa1' && kind !== 'bpa2' && kind !== 'mp') invalid('Pilih jenis BP21, BP26, BPA1, BPA2, atau MP.');
 	const file = input.file;
 	if (!(file instanceof File) || !file.name.toLowerCase().endsWith('.xml')) invalid('Pilih berkas XML sesuai template resmi DJP.');
 	if (file.size > 1_048_576) invalid('Ukuran XML maksimum 1 MiB.');
+	if (kind === 'mp') {
+		let imported: number;
+		try { imported = await importMpXml(await file.text(), owner); }
+		catch (cause) { invalid(cause instanceof Error ? cause.message : 'XML tidak dapat diimpor.'); }
+		await listMp().refresh();
+		return { imported, message: `${imported} konsep MP berhasil dibuat. Periksa lalu Submit dari daftar MP.` };
+	}
 	if (kind === 'bpa1' || kind === 'bpa2') {
 		let imported: number;
 		try { imported = await importBpaXml(await file.text(), kind, owner); }
