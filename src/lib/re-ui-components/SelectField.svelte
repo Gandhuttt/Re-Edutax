@@ -301,7 +301,7 @@
 					/>
 				</div>{/if}
 			<div class="option-list">
-				{#each filteredOptions as option, index (option.value)}<button
+				{#each filteredOptions as option, index}<button
 						type="button"
 						role="option"
 						aria-selected={isSelectedValue(option.value)}

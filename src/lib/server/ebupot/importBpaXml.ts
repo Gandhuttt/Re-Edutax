@@ -70,7 +70,7 @@ export async function importBpaXml(xml: string, kind: BpaKind, owner: string): P
 			iuranPensiun: row.pensionContribution, zakat: row.zakat, nomorBuktiSebelumnya: row.previousSlip,
 			penghasilanNetoSebelumnya: previousNet, pphPasal21DipotongSebelumnya: previousTax,
 			nitkuPemotong: row.nitku, tanggalPemotongan: row.withholdingDate,
-			status: 'SAVEDINVALID' as const, diterbitkan: false, nomorPemotongan: null };
+			status: 'SUBMITTED' as const, diterbitkan: false, nomorPemotongan: null };
 		// Article21IncomeTax is a template total, not an authority: all tax totals
 		// are recalculated from local references/monthly slips, just like detail save.
 		if (kind === 'bpa1') statements.push(db.insert(bukti_potong_bpa1).values({ ...common,

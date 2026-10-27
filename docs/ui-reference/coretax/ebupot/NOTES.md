@@ -1028,8 +1028,10 @@ production when removed).
   The old detail-only issuance endpoints were removed; list lifecycle mutations
   remain the single issuance path for BP21/BP26. This does not implement or claim
   parity with official electronic-signature dialogs.
-- Delete is soft (`DELETED`). Amendment creates a linked draft; the source remains
-  active until the replacement is issued atomically, then becomes `AMENDED`.
+- Delete is soft (`DELETED`), displayed as **Dihapus** under **Tidak Valid**,
+  not Histori. Histori retains `AMENDED` and `CANCELLED`. Amendment creates a
+  linked draft; the source remains active until the replacement is issued atomically,
+  then becomes `AMENDED`.
   Cancellation sets `CANCELLED`. Recipient lists/recaps include only issued
   current versions, not superseded/cancelled/deleted records.
 - Issuance numbers start with `SIM-BP21-` or `SIM-BP26-`; they are not official DJP
@@ -1049,15 +1051,18 @@ BP21/BP26 lists use the same **Impor Data** dropdown pattern as Faktur:
 downloads the corresponding official ZIP template. There is no separate import
 page or Excel import option. Success/errors appear in the list, and successful
 imports refresh its data without navigation.
-The importer reads `Bp21Bulk`/`BP26Bulk` structures into new local `SAVEDINVALID`
-drafts, never uploads to DJP or updates issued records.
+The importer reads `Bp21Bulk`/`BP26Bulk` structures into new local `SUBMITTED`
+records (**Disimpan**, **Belum Terbit**), never uploads to DJP or updates issued records.
 It preserves `WithholdingDate` separately from document date and handles the
 official country codes, PTKP codes and nil fields. Limit: 100 rows and 1 MiB.
 Unknown fields, DTD/entities, owner-TIN mismatches and invalid rows reject the
 whole file before persistence. Automatic Deemed/Rate must match local reference
 calculations; sample numbers in a template are not assumed valid tax examples.
-BP21 names come from registered WPs (left blank otherwise). Prior cumulative
-bruto is absent from the template and must be completed before Submit where needed.
+BP21 names must resolve from registered local WPs; unresolved recipients reject
+the file rather than producing unnamed submitted records. Required document fields,
+owned NITKU, positive gross and object ceilings are checked before persistence.
+Prior cumulative bruto is absent from the template and remains zero; this import
+does not claim parity for cumulative cases requiring prior income.
 
 ### Exercised verification
 
@@ -1243,7 +1248,7 @@ XML import accepts official `A1Bulk/ListOfA1/A1` and `A2Bulk/ListOfA2/A2`
 templates from pajak.go.id's `bpa1.zip`/`bpa2.zip`. TIN must match the active
 account; recipient names and withholding NITKU must resolve in local data.
 All rows are validated and recalculated before one atomic D1 batch creates
-SAVEDINVALID drafts. Gross-up, explicit annualized months and prior monthly
+SUBMITTED, unissued records. Gross-up, explicit annualized months and prior monthly
 withholding use the same calculator as detail save. Article21IncomeTax is not
 trusted as a computed total. PrevWhTaxSlip must resolve an active issued local
 slip for this owner/recipient/kind in an earlier period of the same year;
@@ -1311,7 +1316,7 @@ facility 8 uses Rate and derives PPh from gross. Independent manual PPh amounts
 can be entered in the form, not carried by this XML contract.
 
 All rows resolve recipient master data, objects, facilities and branches before
-one atomic D1 batch creates SAVEDINVALID drafts. Unsupported fields, DTD/entities,
+one atomic D1 batch creates SUBMITTED, unissued records. Unsupported fields, DTD/entities,
 invalid numbers/dates and wrong-owner TIN reject the file. Local limits: 1 MiB,
 1–100 slips, 16-digit TIN, periods from 2025; generic recipients without a
 resolvable name cannot be imported because the template has no name field.
@@ -1335,8 +1340,9 @@ and version, plus owner/amendment indexes. Applied locally only.
   cancellation. Four imported drafts were bulk-deleted; resulting statuses
   were AMENDED (1), CANCELLED (1), DELETED (4), without manual list reloads.
 - A two-row official-structure XML with an invalid second-row NITKU left zero
-  imported rows. Valid data imported as SAVEDINVALID: automatic Rp1,800,000 and
-  manual-rate-derived Rp1,400,000, retaining passport/date and normalized NITKU.
+  imported rows. At that initial verification, valid data imported as SAVEDINVALID:
+  automatic Rp1,800,000 and manual-rate-derived Rp1,400,000, retaining passport/date
+  and normalized NITKU. The import status was subsequently changed to SUBMITTED.
 - CSV/XLSX/print/template endpoints returned 200. Workbook amounts were numeric
   and matched those values; print visibly showed the educational-simulation
   label. The served template was compared with the captured Coretax body.
@@ -1345,4 +1351,58 @@ and version, plus owner/amendment indexes. Applied locally only.
   the BPA total; cancellation removed it. No SPT save/post was performed.
 - All six smoke records were physically removed by exact UUID afterward;
   follow-up SELECT returned zero. No production database writes or deployment.
+
+
+## XML import status alignment (2026-10-27)
+
+Direct Coretax UI/network verification is available for **BP21 and BP26**. For BP21,
+one XML record completed monitoring with `SUBMITTING EBUPOT FINISHED` and
+`1 EBUPOTBP21 successfully created`. The record appeared in **Belum Terbit**
+as **Disimpan**; its detail/API status was `SUBMITTED`, with gross Rp2,500,000
+and PPh Rp62,500. Deleting that exact test record moved it to **Tidak Valid**
+as `DELETED` / **Dihapus**, with no slip number, signature or SPT reporting.
+Deletion preserves a trace; it is not physical removal in Coretax.
+
+An additional one-record BP26 import completed with `SUBMITTING EBUPOT FINISHED`
+and `1 EBUPOTBP26 successfully created`. The record appeared in **Belum Terbit**
+as **Disimpan**; both its detail and list API showed `SUBMITTED`. Gross was
+Rp2,500,000 and PPh Rp500,000 (20%). The unique document number
+`AUDIT-IMP-BP26-20261027-41EC` was verified before deleting test record
+`5f9dd76f-6d8d-482d-90d0-5d15c3ea4cbd` through the UI. The delete endpoint
+`cancelebupotbp26` returned HTTP 200 / `IsSuccessful: true`. The same UUID then
+appeared under **Tidak Valid** as **Dihapus**, API `DELETED`, with null slip
+number/signature and `IsReportedToTaxReturn: false`. No issuance or reporting
+was performed; Coretax retains the deletion trace.
+
+The local import contract now applies the same resulting status/tab mapping to
+BP21, BP26, MP, BPA1 and BPA2. MP runs the existing `prepareMp` Submit validation;
+all importers validate/recalculate all rows before their atomic D1 batch.
+No separate Submit is required after a successful import. Interactive **Simpan
+Konsep** is unchanged. Existing SAVEDINVALID records are not reclassified.
+No schema/data migration is required for this status/tab change.
+
+This is not evidence of end-to-end Coretax import parity for MP/BPA1/BPA2.
+Their status alignment follows the requested local contract, not additional
+live Coretax import tests. BP21/BP26 evidence above covers one valid record each,
+not every validation, facility or calculation branch.
+
+### Local verification of the status change
+
+- Browser file-picker imports succeeded for all five kinds. Each row appeared
+  as Disimpan in Belum Terbit, and its saved detail could be reopened.
+  Observed PPh: BP21 Rp62,500; BP26 Rp500,000; MP Rp200,000;
+  BPA1 and BPA2 Rp2,050,000 each.
+- For each kind, a batch containing a valid first row and an invalid second-row
+  NITKU was rejected. Reloaded lists retained exactly the same record IDs:
+  no partial insert.
+- Missing document number and zero gross (BP21), missing foreign country and
+  missing COD receipt number (BP26) were rejected through the import UI.
+- Each imported test record was deleted through its row action. After reopening
+  the lists, each appeared only under Tidak Valid as Dihapus, with no repeat
+  delete/issue action, and not under Histori. SQLite confirmed all five statuses
+  as DELETED, `diterbitkan = 0`, and `nomor_pemotongan IS NULL`.
+- `npm run check`: 0 errors, 0 warnings. `npm run build`: completed.
+- The five local smoke records were then physically removed by their exact UUIDs;
+  follow-up SELECT counts were zero for every kind. No production database writes,
+  issuance, SPT reporting, deployment, commit or push were performed.
 

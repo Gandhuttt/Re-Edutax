@@ -3,12 +3,12 @@ import { error, invalid } from '@sveltejs/kit';
 import { and, eq } from 'drizzle-orm';
 import { db, type Statement } from '$lib/server/db';
 import { bukti_potong_bp21, bukti_potong_bp26, fasilitas_pajak_ebupot, jenis_dokumen_ebupot, kode_objek_pajak_pph, negara_spt_pph_badan } from '$lib/server/db/schema';
-import { isAllowedPeriod, isObjectAvailable } from '$lib/helpers/bp-parity';
+import { isAllowedPeriod, isObjectAvailable, todayIso } from '$lib/helpers/bp-parity';
 import { ptkpEbupotValues } from '$lib/helpers/ptkp-ebupot';
 import { ebupotCountryCodes } from '$lib/helpers/ebupot-country-codes';
 import { resolveBp21, computeBp21Amounts, type Bp21Amounts } from '$lib/helpers/resolveBp21';
 import { resolveBp26, computeBp26Amounts, type Bp26Amounts } from '$lib/helpers/resolveBp26';
-import { getBpContext, isRecipientBranch, type BpContext } from '$lib/server/ebupot/bpLookup';
+import { findBpInvoice, getBpContext, isRecipientBranch, type BpContext } from '$lib/server/ebupot/bpLookup';
 import { parseBpXml, type BpXmlRow } from '$lib/server/ebupot/parseBpXml';
 import { listBp21 } from '../bp21/listBp21.remote';
 import { listBp26 } from '../bp26/listBp26.remote';
@@ -33,14 +33,14 @@ export const importBp = form('unchecked', async (input) => {
 		try { imported = await importMpXml(await file.text(), owner); }
 		catch (cause) { invalid(cause instanceof Error ? cause.message : 'XML tidak dapat diimpor.'); }
 		await listMp().refresh();
-		return { imported, message: `${imported} konsep MP berhasil dibuat. Periksa lalu Submit dari daftar MP.` };
+		return { imported, message: `${imported} bukti potong MP berhasil disimpan di Belum Terbit.` };
 	}
 	if (kind === 'bpa1' || kind === 'bpa2') {
 		let imported: number;
 		try { imported = await importBpaXml(await file.text(), kind, owner); }
 		catch (cause) { invalid(cause instanceof Error ? cause.message : 'XML tidak dapat diimpor.'); }
 		await (kind === 'bpa1' ? listBpa1() : listBpa2()).refresh();
-		return { imported, message: `${imported} konsep ${kind.toUpperCase()} berhasil dibuat. Periksa lalu Submit dari daftar ${kind.toUpperCase()}.` };
+		return { imported, message: `${imported} bukti potong ${kind.toUpperCase()} berhasil disimpan di Belum Terbit.` };
 	}
 	let rows: BpXmlRow[];
 	try { rows = parseBpXml(await file.text(), kind, owner); }
@@ -53,6 +53,7 @@ export const importBp = form('unchecked', async (input) => {
 	]);
 	const contextCache = new Map<string, Promise<BpContext>>();
 	const statements: Statement[] = [];
+	const today = todayIso();
 	for (const [index, row] of rows.entries()) {
 		const fail: (message: string) => never = (message) => invalid(`Baris ${index + 1}: ${message}`);
 		let pendingContext = contextCache.get(row.tin);
@@ -65,22 +66,34 @@ export const importBp = form('unchecked', async (input) => {
 		if (!object || !isObjectAvailable(object, facility.kode, row.tahun, row.masaPajak)) fail('objek pajak tidak tersedia untuk fasilitas dan masa tersebut.');
 		const document = documents.find((item) => item.kode === row.document);
 		if (!document) fail(`Document ${row.document} tidak dikenal.`);
+		if (!row.documentNumber) fail('DocumentNumber wajib diisi.');
+		if (!row.documentDate || row.documentDate > today) fail('DocumentDate wajib diisi dan tidak boleh setelah hari ini.');
+		if (!row.nitku) fail('IDPlaceOfBusinessActivity wajib diisi.');
+		if (row.gross <= 0) fail('Gross harus lebih dari 0.');
+		if (document.kode === 'TAXINVOICE') {
+			const invoice = await findBpInvoice(owner, row.tin, row.documentNumber);
+			if (!invoice) fail('faktur pajak masukan terbit dari penerima tidak ditemukan.');
+			row.documentDate = invoice.tanggalFaktur;
+		}
 		if (row.nitku && !context.ownBranches.some((branch) => branch.nitku === row.nitku)) fail('NITKU pemotong belum terdaftar di Tempat Kegiatan Usaha akun Anda.');
 		const common = {
 			id: crypto.randomUUID(), npwpPemotong: owner, masaPajak: row.masaPajak, tahun: row.tahun,
 			nomorIdentitasWp: row.tin, fasilitasPajakId: facility.id, kodeObjekPajakId: object.id,
 			penghasilanBruto: row.gross, jenisDokumenId: document.id, nomorDokumen: row.documentNumber,
 			tanggalDokumen: row.documentDate, nitkuPemotong: row.nitku || null,
-			tanggalPemotongan: row.withholdingDate, status: 'SAVEDINVALID' as const,
+			tanggalPemotongan: row.withholdingDate, status: 'SUBMITTED' as const,
 			diterbitkan: false, nomorPemotongan: null
 		};
 		if (kind === 'bp21') {
 			if (!ptkpEbupotValues.includes(row.ptkp as (typeof ptkpEbupotValues)[number])) fail('StatusTaxExemption tidak valid.');
 			const name = context.knownTaxpayer?.nama ?? '';
+			if (name.trim().length < 3 || name.length > 150) fail('nama penerima belum tersedia atau tidak valid pada data Wajib Pajak lokal.');
+			if (!row.recipientNitku) fail('IDPlaceOfBusinessActivityOfIncomeRecipient wajib diisi.');
 			if (row.recipientNitku && !(await isRecipientBranch(row.tin, row.recipientNitku))) fail('NITKU penerima tidak terdaftar di Tempat Kegiatan Usaha penerima.');
 			let amounts: Bp21Amounts;
 			try {
 				const resolved = resolveBp21(object.parameterData, facility.kode, row.ptkp, row.gross, 0);
+				if (resolved.maxBruto !== undefined && row.gross > resolved.maxBruto) fail('Gross melebihi nilai maksimum objek pajak.');
 				amounts = computeBp21Amounts(resolved, row.gross, { dppManual: row.deemed, tarifManual: row.rate, pajakPenghasilanManual: Math.round(row.gross * (row.deemed / 100) * (row.rate / 100)) });
 			} catch (cause) { fail(cause instanceof Error ? cause.message : 'Penghitungan BP21 gagal.'); }
 			if (amounts.dpp !== row.deemed || amounts.tarif !== row.rate) fail('Deemed/Rate tidak sesuai tarif otomatis objek pajak; koreksi XML atau pilih fasilitas yang benar.');
@@ -88,15 +101,24 @@ export const importBp = form('unchecked', async (input) => {
 		} else {
 			const country = countries.find((item) => item.kode === ebupotCountryCodes[row.country]);
 			if (row.country && !country) fail(`CounterpartCountry ${row.country} tidak dikenal.`);
+			const knownName = context.knownTaxpayer?.nama;
+			if (!knownName && (!country || !row.address)) fail('CounterpartCountry dan CounterpartAddress wajib diisi untuk penerima luar negeri.');
+			if (row.dob && (row.dob < '1900-01-01' || row.dob > today)) fail('CounterpartDob harus antara 1900 dan hari ini.');
+			const receipt = row.receipt === '-' ? null : row.receipt || null;
+			if (facility.kode === '7' && !receipt) fail('CounterpartReceiptNumber wajib diisi untuk fasilitas Surat Keterangan Domisili.');
 			let amounts: Bp26Amounts;
-			try { amounts = computeBp26Amounts(resolveBp26(object.parameterData, facility.kode, row.gross), row.gross, { dppManual: row.deemed, tarifManual: row.rate }); }
+			try {
+				const resolved = resolveBp26(object.parameterData, facility.kode, row.gross);
+				if (resolved.maxBruto !== undefined && row.gross > resolved.maxBruto) fail('Gross melebihi nilai maksimum objek pajak.');
+				amounts = computeBp26Amounts(resolved, row.gross, { dppManual: row.deemed, tarifManual: row.rate });
+			}
 			catch (cause) { fail(cause instanceof Error ? cause.message : 'Penghitungan BP26 gagal.'); }
 			if (amounts.dpp !== row.deemed || amounts.tarif !== row.rate) fail('Deemed/Rate tidak sesuai tarif otomatis referensi lokal.');
-			statements.push(db.insert(bukti_potong_bp26).values({ ...common, ...amounts, nama: row.name, alamat: row.address, negaraAsalId: country?.id ?? null, tanggalLahir: row.dob, tempatLahir: row.birthCity, nomorPaspor: row.passport, nomorKitasKitap: row.kitas, receiptNumber: row.receipt === '-' ? null : row.receipt || null }));
+			statements.push(db.insert(bukti_potong_bp26).values({ ...common, ...amounts, nama: knownName || row.name, alamat: knownName ? '' : row.address, negaraAsalId: knownName ? null : country?.id ?? null, tanggalLahir: row.dob, tempatLahir: row.birthCity, nomorPaspor: row.passport, nomorKitasKitap: row.kitas, receiptNumber: facility.kode === '7' ? receipt : null }));
 		}
 	}
 	// Build every statement only after validation. D1 batch rolls back the whole file on failure.
 	await db.batch(statements as [Statement, ...Statement[]]);
 	await (kind === 'bp21' ? listBp21() : listBp26()).refresh();
-	return { imported: rows.length, message: `${rows.length} konsep ${kind.toUpperCase()} berhasil dibuat. Periksa lalu Submit dari daftar ${kind.toUpperCase()}.` };
+	return { imported: rows.length, message: `${rows.length} bukti potong ${kind.toUpperCase()} berhasil disimpan di Belum Terbit.` };
 });

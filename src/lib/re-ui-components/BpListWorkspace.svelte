@@ -97,11 +97,12 @@
 		CANCELLED: "Dibatalkan",
 		DELETED: "Dihapus"
 	};
-	const historyStatuses: BpListStatus[] = ["AMENDED", "CANCELLED", "DELETED"];
+	const historyStatuses: BpListStatus[] = ["AMENDED", "CANCELLED"];
 	const activeIssued: BpListStatus[] = ["NORMAL", "SUBMITTED", "AMENDMENT"];
 	const rupiah = new Intl.NumberFormat("id-ID", { minimumFractionDigits: 0 });
 
 	const inTab = (row: BpListRow, tab: Tab) => {
+		if (row.status === "DELETED") return tab === "Tidak Valid";
 		if (historyStatuses.includes(row.status)) return tab === "Histori";
 		if (row.diterbitkan) return tab === "Telah Terbit";
 		if (row.status === "SAVEDINVALID") return tab === "Tidak Valid";
@@ -449,7 +450,7 @@
 		{:else if pending.action === "cancel"}
 			<p>Bukti potong yang dibatalkan tidak lagi dihitung sebagai bukti potong aktif.</p>
 		{:else}
-			<p>Konsep akan dipindahkan ke Histori sebagai Dihapus.</p>
+			<p>Konsep akan dipindahkan ke Tidak Valid sebagai Dihapus.</p>
 		{/if}
 	{/if}
 	{#snippet actions()}

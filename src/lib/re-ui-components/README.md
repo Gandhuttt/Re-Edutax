@@ -148,6 +148,11 @@ caption and `zoom` crop), `StatementStrip`, `StepList`, `CredentialCard`
 </ReUiRoot>
 ```
 
+`SelectField` preserves the supplied option order, including repeated values.
+Some reference catalogs submit descriptions rather than unique codes (for
+example, the SPT OP country list repeats Angola). Repeated values must not
+prevent the dropdown from rendering; selecting either entry binds the same value.
+
 ## SvelteKit remote-function forms
 
 Pass the remote field proxy itself. The component reads and updates the proxy,

@@ -7,7 +7,7 @@ import { getMpFacilityByKode, getMpObjectByKode, prepareMp } from './mpService';
 const facilityCodes = { 'N/A': '9', DTP: '4', ETC: '8' } as const;
 
 /**
- * Imports the official MmPayrollBulk template as local SAVEDINVALID drafts. Every row is
+ * Imports the official MmPayrollBulk template as local SUBMITTED, unissued slips. Every row is
  * resolved and validated with the same service as the interactive form (period, TIN, object,
  * facility, NITKU, tarif); nothing is written unless all rows pass, and the D1 batch is atomic.
  * The template carries no tax amount: PPh is recalculated locally.
@@ -30,13 +30,13 @@ export async function importMpXml(xml: string, owner: string): Promise<number> {
 			tanggalPemotongan: row.withholdingDate,
 			...(manual ? { tarifManual: String(row.rate),
 				pajakPenghasilanManual: String(Math.round(row.gross * row.rate / 100)) } : {})
-		}, { submit: false, existing: null });
+		}, { submit: true, existing: null });
 		if (errors.length > 0) fail(errors.map((error) => error.message).join('; '));
 		if (!manual && values.tarif !== row.rate) {
 			fail(`Rate ${row.rate} tidak sesuai tarif TER otomatis (${values.tarif}); koreksi XML.`);
 		}
 		statements.push(db.insert(bukti_potong_mp).values({ ...values, id: crypto.randomUUID(),
-			npwpPemotong: owner, status: 'SAVEDINVALID', diterbitkan: false, nomorPemotongan: null }));
+			npwpPemotong: owner, status: 'SUBMITTED', diterbitkan: false, nomorPemotongan: null }));
 	}
 	// No write is executed until every row passes; D1 batch rolls back the whole file on failure.
 	await db.batch(statements as [Statement, ...Statement[]]);
