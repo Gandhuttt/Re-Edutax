@@ -20,8 +20,9 @@
 	import { listSptPphOrangPribadi } from '../listSptPphOrangPribadi.remote';
 	import { listSptPpn } from '../listSptPpn.remote';
 	import { listSptPph2126, newPembetulanSptPph2126 } from '../spt2126.remote';
+	import { listSptPphUnifikasi, newPembetulanSptPphUnifikasi } from '../sptUnifikasi.remote';
 
-	type JenisSpt = 'ppn' | 'pph-badan' | 'pph-orang-pribadi' | 'pph-21-26';
+	type JenisSpt = 'ppn' | 'pph-badan' | 'pph-orang-pribadi' | 'pph-21-26' | 'pph-unifikasi';
 	type ReportedRow = {
 		id: string;
 		kind: JenisSpt;
@@ -35,16 +36,31 @@
 		pasal21?: number;
 		pasal26?: number;
 		tanggalDilaporkan: Date | null;
+		isLatest?: boolean;
 	};
 
 	const rupiah = new Intl.NumberFormat('id-ID');
 	const sptPph2126 = await listSptPph2126({ status: 'dilaporkan' });
+	const sptPphUnifikasi = await listSptPphUnifikasi({ status: 'dilaporkan' });
 	const [sptPpn, sptPphBadan, sptPphOrangPribadi] = await Promise.all([
 		listSptPpn({ status: 'dilaporkan' }),
 		listSptPphBadan({ status: 'dilaporkan' }),
 		listSptPphOrangPribadi({ status: 'dilaporkan' })
 	]);
 	const rows = $derived.by((): ReportedRow[] => [
+		...sptPphUnifikasi.map((row) => ({
+			id: row.id,
+			kind: 'pph-unifikasi' as const,
+			jenis: 'SPT Masa PPh Unifikasi',
+			masaPajak: formatMonth(row.masaPajak),
+			tahun: row.tahun,
+			pembetulanKe: row.pembetulanKe,
+			dibuat: row.createdAt,
+			urutan: '',
+			kurangLebihBayar: row.kurangLebihBayar,
+			tanggalDilaporkan: row.tanggalDilaporkan,
+			isLatest: row.isLatest
+		})),
 		...sptPph2126.map((row) => ({
 			id: row.id,
 			kind: 'pph-21-26' as const,
@@ -106,6 +122,7 @@
 	const pagedRows = $derived(rows.slice((currentPage - 1) * pageSize, currentPage * pageSize));
 
 	function detailHref(row: ReportedRow) {
+		if (row.kind === 'pph-unifikasi') return `/surat-pemberitahuan/pph-unifikasi?id=${row.id}`;
 		if (row.kind === 'pph-21-26') return `/surat-pemberitahuan/pph-21-26?id=${row.id}`;
 		if (row.kind === 'ppn') return `/surat-pemberitahuan/ppn?id=${row.id}`;
 		if (row.kind === 'pph-badan') return `/surat-pemberitahuan/pph-badan?id=${row.id}`;
@@ -185,7 +202,14 @@
 						>
 							{#snippet row(row)}
 								<td class="action-cell">
-									{#if row.kind === 'pph-21-26'}
+									{#if row.kind === 'pph-unifikasi' && row.isLatest}
+										<form {...newPembetulanSptPphUnifikasi.for(row.id)} id={`correct-spt-unifikasi-${row.id}`} hidden>
+											<input type="hidden" name="id" value={row.id} />
+										</form>
+										{#each newPembetulanSptPphUnifikasi.for(row.id).fields.allIssues() ?? [] as issue}
+											<p role="alert">{issue.message}</p>
+										{/each}
+									{:else if row.kind === 'pph-21-26'}
 										<form {...newPembetulanSptPph2126.for(row.id)} id={`correct-spt-2126-${row.id}`} hidden>
 											<input type="hidden" name="id" value={row.id} />
 										</form>
@@ -209,7 +233,12 @@
 										visibleCount={2}
 										actions={[
 											{ label: 'Lihat', href: detailHref(row) },
-											...(row.kind === 'pph-21-26'
+											...(row.kind === 'pph-unifikasi'
+												? (row.isLatest ? [{
+														label: 'Buat Pembetulan',
+														onclick: () => submitForm(`correct-spt-unifikasi-${row.id}`)
+													}] : [])
+												: row.kind === 'pph-21-26'
 												? [{
 														label: 'Buat Pembetulan',
 														onclick: () => submitForm(`correct-spt-2126-${row.id}`)

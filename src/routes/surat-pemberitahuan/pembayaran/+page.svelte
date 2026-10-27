@@ -21,8 +21,9 @@
 	import { paySptPphOrangPribadi } from './paySptPphOrangPribadi.remote';
 	import { paySptPpn } from './paySptPpn.remote';
 	import { listSptPph2126, paySptPph2126 } from '../spt2126.remote';
+	import { listSptPphUnifikasi, paySptPphUnifikasi } from '../sptUnifikasi.remote';
 
-	type JenisSpt = 'ppn' | 'pph-badan' | 'pph-orang-pribadi' | 'pph-21-26';
+	type JenisSpt = 'ppn' | 'pph-badan' | 'pph-orang-pribadi' | 'pph-21-26' | 'pph-unifikasi';
 	type PaymentRow = {
 		id: string;
 		kind: JenisSpt;
@@ -40,12 +41,25 @@
 
 	const rupiah = new Intl.NumberFormat('id-ID');
 	const sptPph2126 = await listSptPph2126({ status: 'menunggu_pembayaran' });
+	const sptPphUnifikasi = await listSptPphUnifikasi({ status: 'menunggu_pembayaran' });
 	const [sptPpn, sptPphBadan, sptPphOrangPribadi] = await Promise.all([
 		listSptPpn({ status: 'menunggu_pembayaran' }),
 		listSptPphBadan({ status: 'menunggu_pembayaran' }),
 		listSptPphOrangPribadi({ status: 'menunggu_pembayaran' })
 	]);
 	const rows = $derived.by((): PaymentRow[] => [
+		...sptPphUnifikasi.map((row) => ({
+			id: row.id,
+			kind: 'pph-unifikasi' as const,
+			jenis: 'SPT Masa PPh Unifikasi',
+			masaPajak: formatMonth(row.masaPajak),
+			tahun: row.tahun,
+			pembetulanKe: row.pembetulanKe,
+			dibuat: row.createdAt,
+			urutan: '',
+			kurangBayar: row.harusDibayar,
+			tanggalPosting: row.tanggalDiperbarui
+		})),
 		...sptPph2126.map((row) => ({
 			id: row.id,
 			kind: 'pph-21-26' as const,
@@ -107,6 +121,7 @@
 	const pagedRows = $derived(rows.slice((currentPage - 1) * pageSize, currentPage * pageSize));
 
 	function detailHref(row: PaymentRow) {
+		if (row.kind === 'pph-unifikasi') return `/surat-pemberitahuan/pph-unifikasi?id=${row.id}`;
 		if (row.kind === 'pph-21-26') return `/surat-pemberitahuan/pph-21-26?id=${row.id}`;
 		if (row.kind === 'ppn') return `/surat-pemberitahuan/ppn?id=${row.id}`;
 		if (row.kind === 'pph-badan') return `/surat-pemberitahuan/pph-badan?id=${row.id}`;
@@ -175,7 +190,7 @@
 								<th style="width: 110px">Pembetulan</th>
 								<th style="width: 170px">Dibuat</th>
 								<th class="right" style="width: 160px">Kurang Bayar</th>
-								<th style="width: 150px">Tanggal Posting</th>
+								<th style="width: 170px">Posting / Pembaruan Data</th>
 							</tr>
 						</thead>
 						<DataTableBody
@@ -186,7 +201,14 @@
 						>
 							{#snippet row(row)}
 								<td class="action-cell">
-									{#if row.kind === 'pph-21-26'}
+									{#if row.kind === 'pph-unifikasi'}
+										<form {...paySptPphUnifikasi.for(row.id)} id={`pay-spt-unifikasi-${row.id}`} hidden>
+											<input type="hidden" name="id" value={row.id} />
+										</form>
+										{#each paySptPphUnifikasi.for(row.id).fields.allIssues() ?? [] as issue}
+											<p role="alert">{issue.message}</p>
+										{/each}
+									{:else if row.kind === 'pph-21-26'}
 										<form {...paySptPph2126.for(row.id)} id={`pay-spt-2126-${row.id}`} hidden>
 											<input type="hidden" name="id" value={row.id} />
 										</form>
@@ -208,10 +230,12 @@
 										actions={[
 											{ label: 'Lihat', href: detailHref(row) },
 											{
-												label: row.kind === 'pph-21-26' ? 'Bayar (Simulasi)' : 'Bayar',
+												label: row.kind === 'pph-21-26' || row.kind === 'pph-unifikasi' ? 'Bayar (Simulasi)' : 'Bayar',
 												onclick: () =>
 													submitForm(
-														row.kind === 'pph-21-26'
+														row.kind === 'pph-unifikasi'
+															? `pay-spt-unifikasi-${row.id}`
+															: row.kind === 'pph-21-26'
 															? `pay-spt-2126-${row.id}`
 															: row.kind === 'ppn'
 															? `pay-spt-ppn-${row.id}`

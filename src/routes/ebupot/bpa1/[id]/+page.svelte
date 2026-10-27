@@ -12,6 +12,7 @@
 		FormActions,
 		FormField,
 		FormSection,
+		FormIssueSummary,
 		InlineAlert,
 		LookupField,
 		PageLayout,
@@ -19,7 +20,8 @@
 		SelectField,
 		ServiceWorkspace,
 		Stack,
-		StatusBadge
+		StatusBadge,
+		remoteFailureFrom
 	} from '$lib/re-ui-components';
 	import { getFasilitasPajakBpa1 } from '../../fasilitasPajak.remote';
 	import { getPriorMonthlyWithheld } from '../../priorMonthlyWithheld.remote';
@@ -46,6 +48,7 @@
 	let statusPtkpState = $state(bpa1.statusPtkp ?? '');
 	let jabatanState = $state(bpa1.jabatan);
 	let kodeObjekPajakIdState = $state(bpa1.kodeObjekPajakId ?? '');
+	let submitFailure = $state('');
 	let fasilitasPajakIdState = $state(
 		bpa1.fasilitasPajakId ?? fasilitasOptions.find((f) => f.kode === '9')?.id ?? ''
 	);
@@ -182,6 +185,11 @@
 			<FormField label="Nomor Bukti Pemotongan BPA1 dari Pemberi Kerja Sebelumnya (Apabila ada)" name="nomorBuktiSebelumnya" bind:value={nomorBuktiSebelumnyaState} disabled={!bpa1.canEdit} /><RupiahField label="Penghasilan Neto dari Pemotongan Sebelumnya (Rp)" name="penghasilanNetoSebelumnya" bind:value={penghasilanNetoSebelumnyaState} disabled={!bpa1.canEdit} /><RupiahField label="Jumlah Penghasilan Neto untuk Perhitungan PPh Pasal 21 (Setahun/Disetahunkan) (Rp)" value={calc?.penghasilanNetoSetahunDisetahunkan ?? 0} disabled /><RupiahField label="Penghasilan Tidak Kena Pajak (Rp)" value={calc?.penghasilanTidakKenaPajak ?? 0} disabled /><RupiahField label="Penghasilan Kena Pajak Setahun / Disetahunkan (Rp)" value={calc?.penghasilanKenaPajak ?? 0} disabled /><FormField label="Tarif (%)" value={String(calc?.tarif ?? 0)} disabled /><RupiahField label="PPh Pasal 21 atas Penghasilan Kena Pajak Setahun/Disetahunkan (Rp)" value={calc?.pphPasal21AtasPkp ?? 0} disabled /><RupiahField label="PPh Pasal 21 Terutang (Rp)" value={calc?.pphPasal21Terutang ?? 0} disabled /><RupiahField label="PPh Pasal 21 Dipotong dari Bukti Pemotongan Sebelumnya (Rp)" name="pphPasal21DipotongSebelumnya" bind:value={pphDipotongSebelumnyaState} disabled={!bpa1.canEdit} /><RupiahField label="PPh Pasal 21 Terutang pada Bukti Pemotongan Ini (Dapat Dikreditkan Pada SPT Tahunan) (Rp)" value={calc?.pphPasal21TerutangPadaIni ?? 0} disabled /><RupiahField label="PPh Pasal 21 yang Dipotong/Ditanggung Pemerintah (Rp)" value={calc?.pphDipotongAtauDitanggung ?? 0} disabled /><RupiahField label="PPh Pasal 21 Kurang (Lebih) Dipotong pada Masa Pajak Desember / Masa Pajak Terakhir (Rp)" value={calc?.pphKurangLebihDipotongDesember ?? 0} disabled /><SelectField label="Jenis Fasilitas pada Masa Pajak Desember/Masa Pajak Terakhir" name="fasilitasPajakId" bind:value={fasilitasPajakIdState} disabled={!bpa1.canEdit} options={fasilitasOptions.map((f) => ({value:f.id,label:f.nama}))} /><FormField label="KAP-KJS" value={selectedObjekPajak?.kap ?? ''} disabled /><FormField label="NITKU/Nomor Identitas Sub Unit Organisasi" value={nitkuPemotong} disabled />
 		</FieldGrid><InlineAlert title="Informasi perhitungan" message="PPh Pasal 21 yang Dipotong diambil dari Bukti Pemotongan Bulanan Pegawai Tetap yang telah terbit untuk penerima dan objek pajak yang sama sebelum masa pajak terakhir. Fasilitas PPh Pasal 21 Ditanggung Pemerintah memindahkan seluruh PPh Terutang ke kolom tersebut." tone="info" /></FormSection>
 		{#if bpa1.canEdit}
+			{#if !selectedObjekPajak}
+				<InlineAlert tone="info" compact message="Pilih Nama Objek Pajak pada Informasi Umum agar KAP-KJS terisi otomatis." />
+			{/if}
+			<FormIssueSummary source={updateBpa1.fields} />
+			{#if submitFailure}<InlineAlert tone="error" title="Penyimpanan gagal" message={submitFailure} />{/if}
 			<FormActions>
 				<ActionButton type="button" tone="quiet" onclick={() => (window.location.href = '/ebupot/bpa1')}>Kembali</ActionButton>
 				<ActionButton type="submit" name="intent" value="draft" tone="secondary" pending={updateBpa1.pending > 0}>Simpan Konsep</ActionButton>
@@ -196,5 +204,14 @@
 <svelte:head><title>e-Bupot BPA1</title></svelte:head>
 <PageLayout contentWidth="1540px"><Stack gap="16px"><Breadcrumbs separator="›" items={[{label:'Beranda',href:'/dashboard'},{label:'e-Bupot',href:'/ebupot/bpa1'},{label:'BPA1'}]} /><ServiceWorkspace identity={{eyebrow:'Wajib Pajak',name:String(appPage.data.user?.name ?? 'Wajib Pajak'),identifier:String(appPage.data.user?.username ?? ''),mark:'EB'}} groups={[{label:'e-Bupot',links:[{label:'Bukti Potong Saya',href:'/ebupot/bukti-potong-saya'},{label:'BPPU',href:'/ebupot/bpu'},{label:'BP21',href:'/ebupot/bp21'},{label:'BP26',href:'/ebupot/bp26'},{label:'BPA1',href:'/ebupot/bpa1',active:true},{label:'BPA2',href:'/ebupot/bpa2'},{label:'Bukti Pemotongan Bulanan Pegawai Tetap',href:'/ebupot/mp'}]}]}><DocumentWorkspace>
 	{#if bpa1.nomorPemotongan}<p>Nomor Pemotongan: <code>{bpa1.nomorPemotongan}</code> <StatusBadge label="Telah Terbit" tone="success" /></p>{/if}
-	{#if bpa1.canEdit}<form {...updateBpa1}>{@render formContent()}</form>{:else}{@render formContent()}{/if}
+	{#if bpa1.canEdit}
+		<form {...updateBpa1.enhance(async (form) => {
+			submitFailure = '';
+			try {
+				await form.submit();
+			} catch (cause) {
+				submitFailure = remoteFailureFrom(cause).message;
+			}
+		})}>{@render formContent()}</form>
+	{:else}{@render formContent()}{/if}
 </DocumentWorkspace></ServiceWorkspace></Stack></PageLayout>

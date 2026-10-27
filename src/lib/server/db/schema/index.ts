@@ -88,3 +88,4 @@ export * from './transactional/surat_pemberitahuan/spt_pph_orang_pribadi/lampira
 export * from './transactional/surat_pemberitahuan/spt_pph_orang_pribadi/lampiran_3c';
 export * from './transactional/surat_pemberitahuan/spt_pph_orang_pribadi/lampiran_3d';
 export * from './transactional/surat_pemberitahuan/spt_pph_2126';
+export * from './transactional/surat_pemberitahuan/spt_pph_unifikasi';

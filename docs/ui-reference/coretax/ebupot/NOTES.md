@@ -1406,3 +1406,115 @@ not every validation, facility or calculation branch.
   follow-up SELECT counts were zero for every kind. No production database writes,
   issuance, SPT reporting, deployment, commit or push were performed.
 
+## BPA1 interactive validation feedback (2026-10-27)
+
+- The BPA1 detail form now shows remote schema issues beside the save/Submit
+  actions and catches server failures using the existing BP26 form pattern.
+  Previously an incomplete Submit returned validation issues without rendering
+  them, making the button appear unresponsive.
+- KAP-KJS remains derived from the selected tax object, not manually entered
+  or hardcoded. A missing object selection now has an explicit instruction.
+- Local browser smoke: an empty Submit displayed the seven missing-field
+  messages. Selecting object `21-100-01` filled `411121-100`; a complete form
+  with Rp100,000,000 gross submitted as Disimpan with Rp2,050,000 PPh and an
+  enabled Terbitkan action. No issuance was performed.
+- A reversed period displayed the server rejection inside the form without
+  navigating away. `npm run check`: 2100 files, 0 errors, 0 warnings.
+- Only the newly created local fixture was removed afterward. A subsequent
+  user-authorized read-only D1 inspection found the reported production
+  record still NORMAL with no object/PTKP/type selected, blank recipient
+  identity/name/job and zero gross. Production BPA1 object references did
+  contain `411121-100`. Both SELECTs reported zero rows written; no record
+  was changed. Browser inputs not saved to D1 were not inspected.
+
+## SPT Masa PPh Unifikasi — BPPU-only simulator (2026-10-27)
+
+The implemented scope is **issued BPPU only**, as requested. BPNR, self-paid
+documents, digunggung and documents treated as withholding slips are not
+included. Daftar-II and Lampiran-I explicitly state that limitation rather
+than showing fabricated source records.
+
+### Storage and workflow
+
+- Migration `0047_spt_unifikasi.sql` adds the SPT table. A normal SPT is unique
+  per owner/month/year; amendments belong to a revision chain.
+- Sources are issued BPPU of the same owner/month/year with active lifecycle
+  status NORMAL or SUBMITTED. Tax-object references supply article/KAP-KJS;
+  facility code 4 supplies DTP. Stored DPP/PPh are aggregated, not recalculated.
+- Induk always includes the ten observed standard KAP-KJS rows, including
+  zero rows and both Pasal 15 KAPs; additional source/payment KAPs are retained.
+- Create builds a snapshot. **Perbarui data BPPU** explicitly replaces the
+  concept snapshot and clears the declaration. Opening a page does not write.
+  This explicit refresh is a simulator choice, not a claim that Coretax has
+  the same refresh trigger.
+- Declaration is mandatory. A payable SPT moves to Menunggu Pembayaran, then
+  simulated payment moves it to Dilaporkan; a zero-payable SPT reports directly.
+  No billing, bank transaction, NTPN, electronic signature or DJP submission occurs.
+- Source changes block submission/payment. A waiting SPT can be reopened,
+  refreshed and submitted again. Reported snapshots stay immutable.
+- Amendments use the entire current liability less **cumulative actual
+  payments** from earlier reported SPTs in the chain, separately per KAP-KJS.
+  They do not subtract earlier liabilities or net a credit against another KAP.
+  Negative balances do not generate an automatic refund.
+- DB-side revision/source guards and atomic batches protect state transitions.
+  Only the latest reported SPT can start a new amendment; only concepts can
+  be deleted. Concept, payment and reported lists expose the corresponding actions.
+
+### Local verification
+
+- Applied the migration locally only. Actual browser create/Daftar-I/Induk:
+  Rp780,000 at 2% contributed Rp15,600; a SUBMITTED but unissued Rp100,000
+  BPPU was excluded.
+- Submit without a declaration displayed an error. Complete submission
+  entered Menunggu Pembayaran. Changing the source disabled payment; a direct
+  payment-form submission was also rejected by the server.
+- Reopen/refresh cleared the declaration. With Rp25,000 withholding and
+  Rp5,000 DTP, liability/payment was Rp20,000. Payment from the waiting list
+  placed the SPT in the reported list.
+- Increasing current liability to Rp25,000 produced a Rp5,000 first-amendment
+  payment. A second-amendment concept at Rp30,000 liability credited
+  Rp25,000 cumulative payments and required only Rp5,000, not Rp10,000.
+- Deleted that concept through its UI action and recreated it. After its
+  non-DTP source ceased being issued, refresh retained the Rp25,000 prior
+  payments: liability zero, balance minus Rp25,000, no further payment.
+  Submission reported directly. The earlier report retained its old snapshot.
+- An April concept with no sources retained ten zero KAP rows and reported
+  directly without payment. A second normal month could be created despite
+  the existing March chain.
+- Browser visual inspection completed for the Induk form. Read-only SQLite
+  assertions confirmed saved snapshots, cumulative payments, reported states,
+  zero-source reporting and deletion of the superseded concept.
+- Helper tests: 8 passed. `npm run check`: 2100 files, 0 errors, 0 warnings.
+  `npm run build`: succeeded. All smoke fixtures were removed afterward.
+
+These are simulator-local checks, not end-to-end Coretax parity. At the time
+of the local checks, no production migration/data write, Coretax mutation,
+deployment, commit or push had been performed.
+
+### Additional HTTP/D1 verification before publication
+
+- Direct HTTP requests plus local database assertions verified cross-account
+  read and all six mutation rejections, invalid periods/declarations/revisions,
+  stale-revision submission, and illegal actions in each lifecycle state.
+  Rejected requests left stored state unchanged.
+- Concurrent create, Submit, payment and amendment requests each allowed only
+  one success, without duplicate SPTs/payments/amendments. Remote-form validation
+  failures use the framework's HTTP 200 issues response; named-action conflicts
+  returned HTTP 409.
+- Mixed-KAP amendments preserved a Rp5,000 Pasal 23 credit while requiring
+  Rp10,000 payment for Pasal 15. Prior actual payments remained cumulative,
+  including when a source ceased to be issued. Reference changes invalidated
+  stale snapshots; inconsistent article/KAP refreshes failed atomically.
+- Prefill exercised all 206 active BPPU objects with facilities 9, 4 and 8
+  (618 synthetic source combinations). One object, `28-404-17`, has malformed
+  KAP `41128-100` in both its catalog column and `ParameterData.RevenueCode`.
+  A batch containing that object was rejected in full, with a KAP-KJS issue
+  and no SPT inserted. Its correction is deliberately unresolved pending an
+  authoritative KAP; it is not silently normalized or omitted.
+- The remaining 205 objects × 3 facilities (615 combinations) prefilled with
+  Rp66,215 withholding, Rp20,500 DTP and Rp45,715 liability. Independent
+  assertions matched all eight represented KAP groups and confirmed that
+  stored manual PPh was preserved rather than recomputed.
+- All temporary SPT/BPPU/reference fixtures and harness sessions were removed.
+  This verification did not change application code or production data.
+
