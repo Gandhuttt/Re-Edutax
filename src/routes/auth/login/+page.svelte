@@ -23,11 +23,21 @@
 			</div>
 
 			<div class="brand-message">
-				<p class="eyebrow">Portal layanan perpajakan</p>
-				<h1 id="brand-heading">Satu ruang kerja untuk kewajiban pajak Anda.</h1>
+				<p class="eyebrow">Simulator Coretax Edutaxindo</p>
+				<h1 id="brand-heading">Belajar pajak melalui praktik.</h1>
 				<p>
-					Kelola faktur, bukti potong, dan pelaporan pajak melalui alur kerja yang tertata.
+					Simulator Coretax Edutaxindo merupakan sarana pembelajaran untuk berlatih administrasi
+					perpajakan melalui simulasi alur kerja Coretax. Akses akun diberikan kepada peserta
+					pelatihan dan brevet saat memasuki sesi praktikum.
 				</p>
+				<div class="class-info">
+					<h2>Belum memiliki akun?</h2>
+					<p>
+						Lihat informasi kelas dan ikuti petunjuk pendaftaran. Sudah menjadi peserta tetapi
+						belum menerima akun saat praktikum? Hubungi penyelenggara pelatihan.
+					</p>
+					<a class="class-link" href="https://bit.ly/BrevetEdutaxindo">Lihat informasi kelas dan pendaftaran</a>
+				</div>
 			</div>
 
 			<p class="environment-note">Lingkungan simulasi edukasi perpajakan</p>
@@ -43,7 +53,7 @@
 				<header class="form-heading">
 					<p class="eyebrow">Akses akun</p>
 					<h2 id="login-heading">Masuk ke Edutaxindo Praktika</h2>
-					<p>Gunakan NPWP dan password yang terdaftar pada akun Anda.</p>
+					<p>Gunakan NPWP dan password akun simulator yang diberikan saat sesi praktikum, bukan akun Coretax DJP.</p>
 				</header>
 
 				<form class="login-form" {...login}>
@@ -172,7 +182,7 @@
 	.brand-message {
 		width: min(590px, 100%);
 		margin: auto 0;
-		padding: 88px 0;
+		padding: 32px 0;
 	}
 
 	.eyebrow {
@@ -188,13 +198,13 @@
 		max-width: 560px;
 		margin: 0;
 		font-family: var(--ui-font-display);
-		font-size: clamp(38px, 4.2vw, 64px);
+		font-size: clamp(36px, 3.4vw, 52px);
 		font-weight: 700;
 		letter-spacing: -0.035em;
 		line-height: 1.05;
 	}
 
-	.brand-message > p:last-child {
+	.brand-message > p:not(.eyebrow) {
 		max-width: 520px;
 		margin: 24px 0 0;
 		color: rgba(255, 255, 255, 0.76);
@@ -212,7 +222,7 @@
 	.form-panel {
 		display: grid;
 		min-height: 100svh;
-		padding: clamp(28px, 6vw, 96px);
+		padding: clamp(24px, 3vw, 48px);
 		place-items: center;
 		background:
 			radial-gradient(circle at 85% 12%, rgba(244, 197, 66, 0.13), transparent 24%),
@@ -221,7 +231,7 @@
 
 	.login-card {
 		width: min(430px, 100%);
-		padding: clamp(32px, 4vw, 52px);
+		padding: 32px;
 		border: 1px solid var(--ui-line);
 		border-top: 5px solid var(--ui-yellow);
 		border-radius: 3px;
@@ -250,7 +260,7 @@
 		margin: 0;
 		color: var(--ui-navy);
 		font-family: var(--ui-font-display);
-		font-size: clamp(30px, 3vw, 40px);
+		font-size: clamp(30px, 2.5vw, 36px);
 		font-weight: 700;
 		letter-spacing: -0.025em;
 		line-height: 1.15;
@@ -286,16 +296,75 @@
 		line-height: 1.5;
 	}
 
+
+	.class-info h2 {
+		margin: 0 0 8px;
+		color: white;
+		font-size: 16px;
+		font-weight: 700;
+		line-height: 1.4;
+	}
+
+	.class-info p {
+		margin: 0 0 8px;
+		color: rgba(255, 255, 255, 0.76);
+		font-size: 14px;
+		line-height: 1.65;
+	}
+
+	.class-link {
+		display: inline-block;
+		padding: 10px 0;
+		color: var(--ui-yellow);
+		font-size: 14px;
+		font-weight: 700;
+		line-height: 1.5;
+		text-decoration: underline;
+		text-underline-offset: 4px;
+	}
+
+	.class-link:hover {
+		color: white;
+	}
+
+	.class-link:focus-visible {
+		outline: 2px solid var(--ui-yellow);
+		outline-offset: 4px;
+	}
+
+	.class-info {
+		margin-top: 28px;
+		padding-top: 24px;
+		border-top: 1px solid rgba(255, 255, 255, 0.2);
+	}
+
 	@media (max-width: 880px) {
 		.login-shell {
 			grid-template-columns: 1fr;
 		}
 
 		.brand-panel {
+			order: 2;
+			min-height: auto;
+			padding: 28px 24px;
+		}
+
+		.brand-lockup,
+		.environment-note {
 			display: none;
 		}
 
+		.brand-message {
+			margin: 0;
+			padding: 0;
+		}
+
+		.brand-message h1 {
+			font-size: 32px;
+		}
+
 		.form-panel {
+			min-height: auto;
 			padding: 28px 20px;
 		}
 
@@ -312,7 +381,7 @@
 		}
 
 		.login-card {
-			min-height: 100svh;
+			min-height: auto;
 			padding: 32px 24px;
 			border: 0;
 			border-top: 5px solid var(--ui-yellow);
