@@ -7,7 +7,7 @@ import { createdAt } from '$lib/server/db/helpers/timestamps';
  *   - `urut`: the system issues the NPWP (batch digits + urut, see helpers/npwp.ts). Every
  *     batch that existed before NIK numbering keeps this, which is why it is the column default.
  *   - `nik`: the peserta's own NIK is the NPWP and the login username. No number is issued,
- *     so nothing is written to npwp_terbit. New batches are created this way.
+ *     so nothing is written to npwp_terbit. Existing NIK batches keep this mode.
  */
 export const batch_peserta = sqliteTable(
 	'batch_peserta',

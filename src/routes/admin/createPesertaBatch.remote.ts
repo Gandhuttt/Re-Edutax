@@ -37,7 +37,7 @@ export const createPesertaBatch = form(
 
 		if (batch.penomoran === 'nik') {
 			invalid(
-				'Batch ini memakai NIK sebagai NPWP, jadi tidak bisa ditambah dari daftar nama. Tambahkan satu per satu dengan NIK, atau lewat pendaftaran online.'
+				'Batch ini memakai NIK sebagai NPWP, jadi tidak bisa ditambah dari daftar nama. Tambahkan satu per satu dengan NIK.'
 			);
 		}
 

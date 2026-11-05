@@ -17,7 +17,6 @@
 		TableActions,
 		TextAreaField,
 	} from '$lib/re-ui-components';
-	import { KELAS_PENDAFTARAN } from '$lib/helpers/pendaftaran';
 	import { createBatch } from './createBatch.remote';
 	import { createPeserta } from './createPeserta.remote';
 	import { createPesertaBatch } from './createPesertaBatch.remote';
@@ -25,13 +24,9 @@
 	import { listPeserta } from './listPeserta.remote';
 	import { resetPesertaPassword } from './resetPesertaPassword.remote';
 	import { setPesertaBanned } from './setPesertaBanned.remote';
-	import { lanjutkanPendaftaran } from './lanjutkanPendaftaran.remote';
-	import { listPendaftaran } from './listPendaftaran.remote';
-	import { setKelasBatch } from './setKelasBatch.remote';
 	import { updateBatch } from './updateBatch.remote';
 
 	const daftarBatch = $derived(await listBatch());
-	const pendaftaranOnline = $derived(await listPendaftaran());
 	const peserta = $derived(await listPeserta());
 
 	let batchDipilih = $state('');
@@ -54,10 +49,6 @@
 			value: batch.id,
 			label: `${batch.nama} (${batch.jumlahAnggota} peserta)`,
 		})),
-	]);
-	const batchKelasOptions = $derived([
-		{ value: '', label: 'Tutup (belum dibuka)' },
-		...daftarBatch.batches.map((batch) => ({ value: batch.id, label: batch.nama }))
 	]);
 
 	function submitForm(id: string) {
@@ -308,116 +299,6 @@
 			</DataTableViewport>
 		</FormSection>
 
-		{#if pendaftaranOnline.aktif}
-		<FormSection
-			title="Pendaftaran Online"
-			description="Kelas yang dipetakan ke sebuah batch dibuka di halaman /daftar; pendaftar masuk ke batch itu otomatis. Kelas tanpa batch tertutup."
-			bordered
-			padded={false}
-		>
-			<DataTableViewport label="Pemetaan kelas pendaftaran" minWidth="760px" framed={false} headerTone="navy">
-				<table>
-					<thead>
-						<tr>
-							<th>Pilihan Kelas</th>
-							<th>Batch Tujuan</th>
-						</tr>
-					</thead>
-					<tbody>
-						{#each KELAS_PENDAFTARAN as kelas (kelas.kode)}
-							{@const formKelas = setKelasBatch.for(kelas.kode)}
-							<tr>
-								<td><strong>{kelas.label}</strong></td>
-								<td>
-									<form {...formKelas} class="kelas-form">
-										<input type="hidden" name="kode" value={kelas.kode} />
-										<SelectField
-											label={`Batch untuk ${kelas.label}`}
-											labelHidden
-											name="batchId"
-											value={pendaftaranOnline.batchPerKelas[kelas.kode] ?? ''}
-											options={batchKelasOptions}
-										/>
-										<ActionButton type="submit" pending={formKelas.pending > 0} pendingLabel="Menyimpan...">
-											Simpan
-										</ActionButton>
-									</form>
-								</td>
-							</tr>
-							{#if formKelas.fields.allIssues()?.[0] || formKelas.result?.message}
-								<tr class="feedback-row">
-									<td colspan="2">
-										<InlineAlert
-											tone={formKelas.fields.allIssues()?.[0] ? 'error' : 'success'}
-											message={formKelas.fields.allIssues()?.[0]?.message ?? formKelas.result?.message}
-											compact
-										/>
-									</td>
-								</tr>
-							{/if}
-						{/each}
-					</tbody>
-				</table>
-			</DataTableViewport>
-
-			<DataTableViewport label="Pendaftaran terbaru" minWidth="1280px" framed={false} headerTone="yellow">
-				<table>
-					<thead>
-						<tr>
-							<th>Waktu</th>
-							<th>Nama</th>
-							<th>Email</th>
-							<th>NPWP</th>
-							<th>Kelas</th>
-							<th>Batch</th>
-							<th>Berkas</th>
-							<th>Status</th>
-						</tr>
-					</thead>
-					<tbody>
-						{#each pendaftaranOnline.pendaftaran as item (item.id)}
-							{@const formLanjut = lanjutkanPendaftaran.for(item.id)}
-							<tr>
-								<td>{item.createdAt.toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })}</td>
-								<td><strong>{item.nama}</strong></td>
-								<td>{item.email}</td>
-								<td><code>{item.npwp}</code></td>
-								<td>{item.kelasLabel}</td>
-								<td>{item.batchNama}</td>
-								<td><a href={item.folderBerkasUrl} target="_blank" rel="noopener noreferrer">Buka folder</a></td>
-								<td>
-									{#if item.status === 'selesai' && item.sheetsSyncedAt}
-										<StatusBadge label="Selesai" tone="success" />
-									{:else}
-										<form {...formLanjut} class="kirim-form">
-											<input type="hidden" name="id" value={item.id} />
-											<StatusBadge
-												label={item.status === 'diproses' ? 'Akun belum selesai' : 'Sheets gagal'}
-												tone="error"
-											/>
-											<ActionButton type="submit" pending={formLanjut.pending > 0} pendingLabel="Memproses...">
-												Lanjutkan
-											</ActionButton>
-										</form>
-										{#if formLanjut.fields.allIssues()?.[0]}
-											<span class="feedback error">{formLanjut.fields.allIssues()?.[0]?.message}</span>
-										{:else if item.status === 'diproses' && item.prosesError}
-											<span class="feedback error">{item.prosesError}</span>
-										{:else if item.sheetsError}
-											<span class="feedback error">{item.sheetsError}</span>
-										{/if}
-									{/if}
-								</td>
-							</tr>
-						{:else}
-							<tr><td class="empty" colspan="8">Belum ada pendaftaran.</td></tr>
-						{/each}
-					</tbody>
-				</table>
-			</DataTableViewport>
-		</FormSection>
-		{/if}
-
 		<FormSection
 			title="Daftar Peserta"
 			description="Kelola akses akun dan tinjau aktivitas perpajakan setiap peserta."
@@ -568,17 +449,6 @@
 		border-color: var(--ui-navy);
 	}
 
-	.kelas-form,
-	.kirim-form {
-		display: flex;
-		align-items: center;
-		gap: 10px;
-	}
-
-	.kelas-form :global(.field),
-	.kelas-form > :global(div) {
-		min-width: 320px;
-	}
 
 	.number {
 		text-align: right;
@@ -590,17 +460,6 @@
 		background: #fffefa;
 	}
 
-	.feedback {
-		font-size: 12px;
-	}
-
-	.feedback.error {
-		color: var(--ui-danger);
-	}
-
-	.feedback.success {
-		color: var(--ui-success);
-	}
 
 	code {
 		font-family: var(--ui-font-mono);

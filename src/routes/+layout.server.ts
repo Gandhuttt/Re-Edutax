@@ -5,9 +5,8 @@ import type { LayoutServerLoad } from './$types';
 export const load: LayoutServerLoad = async ({ locals, url }) => {
 	const isLoginPage = url.pathname === '/auth/login';
 	const isLandingPage = url.pathname === '/';
-	const isRegistrationPage = url.pathname === '/daftar';
 
-	if (!locals.user && !isLoginPage && !isLandingPage && !isRegistrationPage) {
+	if (!locals.user && !isLoginPage && !isLandingPage) {
 		throw redirect(303, '/auth/login');
 	}
 

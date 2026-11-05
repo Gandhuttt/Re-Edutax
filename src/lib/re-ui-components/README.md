@@ -75,7 +75,7 @@ square style: 2px radius panels with a 4px navy or yellow top rule.
 <ReUiRoot>
 	<AppHeader brand="Edutaxindo Praktika" logoSrc="/brand/wsd-mark-inverse.svg" homeHref="/" sticky skipLinkTarget="#main">
 		{#snippet account()}
-			<LinkButton href="/daftar" tone="accent" size="sm" shortLabel="Daftar">Daftar kelas</LinkButton>
+			<LinkButton href="https://bit.ly/BrevetEdutaxindo" tone="accent" size="sm" shortLabel="Daftar">Daftar kelas</LinkButton>
 		{/snippet}
 	</AppHeader>
 	<main id="main" tabindex="-1">
@@ -83,11 +83,11 @@ square style: 2px radius panels with a 4px navy or yellow top rule.
 			<SplitLayout columns="minmax(0, 1.2fr) minmax(320px, 0.8fr)">
 				{#snippet start()}
 					<DisplayHeading level={1} size="hero" headingId="hero-title" title="Belajar pajak" emphasis="lewat praktik.">
-						<LinkButton href="/daftar">Daftar</LinkButton>
+						<LinkButton href="https://bit.ly/BrevetEdutaxindo">Daftar</LinkButton>
 					</DisplayHeading>
 				{/snippet}
 				{#snippet end()}
-					<OfferCard featured live label="Pendaftaran dibuka" title="Batch 19" href="/daftar" actionLabel="Daftar Batch 19">
+					<OfferCard featured live label="Pendaftaran dibuka" title="Batch 19" href="https://bit.ly/BrevetEdutaxindo" actionLabel="Daftar Batch 19">
 						<BulletList items={["Kasus nyata", "Praktik Coretax"]} />
 					</OfferCard>
 				{/snippet}

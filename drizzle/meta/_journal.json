@@ -337,6 +337,13 @@
       "when": 1793083571240,
       "tag": "0047_spt_unifikasi",
       "breakpoints": true
+    },
+    {
+      "idx": 48,
+      "version": "6",
+      "when": 1793281160326,
+      "tag": "0048_remove_internal_registration",
+      "breakpoints": true
     }
   ]
 }
