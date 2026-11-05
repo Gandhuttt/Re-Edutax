@@ -68,18 +68,10 @@
 				<FormField label="NITKU/Nomor Identitas Subunit Organisasi Penerima Penghasilan" value={nitkuPenerima} disabled />
 			</FieldGrid>
 		</FormSection>
-		<FormSection number="02" title="Dokumen Referensi" bordered>
-			<FieldGrid gap="14px 16px">
-				<SelectField label="Jenis Dokumen" name="jenisDokumenId" value={bpu.jenisDokumenId ?? ''} disabled={!bpu.canEdit} options={[{ value: '', label: 'Please select' }, ...jenisDokumenOptions.map((d) => ({ value: d.id, label: d.nama }))]} />
-				<FormField label="Nomor Dokumen" name="nomorDokumen" value={bpu.nomorDokumen ?? ''} disabled={!bpu.canEdit} />
-				<FormField label="Tanggal Dokumen" name="tanggalDokumen" type="date" value={bpu.tanggalDokumen ?? ''} disabled={!bpu.canEdit} />
-				<FormField label="NITKU/Nomor Identitas Sub Unit Organisasi" value={nitkuPemotong} disabled />
-			</FieldGrid>
-		</FormSection>
-		<FormSection number="03" title="Pajak Penghasilan (Rp)" bordered>
+		<FormSection number="02" title="Pajak Penghasilan (Rp)" bordered>
 			<FieldGrid gap="14px 16px">
 				<SelectField label="Fasilitas Pajak yang Dimiliki oleh Penerima Penghasilan" name="fasilitasPajakId" value={fasilitasPajakIdState} onchange={(value) => (fasilitasPajakIdState = String(value))} disabled={!bpu.canEdit} options={[{ value: '', label: 'Please select' }, ...fasilitasOptions.map((f) => ({ value: f.id, label: f.nama }))]} />
-				<SelectField label="Nama Objek Pajak" name="kodeObjekPajakId" value={kodeObjekPajakIdState} onchange={(value) => (kodeObjekPajakIdState = String(value))} disabled={!bpu.canEdit} options={[{ value: '', label: 'Please select' }, ...objekPajakOptions.map((o) => ({ value: o.id, label: o.nama }))]} />
+				<SelectField label="Nama Objek Pajak" name="kodeObjekPajakId" value={kodeObjekPajakIdState} onchange={(value) => (kodeObjekPajakIdState = String(value))} disabled={!bpu.canEdit} searchable searchPlaceholder="Cari nama objek pajak..." options={[{ value: '', label: 'Please select' }, ...objekPajakOptions.map((o) => ({ value: o.id, label: o.nama }))]} />
 				<FormField label="Jenis Pajak" value={selectedObjekPajak?.pasal ?? ''} disabled />
 				<FormField label="Kode Objek Pajak" value={selectedObjekPajak?.kode ?? ''} disabled />
 				<FormField label="Sifat Pajak Penghasilan" value={selectedObjekPajak?.sifat ?? ''} disabled />
@@ -89,6 +81,14 @@
 				<FormField label="KAP" value={selectedObjekPajak?.kap ?? ''} disabled />
 			</FieldGrid>
 			<InlineAlert title="Informasi perhitungan" message={resolvedTarif?.manual || resolvedTarif?.manualIncomeTax ? 'Tarif dan/atau Pajak Penghasilan untuk kombinasi ini dapat diisi manual.' : 'Tarif dan Pajak Penghasilan dihitung otomatis dari kombinasi Nama Objek Pajak dan Fasilitas Pajak saat disimpan.'} />
+		</FormSection>
+		<FormSection number="03" title="Dokumen Referensi" bordered>
+			<FieldGrid gap="14px 16px">
+				<SelectField label="Jenis Dokumen" name="jenisDokumenId" value={bpu.jenisDokumenId ?? ''} disabled={!bpu.canEdit} options={[{ value: '', label: 'Please select' }, ...jenisDokumenOptions.map((d) => ({ value: d.id, label: d.nama }))]} />
+				<FormField label="Nomor Dokumen" name="nomorDokumen" value={bpu.nomorDokumen ?? ''} disabled={!bpu.canEdit} />
+				<FormField label="Tanggal Dokumen" name="tanggalDokumen" type="date" value={bpu.tanggalDokumen ?? ''} disabled={!bpu.canEdit} />
+				<FormField label="NITKU/Nomor Identitas Sub Unit Organisasi" value={nitkuPemotong} disabled />
+			</FieldGrid>
 		</FormSection>
 	</Stack>
 {/snippet}

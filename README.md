@@ -58,6 +58,14 @@ does not revoke Google OAuth grants, delete Google Drive/Sheets data, remove a
 Turnstile widget, or remove deployed secrets. Manage those resources separately;
 Google access can be revoked at https://myaccount.google.com/permissions.
 
+## BPU simulator
+
+The BPU form supports keyword search in the **Nama Objek Pajak** dropdown.
+Open the dropdown and type part of an object name, such as `konstruksi` or
+`saham`, to filter the options without changing the tax calculation.
+Form sections are ordered as **Informasi Umum**, **Pajak Penghasilan (Rp)**,
+then **Dokumen Referensi**.
+
 ## Building
 
 To create a production version of your app:
