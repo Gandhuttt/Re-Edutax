@@ -36,7 +36,7 @@
 						Lihat informasi kelas dan ikuti petunjuk pendaftaran. Sudah menjadi peserta tetapi
 						belum menerima akun saat praktikum? Hubungi penyelenggara pelatihan.
 					</p>
-					<a class="class-link" href="https://bit.ly/BrevetEdutaxindo">Lihat informasi kelas dan pendaftaran</a>
+					<a class="class-link" href="https://edutaxindo.co.id/pendaftaran-brevet-pajak-ab/">Lihat informasi kelas dan pendaftaran</a>
 				</div>
 			</div>
 

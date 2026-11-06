@@ -41,7 +41,7 @@ numbering mode.
 The simulator login page (`/auth/login`) explains that participant accounts are
 provided when the training or brevet practicum begins, and are separate from
 Coretax DJP credentials. New visitors can follow the class information and
-registration link (`https://bit.ly/BrevetEdutaxindo`); existing participants who
+registration link (`https://edutaxindo.co.id/pendaftaran-brevet-pajak-ab/`); existing participants who
 have not received their practicum account are directed to the training organizer.
 On desktop, the explanation and class link occupy the left panel, keeping the
 right-hand login card focused on the form. On narrow screens, the form appears
